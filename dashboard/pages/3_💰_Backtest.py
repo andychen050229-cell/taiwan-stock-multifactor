@@ -1,32 +1,32 @@
 """Backtest — 策略回測分析"""
 
 import streamlit as st
-import json
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from utils import inject_custom_css, load_report
 
 st.set_page_config(page_title="Backtest Results", page_icon="💰", layout="wide")
-
-@st.cache_data
-def load_report():
-    report_dir = Path(__file__).parent.parent.parent / "outputs" / "reports"
-    reports = sorted(report_dir.glob("phase2_report_*.json"), reverse=True)
-    with open(reports[0], "r", encoding="utf-8") as f:
-        return json.load(f)
+inject_custom_css()
 
 report = load_report()
 results = report["results"]
 benchmark = results.get("benchmark", {})
 
 st.title("💰 策略回測分析")
+st.caption("比較不同成本假設下各策略的績效，評估實際可行的交易方案")
 
 # Controls
 col_ctrl1, col_ctrl2 = st.columns(2)
 with col_ctrl1:
     horizon = st.selectbox("Horizon", [1, 5, 20], index=2, format_func=lambda x: f"D+{x}")
 with col_ctrl2:
-    cost_model = st.selectbox("成本模型", ["discount", "standard", "conservative"])
+    cost_model = st.selectbox("成本模型", ["discount", "standard", "conservative"],
+                              help="Discount=電子下單優惠, Standard=一般費率, Conservative=含滑價")
 
 # ===== Performance Table =====
 st.subheader(f"D+{horizon} — {cost_model.title()} 成本情境")
@@ -49,7 +49,6 @@ for eng, res in bt_data.items():
             "Avg Turnover": res.get("avg_turnover", 0),
         })
 
-# Benchmark row
 rows.append({
     "Engine": "BENCHMARK",
     "Ann. Return": benchmark.get("annualized_return", 0),
@@ -65,8 +64,6 @@ rows.append({
 
 if rows:
     df = pd.DataFrame(rows)
-
-    # Format for display
     df_display = df.copy()
     for col in ["Ann. Return", "MDD", "Win Rate", "Daily Cost", "Avg Turnover"]:
         if col in df_display.columns:
@@ -74,10 +71,9 @@ if rows:
     for col in ["Sharpe", "Sortino", "Calmar"]:
         if col in df_display.columns:
             df_display[col] = df_display[col].apply(lambda x: f"{x:.3f}")
-
     st.dataframe(df_display, use_container_width=True, hide_index=True)
 
-# ===== Return Comparison Bar Chart =====
+# ===== Return Bar Chart =====
 st.subheader("回報率比較")
 
 fig = go.Figure()
@@ -95,7 +91,7 @@ fig.update_layout(
 fig.add_hline(y=0, line_color="gray")
 st.plotly_chart(fig, use_container_width=True)
 
-# ===== Cost Impact Analysis =====
+# ===== Cost Impact =====
 st.divider()
 st.subheader("交易成本影響分析")
 
@@ -113,7 +109,6 @@ for eng, res in bt_data.items():
 
 if cost_rows:
     df_cost = pd.DataFrame(cost_rows)
-    import plotly.express as px
     fig2 = px.bar(df_cost, x="Engine", y="Ann. Return", color="Cost Model",
                   barmode="group", text_auto=".1%",
                   color_discrete_map={"Discount": "#00CC96", "Standard": "#636EFA", "Conservative": "#EF553B"},
@@ -146,7 +141,9 @@ if turnover_data:
     fig3.add_trace(go.Scatter(
         x=df_to["Daily Cost"], y=df_to["Ann. Return"],
         mode="markers+text", text=df_to["Strategy"],
-        textposition="top center", marker=dict(size=12, color=df_to["Horizon"], colorscale="Viridis"),
+        textposition="top center", marker=dict(size=14, color=df_to["Horizon"],
+                                                colorscale="Viridis", showscale=True,
+                                                colorbar=dict(title="Horizon")),
     ))
     fig3.update_layout(
         title="Daily Cost vs Return (All Strategies)",
@@ -168,7 +165,6 @@ with c1:
     img = fig_dir / f"cumulative_returns_D{horizon}.png"
     if img.exists():
         st.image(str(img), caption=f"D+{horizon} 累積報酬", use_container_width=True)
-
     img2 = fig_dir / f"monthly_returns_ensemble_D{horizon}.png"
     if img2.exists():
         st.image(str(img2), caption=f"D+{horizon} 月報酬熱力圖", use_container_width=True)

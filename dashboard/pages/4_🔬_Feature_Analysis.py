@@ -1,25 +1,23 @@
 """Feature Analysis — 特徵工程分析"""
 
 import streamlit as st
-import json
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from utils import inject_custom_css, load_report
 
 st.set_page_config(page_title="Feature Analysis", page_icon="🔬", layout="wide")
-
-@st.cache_data
-def load_report():
-    report_dir = Path(__file__).parent.parent.parent / "outputs" / "reports"
-    reports = sorted(report_dir.glob("phase2_report_*.json"), reverse=True)
-    with open(reports[0], "r", encoding="utf-8") as f:
-        return json.load(f)
+inject_custom_css()
 
 report = load_report()
 results = report["results"]
 
 st.title("🔬 特徵工程分析")
+st.caption("三階段特徵篩選流程、五支柱分佈、跨天期重要度比較與 SHAP 可解釋性")
 
 # ===== Feature Selection Pipeline =====
 st.subheader("三階段特徵篩選")
@@ -35,7 +33,7 @@ with col3:
     st.metric("VIF 篩選後", fsel.get("after_vif", 0), delta=f"-{fsel.get('after_mi', 0) - fsel.get('after_vif', 0)}")
 with col4:
     stability = results.get("feature_stability", {})
-    st.metric("穩定性", f"{stability.get('stability_score', 0):.3f}")
+    st.metric("穩定性 (Jaccard)", f"{stability.get('stability_score', 0):.3f}")
 
 # Funnel chart
 fig_funnel = go.Figure(go.Funnel(
@@ -52,7 +50,6 @@ st.subheader("最終選擇的特徵")
 
 selected = fsel.get("selected", [])
 if selected:
-    # Categorize features
     categories = {"Trend": [], "Fundamental": [], "Valuation": [], "Event": [], "Risk": []}
     for f in selected:
         if f.startswith("trend_"):
@@ -66,7 +63,6 @@ if selected:
         elif f.startswith("risk_"):
             categories["Risk"].append(f)
 
-    # Pie chart of categories
     cat_counts = {k: len(v) for k, v in categories.items() if v}
     fig_pie = px.pie(names=list(cat_counts.keys()), values=list(cat_counts.values()),
                      title="特徵五支柱分佈", color_discrete_sequence=px.colors.qualitative.Set2,
@@ -79,13 +75,12 @@ if selected:
     with col_list:
         for cat, feats in categories.items():
             if feats:
-                st.markdown(f"**{cat}** ({len(feats)}): {', '.join(feats)}")
+                st.markdown(f"**{cat}** ({len(feats)}): `{'`, `'.join(feats)}`")
 
 # ===== Cross-Horizon Feature Importance =====
 st.divider()
 st.subheader("跨 Horizon 特徵重要度比較")
 
-# Build importance data for all horizons
 all_imp = {}
 for h in [1, 5, 20]:
     model_data = results.get(f"model_horizon_{h}", {})
@@ -93,8 +88,7 @@ for h in [1, 5, 20]:
         res = model_data.get(eng, {})
         top_feats = res.get("top_features", {})
         if top_feats:
-            key = f"{eng}_D{h}"
-            all_imp[key] = top_feats
+            all_imp[f"{eng}_D{h}"] = top_feats
 
 if all_imp:
     engine_choice = st.radio("選擇引擎", ["lightgbm", "xgboost"], horizontal=True)
@@ -108,7 +102,6 @@ if all_imp:
 
     if imp_rows:
         df_imp = pd.DataFrame(imp_rows)
-        # Top 10 per horizon
         top_per_h = df_imp.groupby("Horizon").apply(
             lambda x: x.nlargest(10, "Importance"), include_groups=False
         ).reset_index(drop=True)
@@ -121,27 +114,25 @@ if all_imp:
         fig_imp.update_layout(height=600, yaxis={"categoryorder": "total ascending"})
         st.plotly_chart(fig_imp, use_container_width=True)
 
-# ===== Stability Analysis =====
+# ===== Stability =====
 st.divider()
 st.subheader("跨 Fold 穩定性")
 
 stability = results.get("feature_stability", {})
 if stability:
     col_s1, col_s2 = st.columns(2)
-
     with col_s1:
         st.metric("Stability Score (Jaccard)", f"{stability.get('stability_score', 0):.4f}")
         jaccards = stability.get("pairwise_jaccards", [])
         if jaccards:
             st.markdown(f"Pairwise Jaccard: {', '.join(f'{j:.3f}' for j in jaccards)}")
-
     with col_s2:
         consistent = stability.get("consistent_top_features", [])
         st.metric("一致入選特徵數", f"{len(consistent)} / {len(selected)}")
         if consistent:
             st.markdown(f"**一致特徵**: {', '.join(consistent[:10])}{'...' if len(consistent) > 10 else ''}")
 
-# ===== SHAP Charts =====
+# ===== SHAP =====
 st.divider()
 st.subheader("SHAP 可解釋性分析")
 
@@ -157,8 +148,10 @@ if shap_charts:
             with cols[i % 2]:
                 st.image(str(chart), caption=chart.stem.replace("shap_summary_", "SHAP: "),
                          use_container_width=True)
+else:
+    st.info("SHAP 圖表尚未生成。")
 
-# ===== Quintile Analysis =====
+# ===== Quintile =====
 quintile_data = results.get("quintile_analysis", {})
 if quintile_data:
     st.divider()
@@ -181,7 +174,7 @@ if quintile_data:
             ))
             fig_q.update_layout(
                 title=f"{key} Quintile Returns",
-                xaxis_title="Quintile (1=Lowest Score, 5=Highest)",
+                xaxis_title="Quintile (1=Lowest, 5=Highest)",
                 yaxis_title="Annualized Return", yaxis_tickformat=".1%",
                 height=350, template="plotly_white"
             )

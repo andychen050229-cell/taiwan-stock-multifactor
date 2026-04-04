@@ -1,27 +1,23 @@
 """ICIR Analysis — 信號穩定性分析"""
 
 import streamlit as st
-import json
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
 from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from utils import inject_custom_css, load_report
 
 st.set_page_config(page_title="ICIR Analysis", page_icon="📈", layout="wide")
-
-@st.cache_data
-def load_report():
-    report_dir = Path(__file__).parent.parent.parent / "outputs" / "reports"
-    reports = sorted(report_dir.glob("phase2_report_*.json"), reverse=True)
-    with open(reports[0], "r", encoding="utf-8") as f:
-        return json.load(f)
+inject_custom_css()
 
 report = load_report()
 results = report["results"]
 icir_data = results.get("icir", {})
 
 st.title("📈 ICIR 信號穩定性分析")
-st.markdown("**ICIR** = mean(daily Rank IC) / std(daily Rank IC)，衡量因子選股能力的穩定性。ICIR > 0.5 為良好，> 1.0 為優秀。")
+st.caption("ICIR = mean(daily Rank IC) / std(daily Rank IC) — 衡量因子選股能力的穩定性。ICIR > 0.5 為良好，> 1.0 為優秀。")
 
 # ===== ICIR Dashboard =====
 st.subheader("全模型 ICIR 總覽")
@@ -43,10 +39,7 @@ for key, val in icir_data.items():
 if icir_rows:
     df_icir = pd.DataFrame(icir_rows)
 
-    # Heatmap-style view
     fig = go.Figure()
-
-    # Group by horizon for visualization
     for h, color in [("D+1", "#EF553B"), ("D+5", "#FFA15A"), ("D+20", "#00CC96")]:
         subset = df_icir[df_icir["Horizon"] == h]
         fig.add_trace(go.Bar(
@@ -74,20 +67,18 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("🎯 頻率結構分析")
-    st.markdown("""
-    | Horizon | ICIR 範圍 | 信號品質 | 實務可行性 |
-    |---------|----------|---------|----------|
-    | D+1 | -0.02 ~ 0.06 | ❌ 噪音主導 | 不可行 |
-    | D+5 | 0.06 ~ 0.07 | ⚠️ 微弱 | 邊際 |
-    | D+20 | **0.74 ~ 0.77** | ✅ 極穩定 | **推薦** |
-
-    **結論**: Alpha 信號在月度頻率真實且穩定，日/週頻率信噪比過低。
-    """)
+    freq_data = pd.DataFrame({
+        "Horizon": ["D+1", "D+5", "D+20"],
+        "ICIR 範圍": ["-0.02 ~ 0.06", "0.06 ~ 0.07", "0.74 ~ 0.77"],
+        "信號品質": ["❌ 噪音主導", "⚠️ 微弱", "✅ 極穩定"],
+        "實務可行性": ["不可行", "邊際", "推薦"],
+    })
+    st.dataframe(freq_data, use_container_width=True, hide_index=True)
+    st.info("**結論**: Alpha 信號在月度頻率真實且穩定，日/週頻率信噪比過低。")
 
 with col2:
-    st.subheader("📐 IC 統計量")
+    st.subheader("📐 D+20 IC 統計量")
     if icir_rows:
-        # Show D+20 detail
         d20 = df_icir[df_icir["Horizon"] == "D+20"]
         if not d20.empty:
             for _, row in d20.iterrows():
@@ -108,13 +99,15 @@ if ic_charts:
     for i, chart in enumerate(ic_charts):
         with cols[i % 3]:
             st.image(str(chart), caption=chart.stem.replace("ic_timeseries_", "IC: "), use_container_width=True)
+else:
+    st.info("IC 時間序列圖表尚未生成。請執行 `python run_phase2.py` 產生。")
 
 # ===== Alpha Decay =====
 alpha_decay = results.get("alpha_decay", {})
 if alpha_decay:
     st.divider()
     st.subheader("Alpha 衰減分析")
-    st.markdown("使用 D+5 模型的預測分數，檢測其對不同 horizon 報酬的預測力衰減。")
+    st.caption("使用 D+5 模型的預測分數，檢測其對不同 horizon 報酬的預測力衰減。")
 
     for eng, metrics in alpha_decay.items():
         decay_rows = []

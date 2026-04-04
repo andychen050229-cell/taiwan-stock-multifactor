@@ -1,28 +1,23 @@
 """Model Metrics — 模型指標分析"""
 
 import streamlit as st
-import json
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from utils import inject_custom_css, load_report
 
 st.set_page_config(page_title="Model Metrics", page_icon="📊", layout="wide")
-
-@st.cache_data
-def load_report():
-    report_dir = Path(__file__).parent.parent.parent / "outputs" / "reports"
-    reports = sorted(report_dir.glob("phase2_report_*.json"), reverse=True)
-    if not reports:
-        st.error("No report found.")
-        st.stop()
-    with open(reports[0], "r", encoding="utf-8") as f:
-        return json.load(f)
+inject_custom_css()
 
 report = load_report()
 results = report["results"]
 
 st.title("📊 模型指標分析")
+st.caption("各模型在不同預測天期的 AUC、Per-Class AUC、Fold 穩定性與特徵重要度")
 
 # Horizon selector
 horizon = st.selectbox("選擇 Horizon", [1, 5, 20], index=2, format_func=lambda x: f"D+{x}")
@@ -32,7 +27,6 @@ st.subheader(f"D+{horizon} — AUC-ROC 比較")
 
 model_data = results.get(f"model_horizon_{horizon}", {})
 
-# Build comparison table
 rows = []
 for eng, res in model_data.items():
     if isinstance(res, dict) and "avg_metrics" in res:
@@ -86,20 +80,20 @@ for eng, res in model_data.items():
 if per_class_rows:
     df_pc = pd.DataFrame(per_class_rows)
 
-    # Plotly grouped bar chart
     fig = go.Figure()
     for cls, color in [("DOWN AUC", "#EF553B"), ("FLAT AUC", "#636EFA"), ("UP AUC", "#00CC96")]:
         avg_by_eng = df_pc.groupby("Engine")[cls].mean()
         fig.add_trace(go.Bar(name=cls.replace(" AUC", ""), x=avg_by_eng.index, y=avg_by_eng.values,
-                             marker_color=color))
+                             marker_color=color, text=avg_by_eng.values.round(4), textposition="outside"))
     fig.update_layout(barmode="group", title=f"D+{horizon} Per-Class AUC (Fold Average)",
                       yaxis_title="AUC", yaxis_range=[0.45, 0.75],
                       height=400, template="plotly_white")
     fig.add_hline(y=0.5, line_dash="dash", line_color="gray", annotation_text="Random")
     st.plotly_chart(fig, use_container_width=True)
 
-    st.dataframe(df_pc.style.background_gradient(subset=["DOWN AUC", "FLAT AUC", "UP AUC"], cmap="RdYlGn"),
-                 use_container_width=True, hide_index=True)
+    with st.expander("Per-Class AUC 明細"):
+        st.dataframe(df_pc.style.background_gradient(subset=["DOWN AUC", "FLAT AUC", "UP AUC"], cmap="RdYlGn"),
+                     use_container_width=True, hide_index=True)
 
 # ===== Fold Stability =====
 st.subheader(f"D+{horizon} — Fold 穩定性")
@@ -121,16 +115,16 @@ if fold_rows:
     df_fold = pd.DataFrame(fold_rows)
     fig2 = px.line(df_fold, x="Fold", y="AUC", color="Engine", markers=True,
                    title=f"D+{horizon} AUC across Folds", template="plotly_white")
-    fig2.add_hline(y=0.52, line_dash="dash", line_color="red", annotation_text="Quality Gate")
+    fig2.add_hline(y=0.52, line_dash="dash", line_color="red", annotation_text="Quality Gate (0.52)")
     fig2.update_layout(height=350)
     st.plotly_chart(fig2, use_container_width=True)
 
 # ===== Feature Importance =====
 st.subheader(f"D+{horizon} — Top 特徵重要度")
 
-engine_sel = st.radio("Engine", [e for e in model_data.keys() if "avg_metrics" in model_data.get(e, {})],
-                      horizontal=True)
-if engine_sel:
+available_engines = [e for e in model_data.keys() if isinstance(model_data.get(e), dict) and "avg_metrics" in model_data.get(e, {})]
+if available_engines:
+    engine_sel = st.radio("Engine", available_engines, horizontal=True)
     top_feats = model_data.get(engine_sel, {}).get("top_features", {})
     if top_feats:
         df_feat = pd.DataFrame(list(top_feats.items()), columns=["Feature", "Importance"])
