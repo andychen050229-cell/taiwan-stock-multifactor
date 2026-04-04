@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment
+.env
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data (too large for git)
+選用資料集/
+*.sql
+outputs/feature_store.parquet
+outputs/income_stmt_processed.parquet
+outputs/ohlcv_temp/
+outputs/archive/
+outputs/models/
+
+# Course materials (large PDFs)
+08_課程講義/
+
+# Outputs
+logs/
+outputs/mlruns/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/

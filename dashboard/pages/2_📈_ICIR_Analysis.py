@@ -1,0 +1,129 @@
+"""ICIR Analysis — 信號穩定性分析"""
+
+import streamlit as st
+import json
+import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
+from pathlib import Path
+
+st.set_page_config(page_title="ICIR Analysis", page_icon="📈", layout="wide")
+
+@st.cache_data
+def load_report():
+    report_dir = Path(__file__).parent.parent.parent / "outputs" / "reports"
+    reports = sorted(report_dir.glob("phase2_report_*.json"), reverse=True)
+    with open(reports[0], "r", encoding="utf-8") as f:
+        return json.load(f)
+
+report = load_report()
+results = report["results"]
+icir_data = results.get("icir", {})
+
+st.title("📈 ICIR 信號穩定性分析")
+st.markdown("**ICIR** = mean(daily Rank IC) / std(daily Rank IC)，衡量因子選股能力的穩定性。ICIR > 0.5 為良好，> 1.0 為優秀。")
+
+# ===== ICIR Dashboard =====
+st.subheader("全模型 ICIR 總覽")
+
+icir_rows = []
+for key, val in icir_data.items():
+    parts = key.rsplit("_D", 1)
+    eng = parts[0] if len(parts) == 2 else key
+    horizon = parts[1] if len(parts) == 2 else "?"
+    icir_rows.append({
+        "Model": key,
+        "Engine": eng.upper(),
+        "Horizon": f"D+{horizon}",
+        "Mean IC": val.get("mean_ic", 0),
+        "Std IC": val.get("std_ic", 0),
+        "ICIR": val.get("icir", 0),
+    })
+
+if icir_rows:
+    df_icir = pd.DataFrame(icir_rows)
+
+    # Heatmap-style view
+    fig = go.Figure()
+
+    # Group by horizon for visualization
+    for h, color in [("D+1", "#EF553B"), ("D+5", "#FFA15A"), ("D+20", "#00CC96")]:
+        subset = df_icir[df_icir["Horizon"] == h]
+        fig.add_trace(go.Bar(
+            name=h, x=subset["Engine"], y=subset["ICIR"],
+            marker_color=color, text=subset["ICIR"].apply(lambda x: f"{x:.3f}"),
+            textposition="outside"
+        ))
+
+    fig.update_layout(
+        barmode="group", title="ICIR by Engine × Horizon",
+        yaxis_title="ICIR", height=450, template="plotly_white",
+    )
+    fig.add_hline(y=0.5, line_dash="dash", line_color="green", annotation_text="Good (0.5)")
+    fig.add_hline(y=0, line_dash="dot", line_color="gray")
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.dataframe(
+        df_icir.style.background_gradient(subset=["ICIR"], cmap="RdYlGn"),
+        use_container_width=True, hide_index=True
+    )
+
+# ===== Key Insight =====
+st.divider()
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("🎯 頻率結構分析")
+    st.markdown("""
+    | Horizon | ICIR 範圍 | 信號品質 | 實務可行性 |
+    |---------|----------|---------|----------|
+    | D+1 | -0.02 ~ 0.06 | ❌ 噪音主導 | 不可行 |
+    | D+5 | 0.06 ~ 0.07 | ⚠️ 微弱 | 邊際 |
+    | D+20 | **0.74 ~ 0.77** | ✅ 極穩定 | **推薦** |
+
+    **結論**: Alpha 信號在月度頻率真實且穩定，日/週頻率信噪比過低。
+    """)
+
+with col2:
+    st.subheader("📐 IC 統計量")
+    if icir_rows:
+        # Show D+20 detail
+        d20 = df_icir[df_icir["Horizon"] == "D+20"]
+        if not d20.empty:
+            for _, row in d20.iterrows():
+                st.metric(
+                    f"{row['Engine']} D+20",
+                    f"ICIR = {row['ICIR']:.3f}",
+                    delta=f"IC = {row['Mean IC']:.4f} (std={row['Std IC']:.4f})"
+                )
+
+# ===== IC Time Series Charts =====
+st.divider()
+st.subheader("IC 時間序列圖表")
+
+fig_dir = Path(__file__).parent.parent.parent / "outputs" / "figures"
+ic_charts = sorted(fig_dir.glob("ic_timeseries_*.png"))
+if ic_charts:
+    cols = st.columns(min(len(ic_charts), 3))
+    for i, chart in enumerate(ic_charts):
+        with cols[i % 3]:
+            st.image(str(chart), caption=chart.stem.replace("ic_timeseries_", "IC: "), use_container_width=True)
+
+# ===== Alpha Decay =====
+alpha_decay = results.get("alpha_decay", {})
+if alpha_decay:
+    st.divider()
+    st.subheader("Alpha 衰減分析")
+    st.markdown("使用 D+5 模型的預測分數，檢測其對不同 horizon 報酬的預測力衰減。")
+
+    for eng, metrics in alpha_decay.items():
+        decay_rows = []
+        for ret_col, vals in metrics.items():
+            decay_rows.append({
+                "Return Column": ret_col,
+                "Mean IC": vals.get("mean_ic", 0),
+                "ICIR": vals.get("icir", 0),
+            })
+        if decay_rows:
+            st.write(f"**{eng.upper()}**")
+            st.dataframe(pd.DataFrame(decay_rows), use_container_width=True, hide_index=True)
