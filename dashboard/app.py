@@ -340,7 +340,7 @@ Quintile Factor Analysis
         ))
         if i < len(stages) - 1:
             flow_fig.add_annotation(
-                x=i + 0.35, y=0.5, ax=i + 0.65, ay=0.5,
+                x=i + 0.65, y=0.5, ax=i + 0.35, ay=0.5,
                 xref="x", yref="y", axref="x", ayref="y",
                 showarrow=True, arrowhead=3, arrowsize=1.5,
                 arrowcolor="#9ca3af", arrowwidth=2,
