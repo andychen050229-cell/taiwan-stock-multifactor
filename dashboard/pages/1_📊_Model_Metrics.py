@@ -5,10 +5,15 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from pathlib import Path
-import sys
+import importlib.util
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from utils import inject_custom_css, inject_advanced_sidebar, load_report
+_utils_path = Path(__file__).resolve().parent.parent / "utils.py"
+_spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_path))
+_utils = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_utils)
+inject_custom_css = _utils.inject_custom_css
+inject_advanced_sidebar = _utils.inject_advanced_sidebar
+load_report = _utils.load_report
 
 st.set_page_config(page_title="Model Metrics | 量化分析工作台", page_icon="📊", layout="wide")
 inject_custom_css()

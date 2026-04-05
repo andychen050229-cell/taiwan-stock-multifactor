@@ -206,8 +206,19 @@ def inject_advanced_sidebar(report_name: str = "", report: dict = None, current_
 
 @st.cache_data
 def load_report():
-    """Load the latest Phase 2 report JSON with caching."""
-    report_dir = Path(__file__).parent.parent / "outputs" / "reports"
+    """Load the latest Phase 2 report JSON with caching.
+
+    Tries multiple paths to handle both local and Streamlit Cloud deployments:
+    1. Path(__file__).resolve().parent.parent / "outputs" / "reports"  (standard)
+    2. Path.cwd() / "outputs" / "reports"  (fallback for Cloud)
+    """
+    # Try standard path first
+    report_dir = Path(__file__).resolve().parent.parent / "outputs" / "reports"
+
+    # Fallback to cwd-based path if standard path doesn't exist
+    if not report_dir.exists():
+        report_dir = Path.cwd() / "outputs" / "reports"
+
     reports = sorted(report_dir.glob("phase2_report_*.json"), reverse=True)
     if not reports:
         st.error("找不到 Phase 2 報告。請先執行 `python run_phase2.py`。")
@@ -220,13 +231,27 @@ def load_report():
 def load_feature_store():
     """Load the feature store parquet file with caching.
 
+    Tries multiple paths to handle both local and Streamlit Cloud deployments:
+    1. Path(__file__).resolve().parent.parent / "outputs" / "feature_store.parquet"
+    2. Path.cwd() / "outputs" / "feature_store.parquet"
+    3. Path(__file__).resolve().parent / "data" / (as fallback, may not exist on Cloud)
+
     Returns:
         pd.DataFrame: Feature store containing all engineered features
     """
-    feature_store_path = Path(__file__).parent.parent / "outputs" / "feature_store.parquet"
+    # Try standard path first
+    feature_store_path = Path(__file__).resolve().parent.parent / "outputs" / "feature_store.parquet"
+
+    # Fallback to cwd-based path if standard path doesn't exist
+    if not feature_store_path.exists():
+        feature_store_path = Path.cwd() / "outputs" / "feature_store.parquet"
+
+    # Final fallback to dashboard/data directory (may not exist on Cloud)
+    if not feature_store_path.exists():
+        feature_store_path = Path(__file__).resolve().parent / "data" / "feature_store.parquet"
 
     if not feature_store_path.exists():
-        st.error(f"Feature store not found at {feature_store_path}")
+        st.error(f"Feature store not found in any expected location")
         st.stop()
 
     return pd.read_parquet(feature_store_path)
@@ -236,13 +261,27 @@ def load_feature_store():
 def load_companies():
     """Load the companies reference data parquet file with caching.
 
+    Tries multiple paths to handle both local and Streamlit Cloud deployments:
+    1. Path(__file__).resolve().parent / "data" / "companies.parquet"  (dashboard/data/)
+    2. Path(__file__).resolve().parent.parent / "選用資料集" / "parquet" / "companies.parquet"  (standard)
+    3. Path.cwd() / "選用資料集" / "parquet" / "companies.parquet"  (fallback)
+
     Returns:
         pd.DataFrame: Companies data containing stock codes, names, sectors, etc.
     """
-    companies_path = Path(__file__).parent.parent / "選用資料集" / "parquet" / "companies.parquet"
+    # Try dashboard/data first
+    companies_path = Path(__file__).resolve().parent / "data" / "companies.parquet"
+
+    # Standard path
+    if not companies_path.exists():
+        companies_path = Path(__file__).resolve().parent.parent / "選用資料集" / "parquet" / "companies.parquet"
+
+    # Fallback to cwd
+    if not companies_path.exists():
+        companies_path = Path.cwd() / "選用資料集" / "parquet" / "companies.parquet"
 
     if not companies_path.exists():
-        st.error(f"Companies data not found at {companies_path}")
+        st.error(f"Companies data not found in any expected location")
         st.stop()
 
     return pd.read_parquet(companies_path)
