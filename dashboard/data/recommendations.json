@@ -5,7 +5,7 @@
       {
         "stock_id": "6199",
         "date": "2025-03-24 00:00:00",
-        "fwd_ret_5": 21.9,
+        "fwd_ret_5": 0.219,
         "label_5": 1,
         "fund_revenue_sq": 23161.0,
         "fund_cost_of_revenue_sq": 5776.0,
@@ -28,7 +28,7 @@
       {
         "stock_id": "6228",
         "date": "2025-03-24 00:00:00",
-        "fwd_ret_5": 19.83,
+        "fwd_ret_5": 0.1983,
         "label_5": 1,
         "fund_revenue_sq": 13107.0,
         "fund_cost_of_revenue_sq": 9920.0,
@@ -47,7 +47,7 @@
       {
         "stock_id": "3434",
         "date": "2025-03-24 00:00:00",
-        "fwd_ret_5": 17.83,
+        "fwd_ret_5": 0.1783,
         "label_5": 1,
         "fund_revenue_sq": 149836.0,
         "fund_cost_of_revenue_sq": 116254.0,
@@ -70,7 +70,7 @@
       {
         "stock_id": "2438",
         "date": "2025-03-24 00:00:00",
-        "fwd_ret_5": 15.17,
+        "fwd_ret_5": 0.1517,
         "label_5": 1,
         "fund_revenue_sq": 103151.0,
         "fund_cost_of_revenue_sq": 92056.0,
@@ -89,7 +89,7 @@
       {
         "stock_id": "7610",
         "date": "2025-03-24 00:00:00",
-        "fwd_ret_5": 14.29,
+        "fwd_ret_5": 0.1429,
         "label_5": 1,
         "risk_drawdown": -0.0141,
         "risk_volatility_regime": 2.0,
@@ -99,7 +99,7 @@
       {
         "stock_id": "5348",
         "date": "2025-03-24 00:00:00",
-        "fwd_ret_5": 13.91,
+        "fwd_ret_5": 0.1391,
         "label_5": 1,
         "fund_revenue_sq": 64903.0,
         "fund_cost_of_revenue_sq": 50886.0,
@@ -118,7 +118,7 @@
       {
         "stock_id": "2440",
         "date": "2025-03-24 00:00:00",
-        "fwd_ret_5": 12.45,
+        "fwd_ret_5": 0.1245,
         "label_5": 1,
         "fund_revenue_sq": 968996.0,
         "fund_cost_of_revenue_sq": 933322.0,
@@ -137,7 +137,7 @@
       {
         "stock_id": "4419",
         "date": "2025-03-24 00:00:00",
-        "fwd_ret_5": 11.73,
+        "fwd_ret_5": 0.1173,
         "label_5": 1,
         "fund_revenue_sq": 633545.0,
         "fund_cost_of_revenue_sq": 476552.0,
@@ -156,7 +156,7 @@
       {
         "stock_id": "8921",
         "date": "2025-03-24 00:00:00",
-        "fwd_ret_5": 10.91,
+        "fwd_ret_5": 0.1091,
         "label_5": 1,
         "fund_revenue_sq": 153914.0,
         "fund_cost_of_revenue_sq": 138019.0,
@@ -175,7 +175,7 @@
       {
         "stock_id": "4943",
         "date": "2025-03-24 00:00:00",
-        "fwd_ret_5": 10.68,
+        "fwd_ret_5": 0.1068,
         "label_5": 1,
         "fund_revenue_sq": 386896.0,
         "fund_cost_of_revenue_sq": 412222.0,
@@ -206,7 +206,7 @@
       {
         "stock_id": "2429",
         "date": "2025-03-03 00:00:00",
-        "fwd_ret_20": 58.73,
+        "fwd_ret_20": 0.5873,
         "label_20": 1,
         "fund_revenue_sq": 77507.0,
         "fund_cost_of_revenue_sq": 73775.0,
@@ -225,7 +225,7 @@
       {
         "stock_id": "6130",
         "date": "2025-03-03 00:00:00",
-        "fwd_ret_20": 57.79,
+        "fwd_ret_20": 0.5779,
         "label_20": 1,
         "fund_revenue_sq": 55750.0,
         "fund_cost_of_revenue_sq": 37465.0,
@@ -244,7 +244,7 @@
       {
         "stock_id": "2468",
         "date": "2025-03-03 00:00:00",
-        "fwd_ret_20": 50.36,
+        "fwd_ret_20": 0.5036,
         "label_20": 1,
         "fund_revenue_sq": 540732.0,
         "fund_cost_of_revenue_sq": 492207.0,
@@ -267,7 +267,7 @@
       {
         "stock_id": "6517",
         "date": "2025-03-03 00:00:00",
-        "fwd_ret_20": 45.45,
+        "fwd_ret_20": 0.4545,
         "label_20": 1,
         "fund_revenue_sq": 141201.0,
         "fund_cost_of_revenue_sq": 84195.0,
@@ -290,7 +290,7 @@
       {
         "stock_id": "6228",
         "date": "2025-03-03 00:00:00",
-        "fwd_ret_20": 40.08,
+        "fwd_ret_20": 0.4008,
         "label_20": 1,
         "fund_revenue_sq": 13107.0,
         "fund_cost_of_revenue_sq": 9920.0,
@@ -309,7 +309,7 @@
       {
         "stock_id": "4541",
         "date": "2025-03-03 00:00:00",
-        "fwd_ret_20": 37.2,
+        "fwd_ret_20": 0.372,
         "label_20": 1,
         "fund_revenue_sq": 394537.0,
         "fund_cost_of_revenue_sq": 328859.0,
@@ -331,7 +331,7 @@
       {
         "stock_id": "4303",
         "date": "2025-03-03 00:00:00",
-        "fwd_ret_20": 34.33,
+        "fwd_ret_20": 0.3433,
         "label_20": 1,
         "fund_revenue_sq": 71299.0,
         "fund_cost_of_revenue_sq": 60117.0,
@@ -354,7 +354,7 @@
       {
         "stock_id": "7610",
         "date": "2025-03-03 00:00:00",
-        "fwd_ret_20": 33.78,
+        "fwd_ret_20": 0.3378,
         "label_20": 1,
         "risk_drawdown": -0.0523,
         "risk_volatility_regime": 1.0,
@@ -364,7 +364,7 @@
       {
         "stock_id": "6148",
         "date": "2025-03-03 00:00:00",
-        "fwd_ret_20": 33.43,
+        "fwd_ret_20": 0.3343,
         "label_20": 1,
         "fund_revenue_sq": 225698.0,
         "fund_cost_of_revenue_sq": 179249.0,
@@ -387,7 +387,7 @@
       {
         "stock_id": "3434",
         "date": "2025-03-03 00:00:00",
-        "fwd_ret_20": 32.61,
+        "fwd_ret_20": 0.3261,
         "label_20": 1,
         "fund_revenue_sq": 149836.0,
         "fund_cost_of_revenue_sq": 116254.0,

@@ -222,8 +222,18 @@ def load_all_data():
     if dashboard_data_dir.exists():
         try:
             companies = pd.read_parquet(dashboard_data_dir / "companies.parquet")
+
             prices = pd.read_parquet(dashboard_data_dir / "stock_prices.parquet")
+            # Fix dtype: parquet 可能以 object 儲存數值欄位
+            prices["closing_price"] = pd.to_numeric(prices["closing_price"], errors="coerce")
+            prices["trade_date"] = pd.to_datetime(prices["trade_date"], errors="coerce")
+
             income = pd.read_parquet(dashboard_data_dir / "income_stmt.parquet")
+            # Fix dtype for income statement numeric columns
+            for col in ["revenue", "cost_of_revenue", "operating_income", "net_income",
+                        "total_comprehensive_income", "eps", "fiscal_year", "fiscal_quarter"]:
+                if col in income.columns:
+                    income[col] = pd.to_numeric(income[col], errors="coerce")
 
             # Load pre-computed recommendations
             rec_file = dashboard_data_dir / "recommendations.json"
@@ -239,7 +249,13 @@ def load_all_data():
         try:
             companies = pd.read_parquet(base / "選用資料集" / "parquet" / "companies.parquet")
             prices = pd.read_parquet(base / "選用資料集" / "parquet" / "stock_prices.parquet")
+            prices["closing_price"] = pd.to_numeric(prices["closing_price"], errors="coerce")
+            prices["trade_date"] = pd.to_datetime(prices["trade_date"], errors="coerce")
             income = pd.read_parquet(base / "選用資料集" / "parquet" / "income_stmt.parquet")
+            for col in ["revenue", "cost_of_revenue", "operating_income", "net_income",
+                        "total_comprehensive_income", "eps", "fiscal_year", "fiscal_quarter"]:
+                if col in income.columns:
+                    income[col] = pd.to_numeric(income[col], errors="coerce")
             fs = pd.read_parquet(base / "outputs" / "feature_store.parquet")
         except Exception as e:
             st.error(f"無法載入資料: {e}")
@@ -295,7 +311,9 @@ def get_recommendations(fs, companies, horizon=20, n_top=10, recommendations=Non
 def get_price_history(prices, company_id, n_days=120):
     """取得股價歷史與技術指標"""
     cp = prices[prices["company_id"] == str(company_id)].copy()
-    cp["trade_date"] = pd.to_datetime(cp["trade_date"])
+    cp["trade_date"] = pd.to_datetime(cp["trade_date"], errors="coerce")
+    cp["closing_price"] = pd.to_numeric(cp["closing_price"], errors="coerce")
+    cp = cp.dropna(subset=["closing_price", "trade_date"])
     cp = cp.sort_values("trade_date").tail(n_days)
 
     if cp.empty:
@@ -463,38 +481,66 @@ def get_direction_emoji(label_val):
 fs, companies, prices, income, recommendations = load_all_data()
 
 
+# ===== Sidebar Widgets CSS (for dark sidebar compatibility) =====
+st.markdown("""<style>
+    /* Sidebar widget labels — ensure visible on dark bg */
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] .stSelectbox label,
+    section[data-testid="stSidebar"] .stSlider label {
+        color: #a8b8cc !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+    }
+    /* Selectbox & slider inner text */
+    section[data-testid="stSidebar"] [data-baseweb="select"] {
+        background: rgba(255,255,255,0.08) !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        border-radius: 8px !important;
+    }
+    section[data-testid="stSidebar"] [data-baseweb="select"] * {
+        color: #e8edf3 !important;
+    }
+    /* Slider track */
+    section[data-testid="stSidebar"] .stSlider [data-baseweb="slider"] div {
+        background: rgba(99, 110, 250, 0.4) !important;
+    }
+    /* Sidebar markdown text */
+    section[data-testid="stSidebar"] .stMarkdown p,
+    section[data-testid="stSidebar"] .stMarkdown li {
+        color: #c0cdd9 !important;
+        font-size: 0.88rem !important;
+        line-height: 1.6 !important;
+    }
+    section[data-testid="stSidebar"] .stMarkdown strong {
+        color: #e8edf3 !important;
+    }
+</style>""", unsafe_allow_html=True)
+
 # ===== Sidebar =====
 st.sidebar.markdown("### 🌱 投資解讀面板")
-st.sidebar.divider()
-
-st.sidebar.markdown("""
-**面板說明**
-
-本面板展示固定歷史時期內的模型判讀結果，用於展示研究能力與方法論，非即時投資建議。
-""")
-
+st.sidebar.caption("固定歷史資料期間的模型判讀展示")
 st.sidebar.divider()
 
 horizon = st.sidebar.selectbox(
-    "預測週期",
+    "📅 預測週期",
     options=[20, 5],
-    format_func=lambda x: f"D+{x}（{'約一個月' if x == 20 else '約一週'}）",
+    format_func=lambda x: f"D+{x}（{'約一個月 ≈ 20 交易日' if x == 20 else '約一週 ≈ 5 交易日'}）",
     index=0,
 )
 
-n_display = st.sidebar.slider("顯示判讀數量", 3, 10, 5)
+n_display = st.sidebar.slider("📊 顯示判讀數量", 3, 10, 5)
 
 st.sidebar.divider()
 st.sidebar.markdown("""
-**判讀方向說明**
+**判讀方向燈號**
 
-🟢 **偏多** — 模型預測正向信號
+🟢 **偏多** — 模型判斷該股在未來 D+N 天的走勢傾向上漲
 
-🟡 **中性** — 模型預測振盪格局
+🟡 **中性** — 模型判斷走勢不明確，可能處於盤整區間
 
-🔴 **觀望** — 模型預測負向信號
+🔴 **觀望** — 模型判斷走勢傾向下跌，建議保守觀察
 
-⚠️ 過去判讀不代表未來方向。
+> ⚠️ 此為歷史回顧，非即時預測。過去判讀方向不代表未來會重現。
 """)
 
 st.sidebar.divider()
@@ -582,9 +628,9 @@ try:
         cid = str(stock["company_id"])
         name = stock.get("short_name", cid)
         full_name = stock.get("company_name", "")
-        price = stock.get("closing_price", 0)
-        fwd_ret = stock.get(ret_col, 0)
-        label_val = stock.get(label_col, 0)
+        price = float(stock.get("closing_price", 0) or 0)
+        fwd_ret = float(stock.get(ret_col, 0) or 0)
+        label_val = float(stock.get(label_col, 0) or 0)
 
         direction_label, direction_class = get_direction_label(label_val)
         direction_emoji = get_direction_emoji(label_val)
@@ -703,7 +749,7 @@ try:
             if full_name:
                 st.caption(f"{full_name}")
 
-            st.metric("目前股價", f"{price:.2f} 元")
+            st.metric("目前股價", f"${price:.2f}" if price > 0 else "—")
 
             # ===== LAYER 3: Why This Interpretation (Expandable) =====
             with st.expander("📖 判讀原因", expanded=True):
@@ -817,14 +863,13 @@ try:
         st.markdown("**D+5 判讀前 5 名**")
         recs_5, _ = get_recommendations(fs, companies, horizon=5, n_top=5, recommendations=recommendations)
         if not recs_5.empty:
-            comp_df_5 = recs_5[["short_name", "company_id", "closing_price", "fwd_ret_5", "val_pe", "label_5"]].copy()
-            comp_df_5.columns = ["股票", "代碼", "現價", "歷史報酬", "P/E", "信號"]
-            comp_df_5["信號"] = comp_df_5["信號"].apply(
-                lambda x: "🟢 偏多" if x == 1.0 else ("🟡 中性" if x == 0.0 else "🔴 觀望")
-            )
-            comp_df_5["現價"] = comp_df_5["現價"].apply(lambda x: f"${x:.2f}")
-            comp_df_5["歷史報酬"] = comp_df_5["歷史報酬"].apply(lambda x: f"{x:+.1%}")
-            comp_df_5["P/E"] = comp_df_5["P/E"].apply(lambda x: f"{x:.1f}x" if pd.notna(x) and x > 0 else "N/A")
+            comp_df_5 = pd.DataFrame({
+                "股票": recs_5["short_name"].fillna(recs_5["company_id"]),
+                "代碼": recs_5["company_id"],
+                "現價": recs_5["closing_price"].apply(lambda x: f"${x:.2f}" if pd.notna(x) and x > 0 else "—"),
+                "歷史報酬": recs_5["fwd_ret_5"].apply(lambda x: f"{x:+.1%}" if pd.notna(x) else "—"),
+                "信號": recs_5["label_5"].apply(lambda x: "🟢 偏多" if x == 1.0 else ("🟡 中性" if x == 0.0 else "🔴 觀望")),
+            })
             st.dataframe(comp_df_5, use_container_width=True, hide_index=True)
         else:
             st.info("無 D+5 判讀資料")
@@ -833,14 +878,13 @@ try:
         st.markdown("**D+20 判讀前 5 名**")
         recs_20, _ = get_recommendations(fs, companies, horizon=20, n_top=5, recommendations=recommendations)
         if not recs_20.empty:
-            comp_df_20 = recs_20[["short_name", "company_id", "closing_price", "fwd_ret_20", "val_pe", "label_20"]].copy()
-            comp_df_20.columns = ["股票", "代碼", "現價", "歷史報酬", "P/E", "信號"]
-            comp_df_20["信號"] = comp_df_20["信號"].apply(
-                lambda x: "🟢 偏多" if x == 1.0 else ("🟡 中性" if x == 0.0 else "🔴 觀望")
-            )
-            comp_df_20["現價"] = comp_df_20["現價"].apply(lambda x: f"${x:.2f}")
-            comp_df_20["歷史報酬"] = comp_df_20["歷史報酬"].apply(lambda x: f"{x:+.1%}")
-            comp_df_20["P/E"] = comp_df_20["P/E"].apply(lambda x: f"{x:.1f}x" if pd.notna(x) and x > 0 else "N/A")
+            comp_df_20 = pd.DataFrame({
+                "股票": recs_20["short_name"].fillna(recs_20["company_id"]),
+                "代碼": recs_20["company_id"],
+                "現價": recs_20["closing_price"].apply(lambda x: f"${x:.2f}" if pd.notna(x) and x > 0 else "—"),
+                "歷史報酬": recs_20["fwd_ret_20"].apply(lambda x: f"{x:+.1%}" if pd.notna(x) else "—"),
+                "信號": recs_20["label_20"].apply(lambda x: "🟢 偏多" if x == 1.0 else ("🟡 中性" if x == 0.0 else "🔴 觀望")),
+            })
             st.dataframe(comp_df_20, use_container_width=True, hide_index=True)
         else:
             st.info("無 D+20 判讀資料")
