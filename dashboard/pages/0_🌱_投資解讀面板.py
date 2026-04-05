@@ -578,28 +578,28 @@ try:
     label_col = f"label_{horizon}"
     ret_col = f"fwd_ret_{horizon}"
 
-    # Use market_summary from recommendations if available
-    total_stocks = 1886  # Default fallback
-    if recommendations and "market_summary" in recommendations:
-        total_stocks = recommendations["market_summary"].get("total_stocks_tracked", 1886)
+    # Load FULL market distribution from recommendations.json (pre-computed from feature_store)
+    horizon_key = f"horizon_{horizon}"
+    market_dist = None
+    if recommendations and horizon_key in recommendations:
+        market_dist = recommendations[horizon_key].get("market_distribution")
 
-    # Compute direction counts from entire recommendations data
-    if recommendations and f"horizon_{horizon}" in recommendations:
-        all_recs = recommendations[f"horizon_{horizon}"].get("stocks", [])
-        all_recs_df = pd.DataFrame(all_recs)
-        up_count = (all_recs_df.get(label_col, all_recs_df.get("label_20", [])) == 1.0).sum()
-        flat_count = (all_recs_df.get(label_col, all_recs_df.get("label_20", [])) == 0.0).sum()
-        down_count = (all_recs_df.get(label_col, all_recs_df.get("label_20", [])) == -1.0).sum()
+    if market_dist:
+        total_stocks = market_dist["total"]
+        up_count = market_dist["up"]
+        flat_count = market_dist["flat"]
+        down_count = market_dist["down"]
     elif fs is not None:
         latest_snap = fs[fs["trade_date"] == rec_date]
-        up_count = (latest_snap[label_col] == 1.0).sum()
-        flat_count = (latest_snap[label_col] == 0.0).sum()
-        down_count = (latest_snap[label_col] == -1.0).sum()
+        total_stocks = len(latest_snap)
+        up_count = int((latest_snap[label_col] == 1.0).sum())
+        flat_count = int((latest_snap[label_col] == 0.0).sum())
+        down_count = int((latest_snap[label_col] == -1.0).sum())
     else:
-        # Fallback: use only available recs
-        up_count = (recs[label_col] == 1.0).sum()
-        flat_count = (recs[label_col] == 0.0).sum()
-        down_count = (recs[label_col] == -1.0).sum()
+        total_stocks = len(recs)
+        up_count = int((recs[label_col] == 1.0).sum())
+        flat_count = int((recs[label_col] == 0.0).sum())
+        down_count = int((recs[label_col] == -1.0).sum())
 
     avg_ret = recs[ret_col].mean()
 
@@ -977,48 +977,65 @@ try:
 
     # ===== Market Distribution =====
     st.divider()
-    st.markdown("### 📈 市場信號分佈")
+    st.markdown("### 📈 全市場信號分佈")
+    st.caption(f"基於 {total_stocks:,} 支股票的模型判讀結果，非僅限上方展示的 Top {len(recs)} 支。")
 
     dist_col1, dist_col2 = st.columns([1, 1])
 
     with dist_col1:
         fig_pie = go.Figure(data=[go.Pie(
-            labels=["🟢 偏多", "🟡 中性", "🔴 觀望"],
+            labels=["偏多", "中性", "觀望"],
             values=[int(up_count), int(flat_count), int(down_count)],
             marker_colors=["#059669", "#f59e0b", "#dc2626"],
-            hole=0.4,
-            textinfo="label+percent",
-            textfont_size=11,
+            hole=0.45,
+            textinfo="label+percent+value",
+            textfont_size=12,
+            insidetextorientation="radial",
         )])
         fig_pie.update_layout(
-            title=f"D+{horizon} 信號分佈",
-            height=350,
-            margin=dict(l=20, r=20, t=50, b=20),
+            title=dict(text=f"D+{horizon} 全市場信號分佈（{total_stocks:,} 支）", font=dict(size=14)),
+            height=400,
+            margin=dict(l=10, r=10, t=60, b=30),
+            legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5),
+            showlegend=True,
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
     with dist_col2:
-        # Show distribution from available recommendations data
-        if not recs.empty:
-            fig_hist = go.Figure()
-            fig_hist.add_trace(go.Histogram(
-                x=recs[ret_col] * 100,
-                nbinsx=50,
-                marker_color="#636EFA",
-                opacity=0.7,
-                hovertemplate="報酬率: %{x:.1f}%<br>股票數: %{y}<extra></extra>",
+        # Show return stats from pre-computed market distribution
+        ret_stats = market_dist.get("return_stats", {}) if market_dist else {}
+        if ret_stats:
+            mean_ret = ret_stats.get("mean", 0)
+            median_ret = ret_stats.get("median", 0)
+            std_ret = ret_stats.get("std", 0)
+            p10 = ret_stats.get("p10", 0)
+            p90 = ret_stats.get("p90", 0)
+
+            fig_bar = go.Figure()
+            # Bar chart showing return distribution stats
+            categories = ["P10（悲觀）", "中位數", "平均值", "P90（樂觀）"]
+            values = [p10 * 100, median_ret * 100, mean_ret * 100, p90 * 100]
+            colors = ["#dc2626", "#f59e0b", "#636EFA", "#059669"]
+
+            fig_bar.add_trace(go.Bar(
+                x=categories, y=values,
+                marker_color=colors,
+                text=[f"{v:+.1f}%" for v in values],
+                textposition="outside",
+                textfont=dict(size=13, color="#1a1f36"),
+                hovertemplate="%{x}: %{y:.2f}%<extra></extra>",
             ))
-            fig_hist.add_vline(x=0, line_dash="dash", line_color="red", line_width=2,
-                              annotation_text="零軸", annotation_position="right")
-            fig_hist.update_layout(
-                title=f"D+{horizon} 歷史報酬分佈（判讀股票）",
-                xaxis_title="報酬率 (%)",
-                yaxis_title="股票數",
-                height=350,
+            fig_bar.add_hline(y=0, line_dash="dash", line_color="#9ca3af", line_width=1)
+            fig_bar.update_layout(
+                title=dict(text=f"D+{horizon} 全市場報酬分佈統計", font=dict(size=14)),
+                yaxis_title="報酬率 (%)",
+                height=400,
                 template="plotly_white",
-                margin=dict(l=20, r=20, t=50, b=20),
+                margin=dict(l=20, r=20, t=60, b=30),
+                showlegend=False,
             )
-            st.plotly_chart(fig_hist, use_container_width=True)
+            st.plotly_chart(fig_bar, use_container_width=True)
+            st.caption(f"📊 全市場中位數報酬 {median_ret:+.1%}，標準差 {std_ret:.1%}。上方展示的判讀股為模型篩選的少數偏多標的。")
         else:
             st.info("無充足的報酬分佈資料")
 
