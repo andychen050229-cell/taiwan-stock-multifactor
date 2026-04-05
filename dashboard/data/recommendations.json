@@ -22,7 +22,8 @@
         "val_pe_rank": 0.352,
         "risk_drawdown": -0.2473,
         "risk_volatility_regime": 1.0,
-        "risk_market_ret_20d": -0.0015
+        "risk_market_ret_20d": -0.0015,
+        "closing_price": 106.0
       },
       {
         "stock_id": "6228",
@@ -40,7 +41,8 @@
         "fund_revenue_yoy": 0.5587,
         "risk_drawdown": 0.0,
         "risk_volatility_regime": 1.0,
-        "risk_market_ret_20d": -0.0015
+        "risk_market_ret_20d": -0.0015,
+        "closing_price": 26.15
       },
       {
         "stock_id": "3434",
@@ -62,7 +64,8 @@
         "val_pe_rank": 0.8462,
         "risk_drawdown": -0.1282,
         "risk_volatility_regime": 2.0,
-        "risk_market_ret_20d": -0.0015
+        "risk_market_ret_20d": -0.0015,
+        "closing_price": 29.95
       },
       {
         "stock_id": "2438",
@@ -80,7 +83,8 @@
         "fund_revenue_yoy": 1.6443,
         "risk_drawdown": -0.2875,
         "risk_volatility_regime": 1.0,
-        "risk_market_ret_20d": -0.0015
+        "risk_market_ret_20d": -0.0015,
+        "closing_price": 37.15
       },
       {
         "stock_id": "7610",
@@ -89,7 +93,8 @@
         "label_5": 1,
         "risk_drawdown": -0.0141,
         "risk_volatility_regime": 2.0,
-        "risk_market_ret_20d": -0.0015
+        "risk_market_ret_20d": -0.0015,
+        "closing_price": 0.0
       },
       {
         "stock_id": "5348",
@@ -107,7 +112,8 @@
         "fund_revenue_yoy": -0.06,
         "risk_drawdown": -0.0891,
         "risk_volatility_regime": 1.0,
-        "risk_market_ret_20d": -0.0015
+        "risk_market_ret_20d": -0.0015,
+        "closing_price": 24.55
       },
       {
         "stock_id": "2440",
@@ -125,7 +131,8 @@
         "fund_revenue_yoy": 0.2085,
         "risk_drawdown": -0.0766,
         "risk_volatility_regime": 0.0,
-        "risk_market_ret_20d": -0.0015
+        "risk_market_ret_20d": -0.0015,
+        "closing_price": 12.45
       },
       {
         "stock_id": "4419",
@@ -143,7 +150,8 @@
         "fund_revenue_yoy": 6.1817,
         "risk_drawdown": -0.1245,
         "risk_volatility_regime": 0.0,
-        "risk_market_ret_20d": -0.0015
+        "risk_market_ret_20d": -0.0015,
+        "closing_price": 51.2
       },
       {
         "stock_id": "8921",
@@ -161,7 +169,8 @@
         "fund_revenue_yoy": 0.0008,
         "risk_drawdown": -0.0736,
         "risk_volatility_regime": 2.0,
-        "risk_market_ret_20d": -0.0015
+        "risk_market_ret_20d": -0.0015,
+        "closing_price": 24.9
       },
       {
         "stock_id": "4943",
@@ -179,7 +188,8 @@
         "fund_revenue_yoy": -0.1591,
         "risk_drawdown": -0.3607,
         "risk_volatility_regime": 2.0,
-        "risk_market_ret_20d": -0.0015
+        "risk_market_ret_20d": -0.0015,
+        "closing_price": 16.8
       }
     ],
     "total_up_stocks": 53,
@@ -209,7 +219,8 @@
         "fund_revenue_yoy": -0.3005,
         "risk_drawdown": -0.0308,
         "risk_volatility_regime": 1.0,
-        "risk_market_ret_20d": 0.0021
+        "risk_market_ret_20d": 0.0021,
+        "closing_price": 37.6
       },
       {
         "stock_id": "6130",
@@ -227,7 +238,8 @@
         "fund_revenue_yoy": -0.0779,
         "risk_drawdown": -0.1578,
         "risk_volatility_regime": 1.0,
-        "risk_market_ret_20d": 0.0021
+        "risk_market_ret_20d": 0.0021,
+        "closing_price": 22.2
       },
       {
         "stock_id": "2468",
@@ -249,7 +261,8 @@
         "val_pe_rank": 0.9298,
         "risk_drawdown": -0.1462,
         "risk_volatility_regime": 2.0,
-        "risk_market_ret_20d": 0.0021
+        "risk_market_ret_20d": 0.0021,
+        "closing_price": 36.65
       },
       {
         "stock_id": "6517",
@@ -271,7 +284,8 @@
         "val_pe_rank": 0.5789,
         "risk_drawdown": -0.1505,
         "risk_volatility_regime": 0.0,
-        "risk_market_ret_20d": 0.0021
+        "risk_market_ret_20d": 0.0021,
+        "closing_price": 66.6
       },
       {
         "stock_id": "6228",
@@ -289,7 +303,8 @@
         "fund_revenue_yoy": 0.5587,
         "risk_drawdown": -0.1984,
         "risk_volatility_regime": 1.0,
-        "risk_market_ret_20d": 0.0021
+        "risk_market_ret_20d": 0.0021,
+        "closing_price": 26.15
       },
       {
         "stock_id": "4541",
@@ -310,7 +325,8 @@
         "val_pe_rank": 0.6292,
         "risk_drawdown": -0.0548,
         "risk_volatility_regime": 1.0,
-        "risk_market_ret_20d": 0.0021
+        "risk_market_ret_20d": 0.0021,
+        "closing_price": 36.25
       },
       {
         "stock_id": "4303",
@@ -332,7 +348,8 @@
         "val_pe_rank": 0.0537,
         "risk_drawdown": -0.121,
         "risk_volatility_regime": 1.0,
-        "risk_market_ret_20d": 0.0021
+        "risk_market_ret_20d": 0.0021,
+        "closing_price": 62.3
       },
       {
         "stock_id": "7610",
@@ -341,7 +358,8 @@
         "label_20": 1,
         "risk_drawdown": -0.0523,
         "risk_volatility_regime": 1.0,
-        "risk_market_ret_20d": 0.0021
+        "risk_market_ret_20d": 0.0021,
+        "closing_price": 0.0
       },
       {
         "stock_id": "6148",
@@ -363,7 +381,8 @@
         "val_pe_rank": 0.2544,
         "risk_drawdown": -0.1756,
         "risk_volatility_regime": 2.0,
-        "risk_market_ret_20d": 0.0021
+        "risk_market_ret_20d": 0.0021,
+        "closing_price": 38.7
       },
       {
         "stock_id": "3434",
@@ -385,7 +404,8 @@
         "val_pe_rank": 0.822,
         "risk_drawdown": -0.0197,
         "risk_volatility_regime": 0.0,
-        "risk_market_ret_20d": 0.0021
+        "risk_market_ret_20d": 0.0021,
+        "closing_price": 29.95
       }
     ],
     "total_up_stocks": 115,
@@ -1652,5 +1672,10 @@
     "risk_market_ret_20d"
   ],
   "date_col": "trade_date",
-  "id_col": "company_id"
+  "id_col": "company_id",
+  "market_summary": {
+    "total_stocks_tracked": 1886,
+    "data_period": "2023-03 ~ 2025-03",
+    "latest_price_date": "2025-02-27"
+  }
 }

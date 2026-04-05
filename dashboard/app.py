@@ -28,11 +28,11 @@ st.set_page_config(
 # ===== Custom CSS =====
 st.markdown("""
 <style>
-    /* Hide sidebar toggle on landing */
+    /* Sidebar — light, readable */
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1a1f36 0%, #232946 100%);
+        background: linear-gradient(180deg, #f0f2f6 0%, #e8ecf4 100%);
     }
-    section[data-testid="stSidebar"] * { color: #e0e6f0 !important; }
+    section[data-testid="stSidebar"] * { color: #1a1f36 !important; }
 
     /* Hero section */
     .hero-container {

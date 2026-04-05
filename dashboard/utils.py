@@ -35,20 +35,21 @@ def inject_custom_css():
 
         /* Sidebar styling */
         section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #1a1f36 0%, #232946 100%);
+            background: linear-gradient(180deg, #f0f2f6 0%, #e8ecf4 100%);
         }
         section[data-testid="stSidebar"] * {
-            color: #e0e6f0 !important;
+            color: #1a1f36 !important;
         }
         section[data-testid="stSidebar"] h3 {
-            color: #ffffff !important;
+            color: #2d3748 !important;
+            font-weight: 700 !important;
         }
         section[data-testid="stSidebar"] a {
-            color: #8892b0 !important;
+            color: #636EFA !important;
             text-decoration: none;
         }
         section[data-testid="stSidebar"] a:hover {
-            color: #e0e6f0 !important;
+            color: #5156d4 !important;
             text-decoration: underline;
         }
 

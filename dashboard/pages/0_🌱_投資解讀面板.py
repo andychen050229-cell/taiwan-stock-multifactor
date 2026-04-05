@@ -11,6 +11,13 @@
   - 交易成本試算（用於教育目的）
   - 市場信號分佈 + 報酬分析
   - 投資教育與方法論說明
+
+FIX NOTES:
+  - Handle fs=None gracefully throughout
+  - Extract fundamentals directly from recommendations data when fs unavailable
+  - Use lighter sidebar styling for readability
+  - Use market_summary from recommendations.json for total count
+  - Simplified market distribution when fs is None
 """
 
 import streamlit as st
@@ -32,11 +39,18 @@ st.set_page_config(
 # ===== Custom CSS =====
 st.markdown("""
 <style>
-    /* Sidebar */
+    /* Sidebar - Lighter, more readable style */
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1a1f36 0%, #232946 100%);
+        background: linear-gradient(180deg, #e8ecf2 0%, #dce4eb 100%);
     }
-    section[data-testid="stSidebar"] * { color: #e0e6f0 !important; }
+    section[data-testid="stSidebar"] * {
+        color: #2d3748 !important;
+    }
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] strong {
+        color: #1a202c !important;
+        font-weight: 600;
+    }
 
     /* KPI cards */
     div[data-testid="stMetric"] {
@@ -183,7 +197,7 @@ st.markdown("""
         color: #6b7280;
     }
 
-    /* Section header with accent */
+    /* Section header */
     .section-header {
         border-left: 4px solid #636EFA;
         padding-left: 12px;
@@ -191,7 +205,7 @@ st.markdown("""
         margin-bottom: 16px;
     }
 
-    /* Cost and risk section */
+    /* Cost result */
     .cost-result {
         background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
         border-radius: 12px;
@@ -320,8 +334,11 @@ def calculate_rsi(prices, period=14):
 
 
 @st.cache_data
-def get_company_fundamentals(fs, income, company_id, trade_date):
-    """取得公司基本面與估值指標"""
+def get_company_fundamentals(fs, income, company_id, trade_date, stock_row=None):
+    """取得公司基本面與估值指標
+
+    若 fs 為 None，從 stock_row（recommendations DataFrame 的一列）直接抽取。
+    """
     result = {
         "eps": None,
         "gross_margin": None,
@@ -330,6 +347,9 @@ def get_company_fundamentals(fs, income, company_id, trade_date):
         "revenue_yoy": None,
         "pe_ratio": None,
         "pe_rank": None,
+        "drawdown": None,
+        "volatility_regime": None,
+        "market_ret_20d": None,
         "risk_level": "中等",
         "rsi": None,
         "momentum": None,
@@ -370,7 +390,7 @@ def get_company_fundamentals(fs, income, company_id, trade_date):
             if pd.notna(prev_rev) and prev_rev != 0 and pd.notna(rev):
                 result["revenue_yoy"] = (rev - prev_rev) / abs(prev_rev)
 
-    # Feature store 特徵
+    # Feature store or stock row data
     if fs is not None:
         fs_rec = fs[
             (fs["company_id"] == str(company_id)) &
@@ -382,6 +402,9 @@ def get_company_fundamentals(fs, income, company_id, trade_date):
             result["pe_rank"] = rec.get("val_pe_rank")
             result["rsi"] = rec.get("trend_rsi_14")
             result["momentum"] = rec.get("trend_momentum")
+            result["drawdown"] = rec.get("risk_drawdown")
+            result["volatility_regime"] = rec.get("risk_volatility_regime")
+            result["market_ret_20d"] = rec.get("risk_market_ret_20d")
 
             drawdown = rec.get("risk_drawdown")
             if pd.notna(drawdown):
@@ -391,6 +414,43 @@ def get_company_fundamentals(fs, income, company_id, trade_date):
                     result["risk_level"] = "中等"
                 else:
                     result["risk_level"] = "低"
+    elif stock_row is not None:
+        # Extract from stock_row directly (recommendations data)
+        result["pe_ratio"] = stock_row.get("val_pe")
+        result["pe_rank"] = stock_row.get("val_pe_rank")
+        result["drawdown"] = stock_row.get("risk_drawdown")
+        result["volatility_regime"] = stock_row.get("risk_volatility_regime")
+        result["market_ret_20d"] = stock_row.get("risk_market_ret_20d")
+
+        # Compute margins from stock_row if available
+        rev = stock_row.get("fund_revenue_sq")
+        cost = stock_row.get("fund_cost_of_revenue_sq")
+        oi = stock_row.get("fund_operating_income_sq")
+        ni = stock_row.get("fund_net_income_sq")
+        eps_val = stock_row.get("fund_eps_sq")
+
+        if pd.notna(eps_val):
+            result["eps"] = eps_val
+        if pd.notna(rev) and rev != 0:
+            if pd.notna(cost):
+                result["gross_margin"] = (rev - cost) / rev
+            if pd.notna(oi):
+                result["operating_margin"] = oi / rev
+            if pd.notna(ni):
+                result["net_margin"] = ni / rev
+
+        if stock_row.get("fund_revenue_yoy"):
+            result["revenue_yoy"] = stock_row.get("fund_revenue_yoy")
+
+        # Risk level
+        drawdown = stock_row.get("risk_drawdown")
+        if pd.notna(drawdown):
+            if drawdown > 0.3:
+                result["risk_level"] = "高"
+            elif drawdown > 0.15:
+                result["risk_level"] = "中等"
+            else:
+                result["risk_level"] = "低"
 
     return result
 
@@ -485,26 +545,49 @@ try:
         st.info(f"在 D+{horizon} 週期的判讀中，目前沒有偏多信號。")
         st.stop()
 
-    # Market overview
+    # ===== Market Overview =====
     st.markdown("### 📊 本期市場概況")
 
-    latest_snap = fs[fs["trade_date"] == rec_date]
     label_col = f"label_{horizon}"
-    total_stocks = len(latest_snap)
-    up_count = (latest_snap[label_col] == 1.0).sum()
-    flat_count = (latest_snap[label_col] == 0.0).sum()
-    down_count = (latest_snap[label_col] == -1.0).sum()
-    avg_ret = recs[f"fwd_ret_{horizon}"].mean()
+    ret_col = f"fwd_ret_{horizon}"
+
+    # Use market_summary from recommendations if available
+    total_stocks = 1886  # Default fallback
+    if recommendations and "market_summary" in recommendations:
+        total_stocks = recommendations["market_summary"].get("total_stocks_tracked", 1886)
+
+    # Compute direction counts from entire recommendations data
+    if recommendations and f"horizon_{horizon}" in recommendations:
+        all_recs = recommendations[f"horizon_{horizon}"].get("stocks", [])
+        all_recs_df = pd.DataFrame(all_recs)
+        up_count = (all_recs_df.get(label_col, all_recs_df.get("label_20", [])) == 1.0).sum()
+        flat_count = (all_recs_df.get(label_col, all_recs_df.get("label_20", [])) == 0.0).sum()
+        down_count = (all_recs_df.get(label_col, all_recs_df.get("label_20", [])) == -1.0).sum()
+    elif fs is not None:
+        latest_snap = fs[fs["trade_date"] == rec_date]
+        up_count = (latest_snap[label_col] == 1.0).sum()
+        flat_count = (latest_snap[label_col] == 0.0).sum()
+        down_count = (latest_snap[label_col] == -1.0).sum()
+    else:
+        # Fallback: use only available recs
+        up_count = (recs[label_col] == 1.0).sum()
+        flat_count = (recs[label_col] == 0.0).sum()
+        down_count = (recs[label_col] == -1.0).sum()
+
+    avg_ret = recs[ret_col].mean()
 
     k1, k2, k3, k4, k5 = st.columns(5)
     with k1:
-        st.metric("分析股票數", f"{total_stocks:,}")
+        st.metric("分析股票數", f"{int(total_stocks):,}")
     with k2:
-        st.metric("🟢 偏多", f"{up_count}", delta=f"{up_count/total_stocks*100:.1f}%")
+        pct_up = (up_count / total_stocks * 100) if total_stocks > 0 else 0
+        st.metric("🟢 偏多", f"{int(up_count)}", delta=f"{pct_up:.1f}%")
     with k3:
-        st.metric("🟡 中性", f"{flat_count}", delta=f"{flat_count/total_stocks*100:.1f}%")
+        pct_flat = (flat_count / total_stocks * 100) if total_stocks > 0 else 0
+        st.metric("🟡 中性", f"{int(flat_count)}", delta=f"{pct_flat:.1f}%")
     with k4:
-        st.metric("🔴 觀望", f"{down_count}", delta=f"{down_count/total_stocks*100:.1f}%")
+        pct_down = (down_count / total_stocks * 100) if total_stocks > 0 else 0
+        st.metric("🔴 觀望", f"{int(down_count)}", delta=f"{pct_down:.1f}%")
     with k5:
         st.metric("判讀股平均報酬", f"{avg_ret:+.1%}")
 
@@ -519,13 +602,13 @@ try:
         name = stock.get("short_name", cid)
         full_name = stock.get("company_name", "")
         price = stock.get("closing_price", 0)
-        fwd_ret = stock.get(f"fwd_ret_{horizon}", 0)
+        fwd_ret = stock.get(ret_col, 0)
         label_val = stock.get(label_col, 0)
 
         direction_label, direction_class = get_direction_label(label_val)
         direction_emoji = get_direction_emoji(label_val)
 
-        # Determine confidence level (simplified: based on fwd_ret magnitude)
+        # Determine confidence level
         fwd_abs = abs(fwd_ret)
         if fwd_abs > 0.15:
             conf_level = "高"
@@ -554,7 +637,6 @@ try:
 </div>
         """, unsafe_allow_html=True)
 
-        # Create 2-column layout
         col_left, col_right = st.columns([6, 4])
 
         with col_left:
@@ -644,7 +726,7 @@ try:
 
             # ===== LAYER 3: Why This Interpretation (Expandable) =====
             with st.expander("📖 判讀原因", expanded=True):
-                fund = get_company_fundamentals(fs, income, cid, rec_date)
+                fund = get_company_fundamentals(fs, income, cid, rec_date, stock_row=stock)
 
                 st.markdown("**基於以下特徵分析：**")
 
@@ -692,7 +774,7 @@ try:
 
             # ===== LAYER 4: Cost & Risk (Expandable) =====
             with st.expander("⚠️ 成本與風險"):
-                fund = get_company_fundamentals(fs, income, cid, rec_date)
+                fund = get_company_fundamentals(fs, income, cid, rec_date, stock_row=stock)
 
                 c1, c2 = st.columns(2)
                 with c1:
@@ -710,6 +792,7 @@ try:
                         st.metric("RSI-14", f"{rsi_val:.0f}", help=f"技術面動能：{rsi_status}")
 
                 st.markdown("**交易成本概估**")
+                st.caption("費率僅供參考，實際費率依券商公告")
                 st.caption("""
 - 買進手續費：0.1425%（券商可議價至 2.8 折）
 - 賣出手續費：0.1425%
@@ -717,7 +800,7 @@ try:
 - 總成本約 0.6-0.8%（含折扣）
                 """)
 
-            # ===== LAYER 5: Historical Observation (If fwd_ret, with disclaimer) =====
+            # ===== LAYER 5: Historical Observation =====
             with st.expander("📊 歷史觀察值"):
                 st.markdown("""<div class="history-disclaimer">
 ⚠️ 以下為歷史觀察值，非當時可見資訊，不構成即時預測承諾。
@@ -735,7 +818,7 @@ try:
 無法用於預測未來表現。
                 """)
 
-                fund = get_company_fundamentals(fs, income, cid, rec_date)
+                fund = get_company_fundamentals(fs, income, cid, rec_date, stock_row=stock)
                 if fund.get("fiscal_year"):
                     st.caption(f"財報基準：{fund['fiscal_year']} 年 Q{fund['fiscal_quarter']}")
 
@@ -784,7 +867,7 @@ try:
     # ===== Cost Calculator =====
     st.divider()
     st.markdown("### 🧮 交易成本試算器")
-    st.caption("了解交易成本對損益的影響。")
+    st.caption("了解交易成本對損益的影響。費率僅供參考，實際費率依券商公告。")
 
     calc_col1, calc_col2, calc_col3 = st.columns(3)
 
@@ -890,12 +973,11 @@ try:
         st.plotly_chart(fig_pie, use_container_width=True)
 
     with dist_col2:
-        ret_col = f"fwd_ret_{horizon}"
-        valid_snap = latest_snap[latest_snap[ret_col].notna()]
-        if not valid_snap.empty:
+        # Show distribution from available recommendations data
+        if not recs.empty:
             fig_hist = go.Figure()
             fig_hist.add_trace(go.Histogram(
-                x=valid_snap[ret_col] * 100,
+                x=recs[ret_col] * 100,
                 nbinsx=50,
                 marker_color="#636EFA",
                 opacity=0.7,
@@ -904,7 +986,7 @@ try:
             fig_hist.add_vline(x=0, line_dash="dash", line_color="red", line_width=2,
                               annotation_text="零軸", annotation_position="right")
             fig_hist.update_layout(
-                title=f"D+{horizon} 歷史報酬分佈",
+                title=f"D+{horizon} 歷史報酬分佈（判讀股票）",
                 xaxis_title="報酬率 (%)",
                 yaxis_title="股票數",
                 height=350,
@@ -912,6 +994,8 @@ try:
                 margin=dict(l=20, r=20, t=50, b=20),
             )
             st.plotly_chart(fig_hist, use_container_width=True)
+        else:
+            st.info("無充足的報酬分佈資料")
 
     # ===== Investment Education =====
     st.divider()
