@@ -286,40 +286,41 @@ def train_single_engine(
                     verbose=False,
                 )
 
-        # 預測
-        pred_proba = model.predict_proba(X_test)
-        pred_class = model.predict(X_test)
+        # 預測（僅對有有效標籤的 clean rows，避免 NaN 標籤行進入 OOF）
+        pred_proba_clean = model.predict_proba(X_test_clean)
+        pred_class_clean = model.predict(X_test_clean)
 
-        # 儲存 OOF
-        oof_preds[fold.test_idx] = pred_proba
-        oof_labels[fold.test_idx] = y_test
+        # 儲存 OOF（只寫入 valid 行，NaN 標籤行保持初始值）
+        valid_test_idx = fold.test_idx[test_valid]
+        oof_preds[valid_test_idx] = pred_proba_clean
+        oof_labels[valid_test_idx] = y_test_clean
 
-        # 評估（僅 valid 行）
+        # 評估
         try:
             auc = roc_auc_score(
-                y_test_clean, pred_proba[test_valid], multi_class="ovr", average="macro"
+                y_test_clean, pred_proba_clean, multi_class="ovr", average="macro"
             )
         except ValueError:
             auc = 0.0
 
-        logloss = log_loss(y_test_clean, pred_proba[test_valid])
-        acc = accuracy_score(y_test_clean, pred_class[test_valid])
-        f1 = f1_score(y_test_clean, pred_class[test_valid], average="weighted")
+        logloss = log_loss(y_test_clean, pred_proba_clean)
+        acc = accuracy_score(y_test_clean, pred_class_clean)
+        f1 = f1_score(y_test_clean, pred_class_clean, average="weighted")
 
         # Per-class AUC (UP/FLAT/DOWN)
         per_class_auc = {}
         try:
+            from sklearn.preprocessing import label_binarize
+            y_bin = label_binarize(y_test_clean, classes=[0, 1, 2])
             for cls_idx, cls_name in enumerate(["DOWN", "FLAT", "UP"]):
-                from sklearn.preprocessing import label_binarize
-                y_bin = label_binarize(y_test_clean, classes=[0, 1, 2])
                 per_class_auc[cls_name] = round(float(roc_auc_score(
-                    y_bin[:, cls_idx], pred_proba[test_valid][:, cls_idx]
+                    y_bin[:, cls_idx], pred_proba_clean[:, cls_idx]
                 )), 4)
         except Exception:
             per_class_auc = {"DOWN": 0.0, "FLAT": 0.0, "UP": 0.0}
 
         # Balanced accuracy
-        bal_acc = balanced_accuracy_score(y_test_clean, pred_class[test_valid])
+        bal_acc = balanced_accuracy_score(y_test_clean, pred_class_clean)
 
         # Class-prior baseline LogLoss (predict training class frequencies)
         train_counts = np.bincount(y_tr, minlength=3).astype(float)

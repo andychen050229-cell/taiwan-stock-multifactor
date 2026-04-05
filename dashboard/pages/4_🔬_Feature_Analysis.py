@@ -1,4 +1,4 @@
-"""Feature Analysis — 特徵工程分析"""
+"""Feature Analysis — 特徵工程分析（量化分析工作台）"""
 
 import streamlit as st
 import pandas as pd
@@ -8,13 +8,14 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from utils import inject_custom_css, load_report
+from utils import inject_custom_css, inject_advanced_sidebar, load_report
 
-st.set_page_config(page_title="Feature Analysis", page_icon="🔬", layout="wide")
+st.set_page_config(page_title="Feature Analysis | 量化分析工作台", page_icon="🔬", layout="wide")
 inject_custom_css()
 
-report = load_report()
+report, report_name = load_report()
 results = report["results"]
+inject_advanced_sidebar(report_name, report)
 
 st.title("🔬 特徵工程分析")
 st.caption("三階段特徵篩選流程、五支柱分佈、跨天期重要度比較與 SHAP 可解釋性")
@@ -35,6 +36,13 @@ with col4:
     stability = results.get("feature_stability", {})
     st.metric("穩定性 (Jaccard)", f"{stability.get('stability_score', 0):.3f}")
 
+st.markdown("""
+<div class="insight-box">
+<strong>篩選流程：</strong>
+Mutual Information（與標籤的非線性關聯）→ VIF（去除多重共線性，VIF > 10 剔除）→ 跨 Fold 穩定性（Jaccard > 0.3）
+</div>
+""", unsafe_allow_html=True)
+
 # Funnel chart
 fig_funnel = go.Figure(go.Funnel(
     y=["候選特徵 (5 支柱)", "MI 篩選", "VIF 去共線性", "最終選擇"],
@@ -46,11 +54,13 @@ fig_funnel.update_layout(title="特徵篩選漏斗", height=350, template="plotl
 st.plotly_chart(fig_funnel, use_container_width=True)
 
 # ===== Selected Features =====
+st.divider()
 st.subheader("最終選擇的特徵")
 
 selected = fsel.get("selected", [])
 if selected:
     categories = {"Trend": [], "Fundamental": [], "Valuation": [], "Event": [], "Risk": []}
+    cat_labels = {"Trend": "趨勢動能", "Fundamental": "基本面", "Valuation": "估值", "Event": "事件輿情", "Risk": "風險環境"}
     for f in selected:
         if f.startswith("trend_"):
             categories["Trend"].append(f)
@@ -64,18 +74,26 @@ if selected:
             categories["Risk"].append(f)
 
     cat_counts = {k: len(v) for k, v in categories.items() if v}
-    fig_pie = px.pie(names=list(cat_counts.keys()), values=list(cat_counts.values()),
-                     title="特徵五支柱分佈", color_discrete_sequence=px.colors.qualitative.Set2,
-                     hole=0.4)
-    fig_pie.update_layout(height=350)
+    fig_pie = go.Figure(data=[go.Pie(
+        labels=[f"{cat_labels.get(k,k)} ({v})" for k, v in cat_counts.items()],
+        values=list(cat_counts.values()),
+        hole=0.45,
+        marker_colors=["#636EFA", "#00CC96", "#AB63FA", "#FFA15A", "#EF553B"],
+        textinfo="label+percent",
+        textfont_size=11,
+    )])
+    fig_pie.update_layout(title="特徵五支柱分佈", height=380, showlegend=False)
 
-    col_pie, col_list = st.columns([1, 2])
+    col_pie, col_list = st.columns([2, 3])
     with col_pie:
         st.plotly_chart(fig_pie, use_container_width=True)
     with col_list:
         for cat, feats in categories.items():
             if feats:
-                st.markdown(f"**{cat}** ({len(feats)}): `{'`, `'.join(feats)}`")
+                st.markdown(f"**{cat_labels.get(cat, cat)}** ({len(feats)} 個)")
+                feat_str = ", ".join(f"`{f}`" for f in feats)
+                st.markdown(feat_str)
+                st.markdown("")
 
 # ===== Cross-Horizon Feature Importance =====
 st.divider()
@@ -91,7 +109,8 @@ for h in [1, 5, 20]:
             all_imp[f"{eng}_D{h}"] = top_feats
 
 if all_imp:
-    engine_choice = st.radio("選擇引擎", ["lightgbm", "xgboost"], horizontal=True)
+    engine_choice = st.radio("選擇引擎", ["lightgbm", "xgboost"], horizontal=True,
+                             format_func=lambda x: x.upper())
 
     imp_rows = []
     for h in [1, 5, 20]:
@@ -114,6 +133,14 @@ if all_imp:
         fig_imp.update_layout(height=600, yaxis={"categoryorder": "total ascending"})
         st.plotly_chart(fig_imp, use_container_width=True)
 
+        st.markdown("""
+<div class="insight-box">
+<strong>跨 Horizon 差異：</strong>
+短期（D+1）主要依賴技術面動能指標，中長期（D+20）則更重視基本面與估值因子。
+這符合 alpha 信號的「頻率結構」——不同天期的驅動因子本質不同。
+</div>
+""", unsafe_allow_html=True)
+
 # ===== Stability =====
 st.divider()
 st.subheader("跨 Fold 穩定性")
@@ -122,15 +149,29 @@ stability = results.get("feature_stability", {})
 if stability:
     col_s1, col_s2 = st.columns(2)
     with col_s1:
-        st.metric("Stability Score (Jaccard)", f"{stability.get('stability_score', 0):.4f}")
+        score = stability.get('stability_score', 0)
+        st.metric("Stability Score (Jaccard)", f"{score:.4f}")
         jaccards = stability.get("pairwise_jaccards", [])
         if jaccards:
-            st.markdown(f"Pairwise Jaccard: {', '.join(f'{j:.3f}' for j in jaccards)}")
+            fig_j = go.Figure(data=[go.Bar(
+                x=[f"Fold {i}-{i+1}" for i in range(len(jaccards))],
+                y=jaccards,
+                marker_color=["#00CC96" if j > 0.8 else "#FFA15A" for j in jaccards],
+                text=[f"{j:.3f}" for j in jaccards],
+                textposition="outside",
+            )])
+            fig_j.update_layout(title="Pairwise Jaccard Similarity", height=300, template="plotly_white",
+                                yaxis_range=[0, 1.1])
+            fig_j.add_hline(y=0.8, line_dash="dash", line_color="green", annotation_text="Excellent (0.8)")
+            st.plotly_chart(fig_j, use_container_width=True)
+
     with col_s2:
         consistent = stability.get("consistent_top_features", [])
         st.metric("一致入選特徵數", f"{len(consistent)} / {len(selected)}")
         if consistent:
-            st.markdown(f"**一致特徵**: {', '.join(consistent[:10])}{'...' if len(consistent) > 10 else ''}")
+            st.markdown("**每折均入選的特徵：**")
+            for f in consistent:
+                st.markdown(f"- `{f}`")
 
 # ===== SHAP =====
 st.divider()
@@ -156,6 +197,7 @@ quintile_data = results.get("quintile_analysis", {})
 if quintile_data:
     st.divider()
     st.subheader("Quintile 因子分組分析")
+    st.caption("將股票按預測分數分為五組，檢驗報酬的單調性——理想情況下 Q5（最高分）報酬應明顯高於 Q1（最低分）")
 
     for key, val in quintile_data.items():
         st.markdown(f"**{key}**")
@@ -174,8 +216,11 @@ if quintile_data:
             ))
             fig_q.update_layout(
                 title=f"{key} Quintile Returns",
-                xaxis_title="Quintile (1=Lowest, 5=Highest)",
+                xaxis_title="Quintile (1=Lowest Score, 5=Highest Score)",
                 yaxis_title="Annualized Return", yaxis_tickformat=".1%",
                 height=350, template="plotly_white"
             )
             st.plotly_chart(fig_q, use_container_width=True)
+
+# ===== Footer =====
+st.markdown('<div class="page-footer">量化分析工作台 — Feature Analysis | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)

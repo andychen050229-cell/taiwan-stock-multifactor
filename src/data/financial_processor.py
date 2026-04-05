@@ -89,9 +89,10 @@ def derive_single_quarter(df: pd.DataFrame) -> pd.DataFrame:
     """
     df = df.copy()
 
+    # 注意：EPS 在台灣 IFRS 財報中不是累計值，不應做差分轉換
     cumulative_cols = [
         "revenue", "cost_of_revenue", "operating_income",
-        "net_income", "total_comprehensive_income", "eps",
+        "net_income", "total_comprehensive_income",
     ]
     existing_cols = [c for c in cumulative_cols if c in df.columns]
 

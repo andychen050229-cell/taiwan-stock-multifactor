@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Phase 2 主執行腳本：模型開發 + 策略回測 (v2 — Enhanced)
+Phase 2 主執行腳本：模型開發 + 策略回測 (v3 — Enhanced + Statistical Validation)
 
-執行流程（12 步驟）：
+執行流程（14 步驟）：
   1. 載入 Feature Store（Phase 1 產出）
   2. 資料完整性驗證（Inf / NaN / 標籤分佈）
   3. 特徵選擇（MI → VIF）
@@ -12,9 +12,12 @@ Phase 2 主執行腳本：模型開發 + 策略回測 (v2 — Enhanced)
   7. 模型訓練 — Horizon D+20
   8. LGB+XGB 集成（Ensemble）+ ICIR 計算
   9. 策略回測（三成本情境 × 三 horizon + ensemble）
-  10. 跨 horizon 比較 + 品質閘門
-  11. 圖表視覺化（8+ 張專業圖表）
-  12. 產出報告
+  9b. 進階分析（Quintile / Bootstrap CI / Drawdown / Alpha Decay）
+  10. 統計驗證（Permutation Test / DSR / OOD 壓力測試）   ← NEW
+  11. 概率校準（Platt Scaling）                           ← NEW
+  12. 跨 horizon 比較 + 品質閘門
+  13. 圖表視覺化（8+ 張專業圖表）
+  14. 產出報告
 
 用法：
   python run_phase2.py
@@ -43,6 +46,8 @@ from src.backtest.metrics import (
     compute_quintile_returns, bootstrap_ci,
     compute_drawdown_analysis, compute_alpha_decay,
 )
+from src.backtest.statistical_tests import run_statistical_validation
+from src.models.calibration import calibrate_oof_predictions
 from src.models.trainer import save_models
 from src.visualization.charts import (
     plot_cumulative_returns, plot_drawdown, plot_ic_time_series,
@@ -95,7 +100,7 @@ def main():
     }
 
     # ===== Step 1: 載入 Feature Store =====
-    log.info("\n[Step 1/10] Loading Feature Store...")
+    log.info("\n[Step 1/14] Loading Feature Store...")
     output_dir = root / config["paths"]["outputs"]
     fs_path = output_dir / "feature_store.parquet"
 
@@ -116,7 +121,7 @@ def main():
     }
 
     # ===== Step 2: 資料完整性驗證 =====
-    log.info("\n[Step 2/10] Data integrity validation...")
+    log.info("\n[Step 2/14] Data integrity validation...")
 
     numeric_cols = fs.select_dtypes(include=["number"]).columns
     inf_count = int(np.isinf(fs[numeric_cols]).sum().sum())
@@ -145,7 +150,7 @@ def main():
     }
 
     # ===== Step 3: 特徵選擇 =====
-    log.info("\n[Step 3/10] Feature selection...")
+    log.info("\n[Step 3/14] Feature selection...")
 
     # 以 label_5 作為特徵選擇的代表標籤（中間尺度）
     selection_result = run_feature_selection(fs, "label_5", config)
@@ -166,7 +171,7 @@ def main():
     }
 
     # ===== Step 4: Walk-Forward 切分 =====
-    log.info("\n[Step 4/10] Walk-forward time series split...")
+    log.info("\n[Step 4/14] Walk-forward time series split...")
 
     folds = generate_walk_forward_splits(fs, date_col="trade_date", config=config)
     fold_summary = get_fold_summary(folds)
@@ -184,7 +189,7 @@ def main():
         label_col = f"label_{h}"
         step_num = 4 + horizons.index(h) + 1
 
-        log.info(f"\n[Step {step_num}/10] Training models — Horizon D+{h} ({label_col})...")
+        log.info(f"\n[Step {step_num}/14] Training models — Horizon D+{h} ({label_col})...")
         log.info("=" * 60)
 
         # 訓練
@@ -215,7 +220,7 @@ def main():
         report["results"][f"model_horizon_{h}"] = serializable
 
     # ===== Step 8: Ensemble + ICIR =====
-    log.info(f"\n[Step 8/12] LGB+XGB Ensemble + ICIR calculation...")
+    log.info(f"\n[Step 8/14] LGB+XGB Ensemble + ICIR calculation...")
 
     all_icir_results = {}
     for h in horizons:
@@ -299,7 +304,7 @@ def main():
                 log.info(f"  {key} ICIR: mean_IC={ic_mean:.4f} | std={ic_std:.4f} | ICIR={icir:.3f}")
 
     # ===== Step 9: 策略回測 =====
-    log.info(f"\n[Step 9/12] Strategy backtesting...")
+    log.info(f"\n[Step 9/14] Strategy backtesting...")
 
     # 基準
     benchmark = compute_benchmark(fs, folds, config)
@@ -451,8 +456,82 @@ def main():
                     output_dir=str(model_dir),
                 )
 
-    # ===== Step 10: 跨 Horizon 比較 + 品質閘門 =====
-    log.info(f"\n[Step 10/14] Cross-horizon comparison & quality gates...")
+    # ===== Step 10: 統計驗證（Permutation Test / DSR / OOD）=====
+    log.info(f"\n[Step 10/14] Statistical validation...")
+
+    try:
+        stat_validation = run_statistical_validation(
+            all_horizon_results=all_horizon_results,
+            all_backtest_results=all_backtest_results,
+            folds=folds,
+            df=fs,
+            feature_cols=selected_features,
+            config=config,
+        )
+        # 移除大型 array，只保留摘要
+        stat_summary = {
+            'permutation_tests': {
+                k: {kk: vv for kk, vv in v.items() if kk != 'permuted_aucs'}
+                for k, v in stat_validation['permutation_tests'].items()
+            },
+            'deflated_sharpe': stat_validation['deflated_sharpe'],
+            'ood_analysis': {
+                k: {kk: vv for kk, vv in v.items() if kk != 'fold_trend'}
+                for k, v in stat_validation['ood_analysis'].items()
+            },
+            'ood_fold_trends': {
+                k: v.get('fold_trend', [])
+                for k, v in stat_validation['ood_analysis'].items()
+            },
+            'overall_validity': stat_validation['overall_validity'],
+        }
+        report["results"]["statistical_validation"] = _serialize(stat_summary)
+        log.info(f"  Overall statistical validity: {stat_validation['overall_validity']}")
+    except Exception as e:
+        log.warning(f"  Statistical validation error (non-fatal): {e}")
+        stat_validation = {'overall_validity': 'ERROR'}
+        report["results"]["statistical_validation"] = {"error": str(e)}
+
+    # ===== Step 11: 概率校準（Platt Scaling）=====
+    log.info(f"\n[Step 11/14] Probability calibration (Platt Scaling)...")
+
+    calibration_results = {}
+    for h in horizons:
+        for eng, res in all_horizon_results[h].items():
+            if 'error' in res or res.get('oof_predictions') is None:
+                continue
+
+            key = f"{eng}_D{h}"
+            log.info(f"  Calibrating {key}...")
+
+            try:
+                cal_result = calibrate_oof_predictions(
+                    oof_predictions=res['oof_predictions'],
+                    oof_labels=res['oof_labels'],
+                    folds=folds,
+                    method="sigmoid",
+                )
+
+                if 'error' not in cal_result:
+                    calibration_results[key] = {
+                        'before': cal_result['before_calibration'],
+                        'after': cal_result['after_calibration'],
+                        'improvement_pct': cal_result['improvement_pct'],
+                        'per_fold_ece': cal_result.get('per_fold_ece', []),
+                    }
+                    # 將校準後概率存回（供後續使用）
+                    res['calibrated_oof'] = cal_result.get('calibrated_proba')
+                else:
+                    calibration_results[key] = {'error': cal_result['error']}
+
+            except Exception as e:
+                log.warning(f"  Calibration for {key} failed: {e}")
+                calibration_results[key] = {'error': str(e)}
+
+    report["results"]["calibration"] = _serialize(calibration_results)
+
+    # ===== Step 12: 跨 Horizon 比較 + 品質閘門 =====
+    log.info(f"\n[Step 12/14] Cross-horizon comparison & quality gates...")
 
     quality_gate_auc = config.get("model", {}).get("quality_gate_auc", 0.52)
     comparison = {}
@@ -518,6 +597,13 @@ def main():
         "sufficient_folds": len(folds) >= 2,
         "no_data_leakage": inf_count == 0,
         "oof_predictions_valid": oof_valid,
+        # Statistical validation gates (NEW)
+        "statistical_validity": stat_validation.get("overall_validity", "ERROR") in ("STRONG", "MODERATE"),
+        "permutation_tests_pass": all(
+            v.get("significant_at_05", False)
+            for v in stat_validation.get("permutation_tests", {}).values()
+            if "error" not in v
+        ),
         # Advisory gates
         "feature_stability": stability_report.get("stability_score", 0) >= 0.3,
         "best_model_ic_positive": (
@@ -537,8 +623,8 @@ def main():
     report["quality_gates"] = gates
     report["overall_status"] = "PASS" if all_gates_pass else "NEEDS REVIEW"
 
-    # ===== Step 11: 圖表視覺化 =====
-    log.info(f"\n[Step 11/12] Generating charts...")
+    # ===== Step 13: 圖表視覺化 =====
+    log.info(f"\n[Step 13/14] Generating charts...")
 
     fig_dir = root / config["paths"]["figures"]
     fig_dir.mkdir(parents=True, exist_ok=True)
@@ -628,8 +714,8 @@ def main():
     except Exception as e:
         log.warning(f"  Chart generation error (non-fatal): {e}")
 
-    # ===== Step 12: 儲存報告 =====
-    log.info(f"\n[Step 12/12] Saving Phase 2 report...")
+    # ===== Step 14: 儲存報告 =====
+    log.info(f"\n[Step 14/14] Saving Phase 2 report...")
 
     report_dir = root / config["paths"]["reports"]
     report_dir.mkdir(parents=True, exist_ok=True)
@@ -673,6 +759,25 @@ def main():
                     f"Sharpe={disc.get('sharpe_ratio', 0):.2f} | "
                     f"MDD={disc.get('max_drawdown', 0):.2%}"
                 )
+
+    log.info(f"\n  --- Statistical Validation ---")
+    log.info(f"  Validity: {stat_validation.get('overall_validity', 'N/A')}")
+    for key, perm in stat_validation.get('permutation_tests', {}).items():
+        if 'error' not in perm:
+            log.info(f"  Permutation {key}: AUC={perm.get('observed_auc', 0):.4f} | "
+                     f"p={perm.get('p_value', 1):.4f} | "
+                     f"{'✓' if perm.get('significant_at_05') else '✗'}")
+    for key, dsr in stat_validation.get('deflated_sharpe', {}).items():
+        if 'error' not in dsr:
+            log.info(f"  DSR {key}: Sharpe={dsr.get('observed_sharpe', 0):.4f} | "
+                     f"p={dsr.get('dsr_p_value', 1):.4f} | "
+                     f"{'✓' if dsr.get('dsr_pass') else '✗'}")
+
+    log.info(f"\n  --- Probability Calibration ---")
+    for key, cal in calibration_results.items():
+        if 'error' not in cal:
+            log.info(f"  {key}: ECE {cal['before']['ece']:.4f} → {cal['after']['ece']:.4f} "
+                     f"({cal['improvement_pct']:+.1f}%)")
 
     log.info(f"\n  --- Quality Gates ---")
     for gate, passed in gates.items():

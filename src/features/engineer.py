@@ -498,16 +498,16 @@ def run_feature_pipeline(prices_df: pd.DataFrame,
     if ticker_col and date_col:
         df = df.sort_values([ticker_col, date_col])
 
-        # 前向填充（per-stock）
+        # 前向填充（per-stock），limit=63（約一季交易日）避免過期資訊無限延伸
         ffill_prefixes = ["trend_", "fund_", "val_", "risk_"]
         ffill_cols = [c for c in df.columns
                       if any(c.startswith(p) for p in ffill_prefixes) and df[c].dtype != "object"]
         if ffill_cols:
             before_nan = df[ffill_cols].isna().sum().sum()
-            df[ffill_cols] = df.groupby(ticker_col)[ffill_cols].ffill()
+            df[ffill_cols] = df.groupby(ticker_col)[ffill_cols].ffill(limit=63)
             after_nan = df[ffill_cols].isna().sum().sum()
             filled = before_nan - after_nan
-            logger.info(f"  Imputation (ffill): {filled:,} NaN filled across {len(ffill_cols)} columns")
+            logger.info(f"  Imputation (ffill, limit=63): {filled:,} NaN filled across {len(ffill_cols)} columns")
 
         # 事件特徵：填 0
         event_cols = [c for c in df.columns if c.startswith("event_") and df[c].dtype != "object"]

@@ -1,4 +1,4 @@
-"""Backtest — 策略回測分析"""
+"""Backtest — 策略回測分析（量化分析工作台）"""
 
 import streamlit as st
 import pandas as pd
@@ -8,14 +8,15 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from utils import inject_custom_css, load_report
+from utils import inject_custom_css, inject_advanced_sidebar, load_report
 
-st.set_page_config(page_title="Backtest Results", page_icon="💰", layout="wide")
+st.set_page_config(page_title="Backtest | 量化分析工作台", page_icon="💰", layout="wide")
 inject_custom_css()
 
-report = load_report()
+report, report_name = load_report()
 results = report["results"]
 benchmark = results.get("benchmark", {})
+inject_advanced_sidebar(report_name, report)
 
 st.title("💰 策略回測分析")
 st.caption("比較不同成本假設下各策略的績效，評估實際可行的交易方案")
@@ -26,7 +27,7 @@ with col_ctrl1:
     horizon = st.selectbox("Horizon", [1, 5, 20], index=2, format_func=lambda x: f"D+{x}")
 with col_ctrl2:
     cost_model = st.selectbox("成本模型", ["discount", "standard", "conservative"],
-                              help="Discount=電子下單優惠, Standard=一般費率, Conservative=含滑價")
+                              format_func=lambda x: {"discount": "Discount（電子下單優惠）", "standard": "Standard（一般費率）", "conservative": "Conservative（含滑價）"}[x])
 
 # ===== Performance Table =====
 st.subheader(f"D+{horizon} — {cost_model.title()} 成本情境")
@@ -73,27 +74,52 @@ if rows:
             df_display[col] = df_display[col].apply(lambda x: f"{x:.3f}")
     st.dataframe(df_display, use_container_width=True, hide_index=True)
 
-# ===== Return Bar Chart =====
-st.subheader("回報率比較")
+# ===== Return & Sharpe Side-by-Side =====
+st.divider()
 
-fig = go.Figure()
-engines = [r["Engine"] for r in rows]
-returns = [r["Ann. Return"] for r in rows]
-colors = ["#00CC96" if r > 0 else "#EF553B" for r in returns]
+r1, r2 = st.columns(2)
 
-fig.add_trace(go.Bar(x=engines, y=returns, marker_color=colors,
-                     text=[f"{r:+.1%}" for r in returns], textposition="outside"))
-fig.update_layout(
-    title=f"D+{horizon} Annualized Return ({cost_model})",
-    yaxis_title="Annualized Return", yaxis_tickformat=".1%",
-    height=400, template="plotly_white"
-)
-fig.add_hline(y=0, line_color="gray")
-st.plotly_chart(fig, use_container_width=True)
+with r1:
+    fig = go.Figure()
+    engines = [r["Engine"] for r in rows]
+    returns = [r["Ann. Return"] for r in rows]
+    colors = ["#00CC96" if r > 0 else "#EF553B" for r in returns]
+    fig.add_trace(go.Bar(x=engines, y=returns, marker_color=colors,
+                         text=[f"{r:+.1%}" for r in returns], textposition="outside"))
+    fig.update_layout(
+        title=f"D+{horizon} 年化報酬率 ({cost_model})",
+        yaxis_title="Annualized Return", yaxis_tickformat=".1%",
+        height=400, template="plotly_white"
+    )
+    fig.add_hline(y=0, line_color="gray")
+    st.plotly_chart(fig, use_container_width=True)
+
+with r2:
+    fig_sr = go.Figure()
+    sharpes = [r["Sharpe"] for r in rows]
+    colors_sr = ["#636EFA" if s > 0.5 else ("#FFA15A" if s > 0 else "#EF553B") for s in sharpes]
+    fig_sr.add_trace(go.Bar(x=engines, y=sharpes, marker_color=colors_sr,
+                            text=[f"{s:.2f}" for s in sharpes], textposition="outside"))
+    fig_sr.update_layout(
+        title=f"D+{horizon} 夏普比率 ({cost_model})",
+        yaxis_title="Sharpe Ratio",
+        height=400, template="plotly_white"
+    )
+    fig_sr.add_hline(y=0.5, line_dash="dash", line_color="green", annotation_text="Good (0.5)")
+    fig_sr.add_hline(y=0, line_color="gray")
+    st.plotly_chart(fig_sr, use_container_width=True)
 
 # ===== Cost Impact =====
 st.divider()
 st.subheader("交易成本影響分析")
+st.markdown("""
+<div class="insight-box">
+<strong>為什麼成本模型很重要？</strong>
+同一策略在不同成本假設下，年化報酬可能差距 3–5%。
+D+1 策略因換手率高達 64–68%，在任何成本情境下幾乎都不可行。
+D+20 策略即使在保守成本下仍有正 alpha。
+</div>
+""", unsafe_allow_html=True)
 
 cost_rows = []
 for eng, res in bt_data.items():
@@ -112,14 +138,14 @@ if cost_rows:
     fig2 = px.bar(df_cost, x="Engine", y="Ann. Return", color="Cost Model",
                   barmode="group", text_auto=".1%",
                   color_discrete_map={"Discount": "#00CC96", "Standard": "#636EFA", "Conservative": "#EF553B"},
-                  template="plotly_white", title=f"D+{horizon} Return by Cost Scenario")
+                  template="plotly_white", title=f"D+{horizon} 各成本情境年化報酬")
     fig2.update_layout(height=400, yaxis_tickformat=".1%")
     fig2.add_hline(y=0, line_color="gray", line_dash="dash")
     st.plotly_chart(fig2, use_container_width=True)
 
 # ===== Turnover Analysis =====
 st.divider()
-st.subheader("換手率與成本結構")
+st.subheader("換手率與成本結構（跨 Horizon 比較）")
 
 turnover_data = []
 for h in [1, 5, 20]:
@@ -137,22 +163,47 @@ for h in [1, 5, 20]:
 
 if turnover_data:
     df_to = pd.DataFrame(turnover_data)
-    fig3 = go.Figure()
-    fig3.add_trace(go.Scatter(
-        x=df_to["Daily Cost"], y=df_to["Ann. Return"],
-        mode="markers+text", text=df_to["Strategy"],
-        textposition="top center", marker=dict(size=14, color=df_to["Horizon"],
-                                                colorscale="Viridis", showscale=True,
-                                                colorbar=dict(title="Horizon")),
-    ))
-    fig3.update_layout(
-        title="Daily Cost vs Return (All Strategies)",
-        xaxis_title="Daily Cost", yaxis_title="Annualized Return",
-        yaxis_tickformat=".1%", xaxis_tickformat=".4f",
-        height=450, template="plotly_white"
-    )
-    fig3.add_hline(y=0, line_color="gray", line_dash="dash")
-    st.plotly_chart(fig3, use_container_width=True)
+
+    t1, t2 = st.columns(2)
+    with t1:
+        fig3 = go.Figure()
+        fig3.add_trace(go.Scatter(
+            x=df_to["Daily Cost"], y=df_to["Ann. Return"],
+            mode="markers+text", text=df_to["Strategy"],
+            textposition="top center",
+            marker=dict(size=16, color=df_to["Horizon"],
+                        colorscale=[[0, "#EF553B"], [0.5, "#FFA15A"], [1, "#00CC96"]],
+                        showscale=True,
+                        colorbar=dict(title="Horizon", tickvals=[1, 5, 20])),
+        ))
+        fig3.update_layout(
+            title="Daily Cost vs Return",
+            xaxis_title="Daily Cost", yaxis_title="Annualized Return",
+            yaxis_tickformat=".1%", xaxis_tickformat=".4f",
+            height=400, template="plotly_white"
+        )
+        fig3.add_hline(y=0, line_color="gray", line_dash="dash")
+        st.plotly_chart(fig3, use_container_width=True)
+
+    with t2:
+        fig4 = go.Figure()
+        fig4.add_trace(go.Scatter(
+            x=df_to["Avg Turnover"], y=df_to["Ann. Return"],
+            mode="markers+text", text=df_to["Strategy"],
+            textposition="top center",
+            marker=dict(size=16, color=df_to["Horizon"],
+                        colorscale=[[0, "#EF553B"], [0.5, "#FFA15A"], [1, "#00CC96"]],
+                        showscale=True,
+                        colorbar=dict(title="Horizon", tickvals=[1, 5, 20])),
+        ))
+        fig4.update_layout(
+            title="Turnover vs Return",
+            xaxis_title="Avg Turnover", yaxis_title="Annualized Return",
+            yaxis_tickformat=".1%", xaxis_tickformat=".0%",
+            height=400, template="plotly_white"
+        )
+        fig4.add_hline(y=0, line_color="gray", line_dash="dash")
+        st.plotly_chart(fig4, use_container_width=True)
 
 # ===== Charts =====
 st.divider()
@@ -179,6 +230,7 @@ bootstrap_data = results.get("bootstrap_ci", {})
 if bootstrap_data:
     st.divider()
     st.subheader("Bootstrap 95% 信賴區間")
+    st.caption("1,000 次 Bootstrap 重抽樣估算的報酬率與 Sharpe 信賴區間")
     ci_rows = []
     for key, val in bootstrap_data.items():
         ci_rows.append({
@@ -206,3 +258,6 @@ if dd_data:
         })
     if dd_rows:
         st.dataframe(pd.DataFrame(dd_rows), use_container_width=True, hide_index=True)
+
+# ===== Footer =====
+st.markdown('<div class="page-footer">量化分析工作台 — Backtest | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)

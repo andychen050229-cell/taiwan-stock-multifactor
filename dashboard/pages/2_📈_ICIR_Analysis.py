@@ -1,4 +1,4 @@
-"""ICIR Analysis — 信號穩定性分析"""
+"""ICIR Analysis — 信號穩定性分析（量化分析工作台）"""
 
 import streamlit as st
 import pandas as pd
@@ -7,17 +7,27 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from utils import inject_custom_css, load_report
+from utils import inject_custom_css, inject_advanced_sidebar, load_report
 
-st.set_page_config(page_title="ICIR Analysis", page_icon="📈", layout="wide")
+st.set_page_config(page_title="ICIR Analysis | 量化分析工作台", page_icon="📈", layout="wide")
 inject_custom_css()
 
-report = load_report()
+report, report_name = load_report()
 results = report["results"]
+inject_advanced_sidebar(report_name, report)
+
 icir_data = results.get("icir", {})
 
 st.title("📈 ICIR 信號穩定性分析")
-st.caption("ICIR = mean(daily Rank IC) / std(daily Rank IC) — 衡量因子選股能力的穩定性。ICIR > 0.5 為良好，> 1.0 為優秀。")
+st.caption("ICIR = mean(daily Rank IC) / std(daily Rank IC) — 衡量因子選股能力的穩定性")
+
+st.markdown("""
+<div class="insight-box">
+<strong>ICIR 解讀標準：</strong>
+|ICIR| > 0.5 為良好信號，> 1.0 為優秀。
+ICIR 本質上是 IC 的 t-statistic：即使 IC 不高，只要足夠穩定，ICIR 也可以很高。
+</div>
+""", unsafe_allow_html=True)
 
 # ===== ICIR Dashboard =====
 st.subheader("全模型 ICIR 總覽")
@@ -74,7 +84,14 @@ with col1:
         "實務可行性": ["不可行", "邊際", "推薦"],
     })
     st.dataframe(freq_data, use_container_width=True, hide_index=True)
-    st.info("**結論**: Alpha 信號在月度頻率真實且穩定，日/週頻率信噪比過低。")
+
+    st.markdown("""
+<div class="insight-box">
+<strong>核心結論：</strong>
+Alpha 信號在月度頻率（D+20）真實且穩定，ICIR 達 0.74–0.77，遠超 0.5 門檻。
+日頻和週頻的信噪比過低，不適合實際交易部署。
+</div>
+""", unsafe_allow_html=True)
 
 with col2:
     st.subheader("📐 D+20 IC 統計量")
@@ -87,6 +104,28 @@ with col2:
                     f"ICIR = {row['ICIR']:.3f}",
                     delta=f"IC = {row['Mean IC']:.4f} (std={row['Std IC']:.4f})"
                 )
+
+    # Visual gauge for best ICIR
+    if icir_rows:
+        best_icir = max(r["ICIR"] for r in icir_rows)
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=best_icir,
+            title={"text": "Best ICIR"},
+            gauge={
+                "axis": {"range": [0, 1.5]},
+                "steps": [
+                    {"range": [0, 0.3], "color": "#fef2f2"},
+                    {"range": [0.3, 0.5], "color": "#fef3c7"},
+                    {"range": [0.5, 1.0], "color": "#ecfdf5"},
+                    {"range": [1.0, 1.5], "color": "#d1fae5"},
+                ],
+                "bar": {"color": "#059669"},
+                "threshold": {"line": {"color": "#059669", "width": 3}, "value": best_icir},
+            }
+        ))
+        fig_gauge.update_layout(height=250, margin=dict(l=20, r=20, t=40, b=20))
+        st.plotly_chart(fig_gauge, use_container_width=True)
 
 # ===== IC Time Series Charts =====
 st.divider()
@@ -120,3 +159,6 @@ if alpha_decay:
         if decay_rows:
             st.write(f"**{eng.upper()}**")
             st.dataframe(pd.DataFrame(decay_rows), use_container_width=True, hide_index=True)
+
+# ===== Footer =====
+st.markdown('<div class="page-footer">量化分析工作台 — ICIR Analysis | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)

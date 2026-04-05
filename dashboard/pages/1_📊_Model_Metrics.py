@@ -1,4 +1,4 @@
-"""Model Metrics — 模型指標分析"""
+"""Model Metrics — 模型指標分析（量化分析工作台）"""
 
 import streamlit as st
 import pandas as pd
@@ -8,13 +8,14 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from utils import inject_custom_css, load_report
+from utils import inject_custom_css, inject_advanced_sidebar, load_report
 
-st.set_page_config(page_title="Model Metrics", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Model Metrics | 量化分析工作台", page_icon="📊", layout="wide")
 inject_custom_css()
 
-report = load_report()
+report, report_name = load_report()
 results = report["results"]
+inject_advanced_sidebar(report_name, report)
 
 st.title("📊 模型指標分析")
 st.caption("各模型在不同預測天期的 AUC、Per-Class AUC、Fold 穩定性與特徵重要度")
@@ -60,8 +61,34 @@ if rows:
     df = pd.DataFrame(rows)
     st.dataframe(df.style.background_gradient(subset=["AUC"], cmap="YlGn"), use_container_width=True, hide_index=True)
 
+    # Visual AUC bar chart
+    fig_auc = go.Figure()
+    colors = {"LIGHTGBM": "#636EFA", "XGBOOST": "#EF553B", "ENSEMBLE": "#00CC96"}
+    for r in rows:
+        fig_auc.add_trace(go.Bar(
+            x=[r["Engine"]], y=[r["AUC"]],
+            marker_color=colors.get(r["Engine"], "#AB63FA"),
+            text=[f"{r['AUC']:.4f}"], textposition="outside",
+            showlegend=False,
+        ))
+    fig_auc.update_layout(
+        title=f"D+{horizon} AUC-ROC",
+        yaxis_title="AUC", yaxis_range=[0.48, max(r["AUC"] for r in rows) + 0.02],
+        height=350, template="plotly_white",
+    )
+    fig_auc.add_hline(y=0.5, line_dash="dash", line_color="gray", annotation_text="Random Baseline")
+    st.plotly_chart(fig_auc, use_container_width=True)
+
 # ===== Per-Class AUC =====
+st.divider()
 st.subheader(f"D+{horizon} — Per-Class AUC 分析")
+st.markdown("""
+<div class="insight-box">
+<strong>為什麼看 Per-Class AUC？</strong>
+三分類問題中，整體 AUC 可能掩蓋個別類別的弱點。
+Per-Class AUC 分別衡量模型對 DOWN / FLAT / UP 的區辨能力。
+</div>
+""", unsafe_allow_html=True)
 
 per_class_rows = []
 for eng, res in model_data.items():
@@ -91,12 +118,13 @@ if per_class_rows:
     fig.add_hline(y=0.5, line_dash="dash", line_color="gray", annotation_text="Random")
     st.plotly_chart(fig, use_container_width=True)
 
-    with st.expander("Per-Class AUC 明細"):
+    with st.expander("📋 Per-Class AUC 逐 Fold 明細"):
         st.dataframe(df_pc.style.background_gradient(subset=["DOWN AUC", "FLAT AUC", "UP AUC"], cmap="RdYlGn"),
                      use_container_width=True, hide_index=True)
 
 # ===== Fold Stability =====
-st.subheader(f"D+{horizon} — Fold 穩定性")
+st.divider()
+st.subheader(f"D+{horizon} — Fold 穩定性趨勢")
 
 fold_rows = []
 for eng, res in model_data.items():
@@ -113,13 +141,28 @@ for eng, res in model_data.items():
 
 if fold_rows:
     df_fold = pd.DataFrame(fold_rows)
-    fig2 = px.line(df_fold, x="Fold", y="AUC", color="Engine", markers=True,
-                   title=f"D+{horizon} AUC across Folds", template="plotly_white")
-    fig2.add_hline(y=0.52, line_dash="dash", line_color="red", annotation_text="Quality Gate (0.52)")
-    fig2.update_layout(height=350)
-    st.plotly_chart(fig2, use_container_width=True)
+
+    f1, f2 = st.columns(2)
+    with f1:
+        fig2 = px.line(df_fold, x="Fold", y="AUC", color="Engine", markers=True,
+                       title=f"D+{horizon} AUC across Folds", template="plotly_white",
+                       color_discrete_map={"LIGHTGBM": "#636EFA", "XGBOOST": "#EF553B"})
+        fig2.add_hline(y=0.52, line_dash="dash", line_color="red", annotation_text="Quality Gate (0.52)")
+        fig2.update_layout(height=350)
+        st.plotly_chart(fig2, use_container_width=True)
+
+    with f2:
+        fig3 = px.line(df_fold, x="Fold", y="LogLoss", color="Engine", markers=True,
+                       title=f"D+{horizon} LogLoss across Folds", template="plotly_white",
+                       color_discrete_map={"LIGHTGBM": "#636EFA", "XGBOOST": "#EF553B"})
+        fig3.update_layout(height=350)
+        st.plotly_chart(fig3, use_container_width=True)
+
+    with st.expander("📋 Fold 明細"):
+        st.dataframe(df_fold, use_container_width=True, hide_index=True)
 
 # ===== Feature Importance =====
+st.divider()
 st.subheader(f"D+{horizon} — Top 特徵重要度")
 
 available_engines = [e for e in model_data.keys() if isinstance(model_data.get(e), dict) and "avg_metrics" in model_data.get(e, {})]
@@ -130,9 +173,12 @@ if available_engines:
         df_feat = pd.DataFrame(list(top_feats.items()), columns=["Feature", "Importance"])
         df_feat = df_feat.sort_values("Importance", ascending=True).tail(15)
 
-        fig3 = px.bar(df_feat, x="Importance", y="Feature", orientation="h",
+        fig4 = px.bar(df_feat, x="Importance", y="Feature", orientation="h",
                       color="Importance", color_continuous_scale="Blues",
                       title=f"{engine_sel.upper()} D+{horizon} Top-15 Features",
                       template="plotly_white")
-        fig3.update_layout(height=500, showlegend=False)
-        st.plotly_chart(fig3, use_container_width=True)
+        fig4.update_layout(height=500, showlegend=False, coloraxis_showscale=False)
+        st.plotly_chart(fig4, use_container_width=True)
+
+# ===== Footer =====
+st.markdown('<div class="page-footer">量化分析工作台 — Model Metrics | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)
