@@ -97,7 +97,10 @@ def derive_single_quarter(df: pd.DataFrame) -> pd.DataFrame:
     existing_cols = [c for c in cumulative_cols if c in df.columns]
 
     if not existing_cols:
-        logger.warning("No cumulative financial columns found.")
+        logger.error(
+            f"No cumulative financial columns found. "
+            f"Expected any of: {cumulative_cols}. Got columns: {list(df.columns[:20])}"
+        )
         return df
 
     df = df.sort_values(["company_id", "fiscal_year", "fiscal_quarter"]).reset_index(drop=True)
@@ -148,7 +151,11 @@ def derive_single_quarter(df: pd.DataFrame) -> pd.DataFrame:
     for col in existing_cols:
         both_valid = q1[col].notna() & q1[f"{col}_sq"].notna()
         if both_valid.any():
-            mismatch = (q1.loc[both_valid, col] != q1.loc[both_valid, f"{col}_sq"]).sum()
+            mismatch = (~np.isclose(
+                q1.loc[both_valid, col].values,
+                q1.loc[both_valid, f"{col}_sq"].values,
+                rtol=1e-6, equal_nan=True
+            )).sum()
             if mismatch > 0:
                 logger.warning(f"  Q1 mismatch in {col}: {mismatch} rows")
 
@@ -246,10 +253,10 @@ def compute_fundamental_ratios(df: pd.DataFrame) -> pd.DataFrame:
     # 毛利率（clip 至 [-1, 2] 避免離群值污染特徵）
     if "revenue_sq" in df.columns and "cost_of_revenue_sq" in df.columns:
         safe_rev = df["revenue_sq"].replace(0, np.nan)
-        df["gross_margin_sq"] = (
-            (df["revenue_sq"] - df["cost_of_revenue_sq"]) / safe_rev
-        ).clip(-1.0, 2.0)
-        logger.info(f"  gross_margin_sq: mean={df['gross_margin_sq'].mean():.4f}")
+        raw_margin = (df["revenue_sq"] - df["cost_of_revenue_sq"]) / safe_rev
+        n_clipped = ((raw_margin < -1.0) | (raw_margin > 2.0)).sum()
+        df["gross_margin_sq"] = raw_margin.clip(-1.0, 2.0)
+        logger.info(f"  gross_margin_sq: mean={df['gross_margin_sq'].mean():.4f}, clipped={n_clipped}")
 
     # 營業利益率（clip 至 [-2, 2] 容許虧損但壓制極端值）
     if "operating_income_sq" in df.columns and "revenue_sq" in df.columns:

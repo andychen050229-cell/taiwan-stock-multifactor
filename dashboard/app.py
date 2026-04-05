@@ -1,9 +1,10 @@
 """
 台灣股市多因子預測系統 — Landing Page（分流入口）
-Taiwan Stock Multi-Factor Prediction System
+固定歷史資料集下的台股多因子預測導向決策輔助系統
+Interactive Analysis & Research Showcase Platform
 
 兩條路徑：
-  1. 智慧選股看板 → 簡單易懂的選股推薦與公司基本面
+  1. 投資解讀面板 → 簡單易懂的投資判讀與公司基本面
   2. 量化研究工作台 → 進階模型指標、回測績效、特徵分析
 
 啟動方式：
@@ -13,6 +14,8 @@ Taiwan Stock Multi-Factor Prediction System
 import streamlit as st
 from pathlib import Path
 import plotly.graph_objects as go
+import json
+from datetime import datetime
 
 # ===== Page Config =====
 st.set_page_config(
@@ -67,11 +70,35 @@ st.markdown("""
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;
+        animation: slideInUp 0.6s ease-out;
     }
-    .path-card:hover {
-        border-color: #636EFA;
-        box-shadow: 0 8px 30px rgba(99, 110, 250, 0.15);
+    .path-card-beginner {
+        background: linear-gradient(135deg, #fffaf0 0%, #fff5eb 100%);
+        border-color: #fed7aa;
+    }
+    .path-card-beginner:hover {
+        border-color: #fb923c;
+        box-shadow: 0 8px 30px rgba(251, 146, 60, 0.15);
         transform: translateY(-4px);
+    }
+    .path-card-advanced {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-color: #7dd3fc;
+    }
+    .path-card-advanced:hover {
+        border-color: #0284c7;
+        box-shadow: 0 8px 30px rgba(2, 132, 199, 0.15);
+        transform: translateY(-4px);
+    }
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
     .path-icon {
         font-size: 3.5rem;
@@ -201,31 +228,81 @@ st.markdown("""
 # ===== Hero Section =====
 st.markdown("""
 <div class="hero-container">
-    <div class="hero-title">📈 台灣股市多因子預測系統</div>
+    <div class="hero-title">📈 台股多因子預測決策輔助系統</div>
     <div class="hero-subtitle">
-        Taiwan Stock Multi-Factor Prediction System<br>
-        運用機器學習，分析 1,932 家上市櫃公司的多維度因子，輔助投資決策
+        固定歷史資料集下的互動式分析與研究展示平台<br>
+        <em>以 2023/03 - 2025/03 台股資料為基礎，提供多種視角的投資決策參考</em>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
+# ===== Helper: Load KPIs from Latest Report =====
+@st.cache_data(ttl=3600)
+def load_kpis_from_report():
+    """Load KPIs from the latest phase2_report JSON with fallback to hardcoded values."""
+    try:
+        # Find the latest report
+        report_dir = Path(__file__).parent.parent / "outputs" / "reports"
+        report_files = list(report_dir.glob("phase2_report_*.json"))
+        if not report_files:
+            raise FileNotFoundError("No phase2_report files found")
+
+        latest_report = sorted(report_files, key=lambda p: p.stat().st_mtime, reverse=True)[0]
+
+        with open(latest_report, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        # Extract KPIs
+        rows = data.get("results", {}).get("feature_store", {}).get("rows", 948976)
+        cols = data.get("results", {}).get("feature_store", {}).get("cols", 59)
+        n_selected = len(data.get("results", {}).get("feature_selection", {}).get("selected", []))
+        n_folds = data.get("results", {}).get("walk_forward", {}).get("n_folds", 4)
+
+        quality_gates = data.get("quality_gates", {})
+        gates_passed = sum(1 for v in quality_gates.values() if v is True or v == "True")
+        total_gates = len(quality_gates)
+
+        return {
+            "rows": f"{rows:,}",
+            "cols": cols,
+            "n_selected": n_selected,
+            "gates_passed": gates_passed,
+            "total_gates": total_gates,
+            "date_range": data.get("results", {}).get("feature_store", {}).get("date_range", "2023/03 - 2025/03"),
+            "report_timestamp": data.get("timestamp", "")
+        }
+    except Exception as e:
+        # Fallback to hardcoded values
+        st.warning(f"Could not load report data: {e}. Using default values.")
+        return {
+            "rows": "948,976",
+            "cols": 59,
+            "n_selected": 23,
+            "gates_passed": 7,
+            "total_gates": 7,
+            "date_range": "2023/03 - 2025/03",
+            "report_timestamp": ""
+        }
+
+kpis = load_kpis_from_report()
+
 # ===== System Stats =====
-st.markdown("""
+st.markdown(f"""
 <div class="stat-row">
     <div class="stat-item">
-        <div class="stat-value">1,932</div>
-        <div class="stat-label">上市櫃公司</div>
+        <div class="stat-value">{kpis['rows']}</div>
+        <div class="stat-label">樣本資料點</div>
     </div>
     <div class="stat-item">
-        <div class="stat-value">23</div>
-        <div class="stat-label">分析因子</div>
+        <div class="stat-value">{kpis['n_selected']}</div>
+        <div class="stat-label">篩選特徵因子</div>
     </div>
     <div class="stat-item">
         <div class="stat-value">3</div>
         <div class="stat-label">預測週期</div>
     </div>
     <div class="stat-item">
-        <div class="stat-value">7/7</div>
+        <div class="stat-value">{kpis['gates_passed']}/{kpis['total_gates']}</div>
         <div class="stat-label">品質門控通過</div>
     </div>
 </div>
@@ -234,9 +311,20 @@ st.markdown("""
 # ===== Data Freshness Notice =====
 st.markdown("""
 <div class="freshness-box">
-<strong>📅 資料時效</strong>：本系統基於 2023/03 至 2025/03 的歷史數據，來源為課堂提供數據集 + FinMind API。非即時數據，用於研究和回測分析。
+<strong>📅 資料時效說明</strong>：本平台為固定歷史資料集（2023/03 至 2025/03）下的互動式分析與研究展示系統，<br>可依不同日期與預測週期回看模型判讀與策略表現。非即時市場監控系統。
 </div>
 """, unsafe_allow_html=True)
+
+st.markdown("")
+
+# ===== Dual-Panel Narrative =====
+st.markdown("""
+#### 📚 兩種閱讀模式
+
+本平台基於同一套台股多因子研究引擎，提供兩種閱讀模式：
+- **投資解讀面板**：協助理解投資意涵的決策資訊呈現
+- **量化研究工作台**：完整呈現模型指標、回測與研究證據的專業視角
+""")
 
 st.markdown("")
 
@@ -245,32 +333,32 @@ col_left, col_space, col_right = st.columns([5, 1, 5])
 
 with col_left:
     st.markdown("""
-<div class="path-card">
+<div class="path-card path-card-beginner">
     <div class="path-icon">🌱</div>
-    <div class="path-title">智慧選股看板</div>
+    <div class="path-title">投資解讀面板</div>
     <div class="path-desc">
-        為投資新手設計。每期精選推薦股票，搭配公司基本面介紹、交易成本試算、風險提示。看得懂、買得安心，不再盲目跟風。
+        將研究結果翻譯成投資人可理解的決策資訊。可回看不同日期、不同預測週期下的模型判讀與策略表現。
     </div>
     <div class="path-tags">
-        <span class="path-tag">精選推薦</span>
-        <span class="path-tag">公司介紹</span>
-        <span class="path-tag">成本試算</span>
+        <span class="path-tag">歷史判讀</span>
+        <span class="path-tag">公司輪廓</span>
+        <span class="path-tag">成本分析</span>
         <span class="path-tag">風險提示</span>
-        <span class="path-tag">基本面分析</span>
+        <span class="path-tag">基本面</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-    if st.button("🌱  進入智慧選股看板", use_container_width=True, type="primary"):
-        st.switch_page("pages/0_🌱_智慧選股看板.py")
+    if st.button("🌱  進入投資解讀面板", use_container_width=True, type="primary"):
+        st.switch_page("pages/0_🌱_投資解讀面板.py")
 
 with col_right:
     st.markdown("""
-<div class="path-card">
+<div class="path-card path-card-advanced">
     <div class="path-icon">⚙️</div>
     <div class="path-title">量化研究工作台</div>
     <div class="path-desc">
-        為量化研究者和進階投資人設計。完整的模型指標、ICIR 信號分析、多情境回測績效、特徵重要度與工程過程。
+        面向教授、評審與量化研究者。完整呈現研究流程、方法論、模型指標與驗證結果。
     </div>
     <div class="path-tags">
         <span class="path-tag path-tag-green">模型指標</span>
@@ -282,12 +370,51 @@ with col_right:
 </div>
 """, unsafe_allow_html=True)
 
-    if st.button("⚙️  進入量化工作台", use_container_width=True, type="secondary"):
+    if st.button("⚙️  進入量化研究工作台", use_container_width=True, type="secondary"):
         st.switch_page("pages/1_📊_Model_Metrics.py")
 
 
-# ===== Brief Methodology =====
+# ===== Phase Boundary Section =====
 st.markdown("")
+st.divider()
+
+st.markdown("#### 🎯 研究階段進展")
+
+phase_col1, phase_col2, phase_col3 = st.columns(3)
+
+with phase_col1:
+    st.markdown("""
+<div class="methodology-box" style="background: #f0fdf4; border-left: 4px solid #22c55e;">
+    <div class="methodology-title">✅ Phase 1: 資料處理與特徵工程</div>
+    <div class="methodology-desc" style="font-size: 0.85rem; color: #166534;">
+        五支柱特徵工程 | 43 → 23 特徵篩選 | 已完成
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+with phase_col2:
+    st.markdown("""
+<div class="methodology-box" style="background: #f0fdf4; border-left: 4px solid #22c55e;">
+    <div class="methodology-title">✅ Phase 2: 模型訓練與回測驗證</div>
+    <div class="methodology-desc" style="font-size: 0.85rem; color: #166534;">
+        雙引擎 | Purged Walk-Forward CV | 已完成
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+with phase_col3:
+    st.markdown("""
+<div class="methodology-box" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+    <div class="methodology-title">🔄 Phase 3: 模型治理與風控強化</div>
+    <div class="methodology-desc" style="font-size: 0.85rem; color: #92400e;">
+        監控與維護 | 規劃中
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("")
+
+# ===== Brief Methodology =====
 st.divider()
 
 st.markdown("#### 🔧 系統方法論")
@@ -329,26 +456,53 @@ with m3:
 st.markdown("")
 st.markdown("#### 📊 系統管道流程")
 
-# Create a simple pipeline flow with Plotly
+# Create a pipeline flow with Plotly and phase labels
 fig = go.Figure()
 
-# Define 6 pipeline stages
-stages = ["FinMind API", "Feature Store", "特徵篩選", "模型訓練", "策略回測", "儀表板"]
+# Define 6 pipeline stages with phase assignments
+stages = [
+    ("FinMind API", "Phase 1"),
+    ("Feature Store", "Phase 1"),
+    ("特徵篩選", "Phase 1"),
+    ("模型訓練", "Phase 2"),
+    ("策略回測", "Phase 2"),
+    ("儀表板", "用戶界面")
+]
 x_positions = list(range(len(stages)))
 
-# Add stage nodes
-for i, stage in enumerate(stages):
+# Color mapping for phases
+phase_colors = {
+    "Phase 1": "#10b981",
+    "Phase 2": "#10b981",
+    "用戶界面": "#636EFA"
+}
+
+# Add stage nodes with phase colors
+for i, (stage, phase) in enumerate(stages):
+    color = phase_colors.get(phase, "#636EFA")
     fig.add_trace(go.Scatter(
         x=[i],
         y=[0],
         mode='markers+text',
-        marker=dict(size=20, color='#636EFA'),
+        marker=dict(size=18, color=color),
         text=stage,
         textposition="top center",
         hoverinfo='text',
-        hovertext=stage,
+        hovertext=f"{stage} ({phase})",
         showlegend=False
     ))
+
+# Add phase labels below
+for i, (stage, phase) in enumerate(stages):
+    fig.add_annotation(
+        x=i,
+        y=-0.4,
+        text=phase,
+        showarrow=False,
+        font=dict(size=9, color='#6b7280'),
+        xref='x',
+        yref='y'
+    )
 
 # Add arrows between stages
 for i in range(len(stages) - 1):
@@ -381,12 +535,12 @@ fig.update_layout(
         showgrid=False,
         zeroline=False,
         showticklabels=False,
-        range=[-1, 1]
+        range=[-0.7, 1]
     ),
     plot_bgcolor='rgba(0,0,0,0)',
     paper_bgcolor='rgba(0,0,0,0)',
-    height=150,
-    margin=dict(l=20, r=20, t=50, b=20)
+    height=180,
+    margin=dict(l=20, r=20, t=60, b=40)
 )
 
 st.plotly_chart(fig, use_container_width=True)
@@ -395,16 +549,19 @@ st.plotly_chart(fig, use_container_width=True)
 # ===== Disclaimer =====
 st.markdown("""
 <div class="warning-box">
-⚠️ <strong>免責聲明</strong>：本系統僅供學術研究與教學用途，不構成任何投資建議。
+⚠️ <strong>免責聲明</strong>：本系統為課程專案成果，不構成任何投資建議。所有顯示結果均為歷史回測數據，非即時預測。
 股市投資有風險，過去的回測績效不代表未來報酬。投資前請審慎評估自身風險承受能力。
 </div>
 """, unsafe_allow_html=True)
 
 
 # ===== Footer =====
-st.markdown("""
+footer_year = datetime.now().year
+st.markdown(f"""
 <div class="landing-footer">
-    大數據與商業分析專案 &nbsp;|&nbsp; Built with Streamlit & Plotly &nbsp;|&nbsp;
-    Data: FinMind API + 課堂數據 &nbsp;|&nbsp; Models: LightGBM + XGBoost
+    大數據與商業分析專案 (v2.0) &nbsp;|&nbsp; Built with Streamlit & Plotly &nbsp;|&nbsp;
+    Data: FinMind API + 課堂數據集 &nbsp;|&nbsp; Models: LightGBM + XGBoost<br>
+    <small>© {footer_year} Course Project &nbsp;|&nbsp;
+    <a href="https://github.com/your-org/taiwan-stock-prediction" target="_blank" style="color: #636EFA; text-decoration: none;">GitHub Repository</a></small>
 </div>
 """, unsafe_allow_html=True)

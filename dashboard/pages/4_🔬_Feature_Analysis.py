@@ -19,6 +19,13 @@ load_report = _utils.load_report
 st.set_page_config(page_title="Feature Analysis | 量化分析工作台", page_icon="🔬", layout="wide")
 inject_custom_css()
 
+# Data Context Banner
+st.markdown("""
+<div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e; margin-bottom:20px;">
+📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）｜Purged Walk-Forward CV（4 Folds）｜LightGBM + XGBoost Ensemble
+</div>
+""", unsafe_allow_html=True)
+
 try:
     report, report_name = load_report()
     results = report["results"]
@@ -159,6 +166,13 @@ except Exception as e:
                         feat_str += f", ... ({len(feats)-5} 更多)"
                     st.markdown(feat_str)
                     st.markdown("")
+
+        st.markdown("""
+        <div class="insight-box">
+        <strong>📌 跨折穩定性 | Cross-Fold Stability：</strong>
+        特徵篩選的穩定性直接影響模型的 generalization 能力。Jaccard 相似度 ≥ 0.3 表示核心特徵在不同訓練折次間保持一致性。
+        </div>
+        """, unsafe_allow_html=True)
 
     # ===== Cross-Horizon Feature Importance =====
     st.divider()
@@ -416,5 +430,8 @@ try:
 except Exception as e:
     st.warning(f"Quintile 分析失敗：{str(e)}")
 
-# ===== Footer =====
+# ===== Footer & Limitations =====
+st.markdown("---")
+st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ 部分治理功能屬 Phase 3 規劃")
+
 st.markdown('<div class="page-footer">量化分析工作台 — Feature Analysis | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)

@@ -71,11 +71,11 @@ def build_trend_features(df: pd.DataFrame, config: dict) -> pd.DataFrame:
     # Momentum（N日報酬率）
     for n in [5, 10, 20]:
         df[f"trend_momentum_{n}"] = df.groupby(ticker_col)[close_col].transform(
-            lambda x: x.pct_change(n, fill_method=None)
+            lambda x: x.pct_change(n)
         )
 
     # 滾動波動率
-    daily_ret = df.groupby(ticker_col)[close_col].pct_change(fill_method=None)
+    daily_ret = df.groupby(ticker_col)[close_col].pct_change()
     for window in [20, 60]:
         df[f"trend_volatility_{window}"] = daily_ret.groupby(df[ticker_col]).transform(
             lambda x: x.rolling(window, min_periods=max(10, window // 3)).std()
@@ -389,19 +389,22 @@ def build_risk_features(df: pd.DataFrame, config: dict) -> pd.DataFrame:
                              labels=[0, 1, 2], include_lowest=True)
         )
     else:
-        # 如果 trend 還沒算，自己算
-        daily_ret = df.groupby(ticker_col)[close_col].pct_change(fill_method=None)
+        # 如果 trend 還沒算，自己算 60 日波動率再分位
+        daily_ret = df.groupby(ticker_col)[close_col].pct_change()
         vol_60 = daily_ret.groupby(df[ticker_col]).transform(
             lambda x: x.rolling(60, min_periods=20).std()
         )
-        df["risk_volatility_regime"] = df.groupby(ticker_col)[close_col].transform(
-            lambda _: pd.cut(vol_60.rank(pct=True), bins=[0, 0.33, 0.67, 1.0],
+        # 先存入 df，再以 groupby + transform 做個股內排名（避免跨股票共用排名）
+        df["_vol_60_tmp"] = vol_60
+        df["risk_volatility_regime"] = df.groupby(ticker_col)["_vol_60_tmp"].transform(
+            lambda x: pd.cut(x.rank(pct=True), bins=[0, 0.33, 0.67, 1.0],
                              labels=[0, 1, 2], include_lowest=True)
         )
+        df.drop(columns=["_vol_60_tmp"], inplace=True)
 
     # 大盤報酬（跨公司的平均日報酬，20 日滾動）
     # 過濾掉 Inf/NaN 並裁切極端值，避免停牌/異常股污染大盤指標
-    daily_ret_all = df.groupby(ticker_col)[close_col].pct_change(fill_method=None)
+    daily_ret_all = df.groupby(ticker_col)[close_col].pct_change()
     daily_ret_clean = daily_ret_all.replace([np.inf, -np.inf], np.nan).clip(-0.5, 0.5)
     market_ret = daily_ret_clean.groupby(df[date_col]).mean()
     market_ret_20 = market_ret.rolling(20, min_periods=10).mean()

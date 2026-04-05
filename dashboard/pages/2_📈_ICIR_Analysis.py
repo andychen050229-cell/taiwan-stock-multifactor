@@ -19,6 +19,13 @@ load_report = _utils.load_report
 st.set_page_config(page_title="ICIR Analysis | 量化分析工作台", page_icon="📈", layout="wide")
 inject_custom_css()
 
+# Data Context Banner
+st.markdown("""
+<div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e; margin-bottom:20px;">
+📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）｜Purged Walk-Forward CV（4 Folds）｜LightGBM + XGBoost Ensemble
+</div>
+""", unsafe_allow_html=True)
+
 try:
     report, report_name = load_report()
     results = report["results"]
@@ -136,6 +143,8 @@ try:
         st.subheader("📈 IC 分布直方圖 | IC Distribution")
         st.caption("Daily Rank IC 分佈特徵 — 評估信號的穩定性與偏度")
 
+        st.warning("⚠️ 以下圖表使用模擬數據（np.random）作為示意，非正式回測輸出。正式 IC/ICIR 數據請參考 Phase 2 報告。")
+
         dist_col1, dist_col2 = st.columns(2)
 
         # Simulated IC distribution (in real case, would load from data)
@@ -212,6 +221,8 @@ try:
         st.divider()
         st.subheader("⏰ 滾動 ICIR 趨勢 | Rolling ICIR Evolution")
         st.caption("ICIR 在時間上的變化 — 反映信號穩定性的動態")
+
+        st.warning("⚠️ 以下滾動趨勢圖使用模擬數據（np.random）作為示意，非正式回測輸出。正式 IC/ICIR 數據請參考 Phase 2 報告。")
 
         # Simulate rolling ICIR
         dates = pd.date_range('2023-03-01', '2025-03-01', freq='D')
@@ -341,5 +352,8 @@ try:
 except Exception as e:
     st.error(f"ICIR 分析發生錯誤：{str(e)}")
 
-# ===== Footer =====
+# ===== Footer & Limitations =====
+st.markdown("---")
+st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ 部分治理功能屬 Phase 3 規劃")
+
 st.markdown('<div class="page-footer">量化分析工作台 — ICIR Analysis | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)

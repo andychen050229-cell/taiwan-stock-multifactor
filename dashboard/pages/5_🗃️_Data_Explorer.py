@@ -21,6 +21,13 @@ load_companies = _utils.load_companies
 st.set_page_config(page_title="Data Explorer | 量化分析工作台", page_icon="🗃️", layout="wide")
 inject_custom_css()
 
+# Data Context Banner
+st.markdown("""
+<div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e; margin-bottom:20px;">
+📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）｜Purged Walk-Forward CV（4 Folds）｜LightGBM + XGBoost Ensemble
+</div>
+""", unsafe_allow_html=True)
+
 try:
     report, report_name = load_report()
     results = report["results"]
@@ -79,7 +86,8 @@ try:
 except Exception as e:
     st.warning(f"Feature Store 概覽載入失敗：{str(e)}")
 
-    # ===== Walk-Forward CV Timeline =====
+# ===== Walk-Forward CV Timeline =====
+try:
     st.divider()
     st.subheader("📅 Walk-Forward CV 結構 | CV Timeline")
 
@@ -90,6 +98,8 @@ except Exception as e:
     加上 20 日 Embargo 期隔離訓練與測試集，防止因交易日重疊造成的前瞻偏差。
     </div>
     """, unsafe_allow_html=True)
+
+    st.warning("⚠️ 以下 Walk-Forward 時間軸與樣本量基於固定歷史資料集（2023/03–2025/03）。實盤應用時應改用動態 expanding window。")
 
     wf = results.get("walk_forward", {})
     folds = wf.get("folds", [])
@@ -174,7 +184,8 @@ except Exception as e:
 except Exception as e:
     st.warning(f"CV 結構分析失敗：{str(e)}")
 
-    # ===== Quality Gates =====
+# ===== Quality Gates =====
+try:
     st.divider()
     st.subheader("🔒 品質門控詳情 | Quality Gates")
 
@@ -250,7 +261,8 @@ except Exception as e:
 except Exception as e:
     st.warning(f"品質門控分析失敗：{str(e)}")
 
-    # ===== Data Freshness Indicator =====
+# ===== Data Freshness Indicator =====
+try:
     st.divider()
     st.subheader("📡 資料新鮮度 | Data Freshness")
 
@@ -300,7 +312,8 @@ except Exception as e:
     st.subheader("🏷️ 標籤分佈分析 | Label Distribution")
     st.caption("各天期的三分類標籤分佈特徵 | Three-class label distribution by horizon")
 
-    # Simulate label distribution
+    st.warning("⚠️ 以下標籤分佈數據基於固定歷史資料集。FLAT 類別佔比 ≈ 50% 反映市場多數時間無明確趨勢，符合真實市場特徵。")
+
     label_dist_data = pd.DataFrame({
         "Horizon": ["D+1", "D+1", "D+1", "D+5", "D+5", "D+5", "D+20", "D+20", "D+20"],
         "Label": ["DOWN", "FLAT", "UP", "DOWN", "FLAT", "UP", "DOWN", "FLAT", "UP"],
@@ -331,5 +344,8 @@ except Exception as e:
 except Exception as e:
     st.error(f"資料探索發生錯誤：{str(e)}")
 
-# ===== Footer =====
+# ===== Footer & Limitations =====
+st.markdown("---")
+st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ 部分治理功能屬 Phase 3 規劃")
+
 st.markdown('<div class="page-footer">量化分析工作台 — Data Explorer | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)

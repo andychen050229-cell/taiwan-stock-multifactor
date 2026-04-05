@@ -18,6 +18,13 @@ load_report = _utils.load_report
 st.set_page_config(page_title="Model Metrics | 量化分析工作台", page_icon="📊", layout="wide")
 inject_custom_css()
 
+# Data Context Banner
+st.markdown("""
+<div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e; margin-bottom:20px;">
+📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）｜Purged Walk-Forward CV（4 Folds）｜LightGBM + XGBoost Ensemble
+</div>
+""", unsafe_allow_html=True)
+
 try:
     report, report_name = load_report()
     results = report["results"]
@@ -220,7 +227,8 @@ try:
         st.markdown("""
         <div class="insight-box">
         <strong>💡 洞察 | Insight：</strong>
-        AUC > 0.52 表示模型優於隨機預測，超越品質門檻。ENSEMBLE 通常結合個別模型優勢，實現更穩定的預測。
+        AUC > 0.52 表示模型優於隨機預測，超越品質門檻。ENSEMBLE 通常結合個別模型優勢，實現更穩定的預測。<br>
+        <strong>✅ 應用建議：</strong> 在 <strong>月度頻率（D+20）</strong> 策略部署；D+1/D+5 信號品質不足，不推薦實盤使用。
         </div>
         """, unsafe_allow_html=True)
 except Exception as e:
@@ -433,5 +441,8 @@ try:
 except Exception as e:
     st.warning(f"特徵重要度分析失敗：{str(e)}")
 
-# ===== Footer =====
+# ===== Footer & Limitations =====
+st.markdown("---")
+st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ 部分治理功能屬 Phase 3 規劃")
+
 st.markdown('<div class="page-footer">量化分析工作台 — Model Metrics | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)

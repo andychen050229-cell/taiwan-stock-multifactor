@@ -40,3 +40,11 @@ Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Claude workspace
+.claude/
+
+# Uploaded reference docs (not part of codebase)
+Code_Audit_Report_Phase2_20260406.docx
+taiwan_stock_multifactor_dashboard_revision_spec.md
+outputs/AUDIT_REPORT_20260405.md

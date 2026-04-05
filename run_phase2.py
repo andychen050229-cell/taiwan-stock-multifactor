@@ -149,11 +149,25 @@ def main():
         "nan_pct": round(nan_pct, 4),
     }
 
-    # ===== Step 3: 特徵選擇 =====
-    log.info("\n[Step 3/14] Feature selection...")
+    # ===== Step 3: Walk-Forward 切分（先於特徵選擇，提供 train_idx）=====
+    log.info("\n[Step 3/14] Walk-forward time series split...")
 
-    # 以 label_5 作為特徵選擇的代表標籤（中間尺度）
-    selection_result = run_feature_selection(fs, "label_5", config)
+    folds = generate_walk_forward_splits(fs, date_col="trade_date", config=config)
+    fold_summary = get_fold_summary(folds)
+    report["results"]["walk_forward"] = fold_summary
+
+    if len(folds) == 0:
+        log.error("  No valid folds generated! Check data date range and config.")
+        sys.exit(1)
+
+    # ===== Step 4: 特徵選擇（使用第一個 fold 的訓練集，防止洩漏）=====
+    log.info("\n[Step 4/14] Feature selection (using Fold 0 train set only)...")
+
+    # 使用第一個 fold 的訓練索引進行特徵選擇，確保不使用未來資料
+    first_fold_train_idx = folds[0].train_idx
+    selection_result = run_feature_selection(
+        fs, "label_5", config, train_idx=first_fold_train_idx
+    )
     selected_features = selection_result["selected_features"]
 
     # 驗證所有選出的特徵確實存在於 Feature Store
@@ -169,17 +183,6 @@ def main():
         "after_vif": len(selection_result["after_vif"]),
         "selected": selected_features,
     }
-
-    # ===== Step 4: Walk-Forward 切分 =====
-    log.info("\n[Step 4/14] Walk-forward time series split...")
-
-    folds = generate_walk_forward_splits(fs, date_col="trade_date", config=config)
-    fold_summary = get_fold_summary(folds)
-    report["results"]["walk_forward"] = fold_summary
-
-    if len(folds) == 0:
-        log.error("  No valid folds generated! Check data date range and config.")
-        sys.exit(1)
 
     # ===== Step 5-7: 三個 Horizon 分別訓練 =====
     all_horizon_results = {}

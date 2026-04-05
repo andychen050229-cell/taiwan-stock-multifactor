@@ -43,9 +43,17 @@ def select_by_mutual_info(
     label_col: str,
     feature_cols: list,
     config: dict,
+    train_idx: np.ndarray | None = None,
 ) -> tuple:
     """
     以 Mutual Information 篩選與目標最相關的特徵。
+
+    Args:
+        df: 完整 DataFrame
+        label_col: 標籤欄位名稱
+        feature_cols: 候選特徵欄位列表
+        config: 設定字典
+        train_idx: 訓練集索引（防止資料洩漏）。若提供，僅使用訓練集計算 MI。
 
     Returns:
         (selected_cols: list, mi_scores: pd.Series)
@@ -54,9 +62,17 @@ def select_by_mutual_info(
         "mi_threshold_percentile", 25
     )
 
+    # 若有提供 train_idx，僅使用訓練集資料（防止測試集洩漏）
+    if train_idx is not None:
+        subset = df.iloc[train_idx]
+        logger.info(f"  MI: using training subset only ({len(subset):,} rows)")
+    else:
+        subset = df
+        logger.warning("  MI: no train_idx provided — using full data (potential leakage)")
+
     # 取樣以加速 — 使用時序尾段（保留時序結構，避免 random 破壞自相關）
-    sample_n = min(100_000, len(df))
-    sample = df.tail(sample_n)
+    sample_n = min(100_000, len(subset))
+    sample = subset.tail(sample_n)
 
     # 明確對齊 X, y — 先建 valid mask 再切片
     valid_mask = sample[label_col].notna() & (~sample[feature_cols].isna().all(axis=1))
@@ -87,9 +103,16 @@ def remove_high_vif(
     df: pd.DataFrame,
     feature_cols: list,
     config: dict,
+    train_idx: np.ndarray | None = None,
 ) -> list:
     """
     迭代移除 VIF > 閾值的特徵，降低多重共線性。
+
+    Args:
+        df: 完整 DataFrame
+        feature_cols: 候選特徵欄位列表
+        config: 設定字典
+        train_idx: 訓練集索引（防止資料洩漏）。若提供，僅使用訓練集計算 VIF。
 
     Returns:
         remaining_cols: list
@@ -99,9 +122,17 @@ def remove_high_vif(
         "rfecv_min_features", 30
     )
 
+    # 若有提供 train_idx，僅使用訓練集資料（防止測試集洩漏）
+    if train_idx is not None:
+        subset = df.iloc[train_idx]
+        logger.info(f"  VIF: using training subset only ({len(subset):,} rows)")
+    else:
+        subset = df
+        logger.warning("  VIF: no train_idx provided — using full data (potential leakage)")
+
     # 取樣加速（時序尾段）+ 標準化確保 VIF 數值穩定
-    sample_n = min(50_000, len(df))
-    raw_sample = df[feature_cols].tail(sample_n).fillna(0)
+    sample_n = min(50_000, len(subset))
+    raw_sample = subset[feature_cols].tail(sample_n).fillna(0)
     scaler = StandardScaler()
     sample_scaled = pd.DataFrame(
         scaler.fit_transform(raw_sample), columns=feature_cols, index=raw_sample.index
@@ -202,9 +233,18 @@ def run_feature_selection(
     df: pd.DataFrame,
     label_col: str,
     config: dict,
+    train_idx: np.ndarray | None = None,
 ) -> dict:
     """
     特徵選擇主流程（MI → VIF）。
+
+    Args:
+        df: 完整 DataFrame
+        label_col: 標籤欄位名稱
+        config: 設定字典
+        train_idx: 訓練集索引（防止資料洩漏）。
+                   應傳入第一個 fold 的訓練集索引，確保特徵篩選
+                   僅使用訓練資料，不會洩漏測試集統計量。
 
     Returns:
         dict with selected_features, mi_scores, etc.
@@ -212,11 +252,13 @@ def run_feature_selection(
     feature_cols = _get_feature_cols(df)
     logger.info(f"Feature selection: {len(feature_cols)} candidate features")
 
-    # Stage 1: MI
-    mi_selected, mi_scores = select_by_mutual_info(df, label_col, feature_cols, config)
+    # Stage 1: MI（僅使用訓練集）
+    mi_selected, mi_scores = select_by_mutual_info(
+        df, label_col, feature_cols, config, train_idx=train_idx
+    )
 
-    # Stage 2: VIF
-    vif_selected = remove_high_vif(df, mi_selected, config)
+    # Stage 2: VIF（僅使用訓練集）
+    vif_selected = remove_high_vif(df, mi_selected, config, train_idx=train_idx)
 
     return {
         "all_features": feature_cols,

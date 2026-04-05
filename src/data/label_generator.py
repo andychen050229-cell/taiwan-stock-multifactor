@@ -143,7 +143,7 @@ def classify_dynamic_threshold(df: pd.DataFrame, config: dict = None) -> pd.Data
     if df[close_col].dtype == "object":
         df[close_col] = pd.to_numeric(df[close_col], errors="coerce")
 
-    df["_daily_ret"] = df.groupby(ticker_col)[close_col].pct_change(fill_method=None)
+    df["_daily_ret"] = df.groupby(ticker_col)[close_col].pct_change()
     df["_vol"] = df.groupby(ticker_col)["_daily_ret"].transform(
         lambda x: x.rolling(vol_window, min_periods=max(20, vol_window // 3)).std()
     )

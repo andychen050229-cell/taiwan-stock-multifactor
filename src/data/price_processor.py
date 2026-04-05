@@ -219,7 +219,7 @@ def verify_ex_dividend(df: pd.DataFrame, config: dict) -> dict:
     df = df.sort_values([ticker_col, date_col]).reset_index(drop=True)
 
     # 計算日報酬率
-    df["_daily_return"] = df.groupby(ticker_col)[close_col].pct_change(fill_method=None)
+    df["_daily_return"] = df.groupby(ticker_col)[close_col].pct_change()
 
     # --- Step 1: 跳空缺口偵測 ---
     logger.info("Step 1/5: 跳空缺口偵測...")
@@ -338,7 +338,7 @@ def detect_limit_moves(df: pd.DataFrame) -> pd.DataFrame:
         df[close_col] = pd.to_numeric(df[close_col], errors="coerce")
 
     df = df.sort_values([ticker_col, date_col]).reset_index(drop=True)
-    daily_ret = df.groupby(ticker_col)[close_col].pct_change(fill_method=None)
+    daily_ret = df.groupby(ticker_col)[close_col].pct_change()
 
     # 漲跌停判定：±9.5% ~ ±10.5%（含四捨五入容差）
     df["_is_limit_up"] = daily_ret >= 0.095

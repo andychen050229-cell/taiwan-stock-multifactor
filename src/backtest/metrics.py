@@ -34,18 +34,23 @@ def annualized_return(daily_returns: pd.Series, trading_days: int = 252) -> floa
 
 def sharpe_ratio(daily_returns: pd.Series, rf: float = 0.0, trading_days: int = 252) -> float:
     """年化 Sharpe Ratio。"""
-    excess = daily_returns - rf / trading_days
-    if excess.std() == 0:
+    if len(daily_returns) < 2:
         return 0.0
-    return float(excess.mean() / excess.std() * np.sqrt(trading_days))
+    excess = daily_returns - rf / trading_days
+    std = excess.std()
+    if std == 0 or np.isnan(std):
+        return 0.0
+    return float(excess.mean() / std * np.sqrt(trading_days))
 
 
 def sortino_ratio(daily_returns: pd.Series, rf: float = 0.0, trading_days: int = 252) -> float:
     """年化 Sortino Ratio（下行偏差 = sqrt(mean(min(r-rf, 0)^2))）。"""
+    if len(daily_returns) < 2:
+        return 0.0
     excess = daily_returns - rf / trading_days
     downside_diff = np.minimum(excess, 0)
     downside_dev = np.sqrt(np.mean(downside_diff ** 2))
-    if downside_dev == 0:
+    if downside_dev == 0 or np.isnan(downside_dev):
         return 0.0
     return float(excess.mean() / downside_dev * np.sqrt(trading_days))
 
@@ -359,6 +364,8 @@ def compute_drawdown_analysis(daily_returns: pd.Series) -> dict:
             continue
 
         trough_idx = dd_period.idxmin()
+        if pd.isna(trough_idx):
+            continue
         trough_depth = float(dd_period.min())
 
         # 從低谷到完全恢復

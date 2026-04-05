@@ -74,7 +74,7 @@ def run_backtest(
 
     # 預計算每支股票的日報酬
     df = df.sort_values([ticker_col, date_col]).copy()
-    df["_daily_ret"] = df.groupby(ticker_col)[close_col].pct_change(fill_method=None)
+    df["_daily_ret"] = df.groupby(ticker_col)[close_col].pct_change()
 
     # === 漲跌停偵測：排除觸及漲跌停的股票（可能無法成交）===
     PRICE_LIMIT = 0.095  # 略低於 10% 以容忍浮點誤差
@@ -217,18 +217,31 @@ def run_backtest(
         logger.info(f"  Actual avg turnover: {avg_turnover:.1%} (n_rebalances={len(actual_turnovers)})")
 
         # === 不同成本情境 ===
+        # 識別換倉日（每 horizon 個交易日的第一天扣除成本）
+        rebalance_dates = set()
+        for fold in folds:
+            test_idx = fold.test_idx
+            test_df_fold = df.iloc[test_idx]
+            test_dates_fold = sorted(test_df_fold[date_col].dropna().unique())
+            rb_points = list(range(0, len(test_dates_fold), max(horizon, 1)))
+            for rb_i in rb_points:
+                if rb_i + 1 < len(test_dates_fold):
+                    # 成本在持倉開始日扣除（rb_date 的下一個交易日）
+                    rebalance_dates.add(test_dates_fold[min(rb_i + 1, len(test_dates_fold) - 1)])
+
         engine_results = {}
         for cost_name, cost_params in cost_models.items():
             rt_cost = _round_trip_cost(cost_params)
 
-            # 成本：使用實際換手率（非固定 50%）
+            # 成本僅在換倉日一次性扣除（乘法扣除，非均攤）
             cost_per_rebalance = rt_cost * avg_turnover
-            holding_days = max(horizon, 1)
-            daily_cost = cost_per_rebalance / holding_days
+            net_returns = raw_returns.copy()
+            for rd in rebalance_dates:
+                if rd in net_returns.index:
+                    net_returns.loc[rd] -= cost_per_rebalance
 
-            net_returns = raw_returns - daily_cost
             metrics = compute_strategy_metrics(net_returns)
-            metrics["daily_cost"] = round(daily_cost, 6)
+            metrics["cost_per_rebalance"] = round(cost_per_rebalance, 6)
             metrics["cost_model"] = cost_name
             metrics["n_rebalances"] = n_rebalances
 
@@ -299,7 +312,7 @@ def compute_benchmark(
     test_df = df[df[date_col].isin(all_test_dates)].copy()
     test_df = test_df.sort_values([ticker_col, date_col])
 
-    daily_ret = test_df.groupby(ticker_col)[close_col].pct_change(fill_method=None)
+    daily_ret = test_df.groupby(ticker_col)[close_col].pct_change()
     market_daily = daily_ret.groupby(test_df[date_col]).mean().sort_index().dropna()
 
     metrics = compute_strategy_metrics(market_daily)
