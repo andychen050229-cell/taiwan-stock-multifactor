@@ -35,6 +35,11 @@ except Exception as e:
 st.title("📊 模型指標分析")
 st.caption("模型在各 Fold 的 AUC、LogLoss 表現，以及雙引擎（LightGBM + XGBoost）比較")
 
+st.info("""
+**如何閱讀本頁？** AUC（曲線下面積）衡量模型區分「上漲股」與「下跌股」的能力，0.5 = 隨機猜測，>0.52 為本系統最低門檻。
+LogLoss 衡量預測機率的校準程度，越低代表模型越有信心且準確。各 Fold 代表不同時間段的驗證結果。
+""")
+
 # Horizon selector
 col_ctrl = st.columns([1, 4])
 with col_ctrl[0]:
@@ -114,6 +119,7 @@ except Exception as e:
 # ===== Model Comparison Radar Chart =====
 try:
     st.subheader("📊 引擎對標分析 | Engine Comparison")
+    st.caption("↓ 雷達圖越大代表該引擎在該維度表現越好。AUC 高 + LogLoss 低 = 最理想。")
     st.caption("LightGBM vs XGBoost | 跨多維度性能指標的側面對比")
 
     radar_rows = []
@@ -236,6 +242,7 @@ except Exception as e:
 # ===== Per-Class AUC =====
 st.divider()
 st.subheader(f"🎯 分類別 AUC 分析 | Per-Class AUC (D+{horizon})")
+st.caption("↓ 三類（DOWN/FLAT/UP）的個別 AUC，觀察模型在哪個方向的判斷更有信心。")
 st.markdown("""
 <div class="insight-box">
 <strong>❓ 為什麼看 Per-Class AUC | Why Per-Class AUC？</strong><br>

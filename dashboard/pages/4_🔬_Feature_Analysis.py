@@ -39,6 +39,13 @@ st.caption("23 因子特徵工程流程：MI 篩選 → VIF 去共線性 → Cro
 # ===== Feature Selection Pipeline =====
 try:
     st.subheader("🔍 三階段特徵篩選 | Three-Stage Feature Selection")
+
+    st.info("""
+**如何閱讀本頁？** 特徵工程是模型的核心。本頁展示 23 個因子如何從候選池中被篩選出來：
+Step 1 Mutual Information（MI）移除與目標無關的特徵；Step 2 VIF 去除高度共線性的特徵；
+Step 3 Cross-fold 穩定性確保選出的特徵在不同時間段一致有效。Jaccard 相似度 > 0.7 表示特徵集穩定。
+    """)
+
     st.caption("Mutual Information → VIF 去共線性 → 跨 Fold 穩定性")
 
     fsel = results.get("feature_selection", {})
@@ -326,7 +333,13 @@ except Exception as e:
 # ===== SHAP Interpretability =====
 st.divider()
 st.subheader("🔍 SHAP 可解釋性分析 | SHAP Interpretability")
-st.caption("SHAP 值展示各特徵對個別預測的邊際貢獻 | Feature Contribution to Individual Predictions")
+st.caption("23 因子特徵工程流程：MI 篩選 → VIF 去共線性 → Cross-fold 穩定性驗證")
+
+st.info("""
+**SHAP（SHapley Additive exPlanations）是什麼？**
+SHAP 值量化每個特徵對模型預測的貢獻程度。圖中每個點代表一筆資料，橫軸為 SHAP 值大小（正值=推升預測，負值=壓低預測），
+顏色表示該特徵原始值的高低（紅=高，藍=低）。特徵由上到下按整體重要性排列。
+""")
 
 try:
     fig_dir = Path(__file__).parent.parent.parent / "outputs" / "figures"
@@ -342,14 +355,13 @@ try:
         )
         relevant = [c for c in shap_charts if f"D{horizon_sel}" in c.name]
         if relevant:
-            cols = st.columns(min(len(relevant), 2))
-            for i, chart in enumerate(relevant):
-                with cols[i % 2]:
-                    st.image(
-                        str(chart),
-                        caption=chart.stem.replace("shap_summary_", f"SHAP (D+{horizon_sel}): "),
-                        use_container_width=True
-                    )
+            # Display SHAP charts VERTICALLY (not side-by-side) to prevent text overlap
+            for chart in relevant:
+                engine_name = "LightGBM" if "lightgbm" in chart.name else "XGBoost"
+                st.markdown(f"**{engine_name} — D+{horizon_sel} SHAP Summary**")
+                st.image(str(chart), use_container_width=True)
+                st.caption(f"↑ {engine_name} 模型中各特徵對預測的 SHAP 貢獻度（class=ALL）")
+                st.markdown("")  # spacing
         else:
             st.info(f"D+{horizon_sel} 的 SHAP 圖表尚未生成")
     else:
@@ -360,6 +372,7 @@ except Exception as e:
 # ===== Quintile Analysis =====
 st.divider()
 st.subheader("📊 Quintile 因子分組分析 | Quintile Analysis")
+st.caption("↓ 將股票按模型預測分數分為 5 組，若報酬呈單調遞增（Q1 最低、Q5 最高），代表模型有效排序能力。")
 st.caption("將股票按預測分數分為五組，檢驗報酬的單調性 | Test monotonicity of returns across quintiles")
 
 try:

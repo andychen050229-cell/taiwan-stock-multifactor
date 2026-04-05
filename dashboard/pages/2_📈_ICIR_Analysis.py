@@ -36,6 +36,12 @@ except Exception as e:
 st.title("📈 ICIR 信號穩定性分析")
 st.caption("因子 IC（Information Coefficient）穩定性分析，衡量預測信號的持續性與可靠度")
 
+st.info("""
+**如何閱讀本頁？** IC（Information Coefficient）衡量模型預測排序與實際報酬排序的相關性。
+ICIR = IC 的平均值 / IC 的標準差，類似「信號的夏普比率」。|ICIR| > 0.5 表示預測信號穩定可用，> 1.0 為優秀。
+D+20 的 ICIR 通常優於 D+1，因為短期價格雜訊較大。
+""")
+
 st.markdown("""
 <div class="insight-box">
 <strong>❓ 什麼是 ICIR | What is ICIR？</strong><br>
@@ -334,6 +340,7 @@ try:
         alpha_decay = results.get("alpha_decay", {})
         if alpha_decay:
             st.subheader("📉 Alpha 衰減分析 | Alpha Decay")
+            st.caption("↓ Alpha 衰減分析：隨著預測天數拉長，模型的預測力如何變化。曲線越平緩代表信號越持久。")
             st.caption("使用 D+5 模型的預測分數，檢測其對不同 horizon 報酬的預測力衰減")
 
             for eng, metrics in alpha_decay.items():

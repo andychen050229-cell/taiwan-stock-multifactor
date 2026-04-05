@@ -37,6 +37,12 @@ except Exception as e:
 st.title("💰 策略回測分析")
 st.caption("基於歷史資料的策略回測結果，含交易成本、風險指標與績效歸因分析")
 
+st.info("""
+**如何閱讀本頁？** 回測模擬模型在歷史資料上的交易表現。年化報酬率 > 0 代表策略有正 alpha；
+夏普比率（Sharpe Ratio）> 1.0 為良好的風險調整報酬；最大回撤（Max Drawdown）顯示策略最差時會虧損多少。
+三種成本情境（無成本 / 折扣 / 保守）幫助評估交易摩擦對策略的影響。
+""")
+
 # Controls
 col_ctrl1, col_ctrl2 = st.columns(2)
 with col_ctrl1:
@@ -249,6 +255,7 @@ try:
     # ===== Cost Impact (Waterfall) =====
     st.divider()
     st.subheader("💰 交易成本影響分析 | Cost Impact Analysis")
+    st.caption("↓ 換手率越高，交易成本侵蝕越大。D+1 策略因每日換手而在扣除成本後通常不可行。")
     st.markdown("""
     <div class="insight-box">
     <strong>💡 為什麼成本模型很重要 | Why Cost Matters？</strong><br>
