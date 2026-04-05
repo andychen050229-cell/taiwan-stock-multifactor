@@ -29,28 +29,12 @@ from plotly.subplots import make_subplots
 from pathlib import Path
 
 # ===== Page Config =====
-st.set_page_config(
-    page_title="投資解讀面板 | Investment Interpretation Panel",
-    page_icon="🌱",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+# NOTE: st.set_page_config() is now managed by st.navigation in app.py
+# Do not uncomment or re-add the set_page_config call
 
 # ===== Custom CSS =====
 st.markdown("""
 <style>
-    /* Sidebar - Lighter, more readable style */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #e8ecf2 0%, #dce4eb 100%);
-    }
-    section[data-testid="stSidebar"] * {
-        color: #2d3748 !important;
-    }
-    section[data-testid="stSidebar"] h3,
-    section[data-testid="stSidebar"] strong {
-        color: #1a202c !important;
-        font-weight: 600;
-    }
 
     /* KPI cards */
     div[data-testid="stMetric"] {
@@ -491,7 +475,7 @@ st.sidebar.markdown("""
 
 st.sidebar.divider()
 
-horizon = st.sidebar.radio(
+horizon = st.sidebar.selectbox(
     "預測週期",
     options=[20, 5],
     format_func=lambda x: f"D+{x}（{'約一個月' if x == 20 else '約一週'}）",
@@ -514,9 +498,6 @@ st.sidebar.markdown("""
 """)
 
 st.sidebar.divider()
-
-if st.sidebar.button("🏠 回到首頁", use_container_width=True):
-    st.switch_page("app.py")
 
 
 # ===== Main Content =====

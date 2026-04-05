@@ -15,7 +15,6 @@ inject_custom_css = _utils.inject_custom_css
 inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
 
-st.set_page_config(page_title="Model Metrics | 量化分析工作台", page_icon="📊", layout="wide")
 inject_custom_css()
 
 # Data Context Banner
@@ -34,7 +33,7 @@ except Exception as e:
     st.stop()
 
 st.title("📊 模型指標分析")
-st.caption("Model Metrics Analysis | 各模型在不同預測天期的 AUC、Per-Class AUC、Fold 穩定性與特徵重要度")
+st.caption("模型在各 Fold 的 AUC、LogLoss 表現，以及雙引擎（LightGBM + XGBoost）比較")
 
 # Horizon selector
 col_ctrl = st.columns([1, 4])

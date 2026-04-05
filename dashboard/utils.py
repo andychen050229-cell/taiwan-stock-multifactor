@@ -33,25 +33,7 @@ def inject_custom_css():
             margin-top: 20px;
         }
 
-        /* Sidebar styling */
-        section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #f0f2f6 0%, #e8ecf4 100%);
-        }
-        section[data-testid="stSidebar"] * {
-            color: #1a1f36 !important;
-        }
-        section[data-testid="stSidebar"] h3 {
-            color: #2d3748 !important;
-            font-weight: 700 !important;
-        }
-        section[data-testid="stSidebar"] a {
-            color: #636EFA !important;
-            text-decoration: none;
-        }
-        section[data-testid="stSidebar"] a:hover {
-            color: #5156d4 !important;
-            text-decoration: underline;
-        }
+        /* Sidebar — dark theme handled globally by app.py router */
 
         /* Insight boxes */
         .insight-box {
@@ -171,38 +153,13 @@ def inject_advanced_sidebar(report_name: str = "", report: dict = None, current_
 
     st.sidebar.divider()
 
-    # Navigation links to all advanced pages
-    st.sidebar.markdown("**📍 Navigation**")
-    pages = [
-        ("📊 Model Metrics", "pages/1_📊_Model_Metrics.py", "model_metrics"),
-        ("📈 ICIR Analysis", "pages/2_📈_ICIR_Analysis.py", "icir_analysis"),
-        ("💰 Backtest", "pages/3_💰_Backtest.py", "backtest"),
-        ("🔬 Feature Analysis", "pages/4_🔬_Feature_Analysis.py", "feature_analysis"),
-        ("🗃️ Data Explorer", "pages/5_🗃️_Data_Explorer.py", "data_explorer"),
-    ]
-
-    for page_label, page_path, page_id in pages:
-        is_active = current_page == page_id
-        if st.sidebar.button(page_label, use_container_width=True, key=f"nav_{page_id}"):
-            st.switch_page(page_path)
-
-    st.sidebar.divider()
-
-    st.sidebar.markdown("**ℹ️ System Info**")
-    st.sidebar.markdown(
-        "**Tech Stack**\n\n"
-        "LightGBM + XGBoost + Ensemble\n\n"
-        "**Cross-Validation**\n\n"
-        "Purged Walk-Forward (4 Folds)\n\n"
-        "**Data Coverage**\n\n"
-        "1,932 companies | 2023/3–2025/3"
+    # System info (navigation is handled by st.navigation in app.py)
+    st.sidebar.markdown("**ℹ️ 系統資訊**")
+    st.sidebar.caption(
+        "🔧 LightGBM + XGBoost Ensemble\n\n"
+        "📐 Purged Walk-Forward CV (4 Folds)\n\n"
+        "📊 1,932 家上市櫃 | 2023/3–2025/3"
     )
-    st.sidebar.divider()
-
-    if st.sidebar.button("🏠 回到首頁", use_container_width=True):
-        st.switch_page("app.py")
-
-    st.sidebar.caption("Built with Streamlit & Plotly")
 
 
 @st.cache_data

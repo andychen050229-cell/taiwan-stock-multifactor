@@ -16,7 +16,6 @@ inject_custom_css = _utils.inject_custom_css
 inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
 
-st.set_page_config(page_title="Feature Analysis | 量化分析工作台", page_icon="🔬", layout="wide")
 inject_custom_css()
 
 # Data Context Banner
@@ -35,7 +34,7 @@ except Exception as e:
     st.stop()
 
 st.title("🔬 特徵工程分析")
-st.caption("Feature Engineering Analysis | 三階段特徵篩選流程、五支柱分佈、跨天期重要度比較與 SHAP 可解釋性")
+st.caption("23 因子特徵工程流程：MI 篩選 → VIF 去共線性 → Cross-fold 穩定性驗證")
 
 # ===== Feature Selection Pipeline =====
 try:

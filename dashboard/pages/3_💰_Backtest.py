@@ -16,7 +16,6 @@ inject_custom_css = _utils.inject_custom_css
 inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
 
-st.set_page_config(page_title="Backtest | 量化分析工作台", page_icon="💰", layout="wide")
 inject_custom_css()
 
 # Data Context Banner
@@ -36,7 +35,7 @@ except Exception as e:
     st.stop()
 
 st.title("💰 策略回測分析")
-st.caption("Backtest Analysis | 比較不同成本假設下各策略的績效，評估實際可行的交易方案")
+st.caption("基於歷史資料的策略回測結果，含交易成本、風險指標與績效歸因分析")
 
 # Controls
 col_ctrl1, col_ctrl2 = st.columns(2)

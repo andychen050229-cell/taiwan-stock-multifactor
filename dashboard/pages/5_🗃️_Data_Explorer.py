@@ -18,7 +18,6 @@ load_report = _utils.load_report
 load_feature_store = _utils.load_feature_store
 load_companies = _utils.load_companies
 
-st.set_page_config(page_title="Data Explorer | 量化分析工作台", page_icon="🗃️", layout="wide")
 inject_custom_css()
 
 # Data Context Banner
@@ -37,7 +36,7 @@ except Exception as e:
     st.stop()
 
 st.title("🗃️ 資料探索")
-st.caption("Data Exploration | Feature Store 概況、Walk-Forward CV 結構、品質門控、資料新鮮度與系統架構")
+st.caption("Feature Store 資料品質總覽、Walk-Forward CV 架構與 Quality Gates 驗證狀態")
 
 # ===== Feature Store Summary =====
 try:

@@ -16,7 +16,6 @@ inject_custom_css = _utils.inject_custom_css
 inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
 
-st.set_page_config(page_title="ICIR Analysis | 量化分析工作台", page_icon="📈", layout="wide")
 inject_custom_css()
 
 # Data Context Banner
@@ -35,7 +34,7 @@ except Exception as e:
     st.stop()
 
 st.title("📈 ICIR 信號穩定性分析")
-st.caption("ICIR Analysis | ICIR = mean(daily Rank IC) / std(daily Rank IC) — 衡量因子選股能力的穩定性與可靠性")
+st.caption("因子 IC（Information Coefficient）穩定性分析，衡量預測信號的持續性與可靠度")
 
 st.markdown("""
 <div class="insight-box">
