@@ -114,15 +114,21 @@ st.markdown("""<style>
         background-color: rgba(99, 110, 250, 0.35) !important;
         color: #ffffff !important;
     }
-    /* Selectbox trigger (the button you click) in sidebar — force dark bg */
+    /* Selectbox trigger (the button you click) in sidebar — BLACK text */
     section[data-testid="stSidebar"] [data-baseweb="select"] {
-        background: #1a2332 !important;
-        background-color: #1a2332 !important;
-        border: 1px solid rgba(255,255,255,0.25) !important;
+        border: 1px solid rgba(0,0,0,0.2) !important;
         border-radius: 8px !important;
     }
-    section[data-testid="stSidebar"] [data-baseweb="select"] * {
-        color: #e8edf3 !important;
+    section[data-testid="stSidebar"] [data-baseweb="select"] *,
+    section[data-testid="stSidebar"] [data-baseweb="select"] span,
+    section[data-testid="stSidebar"] [data-baseweb="select"] div,
+    [data-baseweb="select"] [class*="singleValue"],
+    [data-baseweb="select"] [class*="ValueContainer"] span {
+        color: #000000 !important;
+    }
+    section[data-testid="stSidebar"] [data-baseweb="select"] svg {
+        fill: #000000 !important;
+        color: #000000 !important;
     }
     /* Hide the text input / search inside selectbox (force dropdown-only) */
     section[data-testid="stSidebar"] [data-baseweb="select"] input {

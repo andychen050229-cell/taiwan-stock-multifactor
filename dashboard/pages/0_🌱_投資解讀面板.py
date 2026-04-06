@@ -496,21 +496,27 @@ st.markdown("""<style>
         font-weight: 600 !important;
         font-size: 0.85rem !important;
     }
-    /* Selectbox trigger button in sidebar — dark background to match dark theme */
+    /* Selectbox trigger button in sidebar — text must be BLACK for readability */
     section[data-testid="stSidebar"] [data-baseweb="select"] {
-        background: #1a2332 !important;
-        background-color: #1a2332 !important;
-        border: 1px solid rgba(255,255,255,0.25) !important;
+        border: 1px solid rgba(0,0,0,0.2) !important;
         border-radius: 8px !important;
     }
-    section[data-testid="stSidebar"] [data-baseweb="select"] * {
-        color: #e8edf3 !important;
+    /* Force pure black text inside the selectbox trigger (the white box) */
+    section[data-testid="stSidebar"] [data-baseweb="select"] *,
+    section[data-testid="stSidebar"] [data-baseweb="select"] span,
+    section[data-testid="stSidebar"] [data-baseweb="select"] div,
+    section[data-testid="stSidebar"] [data-baseweb="select"] [role="combobox"],
+    section[data-testid="stSidebar"] [data-baseweb="select"] [data-baseweb="tag"],
+    [data-baseweb="select"] .css-1dimb5e-singleValue,
+    [data-baseweb="select"] [class*="singleValue"],
+    [data-baseweb="select"] [class*="ValueContainer"] span,
+    [data-baseweb="select"] [class*="option"] {
+        color: #000000 !important;
     }
-    /* Fallback: if trigger renders with light/white bg, ensure text is dark */
-    [data-baseweb="select"][aria-expanded] .css-1dimb5e-singleValue,
-    [data-baseweb="select"] [data-testid="stMarkdownContainer"],
-    [data-baseweb="select"] span[class*="singleValue"] {
-        color: inherit !important;
+    /* The dropdown arrow/icon should also be dark */
+    section[data-testid="stSidebar"] [data-baseweb="select"] svg {
+        fill: #000000 !important;
+        color: #000000 !important;
     }
     /* Hide search cursor in selectbox — force dropdown-only */
     section[data-testid="stSidebar"] [data-baseweb="select"] input {
@@ -668,12 +674,27 @@ try:
     market_dist = None
     has_full_market = False
 
-    # Try recommendations dict first
+    # Try recommendations dict first (from cached load_all_data)
     if isinstance(recommendations, dict) and horizon_key in recommendations:
         md = recommendations[horizon_key].get("market_distribution")
         if isinstance(md, dict) and "total" in md:
             market_dist = md
             has_full_market = True
+
+    # Fallback: re-read JSON directly if cache didn't have market_distribution
+    if not has_full_market:
+        try:
+            _rec_path = Path(__file__).parent.parent / "data" / "recommendations.json"
+            if _rec_path.exists():
+                with open(_rec_path, "r", encoding="utf-8") as _rf:
+                    _fresh = json.load(_rf)
+                if isinstance(_fresh, dict) and horizon_key in _fresh:
+                    md = _fresh[horizon_key].get("market_distribution")
+                    if isinstance(md, dict) and "total" in md:
+                        market_dist = md
+                        has_full_market = True
+        except Exception:
+            pass
 
     if has_full_market and market_dist:
         total_stocks = market_dist["total"]
