@@ -242,7 +242,9 @@ if decay_data:
     c1.metric("強信號", summary.get("strong_signals", 0))
     c2.metric("中等信號", summary.get("moderate_signals", 0))
     c3.metric("弱信號", summary.get("weak_signals", 0))
-    c4.metric("建議再訓練週期", retrain)
+    # Shorten long retrain text to prevent metric truncation
+    retrain_short = str(retrain).split("（")[0].strip() if "（" in str(retrain) else str(retrain)
+    c4.metric("再訓練週期", retrain_short)
 
     best = summary.get("best_signal", "—")
     st.markdown(f"**最佳信號來源**：{best}")

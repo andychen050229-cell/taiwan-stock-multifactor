@@ -58,25 +58,25 @@ try:
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric(
-            "總筆數 | Total Rows",
+            "總筆數",
             f"{fs_info.get('rows', 0):,}",
             delta="樣本容量"
         )
     with col2:
         st.metric(
-            "欄位數 | Columns",
+            "欄位數",
             f"{fs_info.get('cols', 0)}",
             delta="特徵維度"
         )
     with col3:
         st.metric(
-            "缺失比例 | NaN %",
+            "缺失比例",
             f"{val_info.get('nan_pct', 0):.3%}",
             delta="資料品質"
         )
     with col4:
         st.metric(
-            "異常值 | Inf Count",
+            "異常值 (Inf)",
             f"{val_info.get('inf_count', 0)}",
             delta="洩漏偵測"
         )

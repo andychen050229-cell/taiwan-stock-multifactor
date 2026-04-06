@@ -111,25 +111,25 @@ try:
             kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
             with kpi_col1:
                 st.metric(
-                    "年化報酬率 | Ann. Return",
+                    "年化報酬率",
                     f"{best_strategy['Ann. Return']:+.2%}",
                     delta=best_strategy["Engine"]
                 )
             with kpi_col2:
                 st.metric(
-                    "夏普比率 | Sharpe Ratio",
+                    "夏普比率",
                     f"{best_strategy['Sharpe']:.3f}",
-                    delta="風險調整後收益"
+                    delta="風險調整收益"
                 )
             with kpi_col3:
                 st.metric(
-                    "最大回撤 | Max Drawdown",
+                    "最大回撤",
                     f"{best_strategy['MDD']:.2%}",
-                    delta="最坏情況損失"
+                    delta="最差情境"
                 )
             with kpi_col4:
                 st.metric(
-                    "勝率 | Win Rate",
+                    "勝率",
                     f"{best_strategy['Win Rate']:.2%}",
                     delta="獲利交易佔比"
                 )

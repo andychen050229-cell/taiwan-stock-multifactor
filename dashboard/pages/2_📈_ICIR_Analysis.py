@@ -88,28 +88,28 @@ try:
         kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
         with kpi_col1:
             st.metric(
-                "最佳 ICIR | Best ICIR",
+                "最佳 ICIR",
                 f"{best_icir_row['ICIR']:.4f}",
                 delta=best_icir_row["Engine"]
             )
         with kpi_col2:
             st.metric(
-                "最佳天期 | Best Horizon",
+                "最佳天期",
                 best_icir_row["Horizon"],
-                delta="預測能力最強"
+                delta="預測力最強"
             )
         with kpi_col3:
             if best_d20:
                 st.metric(
-                    "D+20 ICIR | Monthly Signal",
+                    "D+20 月度信號",
                     f"{best_d20['ICIR']:.4f}",
-                    delta="長期信號品質"
+                    delta="長期品質"
                 )
         with kpi_col4:
             icir_threshold = 0.5
             above_threshold = sum(1 for r in icir_rows if r["ICIR"] > icir_threshold)
             st.metric(
-                "超優質信號 | Premium Signals",
+                "優質信號",
                 f"{above_threshold}/{len(icir_rows)}",
                 delta="ICIR > 0.5"
             )
@@ -304,8 +304,9 @@ try:
                     st.metric(
                         f"{row['Engine']} D+20 ICIR",
                         f"{row['ICIR']:.4f}",
-                        delta=f"Mean IC: {row['Mean IC']:.4f} | Std: {row['Std IC']:.4f}"
+                        delta=f"IC={row['Mean IC']:.4f}"
                     )
+                    st.caption(f"Std IC: {row['Std IC']:.4f}")
 
             # Best ICIR gauge
             if icir_rows:
@@ -336,10 +337,11 @@ try:
         fig_dir = Path(__file__).parent.parent.parent / "outputs" / "figures"
         ic_charts = sorted(fig_dir.glob("ic_timeseries_*.png"))
         if ic_charts:
-            cols = st.columns(min(len(ic_charts), 3))
-            for i, chart in enumerate(ic_charts):
-                with cols[i % 3]:
-                    st.image(str(chart), caption=chart.stem.replace("ic_timeseries_", "IC: "), use_container_width=True)
+            # Display each chart full-width inside an expander for clarity
+            for chart in ic_charts:
+                label = chart.stem.replace("ic_timeseries_", "IC: ").replace("_", " ")
+                with st.expander(f"📈 {label}", expanded=False):
+                    st.image(str(chart), use_container_width=True)
         else:
             st.info("💡 IC 時間序列圖表尚未生成。請執行 run_phase2.py 產生。")
 
@@ -372,13 +374,17 @@ try:
                         })
 
                     df_stab = pd.DataFrame(stab_rows)
-                    s1, s2 = st.columns([3, 1])
-                    with s1:
-                        st.dataframe(df_stab, use_container_width=True, hide_index=True)
-                    with s2:
-                        strong_ct = sum(1 for r in stab_rows if "強" in r["穩定性等級 | Stability"])
+                    strong_ct = sum(1 for r in stab_rows if "強" in r["穩定性等級 | Stability"])
+
+                    s_kpi1, s_kpi2 = st.columns(2)
+                    with s_kpi1:
                         st.metric("強信號數量", f"{strong_ct}/{len(stab_rows)}")
-                        st.metric("建議再訓練週期", _retrain)
+                    with s_kpi2:
+                        # Shorten long retrain text for metric display
+                        retrain_short = str(_retrain).split("（")[0].strip() if "（" in str(_retrain) else str(_retrain)
+                        st.metric("再訓練週期", retrain_short)
+
+                    st.dataframe(df_stab, use_container_width=True, hide_index=True)
 
                     # Half-life summary
                     if _hl_data:

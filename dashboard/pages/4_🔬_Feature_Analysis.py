@@ -64,27 +64,27 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
 
     with col1:
         st.metric(
-            "候選特徵 | Candidates",
+            "候選特徵",
             f"{fsel.get('n_candidates', 0)}",
             delta="初始特徵池"
         )
     with col2:
         n_dropped_mi = fsel.get('n_candidates', 0) - fsel.get('after_mi', 0)
         st.metric(
-            "MI 篩選後 | After MI",
+            "MI 篩選後",
             f"{fsel.get('after_mi', 0)}",
-            delta=f"-{n_dropped_mi} ({n_dropped_mi/max(fsel.get('n_candidates', 1), 1)*100:.0f}%)"
+            delta=f"-{n_dropped_mi} 個淘汰"
         )
     with col3:
         n_dropped_vif = fsel.get('after_mi', 0) - fsel.get('after_vif', 0)
         st.metric(
-            "VIF 篩選後 | After VIF",
+            "VIF 篩選後",
             f"{fsel.get('after_vif', 0)}",
-            delta=f"-{n_dropped_vif} ({n_dropped_vif/max(fsel.get('after_mi', 1), 1)*100:.0f}%)"
+            delta=f"-{n_dropped_vif} 個淘汰"
         )
     with col4:
         st.metric(
-            "穩定性分數 | Stability (Jaccard)",
+            "穩定性 (Jaccard)",
             f"{stability.get('stability_score', 0):.4f}",
             delta="跨 Fold 一致性"
         )
@@ -461,13 +461,13 @@ try:
         )
         relevant = [c for c in shap_charts if f"D{horizon_sel}" in c.name]
         if relevant:
-            # Display SHAP charts VERTICALLY (not side-by-side) to prevent text overlap
+            # Display SHAP charts VERTICALLY with controlled width to prevent text overlap
             for chart in relevant:
                 engine_name = "LightGBM" if "lightgbm" in chart.name else "XGBoost"
-                st.markdown(f"**{engine_name} — D+{horizon_sel} SHAP Summary**")
-                st.image(str(chart), use_container_width=True)
-                st.caption(f"↑ {engine_name} 模型中各特徵對預測的 SHAP 貢獻度（class=ALL）")
-                st.markdown("")  # spacing
+                with st.expander(f"📊 {engine_name} — D+{horizon_sel} SHAP Summary", expanded=True):
+                    # Use fixed pixel width to prevent matplotlib text overlap at full-width
+                    st.image(str(chart), width=720)
+                    st.caption(f"↑ {engine_name} 模型中各特徵對預測的 SHAP 貢獻度（class=ALL）")
         else:
             st.info(f"D+{horizon_sel} 的 SHAP 圖表尚未生成")
     else:

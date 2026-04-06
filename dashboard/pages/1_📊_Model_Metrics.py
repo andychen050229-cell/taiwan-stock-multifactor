@@ -94,29 +94,29 @@ try:
         kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
         with kpi_col1:
             st.metric(
-                "最佳 AUC | Best AUC",
+                "最佳 AUC",
                 f"{best_auc_engine['auc']:.4f}",
-                delta=f"{best_auc_engine['engine']}"
+                delta=best_auc_engine['engine']
             )
         with kpi_col2:
             st.metric(
-                "最佳引擎 | Best Engine",
+                "最佳引擎",
                 best_auc_engine['engine'],
-                delta="當前 Horizon"
+                delta=f"D+{horizon}"
             )
         with kpi_col3:
             if best_ll_improvement:
                 ll_imp = (1 - best_ll_improvement["logloss"] / best_ll_improvement["baseline_ll"]) * 100
                 st.metric(
-                    "LogLoss 改進 | LL Improvement",
+                    "LogLoss 改進",
                     f"{ll_imp:.1f}%",
-                    delta=f"相對基線 | vs Baseline"
+                    delta="vs 基線"
                 )
         with kpi_col4:
             st.metric(
-                "當前預測天期 | Prediction Horizon",
+                "預測天期",
                 f"D+{horizon}",
-                delta="前瞻預測天數"
+                delta="前瞻天數"
             )
 
         st.divider()
@@ -557,18 +557,18 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 try:
-    cm_col1, cm_col2 = st.columns(2)
     figures_dir = Path(__file__).resolve().parent.parent / "outputs" / "figures"
     if not figures_dir.exists():
         figures_dir = Path.cwd() / "outputs" / "figures"
 
+    cm_col1, cm_col2 = st.columns(2)
     for col, engine in zip([cm_col1, cm_col2], ["lightgbm", "xgboost"]):
         with col:
             cm_path = figures_dir / f"confusion_matrix_{engine}_D{horizon}.png"
             if cm_path.exists():
-                st.image(str(cm_path), caption=f"{engine.upper()} D+{horizon} 混淆矩陣", use_container_width=True)
+                st.image(str(cm_path), caption=f"{engine.upper()} D+{horizon}", use_container_width=True)
             else:
-                st.info(f"{engine.upper()} D+{horizon} 混淆矩陣圖片不存在")
+                st.info(f"{engine.upper()} 混淆矩陣不存在")
 
     st.markdown("""
     <div class="insight-box">
