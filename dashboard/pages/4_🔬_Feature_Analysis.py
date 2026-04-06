@@ -513,24 +513,19 @@ try:
             # Friendly name: ensemble_D1 → Ensemble D+1
             display_name = key.replace("ensemble_", "Ensemble ").replace("D", "D+")
             st.markdown(f"**{display_name}**")
-            c1, c2, c3 = st.columns(3)
+            c1, c2 = st.columns(2)
             with c1:
+                _spread = val.get('long_short_spread', 0)
                 st.metric(
                     "Long-Short 差價",
-                    f"{val.get('long_short_spread', 0):+.2%}",
-                    delta="Q5 - Q1 報酬"
+                    f"{_spread:+.2f}%",
+                    delta="Q5 − Q1 報酬"
                 )
             with c2:
                 st.metric(
-                    "單調性",
-                    f"{val.get('monotonicity', 0):.3f}",
-                    delta="0-1 越高越好"
-                )
-            with c3:
-                st.metric(
-                    "Sharpe Ratio",
-                    f"{val.get('sharpe', 0):.3f}",
-                    delta="Long-Short 策略"
+                    "單調性 | Monotonicity",
+                    f"{val.get('monotonicity', 0):.2f}",
+                    delta="0~1 越高越好"
                 )
 
             qr = val.get("quintile_returns", {})
@@ -544,23 +539,25 @@ try:
                     x=[f"Q{k}" for k in q_keys],
                     y=q_vals,
                     marker_color=["#EF553B", "#FFA15A", "#636EFA", "#AB63FA", "#00CC96"][:len(q_keys)],
-                    text=[f"{v:+.1%}" for v in q_vals],
+                    text=[f"{v:+.2f}%" for v in q_vals],
                     textposition="outside",
-                    hovertemplate="<b>%{x}</b><br>Return: %{y:.2%}<extra></extra>"
+                    hovertemplate="<b>%{x}</b><br>Return: %{customdata:.2f}%<extra></extra>",
+                    customdata=q_vals
                 ))
 
                 fig_q.update_layout(
                     title=f"{display_name} Quintile 報酬 | Quintile Returns",
                     xaxis_title="分組 | Quintile (Q1=最低分數, Q5=最高分數)",
                     yaxis_title="年化報酬 | Annualized Return",
-                    yaxis_tickformat=".1%",
+                    yaxis_ticksuffix="%",
                     height=380,
                     template="plotly_white",
                     hovermode="x unified"
                 )
 
                 avg_return = np.mean(q_vals)
-                fig_q.add_hline(y=avg_return, line_dash="dash", line_color="gray", annotation_text="平均報酬 | Mean")
+                fig_q.add_hline(y=avg_return, line_dash="dash", line_color="gray",
+                                annotation_text=f"平均 {avg_return:.2f}%")
                 fig_q.add_hline(y=0, line_color="gray", line_dash="dot")
 
                 st.plotly_chart(fig_q, use_container_width=True)
