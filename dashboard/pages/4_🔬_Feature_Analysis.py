@@ -41,9 +41,17 @@ try:
     st.subheader("🔍 三階段特徵篩選 | Three-Stage Feature Selection")
 
     st.info("""
-**如何閱讀本頁？** 特徵工程是模型的核心。本頁展示 23 個因子如何從候選池中被篩選出來：
-Step 1 Mutual Information（MI）移除與目標無關的特徵；Step 2 VIF 去除高度共線性的特徵；
-Step 3 Cross-fold 穩定性確保選出的特徵在不同時間段一致有效。Jaccard 相似度 > 0.7 表示特徵集穩定。
+**如何閱讀本頁？**
+
+特徵工程是模型的核心。本頁展示 23 個因子如何從候選池中被篩選出來：
+
+Step 1：Mutual Information（MI）移除與目標無關的特徵。
+
+Step 2：VIF 去除高度共線性的特徵。
+
+Step 3：Cross-fold 穩定性確保選出的特徵在不同時間段一致有效。
+
+Jaccard 相似度 > 0.7 表示特徵集穩定。
     """)
 
     st.caption("Mutual Information → VIF 去共線性 → 跨 Fold 穩定性")
@@ -337,8 +345,14 @@ st.caption("23 因子特徵工程流程：MI 篩選 → VIF 去共線性 → Cro
 
 st.info("""
 **SHAP（SHapley Additive exPlanations）是什麼？**
-SHAP 值量化每個特徵對模型預測的貢獻程度。圖中每個點代表一筆資料，橫軸為 SHAP 值大小（正值=推升預測，負值=壓低預測），
-顏色表示該特徵原始值的高低（紅=高，藍=低）。特徵由上到下按整體重要性排列。
+
+SHAP 值量化每個特徵對模型預測的貢獻程度。
+
+圖中每個點代表一筆資料，橫軸為 SHAP 值大小（正值 = 推升預測，負值 = 壓低預測）。
+
+顏色表示該特徵原始值的高低（紅 = 高，藍 = 低）。
+
+特徵由上到下按整體重要性排列。
 """)
 
 try:

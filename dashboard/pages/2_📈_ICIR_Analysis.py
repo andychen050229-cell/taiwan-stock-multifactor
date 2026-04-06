@@ -37,15 +37,22 @@ st.title("📈 ICIR 信號穩定性分析")
 st.caption("因子 IC（Information Coefficient）穩定性分析，衡量預測信號的持續性與可靠度")
 
 st.info("""
-**如何閱讀本頁？** IC（Information Coefficient）衡量模型預測排序與實際報酬排序的相關性。
-ICIR = IC 的平均值 / IC 的標準差，類似「信號的夏普比率」。|ICIR| > 0.5 表示預測信號穩定可用，> 1.0 為優秀。
+**如何閱讀本頁？**
+
+IC（Information Coefficient）衡量模型預測排序與實際報酬排序的相關性。
+
+ICIR = IC 的平均值 / IC 的標準差，類似「信號的夏普比率」。
+
+|ICIR| > 0.5 表示預測信號穩定可用，> 1.0 為優秀。
+
 D+20 的 ICIR 通常優於 D+1，因為短期價格雜訊較大。
 """)
 
 st.markdown("""
 <div class="insight-box">
-<strong>❓ 什麼是 ICIR | What is ICIR？</strong><br>
-ICIR 本質上是 IC 的 t-statistic。|ICIR| > 0.5 為良好信號，> 1.0 為優秀。
+<strong>❓ 什麼是 ICIR | What is ICIR？</strong><br><br>
+ICIR 本質上是 IC 的 t-statistic。<br>
+|ICIR| > 0.5 為良好信號，> 1.0 為優秀。<br><br>
 即使 IC 不高，只要足夠穩定，ICIR 也可以很高——這正是長期超額收益的基礎。
 </div>
 """, unsafe_allow_html=True)
@@ -283,8 +290,8 @@ try:
 
             st.markdown("""
             <div class="success-box">
-            <strong>✅ 核心結論 | Key Finding：</strong><br>
-            Alpha 信號在月度頻率（D+20）真實且穩定，ICIR 達 0.74–0.77，遠超 0.5 門檻。
+            <strong>✅ 核心結論 | Key Finding：</strong><br><br>
+            Alpha 信號在月度頻率（D+20）真實且穩定，ICIR 達 0.74–0.77，遠超 0.5 門檻。<br><br>
             日頻（D+1）與週頻（D+5）的信噪比過低，不適合實際交易部署。
             </div>
             """, unsafe_allow_html=True)
