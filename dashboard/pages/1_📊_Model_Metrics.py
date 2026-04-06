@@ -238,9 +238,11 @@ try:
 
         st.markdown("""
         <div class="insight-box">
-        <strong>💡 洞察 | Insight：</strong>
-        AUC > 0.52 表示模型優於隨機預測，超越品質門檻。ENSEMBLE 通常結合個別模型優勢，實現更穩定的預測。<br>
-        <strong>✅ 應用建議：</strong> 在 <strong>月度頻率（D+20）</strong> 策略部署；D+1/D+5 信號品質不足，不推薦實盤使用。
+        <strong>💡 洞察 | Insight：</strong><br>
+        AUC > 0.52 表示模型優於隨機預測，超越品質門檻。<br>
+        ENSEMBLE 通常結合個別模型優勢，實現更穩定的預測。<br><br>
+        <strong>✅ 應用建議：</strong><br>
+        在 <strong>月度頻率（D+20）</strong> 策略部署；D+1/D+5 信號品質不足，不推薦實盤使用。
         </div>
         """, unsafe_allow_html=True)
 except Exception as e:
@@ -253,8 +255,8 @@ st.caption("↓ 三類（DOWN/FLAT/UP）的個別 AUC，觀察模型在哪個方
 st.markdown("""
 <div class="insight-box">
 <strong>❓ 為什麼看 Per-Class AUC | Why Per-Class AUC？</strong><br>
-三分類問題中，整體 AUC 可能掩蓋個別類別的弱點。Per-Class AUC 分別衡量模型對 DOWN / FLAT / UP 的區辨能力，
-幫助識別特定類別的模型弱點。
+三分類問題中，整體 AUC 可能掩蓋個別類別的弱點。<br>
+Per-Class AUC 分別衡量模型對 DOWN / FLAT / UP 的區辨能力，幫助識別特定類別的模型弱點。
 </div>
 """, unsafe_allow_html=True)
 
@@ -339,7 +341,8 @@ st.divider()
 st.subheader(f"📉 Fold 穩定性趨勢 | Fold Stability (D+{horizon})")
 st.markdown("""
 <div class="insight-box">
-<strong>📌 穩定性指標 | Stability Indicator：</strong>不同 Fold 間的性能波動越小，代表模型越穩健。
+<strong>📌 穩定性指標 | Stability Indicator：</strong><br>
+不同 Fold 間的性能波動越小，代表模型越穩健。<br>
 持續跌破品質門檻的模型可能存在資料或特徵洩漏。
 </div>
 """, unsafe_allow_html=True)
@@ -460,8 +463,9 @@ st.subheader(f"🎯 校準分析 | Calibration Analysis (D+{horizon})")
 st.markdown("""
 <div class="insight-box">
 <strong>❓ 什麼是校準（Calibration）？</strong><br>
-校準衡量模型輸出的機率是否與實際頻率一致。例如模型預測某股票有 70% 機率上漲，則在所有被預測 70% 的股票中，
-應約有 70% 確實上漲。<strong>ECE（Expected Calibration Error）</strong>越低代表校準越好。
+校準衡量模型輸出的機率是否與實際頻率一致。<br>
+例如模型預測某股票有 70% 機率上漲，則在所有被預測 70% 的股票中，應約有 70% 確實上漲。<br>
+<strong>ECE（Expected Calibration Error）</strong>越低代表校準越好。<br>
 本系統使用 <strong>Isotonic Regression</strong> 進行後校準。
 </div>
 """, unsafe_allow_html=True)
@@ -536,8 +540,8 @@ try:
             st.markdown(f"""
             <div class="insight-box">
             <strong>💡 洞察 | Insight：</strong>
-            Isotonic Regression 校準使 D+{horizon} 的 ECE 平均降低約 <strong>74–80%</strong>，
-            顯著提升機率輸出的可靠性。校準後 ECE 均低於 0.02，達到高品質校準水準。
+            Isotonic Regression 校準使 D+{horizon} 的 ECE 平均降低約 <strong>74–80%</strong>，顯著提升機率輸出的可靠性。<br>
+            校準後 ECE 均低於 0.02，達到高品質校準水準。
             </div>
             """, unsafe_allow_html=True)
     else:
@@ -551,8 +555,9 @@ st.subheader(f"🔢 混淆矩陣 | Confusion Matrices (D+{horizon})")
 st.markdown("""
 <div class="insight-box">
 <strong>❓ 什麼是混淆矩陣？</strong><br>
-混淆矩陣展示模型對 DOWN / FLAT / UP 三個類別的實際分類結果。對角線上的值代表正確分類，
-非對角線代表錯誤分類。可以從中觀察模型是否偏向預測特定類別。
+混淆矩陣展示模型對 DOWN / FLAT / UP 三個類別的實際分類結果。<br>
+對角線上的值代表正確分類，非對角線代表錯誤分類。<br>
+可以從中觀察模型是否偏向預測特定類別。
 </div>
 """, unsafe_allow_html=True)
 
@@ -572,8 +577,8 @@ try:
 
     st.markdown("""
     <div class="insight-box">
-    <strong>💡 解讀建議 | Reading Guide：</strong>
-    觀察對角線佔比——若 FLAT 類被大量預測，可能反映市場中性偏好。
+    <strong>💡 解讀建議 | Reading Guide：</strong><br>
+    觀察對角線佔比——若 FLAT 類被大量預測，可能反映市場中性偏好。<br>
     DOWN 與 UP 的混淆程度直接影響策略方向判斷的準確性。
     </div>
     """, unsafe_allow_html=True)
@@ -586,8 +591,7 @@ st.subheader(f"⚙️ 超參數最佳化結果 | Hyperparameter Optimization (D+
 st.markdown("""
 <div class="insight-box">
 <strong>❓ 超參數搜尋流程</strong><br>
-本系統使用 <strong>Optuna（TPE Sampler）</strong> 對每個 Horizon × Engine 組合進行
-<strong>50 輪</strong>貝葉斯超參數搜尋，目標函數為 Walk-Forward CV 平均 AUC。
+本系統使用 <strong>Optuna（TPE Sampler）</strong> 對每個 Horizon × Engine 組合進行 <strong>50 輪</strong>貝葉斯超參數搜尋，目標函數為 Walk-Forward CV 平均 AUC。<br>
 搜尋空間涵蓋學習率、樹深度、正則化強度等核心參數。
 </div>
 """, unsafe_allow_html=True)
@@ -642,8 +646,8 @@ try:
         st.markdown(f"""
         <div class="insight-box">
         <strong>💡 洞察 | Insight：</strong>
-        Optuna 搜尋結果顯示 D+{horizon} 模型傾向使用較低學習率搭配較多棵樹，
-        並透過正則化（reg_alpha / reg_lambda）控制過擬合。兩引擎的最佳參數差異反映其架構特性。
+        Optuna 搜尋結果顯示 D+{horizon} 模型傾向使用較低學習率搭配較多棵樹，並透過正則化（reg_alpha / reg_lambda）控制過擬合。<br>
+        兩引擎的最佳參數差異反映其架構特性。
         </div>
         """, unsafe_allow_html=True)
     else:

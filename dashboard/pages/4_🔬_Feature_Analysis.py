@@ -275,8 +275,9 @@ try:
 
         st.markdown("""
         <div class="insight-box">
-        <strong>📌 跨折穩定性 | Cross-Fold Stability：</strong>
-        特徵篩選的穩定性直接影響模型的 generalization 能力。Jaccard 相似度 ≥ 0.3 表示核心特徵在不同訓練折次間保持一致性。
+        <strong>📌 跨折穩定性 | Cross-Fold Stability：</strong><br>
+        特徵篩選的穩定性直接影響模型的 generalization 能力。<br>
+        Jaccard 相似度 ≥ 0.3 表示核心特徵在不同訓練折次間保持一致性。
         </div>
         """, unsafe_allow_html=True)
 
@@ -336,7 +337,7 @@ try:
             st.markdown("""
             <div class="insight-box">
             <strong>💡 跨天期特徵差異 | Cross-Horizon Pattern：</strong><br>
-            短期（D+1）主要依賴技術面動能指標，中長期（D+20）則更重視基本面與估值因子。
+            短期（D+1）主要依賴技術面動能指標，中長期（D+20）則更重視基本面與估值因子。<br>
             這反映了「頻率結構」——不同天期的驅動因子本質完全不同，短期是噪音，長期是信號。
             </div>
             """, unsafe_allow_html=True)
@@ -448,6 +449,8 @@ SHAP 值量化每個特徵對模型預測的貢獻程度。
 """)
 
 try:
+    from PIL import Image as PILImage
+
     fig_dir = Path(__file__).parent.parent.parent / "outputs" / "figures"
     shap_charts = sorted(fig_dir.glob("shap_summary_*.png"))
 
@@ -461,12 +464,18 @@ try:
         )
         relevant = [c for c in shap_charts if f"D{horizon_sel}" in c.name]
         if relevant:
-            # Display SHAP charts VERTICALLY with controlled width to prevent text overlap
             for chart in relevant:
                 engine_name = "LightGBM" if "lightgbm" in chart.name else "XGBoost"
                 with st.expander(f"📊 {engine_name} — D+{horizon_sel} SHAP Summary", expanded=True):
-                    # Use fixed pixel width to prevent matplotlib text overlap at full-width
-                    st.image(str(chart), width=720)
+                    # Crop the matplotlib title area (top ~120px) to prevent text overlap
+                    # Title is already displayed as the expander heading
+                    try:
+                        img = PILImage.open(chart)
+                        crop_top = int(img.height * 0.08)  # ~200px for 2530px image
+                        img_cropped = img.crop((0, crop_top, img.width, img.height))
+                        st.image(img_cropped, use_container_width=True)
+                    except Exception:
+                        st.image(str(chart), use_container_width=True)
                     st.caption(f"↑ {engine_name} 模型中各特徵對預測的 SHAP 貢獻度（class=ALL）")
         else:
             st.info(f"D+{horizon_sel} 的 SHAP 圖表尚未生成")
@@ -540,7 +549,7 @@ try:
                 st.markdown("""
                 <div class="insight-box">
                 <strong>📌 解讀 | Interpretation：</strong><br>
-                理想情況下，報酬應從 Q1 到 Q5 單調遞增（或 Q5 明顯優於 Q1）。
+                理想情況下，報酬應從 Q1 到 Q5 單調遞增（或 Q5 明顯優於 Q1）。<br>
                 若不存在單調性，表示模型信號不夠清晰，或包含噪音。
                 </div>
                 """, unsafe_allow_html=True)

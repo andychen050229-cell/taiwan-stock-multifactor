@@ -214,8 +214,9 @@ if dsr_data:
 
         st.markdown("""
         <div style="background:#fffbeb; border-left:4px solid #f59e0b; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#78350f;">
-        <strong>📌 DSR 解讀：</strong> 當嘗試 N 種策略時，E[max(SR)] 代表「僅靠運氣」可能達到的最大夏普比率。
-        個別策略的 Sharpe 若低於此門檻，可能只是多重測試的偽陽性結果。<br>
+        <strong>📌 DSR 解讀：</strong><br>
+        當嘗試 N 種策略時，E[max(SR)] 代表「僅靠運氣」可能達到的最大夏普比率。<br>
+        個別策略的 Sharpe 若低於此門檻，可能只是多重測試的偽陽性結果。<br><br>
         <strong>但</strong>：以「單一最佳策略」角度（N=1），ensemble_D5 的 DSR 通過（p=1.0），表明其 Sharpe 不可能僅靠運氣。
         </div>
         """, unsafe_allow_html=True)

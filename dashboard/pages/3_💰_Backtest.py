@@ -266,9 +266,10 @@ try:
     st.caption("↓ 換手率越高，交易成本侵蝕越大。D+1 策略因每日換手而在扣除成本後通常不可行。")
     st.markdown("""
     <div class="insight-box">
-    <strong>💡 為什麼成本模型很重要 | Why Cost Matters？</strong><br>
-    同一策略在不同成本假設下，年化報酬可能差距 3–5%。D+1 策略因換手率高達 64–68%，
-    在任何成本情境下幾乎都不可行。D+20 策略即使在保守成本下仍有正 alpha。
+    <strong>💡 為什麼成本模型很重要 | Why Cost Matters？</strong><br><br>
+    同一策略在不同成本假設下，年化報酬可能差距 3–5%。<br>
+    D+1 策略因換手率高達 64–68%，在任何成本情境下幾乎都不可行。<br>
+    D+20 策略即使在保守成本下仍有正 alpha。
     </div>
     """, unsafe_allow_html=True)
 
@@ -556,8 +557,8 @@ try:
         st.markdown("""
         <div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e;">
         <strong>❓ 什麼是 Permutation Test？</strong><br>
-        隨機打亂標籤 1,000 次，計算每次「偽模型」的 AUC。若真實模型的 AUC 遠超所有偽模型（p < 0.01），
-        證明模型的預測能力並非偶然——具有統計顯著性。
+        隨機打亂標籤 1,000 次，計算每次「偽模型」的 AUC。<br>
+        若真實模型的 AUC 遠超所有偽模型（p < 0.01），證明模型的預測能力並非偶然——具有統計顯著性。
         </div>
         """, unsafe_allow_html=True)
 
@@ -598,8 +599,9 @@ try:
 
         st.markdown("""
         <div style="background:#ecfdf5; border-left:4px solid #059669; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#065f46;">
-        <strong>✅ 結論：</strong> 所有 9 個模型×天期組合的 Permutation Test p-value = 0.000，
-        Z-Score 均超過 170。模型的預測能力具有極高的統計顯著性，排除了偶然性。
+        <strong>✅ 結論：</strong><br>
+        所有 9 個模型×天期組合的 Permutation Test p-value = 0.000，Z-Score 均超過 170。<br>
+        模型的預測能力具有極高的統計顯著性，排除了偶然性。
         </div>
         """, unsafe_allow_html=True)
 except Exception:

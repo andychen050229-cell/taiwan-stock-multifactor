@@ -125,8 +125,8 @@ try:
         st.markdown("""
         <div class="insight-box">
         <strong>📌 PIT（Point-in-Time）合規：</strong><br>
-        所有財報數據嚴格按照台灣 IFRS 法定申報期限進行延遲對齊，確保模型訓練時不會使用到
-        「當時尚未公開」的財報資料。例如：Q1 財報在 5/15 之後才可使用，即使實際公布日期更早。
+        所有財報數據嚴格按照台灣 IFRS 法定申報期限進行延遲對齊，確保模型訓練時不會使用到「當時尚未公開」的財報資料。<br>
+        例如：Q1 財報在 5/15 之後才可使用，即使實際公布日期更早。
         </div>
         """, unsafe_allow_html=True)
 
@@ -143,8 +143,8 @@ try:
     st.markdown("""
     <div class="insight-box">
     <strong>🔐 Purged Walk-Forward CV：</strong><br>
-    使用 Expanding Window 訓練——每一折的訓練集包含所有歷史資料（而非固定視窗），
-    加上 20 日 Embargo 期隔離訓練與測試集，防止因交易日重疊造成的前瞻偏差。
+    使用 Expanding Window 訓練——每一折的訓練集包含所有歷史資料（而非固定視窗），加上 20 日 Embargo 期隔離訓練與測試集。<br>
+    防止因交易日重疊造成的前瞻偏差。
     </div>
     """, unsafe_allow_html=True)
 

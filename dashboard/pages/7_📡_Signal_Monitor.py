@@ -368,8 +368,9 @@ if decay_data:
 
         st.markdown("""
         <div style="background:#ecfdf5; border-left:4px solid #059669; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#065f46;">
-        <strong>📌 半衰期解讀：</strong> D+5 與 D+20 的信號均呈<strong>持續改善</strong>趨勢（正斜率），
-        表示模型的預測能力在研究期間內尚未出現衰減。建議再訓練週期：<strong>3-6 個月</strong>。
+        <strong>📌 半衰期解讀：</strong><br>
+        D+5 與 D+20 的信號均呈<strong>持續改善</strong>趨勢（正斜率），表示模型的預測能力在研究期間內尚未出現衰減。<br>
+        建議再訓練週期：<strong>3-6 個月</strong>。
         </div>
         """, unsafe_allow_html=True)
 
