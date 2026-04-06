@@ -367,7 +367,9 @@ def get_company_fundamentals(fs, income, company_id, trade_date, stock_row=None)
 
         result["fiscal_year"] = int(latest.get("fiscal_year", 0))
         result["fiscal_quarter"] = int(latest.get("fiscal_quarter", 0))
-        result["eps"] = latest.get("eps")
+        eps_raw = latest.get("eps")
+        if pd.notna(eps_raw):
+            result["eps"] = eps_raw
 
         rev = latest.get("revenue")
         cost = latest.get("cost_of_revenue")
@@ -442,8 +444,9 @@ def get_company_fundamentals(fs, income, company_id, trade_date, stock_row=None)
             if pd.notna(ni):
                 result["net_margin"] = ni / rev
 
-        if stock_row.get("fund_revenue_yoy"):
-            result["revenue_yoy"] = stock_row.get("fund_revenue_yoy")
+        rev_yoy = stock_row.get("fund_revenue_yoy")
+        if rev_yoy is not None and pd.notna(rev_yoy):
+            result["revenue_yoy"] = rev_yoy
 
         # Risk level (drawdown stored as negative, use abs)
         drawdown = stock_row.get("risk_drawdown")
@@ -507,22 +510,36 @@ st.markdown("""<style>
         caret-color: transparent !important;
         user-select: none !important;
     }
-    /* Dropdown panel (popover) — dark theme */
-    [data-baseweb="popover"] {
+    /* Dropdown panel (popover) — dark theme, extra specificity for Cloud */
+    [data-baseweb="popover"],
+    [data-baseweb="popover"] > div,
+    [data-baseweb="popover"] [data-baseweb="menu"],
+    [data-baseweb="popover"] ul,
+    div[data-baseweb="popover"] {
         background: #1a2332 !important;
+        background-color: #1a2332 !important;
         border: 1px solid rgba(255,255,255,0.15) !important;
         border-radius: 8px !important;
     }
-    [data-baseweb="popover"] li {
+    [data-baseweb="popover"] li,
+    [data-baseweb="popover"] [role="option"],
+    div[data-baseweb="popover"] li {
         color: #e8edf3 !important;
         background: transparent !important;
+        background-color: transparent !important;
     }
-    [data-baseweb="popover"] li:hover {
+    [data-baseweb="popover"] li:hover,
+    [data-baseweb="popover"] [role="option"]:hover,
+    div[data-baseweb="popover"] li:hover {
         background: rgba(99, 110, 250, 0.25) !important;
+        background-color: rgba(99, 110, 250, 0.25) !important;
         color: #ffffff !important;
     }
-    [data-baseweb="popover"] li[aria-selected="true"] {
+    [data-baseweb="popover"] li[aria-selected="true"],
+    [data-baseweb="popover"] [role="option"][aria-selected="true"],
+    div[data-baseweb="popover"] li[aria-selected="true"] {
         background: rgba(99, 110, 250, 0.35) !important;
+        background-color: rgba(99, 110, 250, 0.35) !important;
         color: #ffffff !important;
     }
     /* Slider track */
@@ -824,12 +841,12 @@ try:
             # Quick fundamental snapshot
             fund = get_company_fundamentals(fs, income, cid, rec_date, stock_row=stock)
             snap_parts = []
-            if fund.get("eps") is not None:
-                eps_v = fund["eps"]
+            if fund.get("eps") is not None and pd.notna(fund["eps"]):
+                eps_v = float(fund["eps"])
                 snap_parts.append(f"EPS {'$' if eps_v >= 0 else '-$'}{abs(eps_v):.2f}")
-            if fund.get("gross_margin") is not None:
+            if fund.get("gross_margin") is not None and pd.notna(fund["gross_margin"]):
                 snap_parts.append(f"毛利率 {fund['gross_margin']:.1%}")
-            if fund.get("revenue_yoy") is not None:
+            if fund.get("revenue_yoy") is not None and pd.notna(fund["revenue_yoy"]):
                 snap_parts.append(f"營收年增 {fund['revenue_yoy']:+.1%}")
             if snap_parts:
                 st.caption(" · ".join(snap_parts))
@@ -841,16 +858,16 @@ try:
                 reasons = []
 
                 # Momentum
-                if fund.get("momentum") is not None:
-                    mom = fund["momentum"]
+                if fund.get("momentum") is not None and pd.notna(fund["momentum"]):
+                    mom = float(fund["momentum"])
                     if mom > 0:
                         reasons.append(f"近期股價有向上動能（動能值 {mom:.2f}），買盤相對積極")
                     else:
                         reasons.append(f"近期股價動能偏弱（動能值 {mom:.2f}），追價意願不高")
 
                 # EPS
-                if fund.get("eps") is not None:
-                    eps_v = fund["eps"]
+                if fund.get("eps") is not None and pd.notna(fund["eps"]):
+                    eps_v = float(fund["eps"])
                     if eps_v > 1:
                         reasons.append(f"每股盈餘 ${eps_v:.2f}，獲利能力穩健")
                     elif eps_v > 0:
@@ -859,8 +876,8 @@ try:
                         reasons.append(f"每股盈餘 ${eps_v:.2f}，目前處於虧損")
 
                 # Revenue growth
-                if fund.get("revenue_yoy") is not None:
-                    yoy = fund["revenue_yoy"]
+                if fund.get("revenue_yoy") is not None and pd.notna(fund["revenue_yoy"]):
+                    yoy = float(fund["revenue_yoy"])
                     if yoy > 0.1:
                         reasons.append(f"營收年增率 {yoy:+.1%}，成長趨勢強勁")
                     elif yoy > 0:
@@ -871,8 +888,8 @@ try:
                         reasons.append(f"營收明顯衰退（年減 {abs(yoy):.1%}），需留意")
 
                 # Valuation
-                if fund.get("pe_rank") is not None:
-                    pr = fund["pe_rank"]
+                if fund.get("pe_rank") is not None and pd.notna(fund["pe_rank"]):
+                    pr = float(fund["pe_rank"])
                     if pr < 0.25:
                         reasons.append(f"估值處於歷史低檔（排位 {pr:.0%}），具價值面吸引力")
                     elif pr > 0.75:
@@ -911,14 +928,14 @@ try:
                     # Generate on the fly from fund data
                     risk_parts = []
                     dd = fund.get("drawdown")
-                    if dd is not None and abs(dd) > 0.15:
-                        risk_parts.append(f"近期最大回撤 {abs(dd):.0%}，波動風險需留意")
+                    if dd is not None and pd.notna(dd) and abs(float(dd)) > 0.15:
+                        risk_parts.append(f"近期最大回撤 {abs(float(dd)):.0%}，波動風險需留意")
                     nm = fund.get("net_margin")
-                    if nm is not None and nm < 0:
-                        risk_parts.append(f"淨利率 {nm:.1%}，目前處於虧損狀態")
+                    if nm is not None and pd.notna(nm) and float(nm) < 0:
+                        risk_parts.append(f"淨利率 {float(nm):.1%}，目前處於虧損狀態")
                     yoy = fund.get("revenue_yoy")
-                    if yoy is not None and yoy < -0.1:
-                        risk_parts.append(f"營收年減 {abs(yoy):.0%}，成長動能不足")
+                    if yoy is not None and pd.notna(yoy) and float(yoy) < -0.1:
+                        risk_parts.append(f"營收年減 {abs(float(yoy)):.0%}，成長動能不足")
                     if risk_parts:
                         st.caption("；".join(risk_parts) + "。")
                     else:
@@ -952,8 +969,10 @@ try:
                         f"此數據僅用於展示模型判讀能力，不代表未來走勢。"
                     )
 
-                if fund.get("fiscal_year"):
-                    st.caption(f"📅 財報基準：{fund['fiscal_year']} 年 Q{fund['fiscal_quarter']}")
+                fy = fund.get("fiscal_year")
+                fq = fund.get("fiscal_quarter")
+                if fy is not None and pd.notna(fy) and fq is not None and pd.notna(fq):
+                    st.caption(f"📅 財報基準：{int(fy)} 年 Q{int(fq)}")
 
         if idx < len(recs) - 1:
             st.divider()

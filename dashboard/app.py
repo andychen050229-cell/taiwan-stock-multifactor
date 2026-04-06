@@ -81,23 +81,37 @@ st.markdown("""<style>
     }
 
     /* ── Selectbox dropdown panel (the popover that floats) ── */
-    /* This targets the baseweb listbox popover globally */
-    [data-baseweb="popover"] {
+    /* Extra specificity for Streamlit Cloud light/dark theme compatibility */
+    [data-baseweb="popover"],
+    [data-baseweb="popover"] > div,
+    [data-baseweb="popover"] [data-baseweb="menu"],
+    [data-baseweb="popover"] ul,
+    div[data-baseweb="popover"] {
         background: #1a2332 !important;
+        background-color: #1a2332 !important;
         border: 1px solid rgba(255,255,255,0.15) !important;
         border-radius: 8px !important;
     }
-    [data-baseweb="popover"] li {
+    [data-baseweb="popover"] li,
+    [data-baseweb="popover"] [role="option"],
+    div[data-baseweb="popover"] li {
         color: #e8edf3 !important;
         background: transparent !important;
+        background-color: transparent !important;
     }
-    [data-baseweb="popover"] li:hover {
+    [data-baseweb="popover"] li:hover,
+    [data-baseweb="popover"] [role="option"]:hover,
+    div[data-baseweb="popover"] li:hover {
         background: rgba(99, 110, 250, 0.25) !important;
+        background-color: rgba(99, 110, 250, 0.25) !important;
         color: #ffffff !important;
     }
     /* Selected option highlight */
-    [data-baseweb="popover"] li[aria-selected="true"] {
+    [data-baseweb="popover"] li[aria-selected="true"],
+    [data-baseweb="popover"] [role="option"][aria-selected="true"],
+    div[data-baseweb="popover"] li[aria-selected="true"] {
         background: rgba(99, 110, 250, 0.35) !important;
+        background-color: rgba(99, 110, 250, 0.35) !important;
         color: #ffffff !important;
     }
     /* Selectbox trigger (the button you click) in sidebar */
