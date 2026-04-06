@@ -2,7 +2,9 @@
 
 import streamlit as st
 import json
+import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 from pathlib import Path
 import importlib.util
 
@@ -151,6 +153,33 @@ if drift_data:
                 })
             st.dataframe(rows, use_container_width=True, hide_index=True)
 
+    # Drift severity heatmap across all features
+    if feature_drift:
+        with st.expander("🗺️ 特徵漂移熱力圖 | Feature Drift Heatmap", expanded=False):
+            feat_names = []
+            psi_values = []
+            ks_values = []
+            for feat, vals in sorted(feature_drift.items(), key=lambda x: x[1].get("psi", 0), reverse=True):
+                feat_names.append(feat)
+                psi_values.append(vals.get("psi", 0))
+                ks_values.append(vals.get("ks_stat", 0))
+
+            fig_heat = go.Figure(data=go.Heatmap(
+                z=[psi_values],
+                x=feat_names,
+                y=["PSI"],
+                colorscale=[[0, "#22c55e"], [0.1/max(max(psi_values, default=1), 0.01), "#fef3c7"],
+                            [0.2/max(max(psi_values, default=1), 0.01), "#f59e0b"], [1, "#ef4444"]],
+                hovertemplate="<b>%{x}</b><br>PSI: %{z:.4f}<extra></extra>",
+            ))
+            fig_heat.update_layout(
+                title="所有特徵 PSI 漂移熱力圖",
+                height=200, template="plotly_white",
+                xaxis_tickangle=-45,
+                margin=dict(l=40, r=20, t=50, b=100),
+            )
+            st.plotly_chart(fig_heat, use_container_width=True)
+
     # Label drift
     label_drift = drift_data.get("label_drift", {})
     if label_drift:
@@ -279,20 +308,56 @@ if decay_data:
             )
             st.plotly_chart(fig_ic, use_container_width=True)
 
-    # Half-life analysis
+    # Half-life analysis with visualization
     half_life = decay_data.get("half_life_analysis", {})
     if half_life:
-        st.markdown("#### 信號半衰期分析")
+        st.markdown("#### 信號半衰期分析 | Signal Half-Life")
+
+        hl_rows = []
         for name, vals in half_life.items():
             hl = vals.get("half_life_months")
             note = vals.get("note", "—")
             trend = vals.get("trend_direction", "unknown")
             trend_icon = {"improving": "📈", "decaying": "📉", "stable": "➡️"}.get(trend, "❓")
+            slope = vals.get("monthly_slope", 0)
+            n_months = vals.get("n_months_analyzed", 0)
 
             if hl:
                 st.markdown(f"- {trend_icon} **{name}**: 半衰期 ≈ **{hl} 個月** — {note}")
             else:
                 st.markdown(f"- {trend_icon} **{name}**: {note}")
+
+            hl_rows.append({
+                "天期": name, "趨勢": trend,
+                "月斜率": slope, "分析月數": n_months,
+                "半衰期（月）": hl if hl else "尚未衰減",
+            })
+
+        if hl_rows:
+            st.dataframe(pd.DataFrame(hl_rows), use_container_width=True, hide_index=True)
+
+            # Trend direction visualization
+            fig_hl = go.Figure()
+            for row in hl_rows:
+                color = "#22c55e" if row["趨勢"] == "improving" else ("#ef4444" if row["趨勢"] == "decaying" else "#636EFA")
+                fig_hl.add_trace(go.Bar(
+                    x=[row["天期"]], y=[row["月斜率"]],
+                    marker_color=color, showlegend=False,
+                    text=[f"{row['月斜率']:+.4f}"], textposition="outside",
+                ))
+            fig_hl.add_hline(y=0, line_dash="dash", line_color="gray")
+            fig_hl.update_layout(
+                title="信號月度斜率 | Monthly IC Slope（正值=改善中）",
+                yaxis_title="IC 月斜率", height=300, template="plotly_white",
+            )
+            st.plotly_chart(fig_hl, use_container_width=True)
+
+        st.markdown("""
+        <div style="background:#ecfdf5; border-left:4px solid #059669; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#065f46;">
+        <strong>📌 半衰期解讀：</strong> D+5 與 D+20 的信號均呈<strong>持續改善</strong>趨勢（正斜率），
+        表示模型的預測能力在研究期間內尚未出現衰減。建議再訓練週期：<strong>3-6 個月</strong>。
+        </div>
+        """, unsafe_allow_html=True)
 
     # Alpha decay from Phase 2
     alpha_decay = decay_data.get("alpha_decay_from_p2", {})
@@ -351,3 +416,8 @@ if has_data:
         st.warning("弱信號數量超過強信號，建議縮短再訓練週期或調整特徵組合。")
     elif strong >= 3:
         st.success("D+20 策略信號穩定性最佳（ICIR > 0.5），適合作為主力策略。")
+
+# ===== Footer =====
+st.markdown("---")
+st.caption("📌 信號監控基於 Phase 3 自動分析 ｜ PSI 閾值：0.1（輕微）/ 0.2（顯著）｜ ICIR 閾值：0.2（中等）/ 0.5（強）")
+st.markdown('<div class="page-footer">量化分析工作台 — Signal Monitor | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)

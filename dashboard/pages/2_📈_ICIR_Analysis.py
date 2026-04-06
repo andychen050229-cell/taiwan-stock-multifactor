@@ -7,6 +7,7 @@ import plotly.express as px
 from pathlib import Path
 import importlib.util
 import numpy as np
+import json
 
 _utils_path = Path(__file__).resolve().parent.parent / "utils.py"
 _spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_path))
@@ -342,6 +343,54 @@ try:
         else:
             st.info("💡 IC 時間序列圖表尚未生成。請執行 run_phase2.py 產生。")
 
+        # ===== Phase 3 Signal Stability Integration =====
+        st.divider()
+        st.subheader("🛡️ Phase 3 信號穩定性評估 | Signal Stability Assessment")
+        st.caption("Phase 3 治理模組自動評估的信號品質等級")
+
+        try:
+            _p3_report_dir = Path(__file__).resolve().parent.parent.parent / "outputs" / "reports"
+            if not _p3_report_dir.exists():
+                _p3_report_dir = Path.cwd() / "outputs" / "reports"
+            _p3_files = sorted(_p3_report_dir.glob("phase3_report_*.json"), reverse=True)
+            if _p3_files:
+                with open(_p3_files[0], "r", encoding="utf-8") as _f:
+                    _p3 = json.load(_f)
+                _sig_stability = _p3.get("results", {}).get("step4_signal_decay", {}).get("signal_stability", {})
+                _hl_data = _p3.get("results", {}).get("step4_signal_decay", {}).get("half_life_analysis", {})
+                _retrain = _p3.get("results", {}).get("step4_signal_decay", {}).get("recommended_retrain_cycle", "—")
+
+                if _sig_stability:
+                    stab_rows = []
+                    for name, vals in _sig_stability.items():
+                        stab = vals.get("stability", "weak")
+                        stab_icon = {"strong": "🟢 強", "moderate": "🟡 中", "weak": "🔴 弱"}.get(stab, "⚪")
+                        stab_rows.append({
+                            "策略 | Strategy": name,
+                            "|ICIR|": abs(vals.get("icir", 0)),
+                            "穩定性等級 | Stability": stab_icon,
+                        })
+
+                    df_stab = pd.DataFrame(stab_rows)
+                    s1, s2 = st.columns([3, 1])
+                    with s1:
+                        st.dataframe(df_stab, use_container_width=True, hide_index=True)
+                    with s2:
+                        strong_ct = sum(1 for r in stab_rows if "強" in r["穩定性等級 | Stability"])
+                        st.metric("強信號數量", f"{strong_ct}/{len(stab_rows)}")
+                        st.metric("建議再訓練週期", _retrain)
+
+                    # Half-life summary
+                    if _hl_data:
+                        for h_name, h_vals in _hl_data.items():
+                            trend = h_vals.get("trend_direction", "unknown")
+                            slope = h_vals.get("monthly_slope", 0)
+                            note = h_vals.get("note", "")
+                            icon = {"improving": "📈", "decaying": "📉", "stable": "➡️"}.get(trend, "❓")
+                            st.markdown(f"{icon} **{h_name}**: 月斜率 = {slope:+.4f} — {note}")
+        except Exception:
+            pass  # Phase 3 data is optional
+
         # ===== Alpha Decay =====
         st.divider()
         alpha_decay = results.get("alpha_decay", {})
@@ -367,6 +416,6 @@ except Exception as e:
 
 # ===== Footer & Limitations =====
 st.markdown("---")
-st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ 部分治理功能屬 Phase 3 規劃")
+st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ Phase 3 治理已實現")
 
 st.markdown('<div class="page-footer">量化分析工作台 — ICIR Analysis | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)

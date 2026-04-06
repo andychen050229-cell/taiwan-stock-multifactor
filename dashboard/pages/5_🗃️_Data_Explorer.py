@@ -90,6 +90,46 @@ try:
     </div>
     """, unsafe_allow_html=True)
 
+    # ===== Data Source Documentation =====
+    with st.expander("📚 資料來源詳細文件 | Data Source Documentation", expanded=False):
+        st.markdown("#### FinMind API 資料表與欄位")
+
+        source_data = pd.DataFrame([
+            {"資料表 | Table": "TaiwanStockPrice", "用途 | Usage": "OHLCV 日頻價量資料",
+             "主要欄位 | Key Fields": "date, stock_id, open, max, min, close, Trading_Volume, Trading_money",
+             "更新頻率": "每日收盤後", "筆數（約）": "~960K"},
+            {"資料表 | Table": "TaiwanStockFinancialStatements", "用途 | Usage": "損益表（季頻）",
+             "主要欄位 | Key Fields": "date, stock_id, revenue, operating_income, net_income, operating_margin, gross_margin, cost_of_revenue, operating_expense, ebitda, comprehensive_income",
+             "更新頻率": "每季（依法定申報期限）", "筆數（約）": "~23K"},
+            {"資料表 | Table": "TaiwanStockNews", "用途 | Usage": "新聞文本與情緒",
+             "主要欄位 | Key Fields": "date, stock_id, title, content, source",
+             "更新頻率": "每日", "筆數（約）": "~120K"},
+            {"資料表 | Table": "TaiwanStockInfo", "用途 | Usage": "公司基本資訊",
+             "主要欄位 | Key Fields": "stock_id, stock_name, industry_category, type (上市/上櫃)",
+             "更新頻率": "不定期", "筆數（約）": "~1,932"},
+        ])
+        st.dataframe(source_data, use_container_width=True, hide_index=True)
+
+        st.markdown("#### 資料前處理流程")
+        st.markdown("""
+| 步驟 | 處理內容 | 參數設定 |
+|------|---------|---------|
+| 缺值填補 | 價格欄位前向填充（Forward Fill） | 最多容許 5 個交易日 |
+| 最低交易日 | 過濾交易日過少的股票 | ≥ 60 個交易日 |
+| 除權息校正 | 偵測並修復除權息跳空 | 容差 0.5%，RSI 異常閾值 10 |
+| 文字去重 | MinHash LSH 去除重複新聞 | 128 permutations，Jaccard > 0.8 |
+| PIT 合規 | 財報按法定申報期限延遲對齊 | Q1→5/15, Q2→8/14, Q3→11/14, Q4→+1年3/31 |
+| 洩漏偵測 | 檢查未來資訊關鍵字 + PSI 檢驗 | PSI > 0.25 警告 |
+        """)
+
+        st.markdown("""
+        <div class="insight-box">
+        <strong>📌 PIT（Point-in-Time）合規：</strong><br>
+        所有財報數據嚴格按照台灣 IFRS 法定申報期限進行延遲對齊，確保模型訓練時不會使用到
+        「當時尚未公開」的財報資料。例如：Q1 財報在 5/15 之後才可使用，即使實際公布日期更早。
+        </div>
+        """, unsafe_allow_html=True)
+
     st.divider()
 
 except Exception as e:
@@ -316,9 +356,46 @@ try:
     └── reports/                   # JSON + DOCX 報告
     """, language="text", line_numbers=False)
 
-    # ===== Label Distribution =====
+    # ===== Label Definition Methodology =====
     st.divider()
-    st.subheader("🏷️ 標籤分佈分析 | Label Distribution")
+    st.subheader("🏷️ 標籤定義方法論 | Label Definition Methodology")
+    st.caption("三分類標籤的定義邏輯與閾值設定 | How UP / FLAT / DOWN labels are defined")
+
+    st.markdown("""
+**標籤定義公式 | Label Formula：**
+
+$$
+r_{i,t}^{(h)} = \\frac{P_{i, t+h} - P_{i,t}}{P_{i,t}} \\quad (\\text{h-day forward return})
+$$
+
+根據前瞻報酬率 $r$ 與閾值 $\\theta_h$ 進行分類：
+    """)
+
+    label_def = pd.DataFrame({
+        "預測天期 | Horizon": ["D+1", "D+5", "D+20"],
+        "閾值 θ | Threshold": ["±0.5%", "±1.5%", "±4.0%"],
+        "UP 條件": ["r > +0.5%", "r > +1.5%", "r > +4.0%"],
+        "FLAT 條件": ["-0.5% ≤ r ≤ +0.5%", "-1.5% ≤ r ≤ +1.5%", "-4.0% ≤ r ≤ +4.0%"],
+        "DOWN 條件": ["r < -0.5%", "r < -1.5%", "r < -4.0%"],
+        "設計理由": [
+            "日內波動小，0.5% 為典型日波動中位數",
+            "週度波動，1.5% ≈ 3 × daily vol",
+            "月度趨勢，4.0% ≈ 具有統計與經濟顯著性"
+        ],
+    })
+    st.dataframe(label_def, use_container_width=True, hide_index=True)
+
+    st.markdown("""
+    <div class="insight-box">
+    <strong>📌 閾值設計原則 | Threshold Design Rationale：</strong><br>
+    • 閾值按天期遞增，反映較長持有期間內的自然價格變異程度<br>
+    • FLAT 類別設計為「中間帶」，代表市場無明確方向——這是最難預測的類別<br>
+    • 閾值的選擇參考台股歷史波動率中位數，確保各類別有足夠樣本<br>
+    • 未使用動態閾值（<code>use_dynamic_threshold: false</code>），保持結果可重現性
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("")
     st.caption("各天期的三分類標籤分佈特徵 | Three-class label distribution by horizon")
 
     st.warning("⚠️ 以下標籤分佈數據基於固定歷史資料集。FLAT 類別佔比 ≈ 50% 反映市場多數時間無明確趨勢，符合真實市場特徵。")
@@ -355,6 +432,6 @@ except Exception as e:
 
 # ===== Footer & Limitations =====
 st.markdown("---")
-st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ 部分治理功能屬 Phase 3 規劃")
+st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ Phase 3 治理已實現")
 
 st.markdown('<div class="page-footer">量化分析工作台 — Data Explorer | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)

@@ -186,6 +186,32 @@ def load_report():
 
 
 @st.cache_data
+def load_phase3_report():
+    """Load the latest Phase 3 report JSON with caching."""
+    report_dir = Path(__file__).resolve().parent.parent / "outputs" / "reports"
+    if not report_dir.exists():
+        report_dir = Path.cwd() / "outputs" / "reports"
+    reports = sorted(report_dir.glob("phase3_report_*.json"), reverse=True)
+    if not reports:
+        return None, None
+    with open(reports[0], "r", encoding="utf-8") as f:
+        return json.load(f), reports[0].name
+
+
+@st.cache_data
+def load_governance_json(filename):
+    """Load a governance JSON file with caching."""
+    gov_dir = Path(__file__).resolve().parent.parent / "outputs" / "governance"
+    if not gov_dir.exists():
+        gov_dir = Path.cwd() / "outputs" / "governance"
+    fp = gov_dir / filename
+    if fp.exists():
+        with open(fp, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+
+@st.cache_data
 def load_feature_store():
     """Load the feature store parquet file with caching.
 

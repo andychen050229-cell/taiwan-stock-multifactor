@@ -2,6 +2,8 @@
 
 import streamlit as st
 import json
+import pandas as pd
+import plotly.graph_objects as go
 from pathlib import Path
 import importlib.util
 
@@ -97,6 +99,28 @@ for i, (gate_key, passed) in enumerate(gates.items()):
     label = gate_names_zh.get(gate_key, gate_key)
     col.markdown(f"{icon} **{label}**")
 
+# Quality gate gauge
+n_pass = sum(1 for v in gates.values() if v)
+n_total = len(gates)
+fig_gate = go.Figure(go.Indicator(
+    mode="gauge+number+delta",
+    value=n_pass,
+    delta={"reference": n_total, "suffix": f"/{n_total}"},
+    title={"text": "品質閘門通過率 | Gates Passed"},
+    gauge={
+        "axis": {"range": [0, n_total]},
+        "bar": {"color": "#059669" if n_pass == n_total else "#f59e0b"},
+        "steps": [
+            {"range": [0, n_total * 0.5], "color": "#fee2e2"},
+            {"range": [n_total * 0.5, n_total * 0.8], "color": "#fef3c7"},
+            {"range": [n_total * 0.8, n_total], "color": "#ecfdf5"},
+        ],
+    },
+    number={"suffix": f" / {n_total}"},
+))
+fig_gate.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20))
+st.plotly_chart(fig_gate, use_container_width=True)
+
 st.divider()
 
 # ============================================================
@@ -152,6 +176,37 @@ if dsr_data:
                 "結果": "✅ PASS" if vals.get("dsr_pass") else "❌ FAIL",
             })
         st.dataframe(rows, use_container_width=True, hide_index=True)
+
+        # DSR visual: observed Sharpe vs E[max(SR)] threshold
+        fig_dsr = go.Figure()
+        strat_names = [r["策略"] for r in rows]
+        obs_sharpes = [r["觀察 Sharpe"] for r in rows]
+        bar_colors = ["#22c55e" if r["結果"].startswith("✅") else "#ef4444" for r in rows]
+
+        fig_dsr.add_trace(go.Bar(
+            x=strat_names, y=obs_sharpes, marker_color=bar_colors,
+            text=[f"{s:.3f}" for s in obs_sharpes], textposition="outside",
+            name="觀察 Sharpe",
+        ))
+        fig_dsr.add_hline(
+            y=dsr_data.get("revised_expected_max_sharpe", 0),
+            line_dash="dash", line_color="#f59e0b", line_width=2,
+            annotation_text=f"E[max(SR)] = {dsr_data.get('revised_expected_max_sharpe', 0):.4f}",
+        )
+        fig_dsr.update_layout(
+            title="各策略觀察 Sharpe vs DSR 門檻 | Observed Sharpe vs E[max(SR)]",
+            yaxis_title="Sharpe Ratio", height=380, template="plotly_white",
+            showlegend=False,
+        )
+        st.plotly_chart(fig_dsr, use_container_width=True)
+
+        st.markdown("""
+        <div style="background:#fffbeb; border-left:4px solid #f59e0b; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#78350f;">
+        <strong>📌 DSR 解讀：</strong> 當嘗試 N 種策略時，E[max(SR)] 代表「僅靠運氣」可能達到的最大夏普比率。
+        個別策略的 Sharpe 若低於此門檻，可能只是多重測試的偽陽性結果。<br>
+        <strong>但</strong>：以「單一最佳策略」角度（N=1），ensemble_D5 的 DSR 通過（p=1.0），表明其 Sharpe 不可能僅靠運氣。
+        </div>
+        """, unsafe_allow_html=True)
 
     # Single best
     single = dsr_data.get("single_best_strategy", {})
@@ -264,6 +319,61 @@ if card_files:
     # Full JSON
     with st.expander("📄 完整 Model Card JSON"):
         st.json(card)
+
+    # ===== Model Card Comparison View =====
+    if len(card_files) >= 2:
+        st.markdown("#### 📊 模型效能橫向比較 | Cross-Model Comparison")
+
+        comp_rows = []
+        for cf in card_files:
+            with open(cf, "r", encoding="utf-8") as f:
+                c = json.load(f)
+            ov = c.get("overview", {})
+            pf = c.get("performance", {})
+            cls_p = pf.get("classification", {})
+            sig_p = pf.get("signal_quality", {})
+            bt_p = pf.get("backtest_discount", {})
+            comp_rows.append({
+                "模型": cf.stem.replace("model_card_", ""),
+                "引擎": ov.get("framework", "—"),
+                "天期": ov.get("horizon", "—"),
+                "AUC": cls_p.get("auc", 0),
+                "ICIR": sig_p.get("icir", 0),
+                "Sharpe": bt_p.get("sharpe_ratio", 0),
+                "Max DD": bt_p.get("max_drawdown", 0),
+                "勝率": bt_p.get("win_rate", 0),
+            })
+
+        df_comp = pd.DataFrame(comp_rows)
+        st.dataframe(
+            df_comp.style.background_gradient(subset=["AUC", "ICIR", "Sharpe"], cmap="RdYlGn")
+                .background_gradient(subset=["Max DD"], cmap="RdYlGn_r"),
+            use_container_width=True, hide_index=True
+        )
+
+        # Radar chart comparison
+        categories = ["AUC", "ICIR", "Sharpe", "勝率"]
+        fig_radar = go.Figure()
+        colors = ["#636EFA", "#EF553B", "#00CC96", "#AB63FA"]
+        for i, row in df_comp.iterrows():
+            # Normalize values for radar
+            vals = [
+                min(row["AUC"] / 0.7, 1.0),
+                min(row["ICIR"] / 1.0, 1.0),
+                min(row["Sharpe"] / 2.0, 1.0),
+                row["勝率"],
+            ]
+            fig_radar.add_trace(go.Scatterpolar(
+                r=vals, theta=categories, fill="toself",
+                name=row["模型"], line_color=colors[i % len(colors)]
+            ))
+        fig_radar.update_layout(
+            polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
+            height=400, template="plotly_white",
+            title="模型多維度效能比較 | Multi-Dimensional Comparison"
+        )
+        st.plotly_chart(fig_radar, use_container_width=True)
+
 else:
     st.warning("尚未生成 Model Card")
 
@@ -282,9 +392,26 @@ if pipeline:
     else:
         st.error("部分模型預測管線驗證失敗")
 
-    results = pipeline.get("results", {})
-    for name, res in results.items():
+    results_pipe = pipeline.get("results", {})
+    pipe_rows = []
+    for name, res in results_pipe.items():
         status = res.get("status", "unknown")
         icon = "✅" if status == "pass" else ("⏭️" if status == "skip" else "❌")
         detail = f"avg UP prob = {res.get('avg_up_prob', 0):.4f}" if status == "pass" else res.get("reason", res.get("error", ""))
         st.markdown(f"{icon} **{name}**: {detail}")
+        pipe_rows.append({
+            "模型": name,
+            "狀態": "通過" if status == "pass" else ("跳過" if status == "skip" else "失敗"),
+            "樣本數": res.get("sample_size", 0),
+            "輸出維度": str(res.get("pred_shape", "—")),
+            "平均 UP 機率": f"{res.get('avg_up_prob', 0):.4f}" if status == "pass" else "—",
+        })
+
+    if pipe_rows:
+        with st.expander("📋 管線驗證詳情 | Pipeline Validation Details"):
+            st.dataframe(pd.DataFrame(pipe_rows), use_container_width=True, hide_index=True)
+
+# ===== Footer =====
+st.markdown("---")
+st.caption("📌 Phase 3 模型治理報告自動生成 ｜ 品質閘門 9/9 通過為生產就緒條件 ｜ DSR 採用 Bailey & López de Prado (2014) 方法")
+st.markdown('<div class="page-footer">量化分析工作台 — Model Governance | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)

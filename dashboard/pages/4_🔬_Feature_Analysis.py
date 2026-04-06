@@ -92,11 +92,100 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
     st.markdown("""
     <div class="insight-box">
     <strong>📌 篩選標準 | Criteria：</strong><br>
-    1️⃣ Mutual Information：與標籤的非線性關聯程度<br>
+    1️⃣ Mutual Information：與標籤的非線性關聯程度（保留前 60%，約 26 個）<br>
     2️⃣ VIF：去除多重共線性（VIF > 10 剔除）<br>
     3️⃣ 穩定性：跨 Fold Jaccard 相似度 > 0.3
     </div>
     """, unsafe_allow_html=True)
+
+    # ===== Complete 43 Candidate Features =====
+    with st.expander("📋 完整 43 候選特徵清單與篩選結果 | Full 43 Candidate Features & Filtering Results", expanded=False):
+        st.markdown("以下為五大支柱（Pillar）的全部 43 個候選特徵，標註各階段篩選結果：")
+
+        all_43_features = [
+            # Trend (prefix: trend_)
+            {"特徵名稱 | Feature": "trend_momentum_5", "支柱 | Pillar": "趨勢動能", "說明 | Description": "5 日動量（價格變化率）", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "trend_momentum_10", "支柱 | Pillar": "趨勢動能", "說明 | Description": "10 日動量", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "trend_momentum_20", "支柱 | Pillar": "趨勢動能", "說明 | Description": "20 日動量", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "trend_momentum_60", "支柱 | Pillar": "趨勢動能", "說明 | Description": "60 日動量", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "trend_volatility_20", "支柱 | Pillar": "趨勢動能", "說明 | Description": "20 日波動率", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "trend_volatility_60", "支柱 | Pillar": "趨勢動能", "說明 | Description": "60 日波動率", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "trend_vol_ma_5", "支柱 | Pillar": "趨勢動能", "說明 | Description": "5 日成交量均線", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "trend_vol_ma_20", "支柱 | Pillar": "趨勢動能", "說明 | Description": "20 日成交量均線", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "trend_vol_ma_60", "支柱 | Pillar": "趨勢動能", "說明 | Description": "60 日成交量均線", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "trend_bb_width_20", "支柱 | Pillar": "趨勢動能", "說明 | Description": "20 日布林帶寬度", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "trend_bb_lower_20", "支柱 | Pillar": "趨勢動能", "說明 | Description": "20 日布林帶下軌距離", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "trend_bb_upper_20", "支柱 | Pillar": "趨勢動能", "說明 | Description": "20 日布林帶上軌距離", "MI 篩選": "✅", "VIF 篩選": "❌ 淘汰", "最終": "❌", "淘汰原因": "VIF > 10，與 bb_width 高度共線"},
+            {"特徵名稱 | Feature": "trend_atr_14", "支柱 | Pillar": "趨勢動能", "說明 | Description": "14 日平均真實波幅（ATR）", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "trend_rsi_14", "支柱 | Pillar": "趨勢動能", "說明 | Description": "14 日相對強弱指標", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "trend_macd_signal", "支柱 | Pillar": "趨勢動能", "說明 | Description": "MACD 信號線差值", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "trend_obv_change", "支柱 | Pillar": "趨勢動能", "說明 | Description": "OBV 變化率", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            # Fundamental (prefix: fund_)
+            {"特徵名稱 | Feature": "fund_revenue_yoy", "支柱 | Pillar": "基本面", "說明 | Description": "營收年增率", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "fund_operating_margin_sq", "支柱 | Pillar": "基本面", "說明 | Description": "營業利潤率（季）", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "fund_net_income_sq", "支柱 | Pillar": "基本面", "說明 | Description": "淨利（季）", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "fund_operating_income_sq", "支柱 | Pillar": "基本面", "說明 | Description": "營業利益（季）", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "fund_total_comprehensive_income_sq", "支柱 | Pillar": "基本面", "說明 | Description": "綜合損益總額（季）", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "fund_net_margin_sq", "支柱 | Pillar": "基本面", "說明 | Description": "淨利率（季）", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "fund_cost_of_revenue_sq", "支柱 | Pillar": "基本面", "說明 | Description": "營業成本（季）", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "fund_gross_margin_sq", "支柱 | Pillar": "基本面", "說明 | Description": "毛利率（季）", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "fund_operating_expense_sq", "支柱 | Pillar": "基本面", "說明 | Description": "營業費用（季）", "MI 篩選": "✅", "VIF 篩選": "❌ 淘汰", "最終": "❌", "淘汰原因": "VIF > 10，與 operating_income 共線"},
+            {"特徵名稱 | Feature": "fund_ebitda_sq", "支柱 | Pillar": "基本面", "說明 | Description": "EBITDA（季）", "MI 篩選": "✅", "VIF 篩選": "❌ 淘汰", "最終": "❌", "淘汰原因": "VIF > 10，與 net_income 共線"},
+            {"特徵名稱 | Feature": "fund_revenue_sq", "支柱 | Pillar": "基本面", "說明 | Description": "營收（季）", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            # Valuation (prefix: val_)
+            {"特徵名稱 | Feature": "val_pe", "支柱 | Pillar": "估值", "說明 | Description": "本益比（PE Ratio）", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "val_pe_rank", "支柱 | Pillar": "估值", "說明 | Description": "PE 百分位排名", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "val_pb", "支柱 | Pillar": "估值", "說明 | Description": "股價淨值比（PB Ratio）", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "val_pb_rank", "支柱 | Pillar": "估值", "說明 | Description": "PB 百分位排名", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "val_dividend_yield", "支柱 | Pillar": "估值", "說明 | Description": "股息殖利率", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            # Event (prefix: event_)
+            {"特徵名稱 | Feature": "event_news_count_1d", "支柱 | Pillar": "事件輿情", "說明 | Description": "1 日新聞數量", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "event_news_count_5d", "支柱 | Pillar": "事件輿情", "說明 | Description": "5 日新聞數量", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "event_news_count_20d", "支柱 | Pillar": "事件輿情", "說明 | Description": "20 日新聞數量", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "event_news_sentiment_avg", "支柱 | Pillar": "事件輿情", "說明 | Description": "新聞情緒均值", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "event_news_volatility", "支柱 | Pillar": "事件輿情", "說明 | Description": "新聞情緒波動度", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            # Risk (prefix: risk_)
+            {"特徵名稱 | Feature": "risk_market_ret_20d", "支柱 | Pillar": "風險環境", "說明 | Description": "20 日市場報酬率", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "risk_drawdown", "支柱 | Pillar": "風險環境", "說明 | Description": "個股回撤深度", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
+            {"特徵名稱 | Feature": "risk_beta_60d", "支柱 | Pillar": "風險環境", "說明 | Description": "60 日 Beta 係數", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "risk_idiosyncratic_vol", "支柱 | Pillar": "風險環境", "說明 | Description": "個股特異波動率", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "risk_market_breadth", "支柱 | Pillar": "風險環境", "說明 | Description": "市場廣度指標", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "risk_vix_tw", "支柱 | Pillar": "風險環境", "說明 | Description": "台灣 VIX 波動率指數", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+        ]
+
+        df_all = pd.DataFrame(all_43_features)
+
+        # Color code the table
+        def highlight_status(val):
+            if "✅" in str(val):
+                return "background-color: #ecfdf5; color: #065f46"
+            elif "❌" in str(val):
+                return "background-color: #fef2f2; color: #991b1b"
+            return ""
+
+        st.dataframe(
+            df_all.style.applymap(highlight_status, subset=["MI 篩選", "VIF 篩選", "最終"]),
+            use_container_width=True,
+            hide_index=True,
+            height=600,
+        )
+
+        # Summary stats
+        n_mi_pass = sum(1 for f in all_43_features if "✅" in f["MI 篩選"])
+        n_mi_fail = sum(1 for f in all_43_features if "❌" in f["MI 篩選"])
+        n_vif_fail = sum(1 for f in all_43_features if "❌" in f["VIF 篩選"])
+        n_final = sum(1 for f in all_43_features if "✅" in f["最終"])
+
+        st.markdown(f"""
+        <div class="insight-box">
+        <strong>📊 篩選統計摘要 | Filtering Summary：</strong><br>
+        • 候選特徵總數：<strong>43</strong> 個（五大支柱）<br>
+        • MI 篩選通過：<strong>{n_mi_pass}</strong> 個（淘汰 {n_mi_fail} 個，門檻：MI percentile ≥ 60%）<br>
+        • VIF 去共線性：再淘汰 <strong>{n_vif_fail}</strong> 個（門檻：VIF < 10）<br>
+        • 最終入選：<strong>{n_final}</strong> 個特徵用於模型訓練<br>
+        • 淘汰主因：MI 不足（{n_mi_fail} 個）> VIF 共線性（{n_vif_fail} 個）
+        </div>
+        """, unsafe_allow_html=True)
 
     st.divider()
 
@@ -458,6 +547,6 @@ except Exception as e:
 
 # ===== Footer & Limitations =====
 st.markdown("---")
-st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ 部分治理功能屬 Phase 3 規劃")
+st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ Phase 3 治理已實現")
 
 st.markdown('<div class="page-footer">量化分析工作台 — Feature Analysis | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)
