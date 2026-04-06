@@ -496,14 +496,21 @@ st.markdown("""<style>
         font-weight: 600 !important;
         font-size: 0.85rem !important;
     }
-    /* Selectbox trigger button in sidebar */
+    /* Selectbox trigger button in sidebar — dark background to match dark theme */
     section[data-testid="stSidebar"] [data-baseweb="select"] {
-        background: rgba(255,255,255,0.07) !important;
-        border: 1px solid rgba(255,255,255,0.18) !important;
+        background: #1a2332 !important;
+        background-color: #1a2332 !important;
+        border: 1px solid rgba(255,255,255,0.25) !important;
         border-radius: 8px !important;
     }
     section[data-testid="stSidebar"] [data-baseweb="select"] * {
         color: #e8edf3 !important;
+    }
+    /* Fallback: if trigger renders with light/white bg, ensure text is dark */
+    [data-baseweb="select"][aria-expanded] .css-1dimb5e-singleValue,
+    [data-baseweb="select"] [data-testid="stMarkdownContainer"],
+    [data-baseweb="select"] span[class*="singleValue"] {
+        color: inherit !important;
     }
     /* Hide search cursor in selectbox — force dropdown-only */
     section[data-testid="stSidebar"] [data-baseweb="select"] input {
@@ -659,44 +666,68 @@ try:
     # Load FULL market distribution from recommendations.json (pre-computed from feature_store)
     horizon_key = f"horizon_{horizon}"
     market_dist = None
-    if recommendations and horizon_key in recommendations:
-        market_dist = recommendations[horizon_key].get("market_distribution")
+    has_full_market = False
 
-    if market_dist:
+    # Try recommendations dict first
+    if isinstance(recommendations, dict) and horizon_key in recommendations:
+        md = recommendations[horizon_key].get("market_distribution")
+        if isinstance(md, dict) and "total" in md:
+            market_dist = md
+            has_full_market = True
+
+    if has_full_market and market_dist:
         total_stocks = market_dist["total"]
         up_count = market_dist["up"]
         flat_count = market_dist["flat"]
         down_count = market_dist["down"]
-    elif fs is not None:
+    elif fs is not None and not fs.empty:
         latest_snap = fs[fs["trade_date"] == rec_date]
         total_stocks = len(latest_snap)
         up_count = int((latest_snap[label_col] == 1.0).sum())
         flat_count = int((latest_snap[label_col] == 0.0).sum())
         down_count = int((latest_snap[label_col] == -1.0).sum())
+        has_full_market = total_stocks > len(recs)
     else:
-        total_stocks = len(recs)
-        up_count = int((recs[label_col] == 1.0).sum())
-        flat_count = int((recs[label_col] == 0.0).sum())
-        down_count = int((recs[label_col] == -1.0).sum())
+        # Fallback: only have top-N recommended stocks — cannot show full market
+        total_stocks = 0
+        up_count = 0
+        flat_count = 0
+        down_count = 0
+        has_full_market = False
 
     # Market-level return stats
     ret_stats = market_dist.get("return_stats", {}) if market_dist else {}
-    market_median = ret_stats.get("median", 0)
+    market_median = ret_stats.get("median", None)
 
-    k1, k2, k3, k4, k5 = st.columns(5)
-    with k1:
-        st.metric("分析股票數", f"{int(total_stocks):,}")
-    with k2:
-        pct_up = (up_count / total_stocks * 100) if total_stocks > 0 else 0
-        st.metric("🟢 偏多", f"{int(up_count)}", delta=f"佔 {pct_up:.1f}%", delta_color="off")
-    with k3:
-        pct_flat = (flat_count / total_stocks * 100) if total_stocks > 0 else 0
-        st.metric("🟡 中性", f"{int(flat_count)}", delta=f"佔 {pct_flat:.1f}%", delta_color="off")
-    with k4:
-        pct_down = (down_count / total_stocks * 100) if total_stocks > 0 else 0
-        st.metric("🔴 觀望", f"{int(down_count)}", delta=f"佔 {pct_down:.1f}%", delta_color="off")
-    with k5:
-        st.metric("全市場中位數報酬", f"{market_median:+.1%}")
+    if has_full_market and total_stocks > 0:
+        k1, k2, k3, k4, k5 = st.columns(5)
+        with k1:
+            st.metric("分析股票數", f"{int(total_stocks):,}")
+        with k2:
+            pct_up = (up_count / total_stocks * 100) if total_stocks > 0 else 0
+            st.metric("🟢 偏多", f"{int(up_count)}", delta=f"佔 {pct_up:.1f}%", delta_color="off")
+        with k3:
+            pct_flat = (flat_count / total_stocks * 100) if total_stocks > 0 else 0
+            st.metric("🟡 中性", f"{int(flat_count)}", delta=f"佔 {pct_flat:.1f}%", delta_color="off")
+        with k4:
+            pct_down = (down_count / total_stocks * 100) if total_stocks > 0 else 0
+            st.metric("🔴 觀望", f"{int(down_count)}", delta=f"佔 {pct_down:.1f}%", delta_color="off")
+        with k5:
+            if market_median is not None:
+                st.metric("全市場中位數報酬", f"{market_median:+.1%}")
+            else:
+                st.metric("全市場中位數報酬", "—")
+    else:
+        # No full market data — show simplified overview
+        st.caption(f"📌 以下展示模型篩選的前 {len(recs)} 檔判讀結果。完整市場分佈資料將在下次部署後更新。")
+        k1, k2 = st.columns(2)
+        with k1:
+            st.metric("判讀股數量", f"{len(recs)}")
+        with k2:
+            if market_median is not None:
+                st.metric("全市場中位數報酬", f"{market_median:+.1%}")
+            else:
+                st.metric("全市場中位數報酬", "—")
 
     st.divider()
 
@@ -1092,68 +1123,68 @@ try:
         """)
 
     # ===== Market Distribution =====
-    st.divider()
-    st.markdown("### 📈 全市場信號分佈")
-    st.caption(f"基於 {total_stocks:,} 支股票的模型判讀結果，非僅限上方展示的 Top {len(recs)} 支。")
+    if has_full_market and total_stocks > 0:
+        st.divider()
+        st.markdown("### 📈 全市場信號分佈")
+        st.caption(f"基於 {total_stocks:,} 支股票的模型判讀結果，非僅限上方展示的 Top {len(recs)} 支。")
 
-    dist_col1, dist_col2 = st.columns([1, 1])
+        dist_col1, dist_col2 = st.columns([1, 1])
 
-    with dist_col1:
-        fig_pie = go.Figure(data=[go.Pie(
-            labels=["偏多", "中性", "觀望"],
-            values=[int(up_count), int(flat_count), int(down_count)],
-            marker_colors=["#059669", "#f59e0b", "#dc2626"],
-            hole=0.45,
-            textinfo="label+percent+value",
-            textfont_size=12,
-            insidetextorientation="radial",
-        )])
-        fig_pie.update_layout(
-            title=dict(text=f"D+{horizon} 全市場信號分佈（{total_stocks:,} 支）", font=dict(size=14)),
-            height=400,
-            margin=dict(l=10, r=10, t=60, b=30),
-            legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5),
-            showlegend=True,
-        )
-        st.plotly_chart(fig_pie, use_container_width=True)
-
-    with dist_col2:
-        # Show return stats from pre-computed market distribution
-        ret_stats = market_dist.get("return_stats", {}) if market_dist else {}
-        if ret_stats:
-            mean_ret = ret_stats.get("mean", 0)
-            median_ret = ret_stats.get("median", 0)
-            std_ret = ret_stats.get("std", 0)
-            p10 = ret_stats.get("p10", 0)
-            p90 = ret_stats.get("p90", 0)
-
-            fig_bar = go.Figure()
-            # Bar chart showing return distribution stats
-            categories = ["P10（悲觀）", "中位數", "平均值", "P90（樂觀）"]
-            values = [p10 * 100, median_ret * 100, mean_ret * 100, p90 * 100]
-            colors = ["#dc2626", "#f59e0b", "#636EFA", "#059669"]
-
-            fig_bar.add_trace(go.Bar(
-                x=categories, y=values,
-                marker_color=colors,
-                text=[f"{v:+.1f}%" for v in values],
-                textposition="outside",
-                textfont=dict(size=13, color="#1a1f36"),
-                hovertemplate="%{x}: %{y:.2f}%<extra></extra>",
-            ))
-            fig_bar.add_hline(y=0, line_dash="dash", line_color="#9ca3af", line_width=1)
-            fig_bar.update_layout(
-                title=dict(text=f"D+{horizon} 全市場報酬分佈統計", font=dict(size=14)),
-                yaxis_title="報酬率 (%)",
+        with dist_col1:
+            fig_pie = go.Figure(data=[go.Pie(
+                labels=["偏多", "中性", "觀望"],
+                values=[int(up_count), int(flat_count), int(down_count)],
+                marker_colors=["#059669", "#f59e0b", "#dc2626"],
+                hole=0.45,
+                textinfo="label+percent+value",
+                textfont_size=12,
+                insidetextorientation="radial",
+            )])
+            fig_pie.update_layout(
+                title=dict(text=f"D+{horizon} 全市場信號分佈（{total_stocks:,} 支）", font=dict(size=14)),
                 height=400,
-                template="plotly_white",
-                margin=dict(l=20, r=20, t=60, b=30),
-                showlegend=False,
+                margin=dict(l=10, r=10, t=60, b=30),
+                legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5),
+                showlegend=True,
             )
-            st.plotly_chart(fig_bar, use_container_width=True)
-            st.caption(f"📊 全市場中位數報酬 {median_ret:+.1%}，標準差 {std_ret:.1%}。上方展示的判讀股為模型篩選的少數偏多標的。")
-        else:
-            st.info("無充足的報酬分佈資料")
+            st.plotly_chart(fig_pie, use_container_width=True)
+
+        with dist_col2:
+            # Show return stats from pre-computed market distribution
+            dist_ret_stats = market_dist.get("return_stats", {}) if market_dist else {}
+            if dist_ret_stats:
+                mean_ret = dist_ret_stats.get("mean", 0)
+                median_ret = dist_ret_stats.get("median", 0)
+                std_ret = dist_ret_stats.get("std", 0)
+                p10 = dist_ret_stats.get("p10", 0)
+                p90 = dist_ret_stats.get("p90", 0)
+
+                fig_bar = go.Figure()
+                categories = ["P10（悲觀）", "中位數", "平均值", "P90（樂觀）"]
+                bar_values = [p10 * 100, median_ret * 100, mean_ret * 100, p90 * 100]
+                colors = ["#dc2626", "#f59e0b", "#636EFA", "#059669"]
+
+                fig_bar.add_trace(go.Bar(
+                    x=categories, y=bar_values,
+                    marker_color=colors,
+                    text=[f"{v:+.1f}%" for v in bar_values],
+                    textposition="outside",
+                    textfont=dict(size=13, color="#1a1f36"),
+                    hovertemplate="%{x}: %{y:.2f}%<extra></extra>",
+                ))
+                fig_bar.add_hline(y=0, line_dash="dash", line_color="#9ca3af", line_width=1)
+                fig_bar.update_layout(
+                    title=dict(text=f"D+{horizon} 全市場報酬分佈統計", font=dict(size=14)),
+                    yaxis_title="報酬率 (%)",
+                    height=400,
+                    template="plotly_white",
+                    margin=dict(l=20, r=20, t=60, b=30),
+                    showlegend=False,
+                )
+                st.plotly_chart(fig_bar, use_container_width=True)
+                st.caption(f"📊 全市場中位數報酬 {median_ret:+.1%}，標準差 {std_ret:.1%}。上方展示的判讀股為模型篩選的少數偏多標的。")
+            else:
+                st.info("無充足的報酬分佈資料")
 
     # ===== Volatility Trend =====
     vol_trend = mkt_env.get("recent_volatility_trend", [])
