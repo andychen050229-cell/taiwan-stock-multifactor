@@ -164,7 +164,7 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
             return ""
 
         st.dataframe(
-            df_all.style.applymap(highlight_status, subset=["MI 篩選", "VIF 篩選", "最終"]),
+            df_all.style.map(highlight_status, subset=["MI 篩選", "VIF 篩選", "最終"]),
             use_container_width=True,
             hide_index=True,
             height=600,
@@ -212,7 +212,10 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
 except Exception as e:
     st.error(f"特徵篩選分析失敗：{str(e)}")
 
-    # ===== Selected Features =====
+# ===== Selected Features =====
+try:
+    fsel = results.get("feature_selection", {})
+    stability = results.get("feature_stability", {})
     st.divider()
     st.subheader("📋 最終選擇的特徵 | Selected Features")
 
@@ -308,9 +311,9 @@ except Exception as e:
 
         if imp_rows:
             df_imp = pd.DataFrame(imp_rows)
-            top_per_h = df_imp.groupby("Horizon").apply(
-                lambda x: x.nlargest(10, "Importance"), include_groups=False
-            ).reset_index(drop=True)
+            top_per_h = pd.concat([
+                g.nlargest(10, "Importance") for _, g in df_imp.groupby("Horizon")
+            ]).reset_index(drop=True)
 
             fig_imp = px.bar(
                 top_per_h,
@@ -430,7 +433,7 @@ except Exception as e:
 # ===== SHAP Interpretability =====
 st.divider()
 st.subheader("🔍 SHAP 可解釋性分析 | SHAP Interpretability")
-st.caption("23 因子特徵工程流程：MI 篩選 → VIF 去共線性 → Cross-fold 穩定性驗證")
+st.caption("SHAP 值量化每個特徵對模型預測結果的邊際貢獻 | Feature-level model interpretability")
 
 st.info("""
 **SHAP（SHapley Additive exPlanations）是什麼？**

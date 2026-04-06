@@ -26,6 +26,18 @@ st.markdown("""
 st.title("📡 信號監控")
 st.caption("持續監控模型信號品質、特徵漂移、及再訓練需求")
 
+st.info("""
+**如何閱讀本頁？**
+
+信號監控追蹤模型是否仍然可靠。
+
+PSI（漂移指標）：衡量資料分佈是否改變。PSI < 0.1 = 穩定。
+
+ICIR（信號穩定性）：衡量預測信號是否一致。|ICIR| > 0.5 = 強信號。
+
+半衰期：預測能力多久會衰減一半，決定何時需要重新訓練。
+""")
+
 
 def _load_gov_json(filename):
     gov_dir = Path(__file__).resolve().parent.parent.parent / "outputs" / "governance"

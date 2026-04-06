@@ -318,9 +318,11 @@ try:
     fs_info = results.get("feature_store", {})
     date_range_str = fs_info.get('date_range', '未知 | Unknown')
 
-    st.info(f"""
-    ✅ **最新資料日期 | Latest Date**: 2025年3月1日 (截至儀表板更新時間)<br>
-    📅 **涵蓋期間 | Coverage**: {date_range_str}<br>
+    st.markdown(f"""
+    ✅ **最新資料日期 | Latest Date**: 2025年3月1日 (截至儀表板更新時間)
+
+    📅 **涵蓋期間 | Coverage**: {date_range_str}
+
     🔄 **更新頻率 | Frequency**: 每週五後市 (Weekly after market close)
     """)
 

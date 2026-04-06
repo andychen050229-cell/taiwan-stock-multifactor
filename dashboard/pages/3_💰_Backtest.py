@@ -478,7 +478,8 @@ $$
 except Exception as e:
     st.error(f"成本分析失敗：{str(e)}")
 
-    # ===== Backtest Charts =====
+# ===== Backtest Charts =====
+try:
     st.divider()
     st.subheader("📊 回測圖表 | Backtest Charts")
 
@@ -543,7 +544,7 @@ except Exception as e:
             st.dataframe(pd.DataFrame(dd_rows), use_container_width=True, hide_index=True)
 
 except Exception as e:
-    st.error(f"回測分析發生錯誤：{str(e)}")
+    st.error(f"回測圖表分析發生錯誤：{str(e)}")
 
 # ===== Statistical Validation =====
 try:

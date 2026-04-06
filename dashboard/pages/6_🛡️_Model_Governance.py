@@ -25,6 +25,18 @@ st.markdown("""
 st.title("🛡️ 模型治理報告")
 st.caption("Phase 3 自動生成的治理文件與品質驗證結果")
 
+st.info("""
+**如何閱讀本頁？**
+
+模型治理確保模型的可靠性與透明度。
+
+品質閘門：9 項自動檢測全部通過 = 模型可信賴。
+
+DSR：排除「多重測試」導致的虛假夏普比率，確認策略效能並非偶然。
+
+Model Card：每個模型的「身分證」，記錄訓練過程、效能與限制。
+""")
+
 
 # === Load governance data ===
 def _load_gov_json(filename):

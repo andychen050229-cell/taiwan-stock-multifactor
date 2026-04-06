@@ -550,6 +550,6 @@ st.markdown(f"""
     大數據與商業分析專案 (v2.0) &nbsp;|&nbsp; Built with Streamlit & Plotly &nbsp;|&nbsp;
     Data: FinMind API + 課堂數據集 &nbsp;|&nbsp; Models: LightGBM + XGBoost<br>
     <small>© {footer_year} Course Project &nbsp;|&nbsp;
-    <a href="https://github.com/your-org/taiwan-stock-prediction" target="_blank" style="color: #636EFA; text-decoration: none;">GitHub Repository</a></small>
+    <a href="https://github.com/andychen050229-cell/taiwan-stock-multifactor" target="_blank" style="color: #636EFA; text-decoration: none;">GitHub Repository</a></small>
 </div>
 """, unsafe_allow_html=True)

@@ -19,12 +19,15 @@ icir = st.Page("pages/2_📈_ICIR_Analysis.py", title="ICIR 信號穩定性", ic
 backtest = st.Page("pages/3_💰_Backtest.py", title="策略回測", icon="💰")
 feature = st.Page("pages/4_🔬_Feature_Analysis.py", title="特徵工程分析", icon="🔬")
 data = st.Page("pages/5_🗃️_Data_Explorer.py", title="資料品質總覽", icon="🗃️")
+governance = st.Page("pages/6_🛡️_Model_Governance.py", title="模型治理", icon="🛡️")
+signal = st.Page("pages/7_📡_Signal_Monitor.py", title="信號監控", icon="📡")
 
 # ===== Navigation Structure =====
 pg = st.navigation({
     "": [home],
     "📖 投資解讀": [interpret],
     "🔬 量化研究工作台": [model, icir, backtest, feature, data],
+    "🛡️ 模型治理與監控": [governance, signal],
 })
 
 # ===== Global Dark Sidebar CSS =====
