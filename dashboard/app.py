@@ -80,6 +80,41 @@ st.markdown("""<style>
         color: #ffffff !important;
     }
 
+    /* ── Selectbox dropdown panel (the popover that floats) ── */
+    /* This targets the baseweb listbox popover globally */
+    [data-baseweb="popover"] {
+        background: #1a2332 !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        border-radius: 8px !important;
+    }
+    [data-baseweb="popover"] li {
+        color: #e8edf3 !important;
+        background: transparent !important;
+    }
+    [data-baseweb="popover"] li:hover {
+        background: rgba(99, 110, 250, 0.25) !important;
+        color: #ffffff !important;
+    }
+    /* Selected option highlight */
+    [data-baseweb="popover"] li[aria-selected="true"] {
+        background: rgba(99, 110, 250, 0.35) !important;
+        color: #ffffff !important;
+    }
+    /* Selectbox trigger (the button you click) in sidebar */
+    section[data-testid="stSidebar"] [data-baseweb="select"] {
+        background: rgba(255,255,255,0.07) !important;
+        border: 1px solid rgba(255,255,255,0.18) !important;
+        border-radius: 8px !important;
+    }
+    section[data-testid="stSidebar"] [data-baseweb="select"] * {
+        color: #e8edf3 !important;
+    }
+    /* Hide the text input / search inside selectbox (force dropdown-only) */
+    section[data-testid="stSidebar"] [data-baseweb="select"] input {
+        caret-color: transparent !important;
+        user-select: none !important;
+    }
+
     /* Hide default Streamlit footer and unnecessary UI */
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }

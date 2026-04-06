@@ -4,7 +4,7 @@
 目標使用者：想了解研究方法論與歷史模型判讀的投資者
 核心邏輯：展示固定歷史時期內的模型判讀結果，用於展示研究能力
 展示資訊：
-  - 每期的模型判讀方向（D+5 / D+20）與信心度
+  - 每期的模型判讀方向（D+1 / D+5 / D+20）與信心度
   - 五層資訊架構：方向信心 > 公司基本面 > 解讀原因 > 成本風險 > 歷史觀察值
   - 近期價格走勢圖 + 技術指標（MA20、RSI）
   - 漸進式揭露（expandable 設計）
@@ -410,9 +410,10 @@ def get_company_fundamentals(fs, income, company_id, trade_date, stock_row=None)
 
             drawdown = rec.get("risk_drawdown")
             if pd.notna(drawdown):
-                if drawdown > 0.3:
+                dd_abs = abs(float(drawdown))
+                if dd_abs > 0.3:
                     result["risk_level"] = "高"
-                elif drawdown > 0.15:
+                elif dd_abs > 0.15:
                     result["risk_level"] = "中等"
                 else:
                     result["risk_level"] = "低"
@@ -444,12 +445,13 @@ def get_company_fundamentals(fs, income, company_id, trade_date, stock_row=None)
         if stock_row.get("fund_revenue_yoy"):
             result["revenue_yoy"] = stock_row.get("fund_revenue_yoy")
 
-        # Risk level
+        # Risk level (drawdown stored as negative, use abs)
         drawdown = stock_row.get("risk_drawdown")
         if pd.notna(drawdown):
-            if drawdown > 0.3:
+            dd_abs = abs(float(drawdown))
+            if dd_abs > 0.3:
                 result["risk_level"] = "高"
-            elif drawdown > 0.15:
+            elif dd_abs > 0.15:
                 result["risk_level"] = "中等"
             else:
                 result["risk_level"] = "低"
@@ -491,14 +493,37 @@ st.markdown("""<style>
         font-weight: 600 !important;
         font-size: 0.85rem !important;
     }
-    /* Selectbox & slider inner text */
+    /* Selectbox trigger button in sidebar */
     section[data-testid="stSidebar"] [data-baseweb="select"] {
-        background: rgba(255,255,255,0.08) !important;
-        border: 1px solid rgba(255,255,255,0.15) !important;
+        background: rgba(255,255,255,0.07) !important;
+        border: 1px solid rgba(255,255,255,0.18) !important;
         border-radius: 8px !important;
     }
     section[data-testid="stSidebar"] [data-baseweb="select"] * {
         color: #e8edf3 !important;
+    }
+    /* Hide search cursor in selectbox — force dropdown-only */
+    section[data-testid="stSidebar"] [data-baseweb="select"] input {
+        caret-color: transparent !important;
+        user-select: none !important;
+    }
+    /* Dropdown panel (popover) — dark theme */
+    [data-baseweb="popover"] {
+        background: #1a2332 !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        border-radius: 8px !important;
+    }
+    [data-baseweb="popover"] li {
+        color: #e8edf3 !important;
+        background: transparent !important;
+    }
+    [data-baseweb="popover"] li:hover {
+        background: rgba(99, 110, 250, 0.25) !important;
+        color: #ffffff !important;
+    }
+    [data-baseweb="popover"] li[aria-selected="true"] {
+        background: rgba(99, 110, 250, 0.35) !important;
+        color: #ffffff !important;
     }
     /* Slider track */
     section[data-testid="stSidebar"] .stSlider [data-baseweb="slider"] div {
@@ -521,10 +546,15 @@ st.sidebar.markdown("### 🌱 投資解讀面板")
 st.sidebar.caption("固定歷史資料期間的模型判讀展示")
 st.sidebar.divider()
 
+HORIZON_LABELS = {
+    1: "D+1（隔日 ≈ 1 交易日）",
+    5: "D+5（約一週 ≈ 5 交易日）",
+    20: "D+20（約一個月 ≈ 20 交易日）",
+}
 horizon = st.sidebar.selectbox(
     "📅 預測週期",
-    options=[20, 5],
-    format_func=lambda x: f"D+{x}（{'約一個月 ≈ 20 交易日' if x == 20 else '約一週 ≈ 5 交易日'}）",
+    options=[20, 5, 1],
+    format_func=lambda x: HORIZON_LABELS[x],
     index=0,
 )
 
@@ -601,22 +631,24 @@ try:
         flat_count = int((recs[label_col] == 0.0).sum())
         down_count = int((recs[label_col] == -1.0).sum())
 
-    avg_ret = recs[ret_col].mean()
+    # Market-level return stats
+    ret_stats = market_dist.get("return_stats", {}) if market_dist else {}
+    market_median = ret_stats.get("median", 0)
 
     k1, k2, k3, k4, k5 = st.columns(5)
     with k1:
         st.metric("分析股票數", f"{int(total_stocks):,}")
     with k2:
         pct_up = (up_count / total_stocks * 100) if total_stocks > 0 else 0
-        st.metric("🟢 偏多", f"{int(up_count)}", delta=f"{pct_up:.1f}%")
+        st.metric("🟢 偏多", f"{int(up_count)}", delta=f"佔 {pct_up:.1f}%", delta_color="off")
     with k3:
         pct_flat = (flat_count / total_stocks * 100) if total_stocks > 0 else 0
-        st.metric("🟡 中性", f"{int(flat_count)}", delta=f"{pct_flat:.1f}%")
+        st.metric("🟡 中性", f"{int(flat_count)}", delta=f"佔 {pct_flat:.1f}%", delta_color="off")
     with k4:
         pct_down = (down_count / total_stocks * 100) if total_stocks > 0 else 0
-        st.metric("🔴 觀望", f"{int(down_count)}", delta=f"{pct_down:.1f}%")
+        st.metric("🔴 觀望", f"{int(down_count)}", delta=f"佔 {pct_down:.1f}%", delta_color="off")
     with k5:
-        st.metric("判讀股平均報酬", f"{avg_ret:+.1%}")
+        st.metric("全市場中位數報酬", f"{market_median:+.1%}")
 
     st.divider()
 
@@ -744,18 +776,36 @@ try:
 
         with col_right:
             # ===== LAYER 2: Company Profile (Always Visible) =====
-            st.markdown("""<div class="section-header"><strong>公司資訊</strong></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="section-header"><strong>公司簡介</strong></div>""", unsafe_allow_html=True)
 
+            # Company intro with industry + name
+            stock_industry = stock.get("industry", "")
             if full_name:
-                st.caption(f"{full_name}")
+                intro_line = f"**{full_name}**"
+                if stock_industry and stock_industry != "其他":
+                    intro_line += f"　｜　{stock_industry}"
+                st.markdown(intro_line)
+            elif stock_industry and stock_industry != "其他":
+                st.markdown(f"**產業**：{stock_industry}")
 
             st.metric("目前股價", f"${price:.2f}" if price > 0 else "—")
 
+            # Quick fundamental snapshot
+            fund = get_company_fundamentals(fs, income, cid, rec_date, stock_row=stock)
+            snap_parts = []
+            if fund.get("eps") is not None:
+                eps_v = fund["eps"]
+                snap_parts.append(f"EPS {'$' if eps_v >= 0 else '-$'}{abs(eps_v):.2f}")
+            if fund.get("gross_margin") is not None:
+                snap_parts.append(f"毛利率 {fund['gross_margin']:.1%}")
+            if fund.get("revenue_yoy") is not None:
+                snap_parts.append(f"營收年增 {fund['revenue_yoy']:+.1%}")
+            if snap_parts:
+                st.caption(" · ".join(snap_parts))
+
             # ===== LAYER 3: Why This Interpretation (Expandable) =====
             with st.expander("📖 判讀原因", expanded=True):
-                fund = get_company_fundamentals(fs, income, cid, rec_date, stock_row=stock)
-
-                st.markdown("**基於以下特徵分析：**")
+                st.markdown("**模型觀察到的特徵訊號：**")
 
                 reasons = []
 
@@ -763,69 +813,87 @@ try:
                 if fund.get("momentum") is not None:
                     mom = fund["momentum"]
                     if mom > 0:
-                        reasons.append(f"• 近期價格動能偏強（動能值：{mom:.2f}）")
+                        reasons.append(f"近期股價有向上動能（動能值 {mom:.2f}），買盤相對積極")
                     else:
-                        reasons.append(f"• 近期價格動能相對較弱（動能值：{mom:.2f}）")
+                        reasons.append(f"近期股價動能偏弱（動能值 {mom:.2f}），追價意願不高")
 
                 # EPS
-                if fund.get("eps") is not None and fund["eps"] > 0:
-                    reasons.append(f"• 基本面顯示獲利穩定（最新 EPS：${fund['eps']:.2f}）")
-                elif fund.get("eps") is not None:
-                    reasons.append(f"• 基本面獲利面臨挑戰（最新 EPS：${fund['eps']:.2f}）")
-
-                # Valuation
-                if fund.get("pe_rank") is not None:
-                    if fund["pe_rank"] < 0.3:
-                        reasons.append(f"• 估值相對偏低（本益比排位：{fund['pe_rank']:.1%}）")
-                    elif fund["pe_rank"] > 0.7:
-                        reasons.append(f"• 估值相對偏高（本益比排位：{fund['pe_rank']:.1%}）")
+                if fund.get("eps") is not None:
+                    eps_v = fund["eps"]
+                    if eps_v > 1:
+                        reasons.append(f"每股盈餘 ${eps_v:.2f}，獲利能力穩健")
+                    elif eps_v > 0:
+                        reasons.append(f"每股盈餘 ${eps_v:.2f}，獲利能力尚可")
+                    else:
+                        reasons.append(f"每股盈餘 ${eps_v:.2f}，目前處於虧損")
 
                 # Revenue growth
                 if fund.get("revenue_yoy") is not None:
-                    if fund["revenue_yoy"] > 0.05:
-                        reasons.append(f"• 營收成長趨勢向上（年增率：{fund['revenue_yoy']:+.1%}）")
-                    elif fund["revenue_yoy"] < -0.05:
-                        reasons.append(f"• 營收成長趨勢向下（年增率：{fund['revenue_yoy']:+.1%}）")
+                    yoy = fund["revenue_yoy"]
+                    if yoy > 0.1:
+                        reasons.append(f"營收年增率 {yoy:+.1%}，成長趨勢強勁")
+                    elif yoy > 0:
+                        reasons.append(f"營收小幅成長（年增 {yoy:+.1%}）")
+                    elif yoy > -0.1:
+                        reasons.append(f"營收微幅衰退（年減 {abs(yoy):.1%}）")
+                    else:
+                        reasons.append(f"營收明顯衰退（年減 {abs(yoy):.1%}），需留意")
 
-                # Risk
+                # Valuation
+                if fund.get("pe_rank") is not None:
+                    pr = fund["pe_rank"]
+                    if pr < 0.25:
+                        reasons.append(f"估值處於歷史低檔（排位 {pr:.0%}），具價值面吸引力")
+                    elif pr > 0.75:
+                        reasons.append(f"估值處於歷史高檔（排位 {pr:.0%}），需留意追高風險")
+
+                # Risk level
                 if fund.get("risk_level") == "低":
-                    reasons.append(f"• 歷史波動性相對穩定（風險等級：低）")
+                    reasons.append("歷史波動度低，價格走勢相對穩定")
                 elif fund.get("risk_level") == "高":
-                    reasons.append(f"• 歷史波動性較大（風險等級：高）")
+                    reasons.append("歷史波動度偏高，短期漲跌幅可能較大")
 
                 if not reasons:
-                    st.caption("資料不足，暫不做明確解讀")
+                    st.caption("可用特徵資料有限，暫不做詳細解讀")
                 else:
                     for reason in reasons[:5]:
-                        st.caption(reason)
+                        st.caption(f"• {reason}")
 
-            # ===== LAYER 4: Cost & Risk (Expandable) =====
-            with st.expander("⚠️ 成本與風險"):
-                fund = get_company_fundamentals(fs, income, cid, rec_date, stock_row=stock)
+            # ===== LAYER 4: 風險提示 (Company-Specific) =====
+            with st.expander("⚠️ 風險提示"):
+                # Risk level badge
+                risk_lvl = fund.get("risk_level", "中等")
+                risk_colors = {"低": "#059669", "中等": "#f59e0b", "高": "#dc2626"}
+                risk_color = risk_colors.get(risk_lvl, "#f59e0b")
+                st.markdown(f"""
+<div style="display:inline-block; padding:6px 16px; border-radius:20px;
+     background:{risk_color}22; color:{risk_color}; font-weight:700; font-size:0.9rem;
+     border:1px solid {risk_color}44; margin-bottom:12px;">
+    風險等級：{risk_lvl}
+</div>""", unsafe_allow_html=True)
 
-                c1, c2 = st.columns(2)
-                with c1:
-                    st.metric("風險等級", fund["risk_level"], help="基於歷史最大回撤計算")
+                # Company-specific risk summary from pre-computed data
+                risk_summary = stock.get("risk_summary", "")
+                if risk_summary:
+                    st.caption(risk_summary)
+                else:
+                    # Generate on the fly from fund data
+                    risk_parts = []
+                    dd = fund.get("drawdown")
+                    if dd is not None and abs(dd) > 0.15:
+                        risk_parts.append(f"近期最大回撤 {abs(dd):.0%}，波動風險需留意")
+                    nm = fund.get("net_margin")
+                    if nm is not None and nm < 0:
+                        risk_parts.append(f"淨利率 {nm:.1%}，目前處於虧損狀態")
+                    yoy = fund.get("revenue_yoy")
+                    if yoy is not None and yoy < -0.1:
+                        risk_parts.append(f"營收年減 {abs(yoy):.0%}，成長動能不足")
+                    if risk_parts:
+                        st.caption("；".join(risk_parts) + "。")
+                    else:
+                        st.caption("目前無特別顯著的風險訊號，但仍需持續關注市場變化。")
 
-                with c2:
-                    if fund.get("rsi") is not None:
-                        rsi_val = fund["rsi"]
-                        if rsi_val > 70:
-                            rsi_status = "超買"
-                        elif rsi_val < 30:
-                            rsi_status = "超賣"
-                        else:
-                            rsi_status = "正常"
-                        st.metric("RSI-14", f"{rsi_val:.0f}", help=f"技術面動能：{rsi_status}")
-
-                st.markdown("**交易成本概估**")
-                st.caption("費率僅供參考，實際費率依券商公告")
-                st.caption("""
-- 買進手續費：0.1425%（券商可議價至 2.8 折）
-- 賣出手續費：0.1425%
-- 證交稅（賣出）：0.3%
-- 總成本約 0.6-0.8%（含折扣）
-                """)
+                st.caption("💡 以上風險分析基於歷史數據，僅供研究參考，不構成投資建議。")
 
             # ===== LAYER 5: Historical Observation =====
             with st.expander("📊 歷史觀察值"):
@@ -839,15 +907,22 @@ try:
 **D+{horizon} 歷史觀察報酬**：<span style='color:{ret_color}; font-weight:bold; font-size:1.3em;'>{fwd_ret:+.1%}</span>
                 """, unsafe_allow_html=True)
 
-                st.caption(f"""
-該股票在 {rec_date.strftime('%Y-%m-%d')} 後的 {horizon} 個交易日內，
-歷史上實現了 {fwd_ret:+.1%} 的報酬。此數據僅用於展示模型判讀的準確性，
-無法用於預測未來表現。
-                """)
+                # Use pre-computed observation text if available
+                obs_text = stock.get("observation_text", "")
+                if obs_text:
+                    st.caption(obs_text)
+                else:
+                    period_map = {1: "隔天", 5: "一週", 20: "一個月"}
+                    period_desc = period_map.get(horizon, f"{horizon} 天")
+                    direction = "上漲" if fwd_ret >= 0 else "下跌"
+                    st.caption(
+                        f"該股票在 {rec_date.strftime('%Y-%m-%d')} 後的{period_desc}內，"
+                        f"歷史上出現了 {abs(fwd_ret):.1%} 的{direction}。"
+                        f"此數據僅用於展示模型判讀能力，不代表未來走勢。"
+                    )
 
-                fund = get_company_fundamentals(fs, income, cid, rec_date, stock_row=stock)
                 if fund.get("fiscal_year"):
-                    st.caption(f"財報基準：{fund['fiscal_year']} 年 Q{fund['fiscal_quarter']}")
+                    st.caption(f"📅 財報基準：{fund['fiscal_year']} 年 Q{fund['fiscal_quarter']}")
 
         if idx < len(recs) - 1:
             st.divider()
@@ -855,39 +930,30 @@ try:
     # ===== Comparison Table =====
     st.divider()
     st.markdown("### 📊 多週期判讀對比")
-    st.caption("D+5 與 D+20 的判讀結果對比。")
+    st.caption("D+1、D+5 與 D+20 三個時間維度的判讀結果對比，協助觀察短中長期趨勢是否一致。")
 
-    comp_col1, comp_col2 = st.columns(2)
+    comp_col1, comp_col2, comp_col3 = st.columns(3)
 
-    with comp_col1:
-        st.markdown("**D+5 判讀前 5 名**")
-        recs_5, _ = get_recommendations(fs, companies, horizon=5, n_top=5, recommendations=recommendations)
-        if not recs_5.empty:
-            comp_df_5 = pd.DataFrame({
-                "股票": recs_5["short_name"].fillna(recs_5["company_id"]),
-                "代碼": recs_5["company_id"],
-                "現價": recs_5["closing_price"].apply(lambda x: f"${x:.2f}" if pd.notna(x) and x > 0 else "—"),
-                "歷史報酬": recs_5["fwd_ret_5"].apply(lambda x: f"{x:+.1%}" if pd.notna(x) else "—"),
-                "信號": recs_5["label_5"].apply(lambda x: "🟢 偏多" if x == 1.0 else ("🟡 中性" if x == 0.0 else "🔴 觀望")),
-            })
-            st.dataframe(comp_df_5, use_container_width=True, hide_index=True)
-        else:
-            st.info("無 D+5 判讀資料")
-
-    with comp_col2:
-        st.markdown("**D+20 判讀前 5 名**")
-        recs_20, _ = get_recommendations(fs, companies, horizon=20, n_top=5, recommendations=recommendations)
-        if not recs_20.empty:
-            comp_df_20 = pd.DataFrame({
-                "股票": recs_20["short_name"].fillna(recs_20["company_id"]),
-                "代碼": recs_20["company_id"],
-                "現價": recs_20["closing_price"].apply(lambda x: f"${x:.2f}" if pd.notna(x) and x > 0 else "—"),
-                "歷史報酬": recs_20["fwd_ret_20"].apply(lambda x: f"{x:+.1%}" if pd.notna(x) else "—"),
-                "信號": recs_20["label_20"].apply(lambda x: "🟢 偏多" if x == 1.0 else ("🟡 中性" if x == 0.0 else "🔴 觀望")),
-            })
-            st.dataframe(comp_df_20, use_container_width=True, hide_index=True)
-        else:
-            st.info("無 D+20 判讀資料")
+    for col_widget, h_val, h_label in [
+        (comp_col1, 1, "D+1"),
+        (comp_col2, 5, "D+5"),
+        (comp_col3, 20, "D+20"),
+    ]:
+        with col_widget:
+            st.markdown(f"**{h_label} 判讀前 5 名**")
+            recs_h, _ = get_recommendations(fs, companies, horizon=h_val, n_top=5, recommendations=recommendations)
+            ret_col_h = f"fwd_ret_{h_val}"
+            label_col_h = f"label_{h_val}"
+            if not recs_h.empty:
+                comp_df = pd.DataFrame({
+                    "股票": recs_h["short_name"].fillna(recs_h["company_id"]),
+                    "代碼": recs_h["company_id"],
+                    "歷史報酬": recs_h[ret_col_h].apply(lambda x: f"{x:+.1%}" if pd.notna(x) else "—") if ret_col_h in recs_h.columns else "—",
+                    "信號": recs_h[label_col_h].apply(lambda x: "🟢 偏多" if x == 1.0 else ("🟡 中性" if x == 0.0 else "🔴 觀望")) if label_col_h in recs_h.columns else "—",
+                })
+                st.dataframe(comp_df, use_container_width=True, hide_index=True)
+            else:
+                st.info(f"無 {h_label} 判讀資料")
 
     # ===== Cost Calculator =====
     st.divider()

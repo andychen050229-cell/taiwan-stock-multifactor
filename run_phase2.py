@@ -364,7 +364,7 @@ def main():
                 qr = compute_quintile_returns(qdf, "_score", "_fwd_ret", "trade_date")
                 key = f"{eng}_D{h}"
                 quintile_results[key] = {
-                    "quintile_returns": qr["quintile_annualized"],
+                    "quintile_returns": qr["quintile_returns"],
                     "long_short_spread": round(qr["long_short_spread"], 4),
                     "monotonicity": round(qr["monotonicity_score"], 4),
                 }
