@@ -350,6 +350,8 @@ with col_right:
         <span class="path-tag path-tag-green">策略回測</span>
         <span class="path-tag path-tag-green">特徵工程</span>
         <span class="path-tag path-tag-green">資料探索</span>
+        <span class="path-tag path-tag-green">模型治理</span>
+        <span class="path-tag path-tag-green">信號監控</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -388,10 +390,10 @@ with phase_col2:
 
 with phase_col3:
     st.markdown("""
-<div class="methodology-box" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
-    <div class="methodology-title">🔄 Phase 3: 模型治理與風控強化</div>
-    <div class="methodology-desc" style="font-size: 0.85rem; color: #92400e;">
-        監控與維護 | 規劃中
+<div class="methodology-box" style="background: #f0fdf4; border-left: 4px solid #22c55e;">
+    <div class="methodology-title">✅ Phase 3: 模型治理與風控強化</div>
+    <div class="methodology-desc" style="font-size: 0.85rem; color: #166534;">
+        Model Card | 漂移偵測 | 信號監控 | DSR 驗證 | 已完成
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -450,7 +452,8 @@ stages = [
     ("特徵篩選", "Phase 1"),
     ("模型訓練", "Phase 2"),
     ("策略回測", "Phase 2"),
-    ("儀表板", "用戶界面")
+    ("模型治理", "Phase 3"),
+    ("儀表板", "用戶界面"),
 ]
 x_positions = list(range(len(stages)))
 
@@ -458,7 +461,8 @@ x_positions = list(range(len(stages)))
 phase_colors = {
     "Phase 1": "#10b981",
     "Phase 2": "#10b981",
-    "用戶界面": "#636EFA"
+    "Phase 3": "#f59e0b",
+    "用戶界面": "#636EFA",
 }
 
 # Add stage nodes with phase colors

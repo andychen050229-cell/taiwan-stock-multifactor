@@ -1,0 +1,372 @@
+{
+  "analysis_date": "2026-04-06T20:29:27.844558",
+  "reference_period": {
+    "n_rows": 706648,
+    "date_range": "2023-03-01 00:00:00 ~ 2024-09-13 00:00:00"
+  },
+  "current_period": {
+    "n_rows": 84136,
+    "date_range": "2025-01-17 00:00:00 ~ 2025-03-31 00:00:00"
+  },
+  "feature_drift": {
+    "fund_gross_margin_sq": {
+      "psi": 0.0053,
+      "ks_stat": 0.0388,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 0.254833,
+      "cur_mean": 0.264577,
+      "ref_std": 0.215211,
+      "cur_std": 0.213459,
+      "mean_shift_pct": 3.82,
+      "action": "穩定，無需處理"
+    },
+    "fund_operating_income_sq": {
+      "psi": 0.0084,
+      "ks_stat": 0.0392,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 399947.561778,
+      "cur_mean": 600550.426807,
+      "ref_std": 5780310.170489,
+      "cur_std": 8871262.607043,
+      "mean_shift_pct": 50.16,
+      "action": "穩定，無需處理"
+    },
+    "fund_operating_margin_sq": {
+      "psi": 0.0099,
+      "ks_stat": 0.0491,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": -0.023736,
+      "cur_mean": -0.004849,
+      "ref_std": 0.381777,
+      "cur_std": 0.392318,
+      "mean_shift_pct": 79.57,
+      "action": "穩定，無需處理"
+    },
+    "fund_net_income_sq": {
+      "psi": 0.0039,
+      "ks_stat": 0.0261,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 456299.272351,
+      "cur_mean": 613590.075511,
+      "ref_std": 5322405.213083,
+      "cur_std": 8039101.887104,
+      "mean_shift_pct": 34.47,
+      "action": "穩定，無需處理"
+    },
+    "fund_cost_of_revenue_sq": {
+      "psi": 0.0034,
+      "ks_stat": 0.0235,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 4320948.648875,
+      "cur_mean": 4935111.658942,
+      "ref_std": 36917859.60832,
+      "cur_std": 45635052.958095,
+      "mean_shift_pct": 14.21,
+      "action": "穩定，無需處理"
+    },
+    "fund_total_comprehensive_income_sq": {
+      "psi": 0.0198,
+      "ks_stat": 0.0623,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 617575.783863,
+      "cur_mean": 533864.84011,
+      "ref_std": 6386195.699076,
+      "cur_std": 7715937.409634,
+      "mean_shift_pct": -13.55,
+      "action": "穩定，無需處理"
+    },
+    "fund_net_margin_sq": {
+      "psi": 0.0058,
+      "ks_stat": 0.0364,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 0.009148,
+      "cur_mean": 0.001678,
+      "ref_std": 0.406076,
+      "cur_std": 0.416783,
+      "mean_shift_pct": -81.65,
+      "action": "穩定，無需處理"
+    },
+    "event_news_count_5d": {
+      "psi": 1.5882,
+      "ks_stat": 0.4466,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "high",
+      "ref_mean": 5407.477915,
+      "cur_mean": 2955.47094,
+      "ref_std": 1331.449983,
+      "cur_std": 2567.928943,
+      "mean_shift_pct": -45.34,
+      "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+    },
+    "risk_market_ret_20d": {
+      "psi": 0.4592,
+      "ks_stat": 0.2402,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "high",
+      "ref_mean": 0.000836,
+      "cur_mean": 0.000678,
+      "ref_std": 0.001688,
+      "cur_std": 0.002035,
+      "mean_shift_pct": -18.87,
+      "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+    },
+    "trend_volatility_20": {
+      "psi": 0.0242,
+      "ks_stat": 0.0419,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 0.020612,
+      "cur_mean": 0.01963,
+      "ref_std": 0.014038,
+      "cur_std": 0.011205,
+      "mean_shift_pct": -4.76,
+      "action": "穩定，無需處理"
+    },
+    "trend_volatility_60": {
+      "psi": 0.0171,
+      "ks_stat": 0.0294,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 0.02115,
+      "cur_mean": 0.020891,
+      "ref_std": 0.01255,
+      "cur_std": 0.013344,
+      "mean_shift_pct": -1.23,
+      "action": "穩定，無需處理"
+    },
+    "event_news_count_1d": {
+      "psi": 1.3537,
+      "ks_stat": 0.4777,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "high",
+      "ref_mean": 1086.662538,
+      "cur_mean": 551.586515,
+      "ref_std": 375.213852,
+      "cur_std": 589.953177,
+      "mean_shift_pct": -49.24,
+      "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+    },
+    "trend_bb_width_20": {
+      "psi": 0.0295,
+      "ks_stat": 0.0486,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 0.139467,
+      "cur_mean": 0.13561,
+      "ref_std": 0.120704,
+      "cur_std": 0.100532,
+      "mean_shift_pct": -2.77,
+      "action": "穩定，無需處理"
+    },
+    "trend_atr_14": {
+      "psi": 0.0149,
+      "ks_stat": 0.0406,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 2.959702,
+      "cur_mean": 3.338642,
+      "ref_std": 8.462276,
+      "cur_std": 9.499823,
+      "mean_shift_pct": 12.8,
+      "action": "穩定，無需處理"
+    },
+    "risk_drawdown": {
+      "psi": 0.0065,
+      "ks_stat": 0.0331,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": -0.093509,
+      "cur_mean": -0.099443,
+      "ref_std": 0.079933,
+      "cur_std": 0.08383,
+      "mean_shift_pct": -6.35,
+      "action": "穩定，無需處理"
+    },
+    "val_pe": {
+      "psi": 0.0259,
+      "ks_stat": 0.0629,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 144.839583,
+      "cur_mean": 131.710411,
+      "ref_std": 488.18443,
+      "cur_std": 612.378446,
+      "mean_shift_pct": -9.06,
+      "action": "穩定，無需處理"
+    },
+    "val_pe_rank": {
+      "psi": 0.0104,
+      "ks_stat": 0.0185,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 0.505869,
+      "cur_mean": 0.504352,
+      "ref_std": 0.290803,
+      "cur_std": 0.289534,
+      "mean_shift_pct": -0.3,
+      "action": "穩定，無需處理"
+    },
+    "trend_macd": {
+      "psi": 0.0069,
+      "ks_stat": 0.0134,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 0.401606,
+      "cur_mean": 0.023068,
+      "ref_std": 6.34911,
+      "cur_std": 6.760371,
+      "mean_shift_pct": -94.26,
+      "action": "穩定，無需處理"
+    },
+    "trend_momentum_20": {
+      "psi": 0.0178,
+      "ks_stat": 0.0372,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 0.017628,
+      "cur_mean": 0.013664,
+      "ref_std": 0.123221,
+      "cur_std": 0.105089,
+      "mean_shift_pct": -22.49,
+      "action": "穩定，無需處理"
+    },
+    "trend_bb_lower_20": {
+      "psi": 0.0074,
+      "ks_stat": 0.0301,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 78.431658,
+      "cur_mean": 89.279539,
+      "ref_std": 160.655128,
+      "cur_std": 193.811372,
+      "mean_shift_pct": 13.83,
+      "action": "穩定，無需處理"
+    },
+    "trend_price_vs_ma20": {
+      "psi": 0.0211,
+      "ks_stat": 0.0415,
+      "ks_p_value": 0.0,
+      "ks_significant": true,
+      "psi_level": "low",
+      "ref_mean": 0.005741,
+      "cur_mean": 0.004471,
+      "ref_std": 0.062909,
+      "cur_std": 0.057381,
+      "mean_shift_pct": -22.13,
+      "action": "穩定，無需處理"
+    }
+  },
+  "label_drift": {
+    "label_5": {
+      "distribution": {
+        "-1.0": {
+          "reference_pct": 0.3041,
+          "current_pct": 0.316,
+          "shift": 0.012
+        },
+        "0.0": {
+          "reference_pct": 0.3898,
+          "current_pct": 0.3736,
+          "shift": 0.0162
+        },
+        "1.0": {
+          "reference_pct": 0.3061,
+          "current_pct": 0.3104,
+          "shift": 0.0042
+        }
+      },
+      "max_shift": 0.0162,
+      "significant": false
+    },
+    "label_20": {
+      "distribution": {
+        "-1.0": {
+          "reference_pct": 0.2587,
+          "current_pct": 0.298,
+          "shift": 0.0394
+        },
+        "0.0": {
+          "reference_pct": 0.4533,
+          "current_pct": 0.4174,
+          "shift": 0.0358
+        },
+        "1.0": {
+          "reference_pct": 0.2881,
+          "current_pct": 0.2846,
+          "shift": 0.0035
+        }
+      },
+      "max_shift": 0.0394,
+      "significant": false
+    }
+  },
+  "n_features_analyzed": 21,
+  "n_drifted_features": 3,
+  "n_ks_significant": 21,
+  "overall_severity": "medium",
+  "top_drifted": [
+    {
+      "feature": "event_news_count_5d",
+      "psi": 1.5882,
+      "ks_sig": true,
+      "mean_shift_pct": -45.34,
+      "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+    },
+    {
+      "feature": "event_news_count_1d",
+      "psi": 1.3537,
+      "ks_sig": true,
+      "mean_shift_pct": -49.24,
+      "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+    },
+    {
+      "feature": "risk_market_ret_20d",
+      "psi": 0.4592,
+      "ks_sig": true,
+      "mean_shift_pct": -18.87,
+      "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+    },
+    {
+      "feature": "trend_bb_width_20",
+      "psi": 0.0295,
+      "ks_sig": true,
+      "mean_shift_pct": -2.77,
+      "action": "穩定，無需處理"
+    },
+    {
+      "feature": "val_pe",
+      "psi": 0.0259,
+      "ks_sig": true,
+      "mean_shift_pct": -9.06,
+      "action": "穩定，無需處理"
+    }
+  ],
+  "recommendation": "持續監控，暫不需重新訓練"
+}

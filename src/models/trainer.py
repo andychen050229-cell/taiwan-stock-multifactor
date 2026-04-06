@@ -475,7 +475,7 @@ def save_models(
     for engine, res in model_results.items():
         if "error" in res:
             continue
-        model = res.get("last_model")
+        model = res.get("last_model") or res.get("model")
         if model is not None:
             path = str(Path(output_dir) / f"{engine}_model.joblib")
             joblib.dump({

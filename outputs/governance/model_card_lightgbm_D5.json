@@ -1,0 +1,111 @@
+{
+  "model_card_version": "1.0",
+  "generated_at": "2026-04-06T20:29:20.832447",
+  "source_report": "2026-04-06T14:21:24.186678",
+  "overview": {
+    "name": "lightgbm_D5",
+    "engine": "lightgbm",
+    "horizon": "D+5",
+    "task": "三分類（DOWN / FLAT / UP）",
+    "framework": "LightGBM",
+    "features_count": 21,
+    "features_list": [
+      "fund_gross_margin_sq",
+      "fund_operating_income_sq",
+      "fund_operating_margin_sq",
+      "fund_net_income_sq",
+      "fund_cost_of_revenue_sq",
+      "fund_total_comprehensive_income_sq",
+      "fund_net_margin_sq",
+      "event_news_count_5d",
+      "risk_market_ret_20d",
+      "trend_volatility_20",
+      "trend_volatility_60",
+      "event_news_count_1d",
+      "trend_bb_width_20",
+      "trend_atr_14",
+      "risk_drawdown",
+      "val_pe",
+      "val_pe_rank",
+      "trend_macd",
+      "trend_momentum_20",
+      "trend_bb_lower_20",
+      "trend_price_vs_ma20"
+    ],
+    "training_method": "Purged Walk-Forward CV (expanding window)",
+    "n_folds": 4,
+    "best_params": {}
+  },
+  "intended_use": {
+    "primary": "台灣股市多因子趨勢判讀研究",
+    "users": "量化研究人員、金融科技開發者",
+    "out_of_scope": [
+      "即時交易決策",
+      "個人投資建議",
+      "非台灣市場應用"
+    ],
+    "ethical_considerations": "模型判讀僅基於歷史資料，不構成投資建議。"
+  },
+  "training_data": {
+    "date_range": "2023-03-01 00:00:00 ~ 2025-03-31 00:00:00",
+    "total_rows": 948976,
+    "total_cols": 59,
+    "unique_stocks": 1930,
+    "nan_pct": 0.0739
+  },
+  "performance": {
+    "classification": {
+      "auc": 0.6282,
+      "log_loss": 1.0575,
+      "accuracy": 0.4393,
+      "balanced_accuracy": 0.4375,
+      "f1_weighted": 0.4392
+    },
+    "signal_quality": {
+      "rank_ic": 0.0789,
+      "icir": 0.177,
+      "mean_ic": 0.0336
+    },
+    "backtest_discount": {
+      "annualized_return": 0.307,
+      "sharpe_ratio": 1.1973,
+      "max_drawdown": -0.1899,
+      "win_rate": 0.5664
+    },
+    "bootstrap_ci_95": {
+      "return_lower": 0,
+      "return_upper": 0,
+      "sharpe_lower": 0,
+      "sharpe_upper": 0
+    }
+  },
+  "calibration": {
+    "before_ece": 0.0483,
+    "after_ece": 0.0117,
+    "improvement_pct": 75.85
+  },
+  "statistical_validation": {
+    "permutation_test": {
+      "p_value": 0.0,
+      "z_score": 192.52,
+      "significant": true
+    },
+    "dsr": {
+      "observed_sharpe": 1.1973,
+      "expected_max_sharpe": 1.4322,
+      "dsr_pass": false,
+      "note": "DSR 以 9 策略計算（含不可行 D+1），Phase 3 Step 7 會修正"
+    },
+    "ood_degradation": {
+      "severity": "unknown",
+      "last_fold_auc": null
+    }
+  },
+  "known_limitations": [
+    "D+1 策略因交易成本侵蝕不可行（Sharpe 全為負）",
+    "DSR 未通過：回測期僅 229 天 + 9 策略多重測試懲罰",
+    "2025 Q1 市場震盪導致 Fold 3 OOD 退化（非模型缺陷）",
+    "模型基於歷史資料訓練，市場結構改變時可能失效",
+    "財報特徵有 PIT（Point-in-Time）延遲，最新數據可能滯後"
+  ]
+}

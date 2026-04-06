@@ -1,0 +1,353 @@
+"""Signal Monitor — 信號監控儀表板（Phase 3）"""
+
+import streamlit as st
+import json
+import plotly.graph_objects as go
+from pathlib import Path
+import importlib.util
+
+_utils_path = Path(__file__).resolve().parent.parent / "utils.py"
+_spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_path))
+_utils = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_utils)
+inject_custom_css = _utils.inject_custom_css
+
+inject_custom_css()
+
+# Data Context Banner
+st.markdown("""
+<div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e; margin-bottom:20px;">
+📡 <strong>Phase 3 — 信號監控</strong>：資料漂移偵測 ｜ 信號衰減分析 ｜ 再訓練建議
+</div>
+""", unsafe_allow_html=True)
+
+st.title("📡 信號監控")
+st.caption("持續監控模型信號品質、特徵漂移、及再訓練需求")
+
+
+def _load_gov_json(filename):
+    gov_dir = Path(__file__).resolve().parent.parent.parent / "outputs" / "governance"
+    fp = gov_dir / filename
+    if fp.exists():
+        with open(fp, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+
+drift_data = _load_gov_json("drift_report.json")
+decay_data = _load_gov_json("signal_decay_report.json")
+
+if not drift_data and not decay_data:
+    st.warning("尚未執行 Phase 3，請先執行 `python run_phase3.py`")
+    st.stop()
+
+# --- Sidebar ---
+with st.sidebar:
+    st.markdown("### 📡 信號監控")
+    if decay_data:
+        st.markdown(f"**分析日期**: {decay_data.get('analysis_date', '—')[:10]}")
+        st.markdown(f"**再訓練建議**: {decay_data.get('recommended_retrain_cycle', '—')}")
+        hl_min = decay_data.get("min_half_life_months")
+        if hl_min:
+            st.markdown(f"**最短半衰期**: {hl_min} 個月")
+    if drift_data:
+        st.markdown(f"**漂移嚴重度**: {drift_data.get('overall_severity', '—')}")
+    st.divider()
+
+# ============================================================
+# Section 1: Data Drift Detection
+# ============================================================
+st.header("資料漂移偵測")
+
+st.info("""
+**PSI（Population Stability Index）是什麼？**
+
+PSI 衡量特徵分佈在「參考期」與「當前期」之間的變化程度。
+
+PSI < 0.1 = 穩定，0.1~0.2 = 輕微偏移，> 0.2 = 顯著偏移。
+
+搭配 KS 檢定（Kolmogorov-Smirnov）做雙重確認。
+
+若多數特徵發生顯著偏移，代表市場結構已改變，模型可能需要重新訓練。
+""")
+
+if drift_data:
+    severity = drift_data.get("overall_severity", "unknown")
+    severity_map = {
+        "low": ("🟢 低", "特徵分佈穩定，模型可繼續使用"),
+        "medium": ("🟡 中", "部分特徵輕微偏移，持續監控"),
+        "high": ("🔴 高", "建議盡快重新訓練模型"),
+    }
+    sev_label, sev_desc = severity_map.get(severity, ("⚪ 未知", ""))
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("漂移嚴重度", sev_label)
+    c2.metric("分析特徵數", drift_data.get("n_features_analyzed", 0))
+    c3.metric("PSI > 0.2 特徵數", drift_data.get("n_drifted_features", 0))
+
+    st.markdown(f"**建議**：{sev_desc}")
+
+    # Reference vs Current period
+    ref = drift_data.get("reference_period", {})
+    cur = drift_data.get("current_period", {})
+    rc1, rc2 = st.columns(2)
+    rc1.markdown(f"**參考期**：{ref.get('n_rows', 0):,} 筆 ｜ {ref.get('date_range', '—')}")
+    rc2.markdown(f"**當前期**：{cur.get('n_rows', 0):,} 筆 ｜ {cur.get('date_range', '—')}")
+
+    # Top drifted features chart
+    top_drifted = drift_data.get("top_drifted", [])
+    if top_drifted:
+        st.markdown("#### 漂移最嚴重的特徵（Top 5）")
+
+        fig = go.Figure()
+        names = [d["feature"] for d in top_drifted]
+        psi_vals = [d["psi"] for d in top_drifted]
+        colors = ["#ef4444" if psi > 0.2 else ("#f59e0b" if psi > 0.1 else "#22c55e") for psi in psi_vals]
+
+        fig.add_trace(go.Bar(
+            x=names, y=psi_vals,
+            marker_color=colors,
+            text=[f"{v:.4f}" for v in psi_vals],
+            textposition="outside",
+        ))
+
+        fig.add_hline(y=0.2, line_dash="dash", line_color="red",
+                      annotation_text="顯著偏移 (0.2)", annotation_position="top right")
+        fig.add_hline(y=0.1, line_dash="dash", line_color="orange",
+                      annotation_text="輕微偏移 (0.1)", annotation_position="top right")
+
+        fig.update_layout(
+            yaxis_title="PSI",
+            height=350,
+            margin=dict(t=30, b=30),
+            showlegend=False,
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Per-feature actionable insights
+        has_action = any(d.get("action") for d in top_drifted)
+        if has_action:
+            st.markdown("#### 各特徵處理建議")
+            for d in top_drifted:
+                if d.get("action"):
+                    shift = d.get("mean_shift_pct", 0)
+                    shift_str = f"（均值偏移 {shift:+.1f}%）" if shift else ""
+                    st.markdown(f"- **{d['feature']}**: {d['action']}{shift_str}")
+
+    # Full feature drift table
+    feature_drift = drift_data.get("feature_drift", {})
+    if feature_drift:
+        with st.expander("📋 完整特徵漂移報告", expanded=False):
+            rows = []
+            for feat, vals in sorted(feature_drift.items(), key=lambda x: x[1]["psi"], reverse=True):
+                rows.append({
+                    "特徵": feat,
+                    "PSI": vals.get("psi", 0),
+                    "PSI 等級": {"low": "🟢 低", "medium": "🟡 中", "high": "🔴 高"}.get(vals.get("psi_level", "low"), "—"),
+                    "KS 統計量": vals.get("ks_stat", 0),
+                    "KS 顯著": "是" if vals.get("ks_significant") else "否",
+                    "均值偏移%": vals.get("mean_shift_pct", 0),
+                    "建議": vals.get("action", "—"),
+                })
+            st.dataframe(rows, use_container_width=True, hide_index=True)
+
+    # Label drift
+    label_drift = drift_data.get("label_drift", {})
+    if label_drift:
+        st.markdown("#### 標籤分佈偏移")
+        for label_name, ld in label_drift.items():
+            sig = ld.get("significant", False)
+            icon = "🔴" if sig else "🟢"
+            st.markdown(f"{icon} **{label_name}**: 最大偏移 = {ld.get('max_shift', 0):.4f} "
+                        f"{'（顯著）' if sig else '（穩定）'}")
+
+            dist = ld.get("distribution", {})
+            if dist:
+                rows = []
+                for cls_label, vals in dist.items():
+                    rows.append({
+                        "類別": cls_label,
+                        "參考期占比": f"{vals.get('reference_pct', 0):.2%}",
+                        "當前期占比": f"{vals.get('current_pct', 0):.2%}",
+                        "偏移量": f"{vals.get('shift', 0):.4f}",
+                    })
+                st.dataframe(rows, use_container_width=True, hide_index=True)
+
+else:
+    st.warning("漂移偵測資料尚未生成")
+
+st.divider()
+
+# ============================================================
+# Section 2: Signal Stability
+# ============================================================
+st.header("信號穩定性分析")
+
+st.info("""
+**ICIR（Information Coefficient Information Ratio）是什麼？**
+
+ICIR = Mean(IC) / Std(IC)，衡量信號的穩定程度。
+
+ICIR > 0.5 = 強信號（可靠），0.2~0.5 = 中等信號，< 0.2 = 弱信號。
+
+強信號意味著模型的預測能力在不同時間段表現一致。
+""")
+
+if decay_data:
+    summary = decay_data.get("summary", {})
+    retrain = decay_data.get("recommended_retrain_cycle", "—")
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("強信號", summary.get("strong_signals", 0))
+    c2.metric("中等信號", summary.get("moderate_signals", 0))
+    c3.metric("弱信號", summary.get("weak_signals", 0))
+    c4.metric("建議再訓練週期", retrain)
+
+    best = summary.get("best_signal", "—")
+    st.markdown(f"**最佳信號來源**：{best}")
+
+    # Signal stability by strategy
+    stability = decay_data.get("signal_stability", {})
+    if stability:
+        st.markdown("#### 各策略信號穩定度")
+
+        strat_names = []
+        icir_vals = []
+        colors = []
+
+        for name, vals in stability.items():
+            strat_names.append(name)
+            icir_vals.append(abs(vals.get("icir", 0)))
+            stab = vals.get("stability", "weak")
+            color = "#22c55e" if stab == "strong" else ("#f59e0b" if stab == "moderate" else "#ef4444")
+            colors.append(color)
+
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=strat_names, y=icir_vals,
+            marker_color=colors,
+            text=[f"{v:.3f}" for v in icir_vals],
+            textposition="outside",
+        ))
+
+        fig.add_hline(y=0.5, line_dash="dash", line_color="green",
+                      annotation_text="強信號 (0.5)", annotation_position="top right")
+        fig.add_hline(y=0.2, line_dash="dash", line_color="orange",
+                      annotation_text="中等信號 (0.2)", annotation_position="top right")
+
+        fig.update_layout(
+            yaxis_title="|ICIR|",
+            height=350,
+            margin=dict(t=30, b=30),
+            showlegend=False,
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    # === Monthly IC Trends Chart (NEW) ===
+    monthly_trends = decay_data.get("monthly_ic_trends", {})
+    if monthly_trends:
+        st.markdown("#### 月度 IC 趨勢（Top 特徵）")
+        horizon_choice = st.selectbox(
+            "選擇預測週期",
+            list(monthly_trends.keys()),
+            format_func=lambda x: f"預測週期 {x}",
+        )
+
+        if horizon_choice in monthly_trends:
+            fig_ic = go.Figure()
+            colors_palette = ["#636EFA", "#EF553B", "#00CC96"]
+
+            for i, (feat, months) in enumerate(monthly_trends[horizon_choice].items()):
+                if months:
+                    x_months = [m["month"] for m in months]
+                    y_ics = [m["ic"] for m in months]
+                    fig_ic.add_trace(go.Scatter(
+                        x=x_months, y=y_ics,
+                        mode="lines+markers",
+                        name=feat,
+                        line=dict(color=colors_palette[i % len(colors_palette)]),
+                        marker=dict(size=5),
+                    ))
+
+            fig_ic.add_hline(y=0, line_dash="dash", line_color="gray", line_width=1)
+            fig_ic.update_layout(
+                yaxis_title="Rank IC",
+                xaxis_title="月份",
+                height=350,
+                margin=dict(t=30, b=30),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+            )
+            st.plotly_chart(fig_ic, use_container_width=True)
+
+    # Half-life analysis
+    half_life = decay_data.get("half_life_analysis", {})
+    if half_life:
+        st.markdown("#### 信號半衰期分析")
+        for name, vals in half_life.items():
+            hl = vals.get("half_life_months")
+            note = vals.get("note", "—")
+            trend = vals.get("trend_direction", "unknown")
+            trend_icon = {"improving": "📈", "decaying": "📉", "stable": "➡️"}.get(trend, "❓")
+
+            if hl:
+                st.markdown(f"- {trend_icon} **{name}**: 半衰期 ≈ **{hl} 個月** — {note}")
+            else:
+                st.markdown(f"- {trend_icon} **{name}**: {note}")
+
+    # Alpha decay from Phase 2
+    alpha_decay = decay_data.get("alpha_decay_from_p2", {})
+    if alpha_decay:
+        with st.expander("📊 Phase 2 Alpha Decay 結果"):
+            rows = []
+            for name, vals in alpha_decay.items():
+                rows.append({
+                    "策略": name,
+                    "Mean IC": f"{vals.get('mean_ic', 0):.4f}",
+                    "ICIR": f"{vals.get('icir', 0):.4f}",
+                })
+            st.dataframe(rows, use_container_width=True, hide_index=True)
+
+else:
+    st.warning("信號衰減分析資料尚未生成")
+
+st.divider()
+
+# ============================================================
+# Section 3: Retrain Recommendation Summary
+# ============================================================
+st.header("綜合建議")
+
+has_data = drift_data or decay_data
+
+if has_data:
+    drift_sev = drift_data.get("overall_severity", "—") if drift_data else "—"
+    retrain_cycle = decay_data.get("recommended_retrain_cycle", "—") if decay_data else "—"
+    n_drifted = drift_data.get("n_drifted_features", 0) if drift_data else 0
+    strong = decay_data.get("summary", {}).get("strong_signals", 0) if decay_data else 0
+    weak = decay_data.get("summary", {}).get("weak_signals", 0) if decay_data else 0
+    min_hl = decay_data.get("min_half_life_months") if decay_data else None
+
+    st.markdown(f"""
+| 項目 | 結果 |
+|------|------|
+| 資料漂移嚴重度 | {drift_sev} |
+| PSI > 0.2 特徵數 | {n_drifted} |
+| 強信號數量 | {strong} |
+| 弱信號數量 | {weak} |
+| 最短半衰期 | {f'{min_hl} 個月' if min_hl else '尚未偵測到衰減'} |
+| 建議再訓練週期 | **{retrain_cycle}** |
+""")
+
+    st.markdown("#### 建議行動")
+
+    if drift_sev == "high":
+        st.error("特徵分佈已顯著偏移，建議立即重新訓練模型。")
+    elif drift_sev == "medium":
+        st.warning("部分特徵出現輕微偏移，建議持續監控並按建議週期重新訓練。")
+    else:
+        st.success("特徵分佈穩定，模型可繼續使用。")
+
+    if weak > strong:
+        st.warning("弱信號數量超過強信號，建議縮短再訓練週期或調整特徵組合。")
+    elif strong >= 3:
+        st.success("D+20 策略信號穩定性最佳（ICIR > 0.5），適合作為主力策略。")

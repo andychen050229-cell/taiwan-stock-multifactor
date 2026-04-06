@@ -1,0 +1,982 @@
+{
+  "phase": "Phase 3 — 模型治理 + 部署優化 + 信號監控",
+  "timestamp": "2026-04-06T20:29:15.106623",
+  "env": "dev",
+  "results": {
+    "step1_models": {
+      "expected": [
+        "lightgbm_D5",
+        "xgboost_D5",
+        "lightgbm_D20",
+        "xgboost_D20"
+      ],
+      "available": [
+        "lightgbm_D20",
+        "lightgbm_D5",
+        "xgboost_D20",
+        "xgboost_D5"
+      ],
+      "rebuilt": []
+    },
+    "step2_model_cards": {
+      "generated": [
+        "lightgbm_D20",
+        "lightgbm_D5",
+        "xgboost_D20",
+        "xgboost_D5"
+      ],
+      "count": 4
+    },
+    "step3_drift": {
+      "severity": "medium",
+      "n_drifted": 3,
+      "top_drifted": [
+        {
+          "feature": "event_news_count_5d",
+          "psi": 1.5882,
+          "ks_sig": true,
+          "mean_shift_pct": -45.34,
+          "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+        },
+        {
+          "feature": "event_news_count_1d",
+          "psi": 1.3537,
+          "ks_sig": true,
+          "mean_shift_pct": -49.24,
+          "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+        },
+        {
+          "feature": "risk_market_ret_20d",
+          "psi": 0.4592,
+          "ks_sig": true,
+          "mean_shift_pct": -18.87,
+          "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+        },
+        {
+          "feature": "trend_bb_width_20",
+          "psi": 0.0295,
+          "ks_sig": true,
+          "mean_shift_pct": -2.77,
+          "action": "穩定，無需處理"
+        },
+        {
+          "feature": "val_pe",
+          "psi": 0.0259,
+          "ks_sig": true,
+          "mean_shift_pct": -9.06,
+          "action": "穩定，無需處理"
+        }
+      ]
+    },
+    "step4_signal_decay": {
+      "analysis_date": "2026-04-06T20:29:35.987062",
+      "alpha_decay_from_p2": {
+        "ensemble_1": {
+          "mean_ic": 0.0198,
+          "icir": 2.1907
+        },
+        "ensemble_5": {
+          "mean_ic": 0.0393,
+          "icir": 4.524
+        },
+        "ensemble_20": {
+          "mean_ic": 0.0387,
+          "icir": 5.6494
+        }
+      },
+      "icir_summary": {
+        "lightgbm_D1": {
+          "mean_ic": -0.0039,
+          "icir": -0.0196
+        },
+        "xgboost_D1": {
+          "mean_ic": 0.0074,
+          "icir": 0.0369
+        },
+        "ensemble_D1": {
+          "mean_ic": 0.0012,
+          "icir": 0.006
+        },
+        "lightgbm_D5": {
+          "mean_ic": 0.0336,
+          "icir": 0.177
+        },
+        "xgboost_D5": {
+          "mean_ic": 0.0481,
+          "icir": 0.2554
+        },
+        "ensemble_D5": {
+          "mean_ic": 0.0423,
+          "icir": 0.2178
+        },
+        "lightgbm_D20": {
+          "mean_ic": 0.0614,
+          "icir": 0.7936
+        },
+        "xgboost_D20": {
+          "mean_ic": 0.0619,
+          "icir": 0.8155
+        },
+        "ensemble_D20": {
+          "mean_ic": 0.0619,
+          "icir": 0.8011
+        }
+      },
+      "signal_stability": {
+        "lightgbm_D1": {
+          "icir": -0.0196,
+          "stability": "weak"
+        },
+        "xgboost_D1": {
+          "icir": 0.0369,
+          "stability": "weak"
+        },
+        "ensemble_D1": {
+          "icir": 0.006,
+          "stability": "weak"
+        },
+        "lightgbm_D5": {
+          "icir": 0.177,
+          "stability": "weak"
+        },
+        "xgboost_D5": {
+          "icir": 0.2554,
+          "stability": "moderate"
+        },
+        "ensemble_D5": {
+          "icir": 0.2178,
+          "stability": "moderate"
+        },
+        "lightgbm_D20": {
+          "icir": 0.7936,
+          "stability": "strong"
+        },
+        "xgboost_D20": {
+          "icir": 0.8155,
+          "stability": "strong"
+        },
+        "ensemble_D20": {
+          "icir": 0.8011,
+          "stability": "strong"
+        }
+      },
+      "half_life_analysis": {
+        "D5": {
+          "half_life_months": null,
+          "decay_rate": null,
+          "trend_direction": "improving",
+          "monthly_slope": 0.002611,
+          "peak_month_idx": 10,
+          "n_months_analyzed": 21,
+          "note": "信號持續改善中，尚未出現衰減"
+        },
+        "D20": {
+          "half_life_months": null,
+          "decay_rate": null,
+          "trend_direction": "improving",
+          "monthly_slope": 0.002101,
+          "peak_month_idx": 10,
+          "n_months_analyzed": 21,
+          "note": "信號持續改善中，尚未出現衰減"
+        }
+      },
+      "monthly_ic_trends": {
+        "D5": {
+          "val_pe_rank": [
+            {
+              "month": "2023-05",
+              "ic": -0.15892
+            },
+            {
+              "month": "2023-06",
+              "ic": -0.135665
+            },
+            {
+              "month": "2023-07",
+              "ic": -0.086479
+            },
+            {
+              "month": "2023-08",
+              "ic": -0.173709
+            },
+            {
+              "month": "2023-09",
+              "ic": -0.102797
+            },
+            {
+              "month": "2023-10",
+              "ic": -0.085037
+            },
+            {
+              "month": "2023-11",
+              "ic": -0.096791
+            },
+            {
+              "month": "2023-12",
+              "ic": -0.12323
+            },
+            {
+              "month": "2024-01",
+              "ic": -0.12813
+            },
+            {
+              "month": "2024-02",
+              "ic": -0.136533
+            },
+            {
+              "month": "2024-03",
+              "ic": -0.043214
+            },
+            {
+              "month": "2024-04",
+              "ic": -0.069641
+            },
+            {
+              "month": "2024-05",
+              "ic": -0.065761
+            },
+            {
+              "month": "2024-06",
+              "ic": -0.120126
+            },
+            {
+              "month": "2024-07",
+              "ic": -0.037039
+            },
+            {
+              "month": "2024-08",
+              "ic": -0.097087
+            },
+            {
+              "month": "2024-09",
+              "ic": -0.119553
+            },
+            {
+              "month": "2024-10",
+              "ic": -0.067925
+            },
+            {
+              "month": "2024-11",
+              "ic": -0.039089
+            },
+            {
+              "month": "2024-12",
+              "ic": -0.107158
+            },
+            {
+              "month": "2025-01",
+              "ic": -0.084752
+            },
+            {
+              "month": "2025-02",
+              "ic": -0.1121
+            },
+            {
+              "month": "2025-03",
+              "ic": -0.011789
+            }
+          ],
+          "trend_price_vs_ma20": [
+            {
+              "month": "2023-03",
+              "ic": -0.110607
+            },
+            {
+              "month": "2023-04",
+              "ic": -0.096449
+            },
+            {
+              "month": "2023-05",
+              "ic": -0.014274
+            },
+            {
+              "month": "2023-06",
+              "ic": -0.051373
+            },
+            {
+              "month": "2023-07",
+              "ic": -0.046136
+            },
+            {
+              "month": "2023-08",
+              "ic": -0.035081
+            },
+            {
+              "month": "2023-09",
+              "ic": -0.085326
+            },
+            {
+              "month": "2023-10",
+              "ic": -0.081738
+            },
+            {
+              "month": "2023-11",
+              "ic": -0.087665
+            },
+            {
+              "month": "2023-12",
+              "ic": -0.114231
+            },
+            {
+              "month": "2024-01",
+              "ic": -0.038071
+            },
+            {
+              "month": "2024-02",
+              "ic": -0.019264
+            },
+            {
+              "month": "2024-03",
+              "ic": -0.030074
+            },
+            {
+              "month": "2024-04",
+              "ic": -0.063421
+            },
+            {
+              "month": "2024-05",
+              "ic": -0.065363
+            },
+            {
+              "month": "2024-06",
+              "ic": -0.064946
+            },
+            {
+              "month": "2024-07",
+              "ic": 0.091646
+            },
+            {
+              "month": "2024-08",
+              "ic": -0.275109
+            },
+            {
+              "month": "2024-09",
+              "ic": -0.175216
+            },
+            {
+              "month": "2024-10",
+              "ic": -0.102307
+            },
+            {
+              "month": "2024-11",
+              "ic": -0.062344
+            },
+            {
+              "month": "2024-12",
+              "ic": -0.073583
+            },
+            {
+              "month": "2025-01",
+              "ic": -0.122254
+            },
+            {
+              "month": "2025-02",
+              "ic": -0.15722
+            },
+            {
+              "month": "2025-03",
+              "ic": -0.01458
+            }
+          ],
+          "trend_momentum_20": [
+            {
+              "month": "2023-03",
+              "ic": 0.054579
+            },
+            {
+              "month": "2023-04",
+              "ic": -0.117554
+            },
+            {
+              "month": "2023-05",
+              "ic": -0.060152
+            },
+            {
+              "month": "2023-06",
+              "ic": -0.016133
+            },
+            {
+              "month": "2023-07",
+              "ic": -0.041242
+            },
+            {
+              "month": "2023-08",
+              "ic": -0.055436
+            },
+            {
+              "month": "2023-09",
+              "ic": -0.053318
+            },
+            {
+              "month": "2023-10",
+              "ic": -0.056372
+            },
+            {
+              "month": "2023-11",
+              "ic": -0.067593
+            },
+            {
+              "month": "2023-12",
+              "ic": -0.086387
+            },
+            {
+              "month": "2024-01",
+              "ic": -0.018635
+            },
+            {
+              "month": "2024-02",
+              "ic": -0.010998
+            },
+            {
+              "month": "2024-03",
+              "ic": -0.035878
+            },
+            {
+              "month": "2024-04",
+              "ic": -0.033177
+            },
+            {
+              "month": "2024-05",
+              "ic": -0.039971
+            },
+            {
+              "month": "2024-06",
+              "ic": -0.035527
+            },
+            {
+              "month": "2024-07",
+              "ic": 0.051574
+            },
+            {
+              "month": "2024-08",
+              "ic": -0.252627
+            },
+            {
+              "month": "2024-09",
+              "ic": -0.150323
+            },
+            {
+              "month": "2024-10",
+              "ic": -0.014126
+            },
+            {
+              "month": "2024-11",
+              "ic": -0.039286
+            },
+            {
+              "month": "2024-12",
+              "ic": -0.020945
+            },
+            {
+              "month": "2025-01",
+              "ic": -0.029967
+            },
+            {
+              "month": "2025-02",
+              "ic": -0.261043
+            },
+            {
+              "month": "2025-03",
+              "ic": 0.00588
+            }
+          ]
+        },
+        "D20": {
+          "val_pe_rank": [
+            {
+              "month": "2023-05",
+              "ic": -0.230771
+            },
+            {
+              "month": "2023-06",
+              "ic": -0.195117
+            },
+            {
+              "month": "2023-07",
+              "ic": -0.055916
+            },
+            {
+              "month": "2023-08",
+              "ic": -0.169112
+            },
+            {
+              "month": "2023-09",
+              "ic": -0.124683
+            },
+            {
+              "month": "2023-10",
+              "ic": -0.110065
+            },
+            {
+              "month": "2023-11",
+              "ic": -0.148427
+            },
+            {
+              "month": "2023-12",
+              "ic": -0.183781
+            },
+            {
+              "month": "2024-01",
+              "ic": -0.212142
+            },
+            {
+              "month": "2024-02",
+              "ic": -0.154439
+            },
+            {
+              "month": "2024-03",
+              "ic": -0.023426
+            },
+            {
+              "month": "2024-04",
+              "ic": -0.049643
+            },
+            {
+              "month": "2024-05",
+              "ic": -0.142854
+            },
+            {
+              "month": "2024-06",
+              "ic": -0.152168
+            },
+            {
+              "month": "2024-07",
+              "ic": -0.104992
+            },
+            {
+              "month": "2024-08",
+              "ic": -0.109285
+            },
+            {
+              "month": "2024-09",
+              "ic": -0.161565
+            },
+            {
+              "month": "2024-10",
+              "ic": -0.061265
+            },
+            {
+              "month": "2024-11",
+              "ic": -0.126851
+            },
+            {
+              "month": "2024-12",
+              "ic": -0.131763
+            },
+            {
+              "month": "2025-01",
+              "ic": -0.151205
+            },
+            {
+              "month": "2025-02",
+              "ic": -0.096259
+            },
+            {
+              "month": "2025-03",
+              "ic": 0.019465
+            }
+          ],
+          "val_pe": [
+            {
+              "month": "2023-05",
+              "ic": -0.075776
+            },
+            {
+              "month": "2023-06",
+              "ic": -0.04682
+            },
+            {
+              "month": "2023-07",
+              "ic": -0.094587
+            },
+            {
+              "month": "2023-08",
+              "ic": -0.111799
+            },
+            {
+              "month": "2023-09",
+              "ic": -0.042462
+            },
+            {
+              "month": "2023-10",
+              "ic": -0.097167
+            },
+            {
+              "month": "2023-11",
+              "ic": -0.082499
+            },
+            {
+              "month": "2023-12",
+              "ic": -0.065949
+            },
+            {
+              "month": "2024-01",
+              "ic": -0.099458
+            },
+            {
+              "month": "2024-02",
+              "ic": -0.181191
+            },
+            {
+              "month": "2024-03",
+              "ic": -0.098446
+            },
+            {
+              "month": "2024-04",
+              "ic": -0.073233
+            },
+            {
+              "month": "2024-05",
+              "ic": 0.024223
+            },
+            {
+              "month": "2024-06",
+              "ic": 0.049348
+            },
+            {
+              "month": "2024-07",
+              "ic": -0.10015
+            },
+            {
+              "month": "2024-08",
+              "ic": -0.023355
+            },
+            {
+              "month": "2024-09",
+              "ic": -0.003627
+            },
+            {
+              "month": "2024-10",
+              "ic": -0.084478
+            },
+            {
+              "month": "2024-11",
+              "ic": -0.043192
+            },
+            {
+              "month": "2024-12",
+              "ic": -0.056925
+            },
+            {
+              "month": "2025-01",
+              "ic": -0.091438
+            },
+            {
+              "month": "2025-02",
+              "ic": -0.123079
+            },
+            {
+              "month": "2025-03",
+              "ic": -0.098477
+            }
+          ],
+          "trend_volatility_60": [
+            {
+              "month": "2023-03",
+              "ic": -0.034105
+            },
+            {
+              "month": "2023-04",
+              "ic": -0.092343
+            },
+            {
+              "month": "2023-05",
+              "ic": 0.024925
+            },
+            {
+              "month": "2023-06",
+              "ic": 0.024965
+            },
+            {
+              "month": "2023-07",
+              "ic": -0.133056
+            },
+            {
+              "month": "2023-08",
+              "ic": -0.040833
+            },
+            {
+              "month": "2023-09",
+              "ic": -0.104935
+            },
+            {
+              "month": "2023-10",
+              "ic": -0.042685
+            },
+            {
+              "month": "2023-11",
+              "ic": 0.00845
+            },
+            {
+              "month": "2023-12",
+              "ic": -0.137759
+            },
+            {
+              "month": "2024-01",
+              "ic": 0.084064
+            },
+            {
+              "month": "2024-02",
+              "ic": -0.134197
+            },
+            {
+              "month": "2024-03",
+              "ic": -0.149885
+            },
+            {
+              "month": "2024-04",
+              "ic": -0.116706
+            },
+            {
+              "month": "2024-05",
+              "ic": 0.069313
+            },
+            {
+              "month": "2024-06",
+              "ic": 0.030427
+            },
+            {
+              "month": "2024-07",
+              "ic": -0.051512
+            },
+            {
+              "month": "2024-08",
+              "ic": -0.039289
+            },
+            {
+              "month": "2024-09",
+              "ic": -0.082042
+            },
+            {
+              "month": "2024-10",
+              "ic": -0.130854
+            },
+            {
+              "month": "2024-11",
+              "ic": -0.092165
+            },
+            {
+              "month": "2024-12",
+              "ic": -0.158713
+            },
+            {
+              "month": "2025-01",
+              "ic": -0.006907
+            },
+            {
+              "month": "2025-02",
+              "ic": -0.227242
+            },
+            {
+              "month": "2025-03",
+              "ic": -0.280496
+            }
+          ]
+        }
+      },
+      "top_features_per_horizon": {
+        "D5": [
+          "val_pe_rank",
+          "trend_price_vs_ma20",
+          "trend_momentum_20"
+        ],
+        "D20": [
+          "val_pe_rank",
+          "val_pe",
+          "trend_volatility_60"
+        ]
+      },
+      "min_half_life_months": null,
+      "recommended_retrain_cycle": "3-6 個月（信號穩定）",
+      "summary": {
+        "strong_signals": 3,
+        "moderate_signals": 2,
+        "weak_signals": 4,
+        "best_signal": "xgboost_D20"
+      }
+    },
+    "step5_baselines": {
+      "models": [
+        "lightgbm_D5",
+        "xgboost_D5",
+        "lightgbm_D20",
+        "xgboost_D20"
+      ],
+      "count": 4
+    },
+    "step6_pipeline": {
+      "valid": true,
+      "results": {
+        "lightgbm_D20": {
+          "status": "pass",
+          "sample_size": 10,
+          "pred_shape": [
+            10,
+            3
+          ],
+          "avg_up_prob": 0.20206483424473723
+        },
+        "lightgbm_D5": {
+          "status": "pass",
+          "sample_size": 10,
+          "pred_shape": [
+            10,
+            3
+          ],
+          "avg_up_prob": 0.3072524141791823
+        },
+        "xgboost_D20": {
+          "status": "pass",
+          "sample_size": 10,
+          "pred_shape": [
+            10,
+            3
+          ],
+          "avg_up_prob": 0.23761431872844696
+        },
+        "xgboost_D5": {
+          "status": "pass",
+          "sample_size": 10,
+          "pred_shape": [
+            10,
+            3
+          ],
+          "avg_up_prob": 0.3135579526424408
+        }
+      }
+    },
+    "step7_dsr": {
+      "analysis_date": "2026-04-06T12:29:36",
+      "original_n_strategies": 9,
+      "revised_n_strategies": 6,
+      "original_expected_max_sharpe": 1.6219,
+      "revised_expected_max_sharpe": 1.3866,
+      "original_results": {
+        "lightgbm_D1": {
+          "observed_sharpe": -1.8761,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "xgboost_D1": {
+          "observed_sharpe": -1.8884,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "ensemble_D1": {
+          "observed_sharpe": -1.5921,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "lightgbm_D5": {
+          "observed_sharpe": 1.1973,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "xgboost_D5": {
+          "observed_sharpe": 1.317,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "ensemble_D5": {
+          "observed_sharpe": 1.3352,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "lightgbm_D20": {
+          "observed_sharpe": 1.0922,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "xgboost_D20": {
+          "observed_sharpe": 1.2896,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "ensemble_D20": {
+          "observed_sharpe": 1.2549,
+          "dsr_pass": false,
+          "n_strategies": 6
+        }
+      },
+      "revised_results": {
+        "lightgbm_D5": {
+          "dsr_statistic": -2.8438,
+          "dsr_p_value": 0.0022,
+          "dsr_pass": false,
+          "observed_sharpe": 1.1973,
+          "expected_max_sharpe": 1.3866,
+          "n_strategies": 6
+        },
+        "xgboost_D5": {
+          "dsr_statistic": -1.0455,
+          "dsr_p_value": 0.1479,
+          "dsr_pass": false,
+          "observed_sharpe": 1.317,
+          "expected_max_sharpe": 1.3866,
+          "n_strategies": 6
+        },
+        "ensemble_D5": {
+          "dsr_statistic": -0.7722,
+          "dsr_p_value": 0.22,
+          "dsr_pass": false,
+          "observed_sharpe": 1.3352,
+          "expected_max_sharpe": 1.3866,
+          "n_strategies": 6
+        },
+        "lightgbm_D20": {
+          "dsr_statistic": -4.4231,
+          "dsr_p_value": 0.0,
+          "dsr_pass": false,
+          "observed_sharpe": 1.0922,
+          "expected_max_sharpe": 1.3866,
+          "n_strategies": 6
+        },
+        "xgboost_D20": {
+          "dsr_statistic": -1.4571,
+          "dsr_p_value": 0.0725,
+          "dsr_pass": false,
+          "observed_sharpe": 1.2896,
+          "expected_max_sharpe": 1.3866,
+          "n_strategies": 6
+        },
+        "ensemble_D20": {
+          "dsr_statistic": -1.9784,
+          "dsr_p_value": 0.0239,
+          "dsr_pass": false,
+          "observed_sharpe": 1.2549,
+          "expected_max_sharpe": 1.3866,
+          "n_strategies": 6
+        }
+      },
+      "single_best_strategy": {
+        "name": "ensemble_D5",
+        "sharpe": 1.3352,
+        "dsr_statistic": 20.0527,
+        "dsr_p_value": 1.0,
+        "dsr_pass": true
+      },
+      "revised_best_dsr_pass": false,
+      "final_verdict": "PASS_SINGLE_BEST",
+      "explanation": "單一最佳策略 DSR 通過：若不考慮多重測試，最佳策略的 Sharpe 具統計顯著性。"
+    },
+    "step8_dashboard": {
+      "governance_data_ready": true,
+      "new_pages_planned": [
+        "6_🛡️_Model_Governance.py",
+        "7_📡_Signal_Monitor.py"
+      ]
+    }
+  },
+  "quality_gates": {
+    "models_available": true,
+    "model_cards_generated": true,
+    "drift_analysis_complete": true,
+    "signal_decay_assessed": true,
+    "baseline_established": true,
+    "prediction_pipeline_valid": true,
+    "dsr_revalidated": true,
+    "no_severe_drift": true,
+    "governance_data_ready": true
+  },
+  "overall_status": "PASS"
+}
