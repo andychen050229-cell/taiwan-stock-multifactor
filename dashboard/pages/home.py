@@ -369,11 +369,11 @@ st.markdown("#### 🎯 研究階段進展")
 phase_col1, phase_col2, phase_col3 = st.columns(3)
 
 with phase_col1:
-    st.markdown("""
+    st.markdown(f"""
 <div class="methodology-box" style="background: #f0fdf4; border-left: 4px solid #22c55e;">
     <div class="methodology-title">✅ Phase 1: 資料處理與特徵工程</div>
     <div class="methodology-desc" style="font-size: 0.85rem; color: #166534;">
-        五支柱特徵工程 | 43 → 23 特徵篩選 | 已完成
+        五支柱特徵工程 | 43 → {kpis['n_selected']} 特徵篩選 | 已完成
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -408,11 +408,11 @@ st.markdown("#### 🔧 系統方法論")
 m1, m2, m3 = st.columns(3)
 
 with m1:
-    st.markdown("""
+    st.markdown(f"""
 <div class="methodology-box">
     <div class="methodology-title">🎯 五支柱特徵工程</div>
     <div class="methodology-desc">
-        趨勢動能 · 基本面 · 估值 · 事件輿情 · 風險環境，共 43 候選因子經三階段篩選至 23 個。
+        趨勢動能 · 基本面 · 估值 · 事件輿情 · 風險環境，共 43 候選因子經三階段篩選至 {kpis['n_selected']} 個。
     </div>
 </div>
 """, unsafe_allow_html=True)
