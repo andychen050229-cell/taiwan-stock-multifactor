@@ -1017,7 +1017,7 @@ try:
                     direction = "上漲" if fwd_ret >= 0 else "下跌"
                     st.caption(
                         f"該股票在 {rec_date.strftime('%Y-%m-%d')} 後的{period_desc}內，"
-                        f"歷史上出現了 {abs(fwd_ret):.1%} 的{direction}。"
+                        f"歷史上出現了 {abs(fwd_ret):.1%} 的{direction}。\n"
                         f"此數據僅用於展示模型判讀能力，不代表未來走勢。"
                     )
 
@@ -1250,8 +1250,8 @@ try:
         # Explanatory note
         high_vol_pct = baselines.get("high_vol_days_pct", 0)
         st.caption(
-            f"💡 歷史上約有 {high_vol_pct:.0%} 的交易日處於高波動環境。"
-            f"當波動度突破 P90 線（{vol_p90:.2f}）時，建議降低持倉信心、擴大停損幅度。"
+            f"💡 歷史上約有 {high_vol_pct:.0%} 的交易日處於高波動環境。\n"
+            f"當波動度突破 P90 線（{vol_p90:.2f}）時，建議降低持倉信心、擴大停損幅度。\n"
             f"OOD 分析顯示 D+5 策略在不同波動環境下穩定性最佳。"
         )
 

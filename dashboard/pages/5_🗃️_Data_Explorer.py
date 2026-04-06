@@ -130,8 +130,6 @@ try:
         </div>
         """, unsafe_allow_html=True)
 
-    st.divider()
-
 except Exception as e:
     st.warning(f"Feature Store 概覽載入失敗：{str(e)}")
 

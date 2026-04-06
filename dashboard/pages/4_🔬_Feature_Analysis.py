@@ -492,25 +492,27 @@ st.caption("將股票按預測分數分為五組，檢驗報酬的單調性 | Te
 
 try:
     quintile_data = results.get("quintile_analysis", {})
-    if quintile_data:
+    if not quintile_data:
+        st.info("Quintile 分組分析數據尚未生成。請確認報告中包含 quintile_analysis 資料。")
+    else:
         for key, val in quintile_data.items():
             st.markdown(f"**{key}**")
             c1, c2, c3 = st.columns(3)
             with c1:
                 st.metric(
-                    "Long-Short 差價 | Long-Short Spread",
+                    "Long-Short 差價",
                     f"{val.get('long_short_spread', 0):+.2%}",
                     delta="Q5 - Q1 報酬"
                 )
             with c2:
                 st.metric(
-                    "單調性 | Monotonicity",
+                    "單調性",
                     f"{val.get('monotonicity', 0):.3f}",
                     delta="0-1 越高越好"
                 )
             with c3:
                 st.metric(
-                    "Sharpe | Sharpe Ratio",
+                    "Sharpe Ratio",
                     f"{val.get('sharpe', 0):.3f}",
                     delta="Long-Short 策略"
                 )
@@ -520,18 +522,20 @@ try:
                 fig_q = go.Figure()
 
                 # Bar chart
+                q_keys = list(qr.keys())
+                q_vals = list(qr.values())
                 fig_q.add_trace(go.Bar(
-                    x=list(qr.keys()),
-                    y=list(qr.values()),
-                    marker_color=["#EF553B", "#FFA15A", "#636EFA", "#AB63FA", "#00CC96"],
-                    text=[f"{v:+.1%}" for v in qr.values()],
+                    x=[f"Q{k}" for k in q_keys],
+                    y=q_vals,
+                    marker_color=["#EF553B", "#FFA15A", "#636EFA", "#AB63FA", "#00CC96"][:len(q_keys)],
+                    text=[f"{v:+.1%}" for v in q_vals],
                     textposition="outside",
                     hovertemplate="<b>%{x}</b><br>Return: %{y:.2%}<extra></extra>"
                 ))
 
                 fig_q.update_layout(
                     title=f"{key} Quintile 報酬 | Quintile Returns",
-                    xaxis_title="分組 | Quintile (1=最低分數 Lowest, 5=最高分數 Highest)",
+                    xaxis_title="分組 | Quintile (Q1=最低分數, Q5=最高分數)",
                     yaxis_title="年化報酬 | Annualized Return",
                     yaxis_tickformat=".1%",
                     height=380,
@@ -539,23 +543,26 @@ try:
                     hovermode="x unified"
                 )
 
-                # Add monotonicity reference line
-                if qr:
-                    avg_return = np.mean(list(qr.values()))
-                    fig_q.add_hline(y=avg_return, line_dash="dash", line_color="gray", annotation_text="平均報酬 | Mean")
+                avg_return = np.mean(q_vals)
+                fig_q.add_hline(y=avg_return, line_dash="dash", line_color="gray", annotation_text="平均報酬 | Mean")
+                fig_q.add_hline(y=0, line_color="gray", line_dash="dot")
 
                 st.plotly_chart(fig_q, use_container_width=True)
 
-                st.markdown("""
-                <div class="insight-box">
-                <strong>📌 解讀 | Interpretation：</strong><br>
-                理想情況下，報酬應從 Q1 到 Q5 單調遞增（或 Q5 明顯優於 Q1）。<br>
-                若不存在單調性，表示模型信號不夠清晰，或包含噪音。
-                </div>
-                """, unsafe_allow_html=True)
+            st.markdown("")  # spacing between strategies
+
+        st.markdown("""
+        <div class="insight-box">
+        <strong>📌 解讀 | Interpretation：</strong><br>
+        理想情況下，報酬應從 Q1 到 Q5 單調遞增（或 Q5 明顯優於 Q1）。<br>
+        若不存在單調性，表示模型信號不夠清晰，或包含噪音。
+        </div>
+        """, unsafe_allow_html=True)
 
 except Exception as e:
     st.warning(f"Quintile 分析失敗：{str(e)}")
+    import traceback
+    st.code(traceback.format_exc())
 
 # ===== Footer & Limitations =====
 st.markdown("---")
