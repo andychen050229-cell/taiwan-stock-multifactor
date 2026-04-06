@@ -816,6 +816,130 @@
       }
     }
   },
+  "market_environment": {
+    "historical_baselines": {
+      "vol_regime_mean": 1.001,
+      "vol_regime_std": 0.265,
+      "vol_regime_p75": 1.082,
+      "vol_regime_p90": 1.583,
+      "high_vol_days_pct": 0.1149
+    },
+    "horizon_1": {
+      "rec_date": "2025-03-28",
+      "volatility_regime": 0.873,
+      "market_ret_20d": -0.0025,
+      "volatility_20d": 0.017,
+      "alert_level": "normal",
+      "alert_text": "✅ 市場波動度處於正常範圍（波動指標 0.87，歷史均值 1.00），模型運作環境穩定。",
+      "market_trend": "盤整震盪",
+      "market_trend_icon": "↔️",
+      "trend_text": "↔️ 大盤近 20 日報酬 -0.25%，走勢盤整震盪。"
+    },
+    "horizon_5": {
+      "rec_date": "2025-03-24",
+      "volatility_regime": 0.852,
+      "market_ret_20d": -0.0015,
+      "volatility_20d": 0.0157,
+      "alert_level": "normal",
+      "alert_text": "✅ 市場波動度處於正常範圍（波動指標 0.85，歷史均值 1.00），模型運作環境穩定。",
+      "market_trend": "盤整震盪",
+      "market_trend_icon": "↔️",
+      "trend_text": "↔️ 大盤近 20 日報酬 -0.15%，走勢盤整震盪。"
+    },
+    "horizon_20": {
+      "rec_date": "2025-03-03",
+      "volatility_regime": 0.888,
+      "market_ret_20d": 0.0021,
+      "volatility_20d": 0.0173,
+      "alert_level": "normal",
+      "alert_text": "✅ 市場波動度處於正常範圍（波動指標 0.89，歷史均值 1.00），模型運作環境穩定。",
+      "market_trend": "盤整震盪",
+      "market_trend_icon": "↔️",
+      "trend_text": "↔️ 大盤近 20 日報酬 +0.21%，走勢盤整震盪。"
+    },
+    "recent_volatility_trend": [
+      {
+        "date": "2025-03-04",
+        "vol_regime": 0.879
+      },
+      {
+        "date": "2025-03-05",
+        "vol_regime": 0.872
+      },
+      {
+        "date": "2025-03-06",
+        "vol_regime": 0.87
+      },
+      {
+        "date": "2025-03-07",
+        "vol_regime": 0.873
+      },
+      {
+        "date": "2025-03-10",
+        "vol_regime": 0.873
+      },
+      {
+        "date": "2025-03-11",
+        "vol_regime": 0.875
+      },
+      {
+        "date": "2025-03-12",
+        "vol_regime": 0.878
+      },
+      {
+        "date": "2025-03-13",
+        "vol_regime": 0.891
+      },
+      {
+        "date": "2025-03-14",
+        "vol_regime": 0.889
+      },
+      {
+        "date": "2025-03-17",
+        "vol_regime": 0.89
+      },
+      {
+        "date": "2025-03-18",
+        "vol_regime": 0.883
+      },
+      {
+        "date": "2025-03-19",
+        "vol_regime": 0.886
+      },
+      {
+        "date": "2025-03-20",
+        "vol_regime": 0.872
+      },
+      {
+        "date": "2025-03-21",
+        "vol_regime": 0.849
+      },
+      {
+        "date": "2025-03-24",
+        "vol_regime": 0.852
+      },
+      {
+        "date": "2025-03-25",
+        "vol_regime": 0.855
+      },
+      {
+        "date": "2025-03-26",
+        "vol_regime": 0.846
+      },
+      {
+        "date": "2025-03-27",
+        "vol_regime": 0.852
+      },
+      {
+        "date": "2025-03-28",
+        "vol_regime": 0.873
+      },
+      {
+        "date": "2025-03-31",
+        "vol_regime": 0.983
+      }
+    ]
+  },
   "backtest_summary": {
     "model_horizon_1": {
       "lightgbm": {

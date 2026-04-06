@@ -602,6 +602,37 @@ try:
         st.info(f"在 D+{horizon} 週期的判讀中，目前沒有偏多信號。")
         st.stop()
 
+    # ===== Market Environment Alert =====
+    mkt_env = recommendations.get("market_environment", {}) if recommendations else {}
+    horizon_env = mkt_env.get(f"horizon_{horizon}", {})
+
+    if horizon_env:
+        alert_level = horizon_env.get("alert_level", "normal")
+        alert_text = horizon_env.get("alert_text", "")
+        trend_text = horizon_env.get("trend_text", "")
+
+        if alert_level == "high":
+            alert_bg = "#fef2f2"
+            alert_border = "#dc2626"
+            alert_icon = "🔴"
+        elif alert_level == "elevated":
+            alert_bg = "#fffbeb"
+            alert_border = "#f59e0b"
+            alert_icon = "🟡"
+        else:
+            alert_bg = "#ecfdf5"
+            alert_border = "#059669"
+            alert_icon = "🟢"
+
+        st.markdown(f"""
+<div style="background:{alert_bg}; border-left:4px solid {alert_border};
+     border-radius:8px; padding:14px 18px; margin:8px 0 16px 0;">
+    <strong>{alert_icon} 市場環境監測</strong><br>
+    <span style="font-size:0.9rem;">{alert_text}</span><br>
+    <span style="font-size:0.85rem; color:#6b7280;">{trend_text}</span>
+</div>
+        """, unsafe_allow_html=True)
+
     # ===== Market Overview =====
     st.markdown("### 📊 本期市場概況")
 
@@ -1104,6 +1135,54 @@ try:
             st.caption(f"📊 全市場中位數報酬 {median_ret:+.1%}，標準差 {std_ret:.1%}。上方展示的判讀股為模型篩選的少數偏多標的。")
         else:
             st.info("無充足的報酬分佈資料")
+
+    # ===== Volatility Trend =====
+    vol_trend = mkt_env.get("recent_volatility_trend", [])
+    baselines = mkt_env.get("historical_baselines", {})
+
+    if vol_trend and len(vol_trend) > 5:
+        st.divider()
+        st.markdown("### 🌡️ 市場波動度趨勢（近 20 日）")
+        st.caption("波動度指標反映市場的不確定性程度。當波動度升高時，模型預測的不確定性也隨之增加。")
+
+        vol_dates = [v["date"] for v in vol_trend]
+        vol_vals = [v["vol_regime"] for v in vol_trend]
+        vol_mean = baselines.get("vol_regime_mean", 1.0)
+        vol_p75 = baselines.get("vol_regime_p75", 1.2)
+        vol_p90 = baselines.get("vol_regime_p90", 1.4)
+
+        fig_vol = go.Figure()
+        fig_vol.add_trace(go.Scatter(
+            x=vol_dates, y=vol_vals,
+            mode="lines+markers",
+            line=dict(color="#636EFA", width=2.5),
+            marker=dict(size=5),
+            name="波動度指標",
+            fill="tozeroy",
+            fillcolor="rgba(99, 110, 250, 0.08)",
+        ))
+        fig_vol.add_hline(y=vol_mean, line_dash="dash", line_color="#059669",
+                          annotation_text=f"歷史均值 ({vol_mean:.2f})", line_width=1)
+        fig_vol.add_hline(y=vol_p75, line_dash="dot", line_color="#f59e0b",
+                          annotation_text=f"P75 警戒線 ({vol_p75:.2f})", line_width=1)
+        fig_vol.add_hline(y=vol_p90, line_dash="dash", line_color="#dc2626",
+                          annotation_text=f"P90 高波動 ({vol_p90:.2f})", line_width=1)
+        fig_vol.update_layout(
+            height=280,
+            template="plotly_white",
+            margin=dict(l=20, r=20, t=20, b=30),
+            yaxis_title="波動度指標",
+            showlegend=False,
+        )
+        st.plotly_chart(fig_vol, use_container_width=True)
+
+        # Explanatory note
+        high_vol_pct = baselines.get("high_vol_days_pct", 0)
+        st.caption(
+            f"💡 歷史上約有 {high_vol_pct:.0%} 的交易日處於高波動環境。"
+            f"當波動度突破 P90 線（{vol_p90:.2f}）時，建議降低持倉信心、擴大停損幅度。"
+            f"OOD 分析顯示 D+5 策略在不同波動環境下穩定性最佳。"
+        )
 
     # ===== Investment Education =====
     st.divider()
