@@ -1,0 +1,32 @@
+# Streamlit Cloud dependencies (dashboard-only subset)
+# Full requirements for running Phase 1-6 pipelines: see 程式碼/requirements_app.txt
+streamlit>=1.36.0
+plotly>=5.18.0
+pandas>=2.0.0
+numpy>=1.24.0
+pyarrow>=14.0.0
+joblib>=1.3.0
+scipy>=1.11.0
+scikit-learn>=1.3.0
+
+# ML models (needed for model.predict in signal monitor page)
+lightgbm>=4.0.0
+xgboost>=2.0.0
+
+# Interpretability (Feature Analysis page SHAP visualizations)
+shap>=0.44.0
+matplotlib>=3.8.0
+
+# Text / NLP (Text Analysis page)
+jieba>=0.42.1
+snownlp>=0.12.3
+wordcloud>=1.9.0
+
+# Doc generation (for PPTX/docx export buttons, if exposed)
+python-pptx>=1.0.0
+python-docx>=1.1.0
+
+# Utilities
+pyyaml>=6.0
+requests>=2.31.0
+loguru>=0.7.0
