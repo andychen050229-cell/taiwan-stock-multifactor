@@ -1,8 +1,0 @@
-# 台灣股市多因子預測系統 — Streamlit Dashboard 依賴
-# 完整專案依賴見 requirements_full.txt
-
-streamlit>=1.28
-pandas>=2.0
-plotly>=5.18
-numpy>=1.24
-pyarrow>=10.0

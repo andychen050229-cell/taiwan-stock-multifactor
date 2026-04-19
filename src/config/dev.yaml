@@ -1,8 +1,0 @@
-# 開發環境設定 — 覆蓋 base.yaml
-logging:
-  level: "DEBUG"
-
-preprocessing:
-  text:
-    # 開發時用 stock_text_lite 加速
-    use_lite: true
