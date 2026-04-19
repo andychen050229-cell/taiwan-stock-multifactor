@@ -1,0 +1,2235 @@
+{
+  "phase": "Phase 2 — 模型開發 + 策略回測",
+  "timestamp": "2026-04-08T18:14:14.598304",
+  "env": "dev",
+  "results": {
+    "feature_store": {
+      "rows": 948976,
+      "cols": 72,
+      "date_range": "2023-03-01 00:00:00 ~ 2025-03-31 00:00:00"
+    },
+    "data_validation": {
+      "inf_count": 0,
+      "nan_pct": 0.0773
+    },
+    "walk_forward": {
+      "n_folds": 4,
+      "folds": [
+        {
+          "fold_id": 0,
+          "train_period": "2023-03-01 00:00:00 → 2024-03-13 00:00:00",
+          "test_period": "2024-04-15 00:00:00 → 2024-07-12 00:00:00",
+          "n_train": 467291,
+          "n_test": 119679
+        },
+        {
+          "fold_id": 1,
+          "train_period": "2023-03-01 00:00:00 → 2024-06-14 00:00:00",
+          "test_period": "2024-07-15 00:00:00 → 2024-10-17 00:00:00",
+          "n_train": 586800,
+          "n_test": 119781
+        },
+        {
+          "fold_id": 2,
+          "train_period": "2023-03-01 00:00:00 → 2024-09-13 00:00:00",
+          "test_period": "2024-10-18 00:00:00 → 2025-01-16 00:00:00",
+          "n_train": 706648,
+          "n_test": 120178
+        },
+        {
+          "fold_id": 3,
+          "train_period": "2023-03-01 00:00:00 → 2024-12-18 00:00:00",
+          "test_period": "2025-01-17 00:00:00 → 2025-03-31 00:00:00",
+          "n_train": 826655,
+          "n_test": 84136
+        }
+      ],
+      "total_train_samples": 2587394,
+      "total_test_samples": 443774
+    },
+    "feature_selection": {
+      "n_candidates": 56,
+      "after_mi": 34,
+      "after_vif": 28,
+      "selected": [
+        "fund_current_ratio",
+        "fund_net_income_sq",
+        "fund_cost_of_revenue_sq",
+        "fund_net_margin_sq",
+        "fund_operating_income_sq",
+        "fund_debt_equity",
+        "fund_total_comprehensive_income_sq",
+        "fund_gross_margin_sq",
+        "fund_ebitda",
+        "fund_operating_margin_sq",
+        "event_news_count_5d",
+        "risk_market_ret_20d",
+        "risk_market_breadth",
+        "trend_volatility_20",
+        "trend_volatility_60",
+        "event_news_count_1d",
+        "trend_bb_width_20",
+        "val_ev_ebitda",
+        "val_pe_rank",
+        "val_pe",
+        "val_ps",
+        "trend_atr_14",
+        "risk_drawdown",
+        "trend_macd",
+        "trend_bb_lower_20",
+        "fund_eps",
+        "trend_price_vs_ma20",
+        "trend_momentum_20"
+      ]
+    },
+    "model_horizon_1": {
+      "lightgbm": {
+        "avg_metrics": {
+          "auc": 0.6145,
+          "log_loss": 1.0676,
+          "accuracy": 0.4295,
+          "f1_weighted": 0.4281,
+          "balanced_accuracy": 0.4279,
+          "baseline_logloss": 1.0989
+        },
+        "fold_metrics": [
+          {
+            "fold_id": 0,
+            "auc": 0.6236,
+            "log_loss": 1.0567,
+            "accuracy": 0.4364,
+            "f1_weighted": 0.4365,
+            "balanced_accuracy": 0.4358,
+            "per_class_auc": {
+              "DOWN": 0.6032,
+              "FLAT": 0.6893,
+              "UP": 0.5783
+            },
+            "baseline_logloss": 1.1012,
+            "n_train": 466365,
+            "n_test": 119495
+          },
+          {
+            "fold_id": 1,
+            "auc": 0.6365,
+            "log_loss": 1.0487,
+            "accuracy": 0.4538,
+            "f1_weighted": 0.4507,
+            "balanced_accuracy": 0.4503,
+            "per_class_auc": {
+              "DOWN": 0.6191,
+              "FLAT": 0.6726,
+              "UP": 0.6179
+            },
+            "baseline_logloss": 1.1005,
+            "n_train": 585693,
+            "n_test": 119649
+          },
+          {
+            "fold_id": 2,
+            "auc": 0.6155,
+            "log_loss": 1.0646,
+            "accuracy": 0.433,
+            "f1_weighted": 0.4344,
+            "balanced_accuracy": 0.4289,
+            "per_class_auc": {
+              "DOWN": 0.5891,
+              "FLAT": 0.6834,
+              "UP": 0.5741
+            },
+            "baseline_logloss": 1.0966,
+            "n_train": 705416,
+            "n_test": 120061
+          },
+          {
+            "fold_id": 3,
+            "auc": 0.5823,
+            "log_loss": 1.1004,
+            "accuracy": 0.3947,
+            "f1_weighted": 0.3908,
+            "balanced_accuracy": 0.3966,
+            "per_class_auc": {
+              "DOWN": 0.5444,
+              "FLAT": 0.6572,
+              "UP": 0.5454
+            },
+            "baseline_logloss": 1.0972,
+            "n_train": 825285,
+            "n_test": 82165
+          }
+        ],
+        "best_params": {
+          "n_estimators": 762,
+          "learning_rate": 0.07767883809849516,
+          "num_leaves": 49,
+          "max_depth": 10,
+          "min_child_samples": 114,
+          "subsample": 0.876098829427658,
+          "colsample_bytree": 0.5075721185513784,
+          "reg_alpha": 0.3115344470285824,
+          "reg_lambda": 0.1915100014336652
+        },
+        "top_features": {
+          "event_news_count_5d": 6165.0,
+          "event_news_count_1d": 6140.75,
+          "risk_market_ret_20d": 6107.0,
+          "risk_market_breadth": 6049.0,
+          "trend_price_vs_ma20": 4351.75,
+          "val_pe_rank": 4275.5,
+          "trend_bb_lower_20": 3570.0,
+          "risk_drawdown": 3461.25,
+          "trend_bb_width_20": 3423.0,
+          "trend_volatility_60": 3370.0,
+          "trend_volatility_20": 3334.5,
+          "trend_momentum_20": 3255.75,
+          "trend_atr_14": 3215.75,
+          "trend_macd": 3211.0,
+          "fund_cost_of_revenue_sq": 2957.75,
+          "fund_debt_equity": 2637.75,
+          "fund_ebitda": 2634.5,
+          "fund_current_ratio": 2502.0,
+          "fund_gross_margin_sq": 2450.5,
+          "val_pe": 2440.0
+        }
+      },
+      "xgboost": {
+        "avg_metrics": {
+          "auc": 0.6136,
+          "log_loss": 1.0678,
+          "accuracy": 0.4284,
+          "f1_weighted": 0.427,
+          "balanced_accuracy": 0.4257,
+          "baseline_logloss": 1.0989
+        },
+        "fold_metrics": [
+          {
+            "fold_id": 0,
+            "auc": 0.622,
+            "log_loss": 1.0607,
+            "accuracy": 0.4351,
+            "f1_weighted": 0.4357,
+            "balanced_accuracy": 0.4344,
+            "per_class_auc": {
+              "DOWN": 0.6043,
+              "FLAT": 0.6864,
+              "UP": 0.5755
+            },
+            "baseline_logloss": 1.1012,
+            "n_train": 466365,
+            "n_test": 119495
+          },
+          {
+            "fold_id": 1,
+            "auc": 0.6327,
+            "log_loss": 1.0466,
+            "accuracy": 0.4507,
+            "f1_weighted": 0.4491,
+            "balanced_accuracy": 0.4456,
+            "per_class_auc": {
+              "DOWN": 0.612,
+              "FLAT": 0.6692,
+              "UP": 0.6171
+            },
+            "baseline_logloss": 1.1005,
+            "n_train": 585693,
+            "n_test": 119649
+          },
+          {
+            "fold_id": 2,
+            "auc": 0.6127,
+            "log_loss": 1.0678,
+            "accuracy": 0.4267,
+            "f1_weighted": 0.4281,
+            "balanced_accuracy": 0.423,
+            "per_class_auc": {
+              "DOWN": 0.5889,
+              "FLAT": 0.6822,
+              "UP": 0.567
+            },
+            "baseline_logloss": 1.0966,
+            "n_train": 705416,
+            "n_test": 120061
+          },
+          {
+            "fold_id": 3,
+            "auc": 0.587,
+            "log_loss": 1.0962,
+            "accuracy": 0.401,
+            "f1_weighted": 0.3951,
+            "balanced_accuracy": 0.3999,
+            "per_class_auc": {
+              "DOWN": 0.555,
+              "FLAT": 0.6514,
+              "UP": 0.5547
+            },
+            "baseline_logloss": 1.0972,
+            "n_train": 825285,
+            "n_test": 82165
+          }
+        ],
+        "best_params": {
+          "n_estimators": 145,
+          "learning_rate": 0.17160445029754812,
+          "max_depth": 10,
+          "min_child_weight": 166,
+          "subsample": 0.7218455076693483,
+          "colsample_bytree": 0.5488360570031919,
+          "reg_alpha": 0.5456725485601477,
+          "reg_lambda": 0.057624872164786026
+        },
+        "top_features": {
+          "trend_volatility_20": 0.158,
+          "trend_volatility_60": 0.0877,
+          "risk_market_ret_20d": 0.0788,
+          "event_news_count_1d": 0.0683,
+          "event_news_count_5d": 0.0585,
+          "risk_market_breadth": 0.0573,
+          "trend_price_vs_ma20": 0.036,
+          "val_pe_rank": 0.0326,
+          "trend_atr_14": 0.031,
+          "trend_bb_width_20": 0.0289,
+          "trend_bb_lower_20": 0.0252,
+          "fund_net_income_sq": 0.0249,
+          "risk_drawdown": 0.0243,
+          "trend_macd": 0.0228,
+          "fund_cost_of_revenue_sq": 0.0218,
+          "trend_momentum_20": 0.0213,
+          "fund_total_comprehensive_income_sq": 0.0206,
+          "fund_operating_income_sq": 0.0198,
+          "fund_eps": 0.0192,
+          "fund_debt_equity": 0.019
+        }
+      }
+    },
+    "model_horizon_5": {
+      "lightgbm": {
+        "avg_metrics": {
+          "auc": 0.6415,
+          "log_loss": 1.051,
+          "accuracy": 0.4522,
+          "f1_weighted": 0.4538,
+          "balanced_accuracy": 0.4528,
+          "baseline_logloss": 1.1006
+        },
+        "fold_metrics": [
+          {
+            "fold_id": 0,
+            "auc": 0.6526,
+            "log_loss": 1.0393,
+            "accuracy": 0.4521,
+            "f1_weighted": 0.4543,
+            "balanced_accuracy": 0.4572,
+            "per_class_auc": {
+              "DOWN": 0.6566,
+              "FLAT": 0.688,
+              "UP": 0.6133
+            },
+            "baseline_logloss": 1.0944,
+            "n_train": 466342,
+            "n_test": 119494
+          },
+          {
+            "fold_id": 1,
+            "auc": 0.6244,
+            "log_loss": 1.069,
+            "accuracy": 0.4394,
+            "f1_weighted": 0.4396,
+            "balanced_accuracy": 0.4416,
+            "per_class_auc": {
+              "DOWN": 0.5902,
+              "FLAT": 0.6767,
+              "UP": 0.6062
+            },
+            "baseline_logloss": 1.1151,
+            "n_train": 585665,
+            "n_test": 119640
+          },
+          {
+            "fold_id": 2,
+            "auc": 0.6363,
+            "log_loss": 1.0555,
+            "accuracy": 0.4503,
+            "f1_weighted": 0.4557,
+            "balanced_accuracy": 0.4476,
+            "per_class_auc": {
+              "DOWN": 0.6168,
+              "FLAT": 0.6842,
+              "UP": 0.608
+            },
+            "baseline_logloss": 1.0977,
+            "n_train": 705375,
+            "n_test": 120062
+          },
+          {
+            "fold_id": 3,
+            "auc": 0.6526,
+            "log_loss": 1.0404,
+            "accuracy": 0.4669,
+            "f1_weighted": 0.4655,
+            "balanced_accuracy": 0.4648,
+            "per_class_auc": {
+              "DOWN": 0.6568,
+              "FLAT": 0.6578,
+              "UP": 0.6431
+            },
+            "baseline_logloss": 1.0953,
+            "n_train": 825243,
+            "n_test": 74447
+          }
+        ],
+        "best_params": {
+          "n_estimators": 762,
+          "learning_rate": 0.07767883809849516,
+          "num_leaves": 49,
+          "max_depth": 10,
+          "min_child_samples": 114,
+          "subsample": 0.876098829427658,
+          "colsample_bytree": 0.5075721185513784,
+          "reg_alpha": 0.3115344470285824,
+          "reg_lambda": 0.1915100014336652
+        },
+        "top_features": {
+          "val_pe_rank": 3716.5,
+          "risk_market_ret_20d": 3658.0,
+          "event_news_count_5d": 3603.0,
+          "risk_market_breadth": 3403.5,
+          "event_news_count_1d": 2830.5,
+          "trend_volatility_60": 2682.5,
+          "trend_bb_lower_20": 2355.25,
+          "trend_volatility_20": 2250.25,
+          "trend_price_vs_ma20": 2204.75,
+          "fund_debt_equity": 2196.5,
+          "fund_ebitda": 2173.5,
+          "fund_cost_of_revenue_sq": 2141.5,
+          "fund_current_ratio": 2114.0,
+          "trend_macd": 2100.5,
+          "val_pe": 2038.5,
+          "fund_gross_margin_sq": 2007.5,
+          "trend_atr_14": 1996.0,
+          "trend_bb_width_20": 1970.0,
+          "risk_drawdown": 1948.75,
+          "val_ev_ebitda": 1856.0
+        }
+      },
+      "xgboost": {
+        "avg_metrics": {
+          "auc": 0.6364,
+          "log_loss": 1.0764,
+          "accuracy": 0.449,
+          "f1_weighted": 0.4501,
+          "balanced_accuracy": 0.4501,
+          "baseline_logloss": 1.1006
+        },
+        "fold_metrics": [
+          {
+            "fold_id": 0,
+            "auc": 0.6465,
+            "log_loss": 1.0739,
+            "accuracy": 0.4533,
+            "f1_weighted": 0.4541,
+            "balanced_accuracy": 0.459,
+            "per_class_auc": {
+              "DOWN": 0.6544,
+              "FLAT": 0.6758,
+              "UP": 0.6092
+            },
+            "baseline_logloss": 1.0944,
+            "n_train": 466342,
+            "n_test": 119494
+          },
+          {
+            "fold_id": 1,
+            "auc": 0.6161,
+            "log_loss": 1.0995,
+            "accuracy": 0.4293,
+            "f1_weighted": 0.4292,
+            "balanced_accuracy": 0.4333,
+            "per_class_auc": {
+              "DOWN": 0.5844,
+              "FLAT": 0.6716,
+              "UP": 0.5923
+            },
+            "baseline_logloss": 1.1151,
+            "n_train": 585665,
+            "n_test": 119640
+          },
+          {
+            "fold_id": 2,
+            "auc": 0.6331,
+            "log_loss": 1.0731,
+            "accuracy": 0.45,
+            "f1_weighted": 0.4551,
+            "balanced_accuracy": 0.4458,
+            "per_class_auc": {
+              "DOWN": 0.6173,
+              "FLAT": 0.681,
+              "UP": 0.6011
+            },
+            "baseline_logloss": 1.0977,
+            "n_train": 705375,
+            "n_test": 120062
+          },
+          {
+            "fold_id": 3,
+            "auc": 0.65,
+            "log_loss": 1.059,
+            "accuracy": 0.4634,
+            "f1_weighted": 0.4621,
+            "balanced_accuracy": 0.4624,
+            "per_class_auc": {
+              "DOWN": 0.656,
+              "FLAT": 0.658,
+              "UP": 0.636
+            },
+            "baseline_logloss": 1.0953,
+            "n_train": 825243,
+            "n_test": 74447
+          }
+        ],
+        "best_params": {
+          "n_estimators": 572,
+          "learning_rate": 0.0733090425188425,
+          "max_depth": 10,
+          "min_child_weight": 85,
+          "subsample": 0.7114439828369286,
+          "colsample_bytree": 0.856945023486514,
+          "reg_alpha": 0.7069186277021319,
+          "reg_lambda": 0.29474374285116767
+        },
+        "top_features": {
+          "trend_volatility_20": 0.0912,
+          "risk_market_ret_20d": 0.0737,
+          "event_news_count_1d": 0.0618,
+          "risk_market_breadth": 0.0576,
+          "trend_volatility_60": 0.0569,
+          "event_news_count_5d": 0.0559,
+          "val_pe_rank": 0.0519,
+          "trend_price_vs_ma20": 0.0335,
+          "fund_net_income_sq": 0.0288,
+          "trend_atr_14": 0.028,
+          "trend_bb_width_20": 0.0279,
+          "fund_current_ratio": 0.0274,
+          "fund_operating_income_sq": 0.0271,
+          "fund_cost_of_revenue_sq": 0.0268,
+          "trend_momentum_20": 0.0267,
+          "val_pe": 0.0266,
+          "fund_total_comprehensive_income_sq": 0.0261,
+          "fund_ebitda": 0.0255,
+          "fund_debt_equity": 0.0254,
+          "fund_eps": 0.0254
+        }
+      }
+    },
+    "model_horizon_20": {
+      "lightgbm": {
+        "avg_metrics": {
+          "auc": 0.6484,
+          "log_loss": 1.0558,
+          "accuracy": 0.4427,
+          "f1_weighted": 0.443,
+          "balanced_accuracy": 0.4496,
+          "baseline_logloss": 1.0897
+        },
+        "fold_metrics": [
+          {
+            "fold_id": 0,
+            "auc": 0.6687,
+            "log_loss": 1.0534,
+            "accuracy": 0.4474,
+            "f1_weighted": 0.4404,
+            "balanced_accuracy": 0.4698,
+            "per_class_auc": {
+              "DOWN": 0.6951,
+              "FLAT": 0.6613,
+              "UP": 0.6498
+            },
+            "baseline_logloss": 1.0898,
+            "n_train": 466332,
+            "n_test": 119505
+          },
+          {
+            "fold_id": 1,
+            "auc": 0.6454,
+            "log_loss": 1.0471,
+            "accuracy": 0.4482,
+            "f1_weighted": 0.4568,
+            "balanced_accuracy": 0.4537,
+            "per_class_auc": {
+              "DOWN": 0.6591,
+              "FLAT": 0.6773,
+              "UP": 0.5999
+            },
+            "baseline_logloss": 1.094,
+            "n_train": 585647,
+            "n_test": 119640
+          },
+          {
+            "fold_id": 2,
+            "auc": 0.6586,
+            "log_loss": 1.0759,
+            "accuracy": 0.4336,
+            "f1_weighted": 0.4365,
+            "balanced_accuracy": 0.453,
+            "per_class_auc": {
+              "DOWN": 0.6712,
+              "FLAT": 0.6693,
+              "UP": 0.6352
+            },
+            "baseline_logloss": 1.0902,
+            "n_train": 705353,
+            "n_test": 120064
+          },
+          {
+            "fold_id": 3,
+            "auc": 0.6211,
+            "log_loss": 1.0466,
+            "accuracy": 0.4416,
+            "f1_weighted": 0.4384,
+            "balanced_accuracy": 0.4217,
+            "per_class_auc": {
+              "DOWN": 0.6533,
+              "FLAT": 0.6588,
+              "UP": 0.5512
+            },
+            "baseline_logloss": 1.0849,
+            "n_train": 825229,
+            "n_test": 45515
+          }
+        ],
+        "best_params": {
+          "n_estimators": 778,
+          "learning_rate": 0.010181283131439633,
+          "num_leaves": 124,
+          "max_depth": 10,
+          "min_child_samples": 118,
+          "subsample": 0.876098829427658,
+          "colsample_bytree": 0.6277217293825994,
+          "reg_alpha": 0.0413146699891262,
+          "reg_lambda": 0.08263816993530092
+        },
+        "top_features": {
+          "val_pe_rank": 19310.25,
+          "risk_market_ret_20d": 13569.0,
+          "risk_market_breadth": 13320.25,
+          "fund_debt_equity": 13125.75,
+          "fund_current_ratio": 13043.25,
+          "fund_ebitda": 12979.75,
+          "trend_bb_lower_20": 12489.75,
+          "fund_cost_of_revenue_sq": 12449.25,
+          "fund_gross_margin_sq": 12395.5,
+          "trend_volatility_60": 12346.75,
+          "val_pe": 10451.25,
+          "event_news_count_5d": 10437.75,
+          "fund_total_comprehensive_income_sq": 10432.25,
+          "val_ev_ebitda": 10378.25,
+          "fund_net_income_sq": 10264.0,
+          "fund_operating_margin_sq": 10017.75,
+          "fund_net_margin_sq": 9762.25,
+          "fund_operating_income_sq": 9641.25,
+          "val_ps": 9407.75,
+          "fund_eps": 9149.75
+        }
+      },
+      "xgboost": {
+        "avg_metrics": {
+          "auc": 0.6454,
+          "log_loss": 1.0591,
+          "accuracy": 0.4423,
+          "f1_weighted": 0.443,
+          "balanced_accuracy": 0.4485,
+          "baseline_logloss": 1.0897
+        },
+        "fold_metrics": [
+          {
+            "fold_id": 0,
+            "auc": 0.6678,
+            "log_loss": 1.0564,
+            "accuracy": 0.447,
+            "f1_weighted": 0.4393,
+            "balanced_accuracy": 0.4699,
+            "per_class_auc": {
+              "DOWN": 0.6932,
+              "FLAT": 0.6587,
+              "UP": 0.6516
+            },
+            "baseline_logloss": 1.0898,
+            "n_train": 466332,
+            "n_test": 119505
+          },
+          {
+            "fold_id": 1,
+            "auc": 0.6448,
+            "log_loss": 1.05,
+            "accuracy": 0.4451,
+            "f1_weighted": 0.4538,
+            "balanced_accuracy": 0.4519,
+            "per_class_auc": {
+              "DOWN": 0.659,
+              "FLAT": 0.676,
+              "UP": 0.5994
+            },
+            "baseline_logloss": 1.094,
+            "n_train": 585647,
+            "n_test": 119640
+          },
+          {
+            "fold_id": 2,
+            "auc": 0.6504,
+            "log_loss": 1.0796,
+            "accuracy": 0.4355,
+            "f1_weighted": 0.4419,
+            "balanced_accuracy": 0.4518,
+            "per_class_auc": {
+              "DOWN": 0.6583,
+              "FLAT": 0.6677,
+              "UP": 0.6252
+            },
+            "baseline_logloss": 1.0902,
+            "n_train": 705353,
+            "n_test": 120064
+          },
+          {
+            "fold_id": 3,
+            "auc": 0.6184,
+            "log_loss": 1.0503,
+            "accuracy": 0.4416,
+            "f1_weighted": 0.4372,
+            "balanced_accuracy": 0.4203,
+            "per_class_auc": {
+              "DOWN": 0.652,
+              "FLAT": 0.6581,
+              "UP": 0.545
+            },
+            "baseline_logloss": 1.0849,
+            "n_train": 825229,
+            "n_test": 45515
+          }
+        ],
+        "best_params": {
+          "n_estimators": 483,
+          "learning_rate": 0.017398074711291726,
+          "max_depth": 10,
+          "min_child_weight": 160,
+          "subsample": 0.9757995766256756,
+          "colsample_bytree": 0.9474136752138245,
+          "reg_alpha": 0.24637685958997463,
+          "reg_lambda": 4.869640941520899
+        },
+        "top_features": {
+          "trend_volatility_60": 0.0933,
+          "trend_volatility_20": 0.0923,
+          "val_pe_rank": 0.0666,
+          "risk_market_ret_20d": 0.0645,
+          "risk_market_breadth": 0.0632,
+          "event_news_count_5d": 0.0592,
+          "event_news_count_1d": 0.0536,
+          "val_pe": 0.035,
+          "trend_atr_14": 0.0315,
+          "trend_price_vs_ma20": 0.0302,
+          "fund_net_income_sq": 0.0264,
+          "fund_operating_income_sq": 0.0263,
+          "fund_cost_of_revenue_sq": 0.024,
+          "trend_macd": 0.0236,
+          "fund_operating_margin_sq": 0.0231,
+          "fund_net_margin_sq": 0.0229,
+          "fund_total_comprehensive_income_sq": 0.0229,
+          "fund_eps": 0.0228,
+          "fund_current_ratio": 0.0227,
+          "trend_bb_width_20": 0.0225
+        }
+      }
+    },
+    "benchmark": {
+      "annualized_return": -0.0242,
+      "sharpe_ratio": -0.0586,
+      "sortino_ratio": -0.0724,
+      "max_drawdown": -0.145,
+      "calmar_ratio": -0.1668,
+      "total_return": -0.0223,
+      "daily_volatility": 0.010683,
+      "annual_volatility": 0.1696,
+      "positive_days": 134,
+      "negative_days": 98,
+      "win_rate": 0.5776,
+      "n_trading_days": 232
+    },
+    "backtest_horizon_1": {
+      "lightgbm": {
+        "cost_scenarios": {
+          "standard": {
+            "annualized_return": -0.5789,
+            "sharpe_ratio": -3.2272,
+            "sortino_ratio": -3.7166,
+            "max_drawdown": -0.5657,
+            "calmar_ratio": -1.0233,
+            "total_return": -0.5443,
+            "daily_volatility": 0.016199,
+            "annual_volatility": 0.2571,
+            "positive_days": 96,
+            "negative_days": 133,
+            "win_rate": 0.4192,
+            "n_trading_days": 229,
+            "cost_per_rebalance": 0.005128,
+            "cost_model": "standard",
+            "n_rebalances": 233
+          },
+          "discount": {
+            "annualized_return": -0.3031,
+            "sharpe_ratio": -1.2735,
+            "sortino_ratio": -1.5824,
+            "max_drawdown": -0.3872,
+            "calmar_ratio": -0.7828,
+            "total_return": -0.2797,
+            "daily_volatility": 0.016199,
+            "annual_volatility": 0.2571,
+            "positive_days": 112,
+            "negative_days": 117,
+            "win_rate": 0.4891,
+            "n_trading_days": 229,
+            "cost_per_rebalance": 0.003134,
+            "cost_model": "discount",
+            "n_rebalances": 233
+          },
+          "conservative": {
+            "annualized_return": -0.6974,
+            "sharpe_ratio": -4.5074,
+            "sortino_ratio": -4.9387,
+            "max_drawdown": -0.6635,
+            "calmar_ratio": -1.0512,
+            "total_return": -0.6625,
+            "daily_volatility": 0.016199,
+            "annual_volatility": 0.2571,
+            "positive_days": 90,
+            "negative_days": 139,
+            "win_rate": 0.393,
+            "n_trading_days": 229,
+            "cost_per_rebalance": 0.006434,
+            "cost_model": "conservative",
+            "n_rebalances": 233
+          }
+        },
+        "rank_ic": 0.0501,
+        "n_trading_days": 229,
+        "avg_daily_stocks": 85.5,
+        "avg_turnover": 0.6532
+      },
+      "xgboost": {
+        "cost_scenarios": {
+          "standard": {
+            "annualized_return": -0.6008,
+            "sharpe_ratio": -3.4192,
+            "sortino_ratio": -3.9031,
+            "max_drawdown": -0.5785,
+            "calmar_ratio": -1.0386,
+            "total_return": -0.5659,
+            "daily_volatility": 0.016267,
+            "annual_volatility": 0.2582,
+            "positive_days": 102,
+            "negative_days": 127,
+            "win_rate": 0.4454,
+            "n_trading_days": 229,
+            "cost_per_rebalance": 0.005278,
+            "cost_model": "standard",
+            "n_rebalances": 233
+          },
+          "discount": {
+            "annualized_return": -0.3295,
+            "sharpe_ratio": -1.4166,
+            "sortino_ratio": -1.7497,
+            "max_drawdown": -0.3992,
+            "calmar_ratio": -0.8255,
+            "total_return": -0.3046,
+            "daily_volatility": 0.016267,
+            "annual_volatility": 0.2582,
+            "positive_days": 106,
+            "negative_days": 123,
+            "win_rate": 0.4629,
+            "n_trading_days": 229,
+            "cost_per_rebalance": 0.003226,
+            "cost_model": "discount",
+            "n_rebalances": 233
+          },
+          "conservative": {
+            "annualized_return": -0.716,
+            "sharpe_ratio": -4.7315,
+            "sortino_ratio": -5.1311,
+            "max_drawdown": -0.684,
+            "calmar_ratio": -1.0468,
+            "total_return": -0.6814,
+            "daily_volatility": 0.016267,
+            "annual_volatility": 0.2582,
+            "positive_days": 94,
+            "negative_days": 135,
+            "win_rate": 0.4105,
+            "n_trading_days": 229,
+            "cost_per_rebalance": 0.006623,
+            "cost_model": "conservative",
+            "n_rebalances": 233
+          }
+        },
+        "rank_ic": 0.0507,
+        "n_trading_days": 229,
+        "avg_daily_stocks": 85.5,
+        "avg_turnover": 0.6724
+      },
+      "ensemble": {
+        "cost_scenarios": {
+          "standard": {
+            "annualized_return": -0.5726,
+            "sharpe_ratio": -3.1421,
+            "sortino_ratio": -3.6433,
+            "max_drawdown": -0.5643,
+            "calmar_ratio": -1.0147,
+            "total_return": -0.5381,
+            "daily_volatility": 0.016331,
+            "annual_volatility": 0.2592,
+            "positive_days": 99,
+            "negative_days": 130,
+            "win_rate": 0.4323,
+            "n_trading_days": 229,
+            "cost_per_rebalance": 0.005008,
+            "cost_model": "standard",
+            "n_rebalances": 233
+          },
+          "discount": {
+            "annualized_return": -0.301,
+            "sharpe_ratio": -1.2494,
+            "sortino_ratio": -1.5612,
+            "max_drawdown": -0.3901,
+            "calmar_ratio": -0.7714,
+            "total_return": -0.2777,
+            "daily_volatility": 0.016331,
+            "annual_volatility": 0.2592,
+            "positive_days": 111,
+            "negative_days": 118,
+            "win_rate": 0.4847,
+            "n_trading_days": 229,
+            "cost_per_rebalance": 0.003061,
+            "cost_model": "discount",
+            "n_rebalances": 233
+          },
+          "conservative": {
+            "annualized_return": -0.6905,
+            "sharpe_ratio": -4.3823,
+            "sortino_ratio": -4.8395,
+            "max_drawdown": -0.6594,
+            "calmar_ratio": -1.0472,
+            "total_return": -0.6555,
+            "daily_volatility": 0.016331,
+            "annual_volatility": 0.2592,
+            "positive_days": 94,
+            "negative_days": 135,
+            "win_rate": 0.4105,
+            "n_trading_days": 229,
+            "cost_per_rebalance": 0.006284,
+            "cost_model": "conservative",
+            "n_rebalances": 233
+          }
+        },
+        "rank_ic": 0.0522,
+        "n_trading_days": 229,
+        "avg_daily_stocks": 85.5,
+        "avg_turnover": 0.638
+      }
+    },
+    "backtest_horizon_5": {
+      "lightgbm": {
+        "cost_scenarios": {
+          "standard": {
+            "annualized_return": 0.349,
+            "sharpe_ratio": 1.3551,
+            "sortino_ratio": 1.8625,
+            "max_drawdown": -0.1811,
+            "calmar_ratio": 1.9275,
+            "total_return": 0.308,
+            "daily_volatility": 0.015305,
+            "annual_volatility": 0.243,
+            "positive_days": 131,
+            "negative_days": 95,
+            "win_rate": 0.5796,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.005749,
+            "cost_model": "standard",
+            "n_rebalances": 48
+          },
+          "discount": {
+            "annualized_return": 0.5165,
+            "sharpe_ratio": 1.8398,
+            "sortino_ratio": 2.567,
+            "max_drawdown": -0.1775,
+            "calmar_ratio": 2.9105,
+            "total_return": 0.4527,
+            "daily_volatility": 0.015284,
+            "annual_volatility": 0.2426,
+            "positive_days": 136,
+            "negative_days": 90,
+            "win_rate": 0.6018,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.003514,
+            "cost_model": "discount",
+            "n_rebalances": 48
+          },
+          "conservative": {
+            "annualized_return": 0.2492,
+            "sharpe_ratio": 1.0363,
+            "sortino_ratio": 1.4102,
+            "max_drawdown": -0.1834,
+            "calmar_ratio": 1.3587,
+            "total_return": 0.2209,
+            "daily_volatility": 0.015348,
+            "annual_volatility": 0.2436,
+            "positive_days": 129,
+            "negative_days": 97,
+            "win_rate": 0.5708,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.007213,
+            "cost_model": "conservative",
+            "n_rebalances": 48
+          }
+        },
+        "rank_ic": 0.1279,
+        "n_trading_days": 226,
+        "avg_daily_stocks": 85.7,
+        "avg_turnover": 0.7323
+      },
+      "xgboost": {
+        "cost_scenarios": {
+          "standard": {
+            "annualized_return": 0.2359,
+            "sharpe_ratio": 1.0122,
+            "sortino_ratio": 1.3699,
+            "max_drawdown": -0.1815,
+            "calmar_ratio": 1.2996,
+            "total_return": 0.2092,
+            "daily_volatility": 0.014954,
+            "annual_volatility": 0.2374,
+            "positive_days": 133,
+            "negative_days": 93,
+            "win_rate": 0.5885,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.005775,
+            "cost_model": "standard",
+            "n_rebalances": 48
+          },
+          "discount": {
+            "annualized_return": 0.3902,
+            "sharpe_ratio": 1.5109,
+            "sortino_ratio": 2.0764,
+            "max_drawdown": -0.1779,
+            "calmar_ratio": 2.1933,
+            "total_return": 0.3438,
+            "daily_volatility": 0.014923,
+            "annual_volatility": 0.2369,
+            "positive_days": 138,
+            "negative_days": 88,
+            "win_rate": 0.6106,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.00353,
+            "cost_model": "discount",
+            "n_rebalances": 48
+          },
+          "conservative": {
+            "annualized_return": 0.144,
+            "sharpe_ratio": 0.685,
+            "sortino_ratio": 0.9178,
+            "max_drawdown": -0.1839,
+            "calmar_ratio": 0.7833,
+            "total_return": 0.1283,
+            "daily_volatility": 0.015004,
+            "annual_volatility": 0.2382,
+            "positive_days": 131,
+            "negative_days": 95,
+            "win_rate": 0.5796,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.007246,
+            "cost_model": "conservative",
+            "n_rebalances": 48
+          }
+        },
+        "rank_ic": 0.1267,
+        "n_trading_days": 226,
+        "avg_daily_stocks": 85.6,
+        "avg_turnover": 0.7357
+      },
+      "ensemble": {
+        "cost_scenarios": {
+          "standard": {
+            "annualized_return": 0.3361,
+            "sharpe_ratio": 1.3407,
+            "sortino_ratio": 1.8299,
+            "max_drawdown": -0.1797,
+            "calmar_ratio": 1.8699,
+            "total_return": 0.2967,
+            "daily_volatility": 0.014955,
+            "annual_volatility": 0.2374,
+            "positive_days": 135,
+            "negative_days": 91,
+            "win_rate": 0.5973,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.00568,
+            "cost_model": "standard",
+            "n_rebalances": 48
+          },
+          "discount": {
+            "annualized_return": 0.4999,
+            "sharpe_ratio": 1.8311,
+            "sortino_ratio": 2.5363,
+            "max_drawdown": -0.1762,
+            "calmar_ratio": 2.8378,
+            "total_return": 0.4385,
+            "daily_volatility": 0.014931,
+            "annual_volatility": 0.237,
+            "positive_days": 139,
+            "negative_days": 87,
+            "win_rate": 0.615,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.003472,
+            "cost_model": "discount",
+            "n_rebalances": 48
+          },
+          "conservative": {
+            "annualized_return": 0.2384,
+            "sharpe_ratio": 1.0181,
+            "sortino_ratio": 1.3761,
+            "max_drawdown": -0.1821,
+            "calmar_ratio": 1.3093,
+            "total_return": 0.2114,
+            "daily_volatility": 0.014999,
+            "annual_volatility": 0.2381,
+            "positive_days": 132,
+            "negative_days": 94,
+            "win_rate": 0.5841,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.007128,
+            "cost_model": "conservative",
+            "n_rebalances": 48
+          }
+        },
+        "rank_ic": 0.1308,
+        "n_trading_days": 226,
+        "avg_daily_stocks": 85.7,
+        "avg_turnover": 0.7236
+      }
+    },
+    "backtest_horizon_20": {
+      "lightgbm": {
+        "cost_scenarios": {
+          "standard": {
+            "annualized_return": 0.4718,
+            "sharpe_ratio": 1.8385,
+            "sortino_ratio": 2.5144,
+            "max_drawdown": -0.1838,
+            "calmar_ratio": 2.5662,
+            "total_return": 0.4142,
+            "daily_volatility": 0.014119,
+            "annual_volatility": 0.2241,
+            "positive_days": 139,
+            "negative_days": 87,
+            "win_rate": 0.615,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.005985,
+            "cost_model": "standard",
+            "n_rebalances": 15
+          },
+          "discount": {
+            "annualized_return": 0.526,
+            "sharpe_ratio": 1.998,
+            "sortino_ratio": 2.7472,
+            "max_drawdown": -0.1838,
+            "calmar_ratio": 2.8614,
+            "total_return": 0.4609,
+            "daily_volatility": 0.014137,
+            "annual_volatility": 0.2244,
+            "positive_days": 141,
+            "negative_days": 85,
+            "win_rate": 0.6239,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.003658,
+            "cost_model": "discount",
+            "n_rebalances": 15
+          },
+          "conservative": {
+            "annualized_return": 0.4372,
+            "sharpe_ratio": 1.7323,
+            "sortino_ratio": 2.3615,
+            "max_drawdown": -0.1838,
+            "calmar_ratio": 2.3781,
+            "total_return": 0.3844,
+            "daily_volatility": 0.014119,
+            "annual_volatility": 0.2241,
+            "positive_days": 139,
+            "negative_days": 87,
+            "win_rate": 0.615,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.00751,
+            "cost_model": "conservative",
+            "n_rebalances": 15
+          }
+        },
+        "rank_ic": 0.1491,
+        "n_trading_days": 226,
+        "avg_daily_stocks": 86.8,
+        "avg_turnover": 0.7624
+      },
+      "xgboost": {
+        "cost_scenarios": {
+          "standard": {
+            "annualized_return": 0.4755,
+            "sharpe_ratio": 1.7998,
+            "sortino_ratio": 2.4793,
+            "max_drawdown": -0.1853,
+            "calmar_ratio": 2.566,
+            "total_return": 0.4174,
+            "daily_volatility": 0.014567,
+            "annual_volatility": 0.2312,
+            "positive_days": 135,
+            "negative_days": 91,
+            "win_rate": 0.5973,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.005996,
+            "cost_model": "standard",
+            "n_rebalances": 15
+          },
+          "discount": {
+            "annualized_return": 0.53,
+            "sharpe_ratio": 1.9542,
+            "sortino_ratio": 2.7068,
+            "max_drawdown": -0.1853,
+            "calmar_ratio": 2.86,
+            "total_return": 0.4643,
+            "daily_volatility": 0.014589,
+            "annual_volatility": 0.2316,
+            "positive_days": 138,
+            "negative_days": 88,
+            "win_rate": 0.6106,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.003665,
+            "cost_model": "discount",
+            "n_rebalances": 15
+          },
+          "conservative": {
+            "annualized_return": 0.4408,
+            "sharpe_ratio": 1.697,
+            "sortino_ratio": 2.3297,
+            "max_drawdown": -0.1853,
+            "calmar_ratio": 2.3787,
+            "total_return": 0.3875,
+            "daily_volatility": 0.014565,
+            "annual_volatility": 0.2312,
+            "positive_days": 134,
+            "negative_days": 92,
+            "win_rate": 0.5929,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.007524,
+            "cost_model": "conservative",
+            "n_rebalances": 15
+          }
+        },
+        "rank_ic": 0.15,
+        "n_trading_days": 226,
+        "avg_daily_stocks": 86.8,
+        "avg_turnover": 0.7638
+      },
+      "ensemble": {
+        "cost_scenarios": {
+          "standard": {
+            "annualized_return": 0.4926,
+            "sharpe_ratio": 1.8663,
+            "sortino_ratio": 2.5759,
+            "max_drawdown": -0.1873,
+            "calmar_ratio": 2.6304,
+            "total_return": 0.4322,
+            "daily_volatility": 0.01442,
+            "annual_volatility": 0.2289,
+            "positive_days": 139,
+            "negative_days": 87,
+            "win_rate": 0.615,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.005969,
+            "cost_model": "standard",
+            "n_rebalances": 15
+          },
+          "discount": {
+            "annualized_return": 0.5475,
+            "sharpe_ratio": 2.0218,
+            "sortino_ratio": 2.8058,
+            "max_drawdown": -0.1873,
+            "calmar_ratio": 2.9233,
+            "total_return": 0.4793,
+            "daily_volatility": 0.014439,
+            "annual_volatility": 0.2292,
+            "positive_days": 141,
+            "negative_days": 85,
+            "win_rate": 0.6239,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.003648,
+            "cost_model": "discount",
+            "n_rebalances": 15
+          },
+          "conservative": {
+            "annualized_return": 0.4576,
+            "sharpe_ratio": 1.7627,
+            "sortino_ratio": 2.425,
+            "max_drawdown": -0.1873,
+            "calmar_ratio": 2.4437,
+            "total_return": 0.4021,
+            "daily_volatility": 0.014419,
+            "annual_volatility": 0.2289,
+            "positive_days": 137,
+            "negative_days": 89,
+            "win_rate": 0.6062,
+            "n_trading_days": 226,
+            "cost_per_rebalance": 0.00749,
+            "cost_model": "conservative",
+            "n_rebalances": 15
+          }
+        },
+        "rank_ic": 0.1507,
+        "n_trading_days": 226,
+        "avg_daily_stocks": 86.8,
+        "avg_turnover": 0.7604
+      }
+    },
+    "statistical_validation": {
+      "permutation_tests": {
+        "lightgbm_D1": {
+          "observed_auc": 0.6177,
+          "p_value": 0.0,
+          "mean_permuted_auc": 0.5,
+          "std_permuted_auc": 0.0006,
+          "z_score": 183.37,
+          "significant_at_05": true,
+          "significant_at_01": true
+        },
+        "xgboost_D1": {
+          "observed_auc": 0.6162,
+          "p_value": 0.0,
+          "mean_permuted_auc": 0.5,
+          "std_permuted_auc": 0.0006,
+          "z_score": 184.19,
+          "significant_at_05": true,
+          "significant_at_01": true
+        },
+        "ensemble_D1": {
+          "observed_auc": 0.6198,
+          "p_value": 0.0,
+          "mean_permuted_auc": 0.5,
+          "std_permuted_auc": 0.0006,
+          "z_score": 188.72,
+          "significant_at_05": true,
+          "significant_at_01": true
+        },
+        "lightgbm_D5": {
+          "observed_auc": 0.6401,
+          "p_value": 0.0,
+          "mean_permuted_auc": 0.5,
+          "std_permuted_auc": 0.0007,
+          "z_score": 210.87,
+          "significant_at_05": true,
+          "significant_at_01": true
+        },
+        "xgboost_D5": {
+          "observed_auc": 0.6348,
+          "p_value": 0.0,
+          "mean_permuted_auc": 0.5,
+          "std_permuted_auc": 0.0007,
+          "z_score": 203.64,
+          "significant_at_05": true,
+          "significant_at_01": true
+        },
+        "ensemble_D5": {
+          "observed_auc": 0.6403,
+          "p_value": 0.0,
+          "mean_permuted_auc": 0.5,
+          "std_permuted_auc": 0.0007,
+          "z_score": 211.52,
+          "significant_at_05": true,
+          "significant_at_01": true
+        },
+        "lightgbm_D20": {
+          "observed_auc": 0.6414,
+          "p_value": 0.0,
+          "mean_permuted_auc": 0.5,
+          "std_permuted_auc": 0.0007,
+          "z_score": 209.91,
+          "significant_at_05": true,
+          "significant_at_01": true
+        },
+        "xgboost_D20": {
+          "observed_auc": 0.6415,
+          "p_value": 0.0,
+          "mean_permuted_auc": 0.5,
+          "std_permuted_auc": 0.0007,
+          "z_score": 205.88,
+          "significant_at_05": true,
+          "significant_at_01": true
+        },
+        "ensemble_D20": {
+          "observed_auc": 0.6424,
+          "p_value": 0.0,
+          "mean_permuted_auc": 0.5,
+          "std_permuted_auc": 0.0007,
+          "z_score": 209.48,
+          "significant_at_05": true,
+          "significant_at_01": true
+        }
+      },
+      "deflated_sharpe": {
+        "lightgbm_D1": {
+          "observed_sharpe": -1.2735,
+          "n_strategies": 6,
+          "n_trading_days": 229,
+          "expected_max_sharpe": 1.3193,
+          "sharpe_std_error": 1.0147,
+          "dsr_statistic": -2.5552,
+          "dsr_p_value": 0.9947,
+          "dsr_pass": false
+        },
+        "xgboost_D1": {
+          "observed_sharpe": -1.4166,
+          "n_strategies": 6,
+          "n_trading_days": 229,
+          "expected_max_sharpe": 1.3176,
+          "sharpe_std_error": 1.0134,
+          "dsr_statistic": -2.698,
+          "dsr_p_value": 0.9965,
+          "dsr_pass": false
+        },
+        "ensemble_D1": {
+          "observed_sharpe": -1.2494,
+          "n_strategies": 6,
+          "n_trading_days": 229,
+          "expected_max_sharpe": 1.3242,
+          "sharpe_std_error": 1.0185,
+          "dsr_statistic": -2.5269,
+          "dsr_p_value": 0.9942,
+          "dsr_pass": false
+        },
+        "lightgbm_D5": {
+          "observed_sharpe": 1.8398,
+          "n_strategies": 6,
+          "n_trading_days": 226,
+          "expected_max_sharpe": 1.4807,
+          "sharpe_std_error": 1.1389,
+          "dsr_statistic": 0.3153,
+          "dsr_p_value": 0.3762,
+          "dsr_pass": false
+        },
+        "xgboost_D5": {
+          "observed_sharpe": 1.5109,
+          "n_strategies": 6,
+          "n_trading_days": 226,
+          "expected_max_sharpe": 1.4684,
+          "sharpe_std_error": 1.1294,
+          "dsr_statistic": 0.0376,
+          "dsr_p_value": 0.485,
+          "dsr_pass": false
+        },
+        "ensemble_D5": {
+          "observed_sharpe": 1.8311,
+          "n_strategies": 6,
+          "n_trading_days": 226,
+          "expected_max_sharpe": 1.4905,
+          "sharpe_std_error": 1.1464,
+          "dsr_statistic": 0.2971,
+          "dsr_p_value": 0.3832,
+          "dsr_pass": false
+        },
+        "lightgbm_D20": {
+          "observed_sharpe": 1.998,
+          "n_strategies": 6,
+          "n_trading_days": 226,
+          "expected_max_sharpe": 1.5092,
+          "sharpe_std_error": 1.1608,
+          "dsr_statistic": 0.4211,
+          "dsr_p_value": 0.3368,
+          "dsr_pass": false
+        },
+        "xgboost_D20": {
+          "observed_sharpe": 1.9542,
+          "n_strategies": 6,
+          "n_trading_days": 226,
+          "expected_max_sharpe": 1.4983,
+          "sharpe_std_error": 1.1524,
+          "dsr_statistic": 0.3956,
+          "dsr_p_value": 0.3462,
+          "dsr_pass": false
+        },
+        "ensemble_D20": {
+          "observed_sharpe": 2.0218,
+          "n_strategies": 6,
+          "n_trading_days": 226,
+          "expected_max_sharpe": 1.5033,
+          "sharpe_std_error": 1.1563,
+          "dsr_statistic": 0.4484,
+          "dsr_p_value": 0.3269,
+          "dsr_pass": false
+        }
+      },
+      "ood_analysis": {
+        "D1": {
+          "degradation_detected": true,
+          "degradation_severity": "severe",
+          "regime_analysis": {},
+          "feature_drift": {
+            "engine": "xgboost",
+            "top_drifted_features": {
+              "risk_market_breadth": 0.205,
+              "trend_volatility_60": 0.102,
+              "risk_market_ret_20d": -0.099,
+              "fund_debt_equity": -0.097,
+              "fund_current_ratio": -0.089,
+              "fund_gross_margin_sq": -0.081,
+              "fund_cost_of_revenue_sq": -0.072,
+              "val_ev_ebitda": -0.068,
+              "fund_operating_margin_sq": -0.067,
+              "val_pe": -0.066
+            },
+            "avg_abs_drift": 0.055
+          },
+          "diagnosis": "退化原因不明，建議檢查個別特徵在最新期間的分佈"
+        },
+        "D5": {
+          "degradation_detected": false,
+          "degradation_severity": "none",
+          "regime_analysis": {},
+          "feature_drift": {
+            "engine": "xgboost",
+            "top_drifted_features": {
+              "risk_market_ret_20d": 0.132,
+              "fund_current_ratio": -0.118,
+              "trend_volatility_20": 0.109,
+              "fund_cost_of_revenue_sq": -0.087,
+              "val_ev_ebitda": -0.087,
+              "fund_debt_equity": -0.08,
+              "fund_operating_margin_sq": -0.071,
+              "fund_gross_margin_sq": -0.058,
+              "fund_ebitda": -0.057,
+              "trend_momentum_20": -0.057
+            },
+            "avg_abs_drift": 0.051
+          },
+          "diagnosis": "未偵測到顯著退化，模型穩定性良好"
+        },
+        "D20": {
+          "degradation_detected": true,
+          "degradation_severity": "severe",
+          "regime_analysis": {},
+          "feature_drift": {
+            "engine": "xgboost",
+            "top_drifted_features": {
+              "trend_bb_width_20": 0.357,
+              "val_pe": -0.237,
+              "trend_atr_14": -0.175,
+              "trend_volatility_60": 0.151,
+              "trend_volatility_20": 0.146,
+              "event_news_count_1d": 0.111,
+              "risk_market_breadth": -0.101,
+              "trend_momentum_20": -0.096,
+              "fund_cost_of_revenue_sq": -0.077,
+              "fund_eps": -0.071
+            },
+            "avg_abs_drift": 0.078
+          },
+          "diagnosis": "退化原因不明，建議檢查個別特徵在最新期間的分佈"
+        }
+      },
+      "ood_fold_trends": {
+        "D1": [
+          {
+            "fold_id": 0,
+            "n_test": 119679,
+            "test_start": "2024-04-15 00:00:00",
+            "test_end": "2024-07-12 00:00:00",
+            "label_distribution": {
+              "-1.0": 0.345,
+              "1.0": 0.341,
+              "0.0": 0.314
+            },
+            "avg_volatility_20": 0.0215,
+            "avg_fwd_return": 0.001774,
+            "fwd_return_std": 0.025359,
+            "avg_market_ret": 0.0017,
+            "auc_lightgbm": 0.6236,
+            "auc_xgboost": 0.622
+          },
+          {
+            "fold_id": 1,
+            "n_test": 119781,
+            "test_start": "2024-07-15 00:00:00",
+            "test_end": "2024-10-17 00:00:00",
+            "label_distribution": {
+              "-1.0": 0.377,
+              "1.0": 0.337,
+              "0.0": 0.285
+            },
+            "avg_volatility_20": 0.0259,
+            "avg_fwd_return": -0.000525,
+            "fwd_return_std": 0.031765,
+            "avg_market_ret": -0.0002,
+            "auc_lightgbm": 0.6365,
+            "auc_xgboost": 0.6327
+          },
+          {
+            "fold_id": 2,
+            "n_test": 120178,
+            "test_start": "2024-10-18 00:00:00",
+            "test_end": "2025-01-16 00:00:00",
+            "label_distribution": {
+              "-1.0": 0.386,
+              "0.0": 0.317,
+              "1.0": 0.296
+            },
+            "avg_volatility_20": 0.0205,
+            "avg_fwd_return": -0.00098,
+            "fwd_return_std": 0.023804,
+            "avg_market_ret": -0.0008,
+            "auc_lightgbm": 0.6155,
+            "auc_xgboost": 0.6127
+          },
+          {
+            "fold_id": 3,
+            "n_test": 84136,
+            "test_start": "2025-01-17 00:00:00",
+            "test_end": "2025-03-31 00:00:00",
+            "label_distribution": {
+              "-1.0": 0.361,
+              "0.0": 0.327,
+              "1.0": 0.312
+            },
+            "avg_volatility_20": 0.0196,
+            "avg_fwd_return": -0.000612,
+            "fwd_return_std": 0.02339,
+            "avg_market_ret": 0.0007,
+            "auc_lightgbm": 0.5823,
+            "auc_xgboost": 0.587
+          }
+        ],
+        "D5": [
+          {
+            "fold_id": 0,
+            "n_test": 119679,
+            "test_start": "2024-04-15 00:00:00",
+            "test_end": "2024-07-12 00:00:00",
+            "label_distribution": {
+              "0.0": 0.382,
+              "1.0": 0.342,
+              "-1.0": 0.276
+            },
+            "avg_volatility_20": 0.0215,
+            "avg_fwd_return": 0.009859,
+            "fwd_return_std": 0.059682,
+            "avg_market_ret": 0.0017,
+            "auc_lightgbm": 0.6526,
+            "auc_xgboost": 0.6465
+          },
+          {
+            "fold_id": 1,
+            "n_test": 119781,
+            "test_start": "2024-07-15 00:00:00",
+            "test_end": "2024-10-17 00:00:00",
+            "label_distribution": {
+              "-1.0": 0.374,
+              "0.0": 0.318,
+              "1.0": 0.307
+            },
+            "avg_volatility_20": 0.0259,
+            "avg_fwd_return": -0.001888,
+            "fwd_return_std": 0.072527,
+            "avg_market_ret": -0.0002,
+            "auc_lightgbm": 0.6244,
+            "auc_xgboost": 0.6161
+          },
+          {
+            "fold_id": 2,
+            "n_test": 120178,
+            "test_start": "2024-10-18 00:00:00",
+            "test_end": "2025-01-16 00:00:00",
+            "label_distribution": {
+              "-1.0": 0.387,
+              "0.0": 0.368,
+              "1.0": 0.245
+            },
+            "avg_volatility_20": 0.0205,
+            "avg_fwd_return": -0.004986,
+            "fwd_return_std": 0.053155,
+            "avg_market_ret": -0.0008,
+            "auc_lightgbm": 0.6363,
+            "auc_xgboost": 0.6331
+          },
+          {
+            "fold_id": 3,
+            "n_test": 84136,
+            "test_start": "2025-01-17 00:00:00",
+            "test_end": "2025-03-31 00:00:00",
+            "label_distribution": {
+              "0.0": 0.374,
+              "-1.0": 0.316,
+              "1.0": 0.31
+            },
+            "avg_volatility_20": 0.0196,
+            "avg_fwd_return": 0.002386,
+            "fwd_return_std": 0.053159,
+            "avg_market_ret": 0.0007,
+            "auc_lightgbm": 0.6526,
+            "auc_xgboost": 0.65
+          }
+        ],
+        "D20": [
+          {
+            "fold_id": 0,
+            "n_test": 119679,
+            "test_start": "2024-04-15 00:00:00",
+            "test_end": "2024-07-12 00:00:00",
+            "label_distribution": {
+              "0.0": 0.413,
+              "1.0": 0.313,
+              "-1.0": 0.274
+            },
+            "avg_volatility_20": 0.0215,
+            "avg_fwd_return": 0.02006,
+            "fwd_return_std": 0.139121,
+            "avg_market_ret": 0.0017,
+            "auc_lightgbm": 0.6687,
+            "auc_xgboost": 0.6678
+          },
+          {
+            "fold_id": 1,
+            "n_test": 119781,
+            "test_start": "2024-07-15 00:00:00",
+            "test_end": "2024-10-17 00:00:00",
+            "label_distribution": {
+              "0.0": 0.431,
+              "-1.0": 0.323,
+              "1.0": 0.246
+            },
+            "avg_volatility_20": 0.0259,
+            "avg_fwd_return": 0.003493,
+            "fwd_return_std": 0.147348,
+            "avg_market_ret": -0.0002,
+            "auc_lightgbm": 0.6454,
+            "auc_xgboost": 0.6448
+          },
+          {
+            "fold_id": 2,
+            "n_test": 120178,
+            "test_start": "2024-10-18 00:00:00",
+            "test_end": "2025-01-16 00:00:00",
+            "label_distribution": {
+              "0.0": 0.425,
+              "-1.0": 0.354,
+              "1.0": 0.221
+            },
+            "avg_volatility_20": 0.0205,
+            "avg_fwd_return": -0.00608,
+            "fwd_return_std": 0.105507,
+            "avg_market_ret": -0.0008,
+            "auc_lightgbm": 0.6586,
+            "auc_xgboost": 0.6504
+          },
+          {
+            "fold_id": 3,
+            "n_test": 84136,
+            "test_start": "2025-01-17 00:00:00",
+            "test_end": "2025-03-31 00:00:00",
+            "label_distribution": {
+              "0.0": 0.417,
+              "-1.0": 0.298,
+              "1.0": 0.285
+            },
+            "avg_volatility_20": 0.0196,
+            "avg_fwd_return": 0.004877,
+            "fwd_return_std": 0.103884,
+            "avg_market_ret": 0.0007,
+            "auc_lightgbm": 0.6211,
+            "auc_xgboost": 0.6184
+          }
+        ]
+      },
+      "overall_validity": "WEAK"
+    },
+    "calibration": {
+      "lightgbm_D1": {
+        "before": {
+          "brier_score": 0.6437,
+          "ece": 0.0407
+        },
+        "after": {
+          "brier_score": 0.6345,
+          "ece": 0.0062
+        },
+        "improvement_pct": 84.73,
+        "per_fold_ece": [
+          0.0319,
+          0.0182,
+          0.0207,
+          0.0368
+        ]
+      },
+      "xgboost_D1": {
+        "before": {
+          "brier_score": 0.6442,
+          "ece": 0.0419
+        },
+        "after": {
+          "brier_score": 0.6354,
+          "ece": 0.0062
+        },
+        "improvement_pct": 85.3,
+        "per_fold_ece": [
+          0.0282,
+          0.0156,
+          0.0229,
+          0.0357
+        ]
+      },
+      "ensemble_D1": {
+        "before": {
+          "brier_score": 0.6409,
+          "ece": 0.0366
+        },
+        "after": {
+          "brier_score": 0.634,
+          "ece": 0.0067
+        },
+        "improvement_pct": 81.69,
+        "per_fold_ece": [
+          0.0305,
+          0.0189,
+          0.0215,
+          0.0374
+        ]
+      },
+      "lightgbm_D5": {
+        "before": {
+          "brier_score": 0.6348,
+          "ece": 0.0461
+        },
+        "after": {
+          "brier_score": 0.6274,
+          "ece": 0.0126
+        },
+        "improvement_pct": 72.66,
+        "per_fold_ece": [
+          0.0668,
+          0.0309,
+          0.0475,
+          0.0374
+        ]
+      },
+      "xgboost_D5": {
+        "before": {
+          "brier_score": 0.6483,
+          "ece": 0.065
+        },
+        "after": {
+          "brier_score": 0.63,
+          "ece": 0.0107
+        },
+        "improvement_pct": 83.47,
+        "per_fold_ece": [
+          0.0689,
+          0.0402,
+          0.048,
+          0.0343
+        ]
+      },
+      "ensemble_D5": {
+        "before": {
+          "brier_score": 0.6375,
+          "ece": 0.0513
+        },
+        "after": {
+          "brier_score": 0.6273,
+          "ece": 0.0117
+        },
+        "improvement_pct": 77.14,
+        "per_fold_ece": [
+          0.0684,
+          0.0352,
+          0.0478,
+          0.0363
+        ]
+      },
+      "lightgbm_D20": {
+        "before": {
+          "brier_score": 0.6384,
+          "ece": 0.0793
+        },
+        "after": {
+          "brier_score": 0.6181,
+          "ece": 0.0181
+        },
+        "improvement_pct": 77.17,
+        "per_fold_ece": [
+          0.0782,
+          0.0234,
+          0.0759,
+          0.0563
+        ]
+      },
+      "xgboost_D20": {
+        "before": {
+          "brier_score": 0.6401,
+          "ece": 0.081
+        },
+        "after": {
+          "brier_score": 0.6175,
+          "ece": 0.0162
+        },
+        "improvement_pct": 79.96,
+        "per_fold_ece": [
+          0.076,
+          0.0222,
+          0.0672,
+          0.0586
+        ]
+      },
+      "ensemble_D20": {
+        "before": {
+          "brier_score": 0.6381,
+          "ece": 0.0796
+        },
+        "after": {
+          "brier_score": 0.6174,
+          "ece": 0.017
+        },
+        "improvement_pct": 78.66,
+        "per_fold_ece": [
+          0.0775,
+          0.0229,
+          0.0719,
+          0.0583
+        ]
+      }
+    },
+    "comparison": {
+      "lightgbm_D1": {
+        "horizon": 1,
+        "engine": "lightgbm",
+        "auc": 0.6145,
+        "log_loss": 1.0676,
+        "accuracy": 0.4295,
+        "balanced_accuracy": 0.4279,
+        "f1": 0.4281,
+        "rank_ic": 0.0501,
+        "icir": 0.1047,
+        "baseline_logloss": 1.0989,
+        "pass_auc_gate": "True"
+      },
+      "xgboost_D1": {
+        "horizon": 1,
+        "engine": "xgboost",
+        "auc": 0.6136,
+        "log_loss": 1.0678,
+        "accuracy": 0.4284,
+        "balanced_accuracy": 0.4257,
+        "f1": 0.427,
+        "rank_ic": 0.0507,
+        "icir": 0.0715,
+        "baseline_logloss": 1.0989,
+        "pass_auc_gate": "True"
+      },
+      "ensemble_D1": {
+        "horizon": 1,
+        "engine": "ensemble",
+        "auc": 0.6198,
+        "log_loss": 1.0602,
+        "accuracy": 0.4344,
+        "balanced_accuracy": 0.4338,
+        "f1": 0,
+        "rank_ic": 0.0522,
+        "icir": 0.0866,
+        "baseline_logloss": 0,
+        "pass_auc_gate": true
+      },
+      "lightgbm_D5": {
+        "horizon": 5,
+        "engine": "lightgbm",
+        "auc": 0.6415,
+        "log_loss": 1.051,
+        "accuracy": 0.4522,
+        "balanced_accuracy": 0.4528,
+        "f1": 0.4538,
+        "rank_ic": 0.1279,
+        "icir": 0.4578,
+        "baseline_logloss": 1.1006,
+        "pass_auc_gate": "True"
+      },
+      "xgboost_D5": {
+        "horizon": 5,
+        "engine": "xgboost",
+        "auc": 0.6364,
+        "log_loss": 1.0764,
+        "accuracy": 0.449,
+        "balanced_accuracy": 0.4501,
+        "f1": 0.4501,
+        "rank_ic": 0.1267,
+        "icir": 0.5136,
+        "baseline_logloss": 1.1006,
+        "pass_auc_gate": "True"
+      },
+      "ensemble_D5": {
+        "horizon": 5,
+        "engine": "ensemble",
+        "auc": 0.6403,
+        "log_loss": 1.0574,
+        "accuracy": 0.4517,
+        "balanced_accuracy": 0.4527,
+        "f1": 0,
+        "rank_ic": 0.1308,
+        "icir": 0.4883,
+        "baseline_logloss": 0,
+        "pass_auc_gate": true
+      },
+      "lightgbm_D20": {
+        "horizon": 20,
+        "engine": "lightgbm",
+        "auc": 0.6484,
+        "log_loss": 1.0558,
+        "accuracy": 0.4427,
+        "balanced_accuracy": 0.4496,
+        "f1": 0.443,
+        "rank_ic": 0.1491,
+        "icir": 1.7891,
+        "baseline_logloss": 1.0897,
+        "pass_auc_gate": "True"
+      },
+      "xgboost_D20": {
+        "horizon": 20,
+        "engine": "xgboost",
+        "auc": 0.6454,
+        "log_loss": 1.0591,
+        "accuracy": 0.4423,
+        "balanced_accuracy": 0.4485,
+        "f1": 0.443,
+        "rank_ic": 0.15,
+        "icir": 1.6461,
+        "baseline_logloss": 1.0897,
+        "pass_auc_gate": "True"
+      },
+      "ensemble_D20": {
+        "horizon": 20,
+        "engine": "ensemble",
+        "auc": 0.6424,
+        "log_loss": 1.0572,
+        "accuracy": 0.4434,
+        "balanced_accuracy": 0.4486,
+        "f1": 0,
+        "rank_ic": 0.1507,
+        "icir": 1.7413,
+        "baseline_logloss": 0,
+        "pass_auc_gate": true
+      }
+    },
+    "best_model": "lightgbm_D20",
+    "icir": {
+      "lightgbm_D1": {
+        "mean_ic": 0.0198,
+        "std_ic": 0.1888,
+        "icir": 0.1047
+      },
+      "xgboost_D1": {
+        "mean_ic": 0.0141,
+        "std_ic": 0.1969,
+        "icir": 0.0715
+      },
+      "ensemble_D1": {
+        "mean_ic": 0.0173,
+        "std_ic": 0.1994,
+        "icir": 0.0866
+      },
+      "lightgbm_D5": {
+        "mean_ic": 0.0798,
+        "std_ic": 0.1742,
+        "icir": 0.4578
+      },
+      "xgboost_D5": {
+        "mean_ic": 0.0855,
+        "std_ic": 0.1664,
+        "icir": 0.5136
+      },
+      "ensemble_D5": {
+        "mean_ic": 0.0855,
+        "std_ic": 0.1751,
+        "icir": 0.4883
+      },
+      "lightgbm_D20": {
+        "mean_ic": 0.1147,
+        "std_ic": 0.0641,
+        "icir": 1.7891
+      },
+      "xgboost_D20": {
+        "mean_ic": 0.1074,
+        "std_ic": 0.0652,
+        "icir": 1.6461
+      },
+      "ensemble_D20": {
+        "mean_ic": 0.1123,
+        "std_ic": 0.0645,
+        "icir": 1.7413
+      }
+    },
+    "feature_stability": {
+      "stability_score": 0.9062,
+      "consistent_top_features": [
+        "fund_cost_of_revenue_sq",
+        "fund_current_ratio",
+        "fund_debt_equity",
+        "fund_ebitda",
+        "fund_eps",
+        "fund_gross_margin_sq",
+        "fund_net_income_sq",
+        "fund_net_margin_sq",
+        "fund_operating_income_sq",
+        "fund_operating_margin_sq",
+        "fund_total_comprehensive_income_sq",
+        "risk_market_breadth",
+        "risk_market_ret_20d",
+        "trend_bb_lower_20",
+        "trend_volatility_60",
+        "val_ev_ebitda",
+        "val_pe",
+        "val_pe_rank"
+      ],
+      "pairwise_jaccards": [
+        0.9048,
+        0.9048,
+        0.8182,
+        1.0,
+        0.9048,
+        0.9048
+      ]
+    },
+    "quintile_analysis": {
+      "ensemble_D1": {
+        "quintile_returns": {
+          "1": -0.2627,
+          "2": -0.1429,
+          "3": -0.0748,
+          "4": 0.0023,
+          "5": 0.4959
+        },
+        "long_short_spread": 0.7586,
+        "monotonicity": 1.0
+      },
+      "ensemble_D5": {
+        "quintile_returns": {
+          "1": -0.7686,
+          "2": -0.1534,
+          "3": 0.322,
+          "4": 0.7385,
+          "5": 6.2144
+        },
+        "long_short_spread": 6.983,
+        "monotonicity": 1.0
+      },
+      "ensemble_D20": {
+        "quintile_returns": {
+          "1": -0.9614,
+          "2": -0.0394,
+          "3": 2.7827,
+          "4": 9.1477,
+          "5": 276.3821
+        },
+        "long_short_spread": 277.3435,
+        "monotonicity": 1.0
+      }
+    },
+    "bootstrap_ci": {
+      "xgboost_D1": {
+        "return_point": -0.3295,
+        "return_ci_lower": -0.603,
+        "return_ci_upper": 0.1306,
+        "sharpe_point": -1.4166,
+        "sharpe_ci_lower": -3.3576,
+        "sharpe_ci_upper": 0.6672
+      },
+      "xgboost_D5": {
+        "return_point": 0.3997,
+        "return_ci_lower": -0.1674,
+        "return_ci_upper": 1.2129,
+        "sharpe_point": 1.5342,
+        "sharpe_ci_lower": -0.5438,
+        "sharpe_ci_upper": 3.8143
+      },
+      "xgboost_D20": {
+        "return_point": 0.5465,
+        "return_ci_lower": -0.0518,
+        "return_ci_upper": 1.4898,
+        "sharpe_point": 1.9912,
+        "sharpe_ci_lower": -0.0753,
+        "sharpe_ci_upper": 4.3721
+      }
+    },
+    "drawdown_analysis": {
+      "xgboost_D1": {
+        "cdar_95": -0.3036,
+        "avg_recovery_days": 3,
+        "n_episodes": 5,
+        "worst_episode": {
+          "start_date": "2024-07-08 00:00:00",
+          "trough_date": "2025-03-31 00:00:00",
+          "recovery_date": null,
+          "depth": -0.3992,
+          "duration_to_trough": 266,
+          "duration_to_recovery": null
+        }
+      },
+      "xgboost_D5": {
+        "cdar_95": -0.0909,
+        "avg_recovery_days": 10,
+        "n_episodes": 5,
+        "worst_episode": {
+          "start_date": "2024-07-18 00:00:00",
+          "trough_date": "2024-08-06 00:00:00",
+          "recovery_date": "2025-01-20 00:00:00",
+          "depth": -0.1793,
+          "duration_to_trough": 19,
+          "duration_to_recovery": 167
+        }
+      },
+      "xgboost_D20": {
+        "cdar_95": -0.0861,
+        "avg_recovery_days": 5,
+        "n_episodes": 5,
+        "worst_episode": {
+          "start_date": "2024-07-18 00:00:00",
+          "trough_date": "2024-08-06 00:00:00",
+          "recovery_date": "2024-09-23 00:00:00",
+          "depth": -0.1871,
+          "duration_to_trough": 19,
+          "duration_to_recovery": 48
+        }
+      }
+    },
+    "alpha_decay": {
+      "ensemble": {
+        "1": {
+          "mean_ic": 0.0468,
+          "icir": 5.3377
+        },
+        "5": {
+          "mean_ic": 0.0835,
+          "icir": 9.2417
+        },
+        "20": {
+          "mean_ic": 0.0999,
+          "icir": 12.3356
+        }
+      }
+    }
+  },
+  "quality_gates": {
+    "all_models_trained": true,
+    "auc_gate_pass": true,
+    "sufficient_folds": true,
+    "no_data_leakage": true,
+    "oof_predictions_valid": true,
+    "statistical_validity": false,
+    "permutation_tests_pass": true,
+    "feature_stability": "True",
+    "best_model_ic_positive": true
+  },
+  "overall_status": "NEEDS REVIEW"
+}

@@ -1,0 +1,25 @@
+# 開發環境設定 — 覆蓋 base.yaml
+logging:
+  level: "DEBUG"
+
+preprocessing:
+  text:
+    # Phase 5A 起切換到 stock_text.parquet 完整版（包含 content 欄位）
+    # 以支援 TF-IDF / 情緒 / BERTopic 等下游 NLP 任務
+    # 記憶體 ~1.7 GB；如 OOM 可暫改回 true 回落到 lite（只含 title）
+    use_lite: false
+
+model:
+  # Phase 5A：啟用三個 horizon 以完整對照 Phase 4 基線
+  # (Phase 4: D+1 ICIR=0.105, D+5=0.514, D+20=1.789；驗證 chip_/mg_/event_phase5a 能否救 D+1)
+  horizons: [1, 5, 20]
+  optuna:
+    n_trials: 0      # 保持與 Phase 4 同樣的固定超參數，隔離「特徵差異」這個變數
+    timeout: 0
+  lightgbm:
+    n_estimators: 300
+  xgboost:
+    n_estimators: 200
+    max_depth: 5
+    subsample: 0.6
+    colsample_bytree: 0.6

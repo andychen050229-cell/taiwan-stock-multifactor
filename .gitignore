@@ -18,17 +18,27 @@ env/
 *.swp
 *.swo
 
-# Data (too large for git)
+# Data (too large for git / >100MB GitHub limit)
 選用資料集/
 *.sql
 outputs/feature_store.parquet
+outputs/feature_store_final.parquet
 outputs/income_stmt_processed.parquet
 outputs/ohlcv_temp/
+outputs/bs_temp/
+outputs/cf_temp/
 outputs/archive/
 outputs/models/
+outputs/balance_sheet_processed.parquet
+outputs/text_tokens_lite.parquet
+outputs/_temp_*.npz
+outputs/_temp_*.npy
+
+# Phase 5B / 6 runtime tokens (large intermediate files)
+outputs/text_tokens.parquet
 
 # Course materials (large PDFs)
-08_課程講義/
+文件/課程教材/
 
 # Outputs
 logs/
@@ -43,8 +53,3 @@ Thumbs.db
 
 # Claude workspace
 .claude/
-
-# Uploaded reference docs (not part of codebase)
-Code_Audit_Report_Phase2_20260406.docx
-taiwan_stock_multifactor_dashboard_revision_spec.md
-outputs/AUDIT_REPORT_20260405.md

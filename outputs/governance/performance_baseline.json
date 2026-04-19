@@ -1,109 +1,109 @@
 {
   "lightgbm_D5": {
     "auc": {
-      "baseline": 0.6282,
-      "warning_threshold": 0.6094,
+      "baseline": 0.6352,
+      "warning_threshold": 0.6161,
       "description": "AUC 下降超過 3% 觸發警告"
     },
     "rank_ic": {
-      "baseline": 0.0789,
+      "baseline": 0.0083,
       "warning_threshold": 0,
       "description": "Rank IC 轉負觸發警告"
     },
     "sharpe_ratio": {
-      "baseline": 1.1973,
-      "warning_threshold": 0.5987,
+      "baseline": -0.3935,
+      "warning_threshold": -0.1968,
       "description": "Sharpe 下降超過 50% 觸發警告"
     },
     "calibration_ece": {
-      "baseline": 0.0117,
-      "warning_threshold": 0.0234,
+      "baseline": 0.013,
+      "warning_threshold": 0.026,
       "description": "ECE 上升超過 100% 觸發警告"
     },
     "nan_pct": {
-      "baseline": 0.0739,
-      "warning_threshold": 0.1239,
+      "baseline": 0.0042,
+      "warning_threshold": 0.0542,
       "description": "NaN 比率上升超過 5% 觸發警告"
     }
   },
   "xgboost_D5": {
     "auc": {
-      "baseline": 0.6256,
-      "warning_threshold": 0.6068,
+      "baseline": 0.6386,
+      "warning_threshold": 0.6194,
       "description": "AUC 下降超過 3% 觸發警告"
     },
     "rank_ic": {
-      "baseline": 0.0744,
+      "baseline": 0.0254,
       "warning_threshold": 0,
       "description": "Rank IC 轉負觸發警告"
     },
     "sharpe_ratio": {
-      "baseline": 1.317,
-      "warning_threshold": 0.6585,
+      "baseline": 0.0957,
+      "warning_threshold": 0.0478,
       "description": "Sharpe 下降超過 50% 觸發警告"
     },
     "calibration_ece": {
-      "baseline": 0.0123,
-      "warning_threshold": 0.0246,
+      "baseline": 0.0161,
+      "warning_threshold": 0.0322,
       "description": "ECE 上升超過 100% 觸發警告"
     },
     "nan_pct": {
-      "baseline": 0.0739,
-      "warning_threshold": 0.1239,
+      "baseline": 0.0042,
+      "warning_threshold": 0.0542,
       "description": "NaN 比率上升超過 5% 觸發警告"
     }
   },
   "lightgbm_D20": {
     "auc": {
-      "baseline": 0.6275,
-      "warning_threshold": 0.6087,
+      "baseline": 0.6391,
+      "warning_threshold": 0.6199,
       "description": "AUC 下降超過 3% 觸發警告"
     },
     "rank_ic": {
-      "baseline": 0.0598,
+      "baseline": 0.0131,
       "warning_threshold": 0,
       "description": "Rank IC 轉負觸發警告"
     },
     "sharpe_ratio": {
-      "baseline": 1.0922,
-      "warning_threshold": 0.5461,
+      "baseline": 0.6995,
+      "warning_threshold": 0.3498,
       "description": "Sharpe 下降超過 50% 觸發警告"
     },
     "calibration_ece": {
-      "baseline": 0.0182,
-      "warning_threshold": 0.0364,
+      "baseline": 0.0357,
+      "warning_threshold": 0.0714,
       "description": "ECE 上升超過 100% 觸發警告"
     },
     "nan_pct": {
-      "baseline": 0.0739,
-      "warning_threshold": 0.1239,
+      "baseline": 0.0042,
+      "warning_threshold": 0.0542,
       "description": "NaN 比率上升超過 5% 觸發警告"
     }
   },
   "xgboost_D20": {
     "auc": {
-      "baseline": 0.6205,
-      "warning_threshold": 0.6019,
+      "baseline": 0.6455,
+      "warning_threshold": 0.6261,
       "description": "AUC 下降超過 3% 觸發警告"
     },
     "rank_ic": {
-      "baseline": 0.0635,
+      "baseline": 0.0151,
       "warning_threshold": 0,
       "description": "Rank IC 轉負觸發警告"
     },
     "sharpe_ratio": {
-      "baseline": 1.2896,
-      "warning_threshold": 0.6448,
+      "baseline": 0.8064,
+      "warning_threshold": 0.4032,
       "description": "Sharpe 下降超過 50% 觸發警告"
     },
     "calibration_ece": {
-      "baseline": 0.016,
-      "warning_threshold": 0.032,
+      "baseline": 0.0299,
+      "warning_threshold": 0.0598,
       "description": "ECE 上升超過 100% 觸發警告"
     },
     "nan_pct": {
-      "baseline": 0.0739,
-      "warning_threshold": 0.1239,
+      "baseline": 0.0042,
+      "warning_threshold": 0.0542,
       "description": "NaN 比率上升超過 5% 觸發警告"
     }
   }

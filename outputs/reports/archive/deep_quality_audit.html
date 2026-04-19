@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>深度品質審計報告 — 評分與改善建議</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f7fa;color:#2d3748;line-height:1.7;padding:24px}
+  .container{max-width:1100px;margin:0 auto}
+  h1{font-size:1.8rem;color:#1a365d;margin-bottom:4px}
+  .subtitle{color:#718096;font-size:0.93rem;margin-bottom:28px}
+  h2{font-size:1.25rem;color:#2b6cb0;margin:30px 0 12px;border-left:4px solid #3182ce;padding-left:12px}
+  h3{font-size:1.05rem;color:#4a5568;margin:16px 0 8px}
+  table{border-collapse:collapse;width:100%;margin:8px 0 20px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  th{background:#2b6cb0;color:#fff;font-weight:600;padding:10px 14px;text-align:left;font-size:.87rem}
+  td{padding:9px 14px;border-bottom:1px solid #e2e8f0;font-size:.87rem}
+  tr:last-child td{border-bottom:none}
+  tr:nth-child(even){background:#f7fafc}
+  .badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.78rem;font-weight:600}
+  .badge-pass{background:#c6f6d5;color:#276749}
+  .badge-fail{background:#fed7d7;color:#c53030}
+  .badge-warn{background:#fefcbf;color:#975a16}
+  .badge-info{background:#bee3f8;color:#2a4365}
+  .card{background:#fff;border-radius:10px;padding:20px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .note{background:#ebf8ff;border-left:4px solid #3182ce;padding:12px 16px;margin:12px 0;border-radius:0 6px 6px 0;font-size:.88rem}
+  .warn-note{background:#fffff0;border-left-color:#d69e2e}
+  .err-note{background:#fff5f5;border-left-color:#c53030}
+  .ok-note{background:#f0fff4;border-left-color:#38a169}
+  .score-box{text-align:center;padding:28px;background:linear-gradient(135deg,#2b6cb0,#3182ce);color:#fff;border-radius:14px;margin:20px 0}
+  .score-big{font-size:4rem;font-weight:800;line-height:1}
+  .score-label{font-size:1rem;margin-top:6px;opacity:.9}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .mini-score{text-align:center;padding:16px;background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .mini-val{font-size:2rem;font-weight:700}
+  .mini-label{font-size:.8rem;color:#718096;margin-top:2px}
+  .green{color:#276749} .yellow{color:#b7791f} .red{color:#c53030} .blue{color:#2b6cb0}
+  ul{margin:8px 0 8px 24px} li{margin:5px 0;font-size:.9rem}
+  .footer{text-align:center;color:#a0aec0;font-size:.78rem;margin-top:40px;padding-top:16px;border-top:1px solid #e2e8f0}
+  .prio-high{color:#c53030;font-weight:600} .prio-mid{color:#b7791f;font-weight:600} .prio-low{color:#718096}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>深度品質審計報告</h1>
+<p class="subtitle">三層審計：資料品質 × 程式碼正確性 × 管線完整性 ｜ 2026-04-09</p>
+
+<!-- ===== OVERALL SCORE ===== -->
+<div class="score-box">
+  <div class="score-big">B+</div>
+  <div class="score-label">總體品質評分：78 / 100</div>
+  <div style="margin-top:8px;font-size:.88rem;opacity:.85">系統核心邏輯正確、模型具統計顯著性，但存在若干可改善的資料品質與設計問題</div>
+</div>
+
+<div class="grid3">
+  <div class="mini-score"><div class="mini-val green">85</div><div class="mini-label">程式碼正確性</div></div>
+  <div class="mini-score"><div class="mini-val yellow">70</div><div class="mini-label">資料品質</div></div>
+  <div class="mini-score"><div class="mini-val green">80</div><div class="mini-label">管線完整性</div></div>
+</div>
+
+<!-- ===== LAYER 1: DATA QUALITY ===== -->
+<h2>第一層：資料品質審計（70/100）</h2>
+
+<table>
+  <tr><th>檢查項目</th><th>結果</th><th>嚴重度</th><th>影響模型?</th></tr>
+  <tr>
+    <td>Feature Store 行數/列數</td>
+    <td>948,976 × 72 — 與報告一致 ✓</td>
+    <td><span class="badge badge-pass">OK</span></td>
+    <td>—</td>
+  </tr>
+  <tr>
+    <td>無重複 (date, company) 組合</td>
+    <td>0 duplicates ✓</td>
+    <td><span class="badge badge-pass">OK</span></td>
+    <td>—</td>
+  </tr>
+  <tr>
+    <td>無 Inf 值</td>
+    <td>0 inf values ✓</td>
+    <td><span class="badge badge-pass">OK</span></td>
+    <td>—</td>
+  </tr>
+  <tr>
+    <td>Label 分佈 (label_20)</td>
+    <td>DOWN 26.5% / FLAT 42.9% / UP 26.4% — 合理三分類</td>
+    <td><span class="badge badge-pass">OK</span></td>
+    <td>—</td>
+  </tr>
+  <tr>
+    <td><strong>val_pb 全部鎖死在 50.0</strong></td>
+    <td>63.2 萬筆有效值中 99.99% = 50.0（clip 上限），特徵完全無鑑別力</td>
+    <td><span class="badge badge-fail">嚴重</span></td>
+    <td>否（未被選入模型）</td>
+  </tr>
+  <tr>
+    <td><strong>fund_roic 99.4% 在 clip 邊界</strong></td>
+    <td>69.4% = +5.0, 30.1% = −5.0，僅 0.6% 在正常範圍</td>
+    <td><span class="badge badge-fail">嚴重</span></td>
+    <td>否（未被選入模型）</td>
+  </tr>
+  <tr>
+    <td><strong>val_ev_ebitda 82% 在 (0, 1] 區間</strong></td>
+    <td>因 cash_proxy=current_assets 導致 EV 系統性偏低</td>
+    <td><span class="badge badge-warn">中等</span></td>
+    <td><strong>是</strong>（在 28 個選入特徵中）</td>
+  </tr>
+  <tr>
+    <td>val_pe 21.6% 超過 100</td>
+    <td>高 P/E 值集中，可能需更嚴格 winsorize</td>
+    <td><span class="badge badge-warn">中等</span></td>
+    <td>是（val_pe 在模型中）</td>
+  </tr>
+  <tr>
+    <td>fund_revenue_yoy 60.7% NaN</td>
+    <td>大量缺失</td>
+    <td><span class="badge badge-info">低</span></td>
+    <td>否（未被選入模型）</td>
+  </tr>
+  <tr>
+    <td>fwd_ret_20 分佈</td>
+    <td>772 筆 > 100%（0.085%），合理尾部事件</td>
+    <td><span class="badge badge-pass">OK</span></td>
+    <td>—</td>
+  </tr>
+  <tr>
+    <td>每日股票覆蓋</td>
+    <td>1,825~1,924 檔/日 — 穩定覆蓋</td>
+    <td><span class="badge badge-pass">OK</span></td>
+    <td>—</td>
+  </tr>
+</table>
+
+<div class="err-note note">
+  <strong>關鍵發現：val_pb 和 fund_roic 兩個特徵實質失效。</strong>
+  val_pb 的 P/B 計算導致幾乎所有值被 clip 到上限 50（可能 implied_shares 極小導致 book_value_per_share 極大）。
+  fund_roic 的 invested_capital 計算中分母太小，ROIC 極端化後被 clip。
+  <strong>好消息</strong>：Feature Selection（MI + VIF）已自動淘汰這兩個特徵，未進入模型。
+</div>
+
+<div class="warn-note note">
+  <strong>待改善：val_ev_ebitda 分佈偏移。</strong>
+  Bug #4 修復後使用 current_assets 作為 cash proxy，這比真正的 cash &amp; equivalents 大得多，
+  導致 EV 系統性偏低（82% 的 EV/EBITDA < 1）。雖然 tree model 可以學習非線性映射，
+  但特徵的經濟學意義已被扭曲。建議未來改用更窄的現金代理變數。
+</div>
+
+<!-- ===== LAYER 2: CODE CORRECTNESS ===== -->
+<h2>第二層：程式碼正確性審計（85/100）</h2>
+
+<table>
+  <tr><th>Bug #</th><th>修復驗證</th><th>狀態</th><th>備註</th></tr>
+  <tr><td>#1 ROIC</td><td>Series fallback 正確，索引對齊 ✓</td><td><span class="badge badge-pass">正確</span></td><td>—</td></tr>
+  <tr><td>#2 NOPAT</td><td>eff_tax = (OI-NI)/OI，虧損處理 ✓，clip [0,0.5] ✓</td><td><span class="badge badge-pass">正確</span></td><td>—</td></tr>
+  <tr><td>#3 Implied Shares</td><td>移除 .abs()，where(>0, NaN) ✓</td><td><span class="badge badge-pass">正確</span></td><td>—</td></tr>
+  <tr><td>#4 EV 公式</td><td>公式正確，但 cash_proxy 選擇不佳</td><td><span class="badge badge-warn">部分正確</span></td><td>current_assets ≠ cash</td></tr>
+  <tr><td>#5 EBITDA D&A</td><td>median 符號檢測 ✓，abs() 轉換 ✓</td><td><span class="badge badge-pass">正確</span></td><td>—</td></tr>
+  <tr><td>#6 Quintile 年化</td><td>periods_per_year = 252/holding_days ✓</td><td><span class="badge badge-pass">正確</span></td><td>—</td></tr>
+</table>
+
+<h3>額外發現的潛在問題</h3>
+<table>
+  <tr><th>#</th><th>問題</th><th>嚴重度</th><th>位置</th><th>是否阻擋下一步?</th></tr>
+  <tr>
+    <td>A</td>
+    <td><strong>Feature Selection 僅用 Fold 0 訓練資料</strong> — MI/VIF 只看最早期資料，可能遺漏後期重要特徵</td>
+    <td class="prio-mid">中</td>
+    <td>執行Phase2 L173</td>
+    <td>否（現行 28 特徵表現良好）</td>
+  </tr>
+  <tr>
+    <td>B</td>
+    <td><strong>Alpha Decay 用錯模型</strong> — 用 D+20 模型預測算所有 horizon 的 IC，可能誤導結論</td>
+    <td class="prio-mid">中</td>
+    <td>執行Phase2 L487</td>
+    <td>否（目前僅 D+20，無跨 horizon 問題）</td>
+  </tr>
+  <tr>
+    <td>C</td>
+    <td><strong>Embargo 對所有 horizon 統一 20 天</strong> — D+1 策略 20 天 embargo 可能過嚴</td>
+    <td class="prio-low">低</td>
+    <td>walk_forward.py</td>
+    <td>否（目前僅 D+20，20 天合理）</td>
+  </tr>
+  <tr>
+    <td>D</td>
+    <td><strong>Price Limit 閾值 9.5%</strong> — 台股漲跌停為 10%，9.5% 偏保守</td>
+    <td class="prio-low">低</td>
+    <td>engine.py L80</td>
+    <td>否（影響極少數交易日）</td>
+  </tr>
+  <tr>
+    <td>E</td>
+    <td><strong>Liquidity Filter 靜默失效</strong> — volume 欄位未被 column pruning 保留時，liquidity 自動設 True</td>
+    <td class="prio-mid">中</td>
+    <td>engine.py L101</td>
+    <td>否（volume 在 Feature Store 中存在）</td>
+  </tr>
+  <tr>
+    <td>F</td>
+    <td><strong>Ensemble 等權重</strong> — 未按驗證表現加權</td>
+    <td class="prio-low">低</td>
+    <td>執行Phase2 L285</td>
+    <td>否（設計選擇）</td>
+  </tr>
+</table>
+
+<!-- ===== LAYER 3: PIPELINE INTEGRITY ===== -->
+<h2>第三層：管線完整性審計（80/100）</h2>
+
+<table>
+  <tr><th>檢查維度</th><th>結果</th><th>狀態</th></tr>
+  <tr>
+    <td>Data Leakage（訓練/測試切分）</td>
+    <td>Walk-forward 擴展窗口 + 20 天 embargo — 無洩漏</td>
+    <td><span class="badge badge-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>OOF 預測組裝</td>
+    <td>正確使用 fold.test_idx，NaN label 已排除</td>
+    <td><span class="badge badge-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>Rank IC 計算</td>
+    <td>僅使用 test 期間資料，非 train 資料</td>
+    <td><span class="badge badge-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>Backtest 價格使用</td>
+    <td>使用 closing_price 建構投組，無未來資訊</td>
+    <td><span class="badge badge-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>成本模型</td>
+    <td>三層成本（standard/discount/conservative），含手續費+稅</td>
+    <td><span class="badge badge-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>Permutation Test</td>
+    <td>右尾 p-value 計算正確 (permuted_aucs >= observed)</td>
+    <td><span class="badge badge-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>DSR 計算</td>
+    <td>日 → 年轉換正確（含雙向轉換精度損失風險，但可接受）</td>
+    <td><span class="badge badge-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>Subsample 確定性</td>
+    <td>seed = 42 + fold_id — 可重現</td>
+    <td><span class="badge badge-pass">PASS</span></td>
+  </tr>
+  <tr>
+    <td>Feature Selection 範圍</td>
+    <td>僅 Fold 0 訓練資料（最早期），非全體資料</td>
+    <td><span class="badge badge-warn">可改善</span></td>
+  </tr>
+  <tr>
+    <td>記憶體管理</td>
+    <td>float32 + OOF-to-disk + gc.collect() — 成功在 3.9GB 運行</td>
+    <td><span class="badge badge-pass">PASS</span></td>
+  </tr>
+</table>
+
+<!-- ===== SCORING BREAKDOWN ===== -->
+<h2>評分細項</h2>
+
+<div class="card">
+<table>
+  <tr><th>維度</th><th>滿分</th><th>得分</th><th>扣分原因</th></tr>
+  <tr><td>Bug Fix 正確性（6 bugs）</td><td>20</td><td>18</td><td>Bug #4 cash proxy 選擇不精確 (−2)</td></tr>
+  <tr><td>Feature Store 資料完整性</td><td>15</td><td>10</td><td>val_pb 失效 (−2)、fund_roic 失效 (−2)、val_ev_ebitda 偏移 (−1)</td></tr>
+  <tr><td>模型預測能力</td><td>15</td><td>13</td><td>AUC 0.64 尚可但未達 0.66+ (−1)、Optuna 未啟用 (−1)</td></tr>
+  <tr><td>回測可信度</td><td>15</td><td>14</td><td>OOD Fold 3 退化 (−1)</td></tr>
+  <tr><td>統計嚴謹性</td><td>10</td><td>9</td><td>DSR 雙向轉換精度 (−1)</td></tr>
+  <tr><td>管線無洩漏</td><td>10</td><td>10</td><td>—</td></tr>
+  <tr><td>程式碼品質與穩健性</td><td>10</td><td>7</td><td>Feature selection 範圍 (−1)、Alpha decay 跨 horizon (−1)、Liquidity 靜默失效 (−1)</td></tr>
+  <tr><td>治理與監控</td><td>5</td><td>4</td><td>Feature Drift 9 features high severity (−1)</td></tr>
+  <tr style="font-weight:700;background:#ebf8ff">
+    <td>總計</td><td>100</td><td>78 (B+)</td><td></td>
+  </tr>
+</table>
+</div>
+
+<!-- ===== IMPROVEMENT RECOMMENDATIONS ===== -->
+<h2>改善建議（按優先級排序）</h2>
+
+<table>
+  <tr><th>優先級</th><th>項目</th><th>預估改善幅度</th><th>是否阻擋 Phase 5?</th></tr>
+  <tr>
+    <td class="prio-high">P1</td>
+    <td><strong>EV 公式 cash proxy 改善</strong><br>將 current_assets 改為更窄的現金代理（如 cash_and_equivalents 或 current_assets × 0.3）</td>
+    <td>val_ev_ebitda 分佈修正 → 可能提升 1-3% AUC</td>
+    <td>否</td>
+  </tr>
+  <tr>
+    <td class="prio-high">P1</td>
+    <td><strong>val_pb 計算修復</strong><br>檢查 implied_shares 在 P/B 計算中為何產生極小值導致 clip</td>
+    <td>新增一個有效估值特徵</td>
+    <td>否</td>
+  </tr>
+  <tr>
+    <td class="prio-mid">P2</td>
+    <td><strong>ROIC 分母修正</strong><br>invested_capital 可能需改用 (total_assets − current_liabilities) 替代</td>
+    <td>新增一個有效獲利特徵</td>
+    <td>否</td>
+  </tr>
+  <tr>
+    <td class="prio-mid">P2</td>
+    <td><strong>在更大記憶體環境啟用 Optuna</strong><br>恢復 n_trials=20+ 進行超參數搜索</td>
+    <td>預估 Sharpe +0.1~0.3</td>
+    <td>否</td>
+  </tr>
+  <tr>
+    <td class="prio-mid">P2</td>
+    <td><strong>Feature Selection 改為全域或滾動</strong><br>使用所有 fold 訓練資料或 rolling MI 計算</td>
+    <td>可能發現被遺漏的重要特徵</td>
+    <td>否</td>
+  </tr>
+  <tr>
+    <td class="prio-low">P3</td>
+    <td><strong>val_pe winsorize 更嚴格</strong><br>將 P/E > 200 的部分 clip 或 rank-transform</td>
+    <td>減少極端值干擾</td>
+    <td>否</td>
+  </tr>
+  <tr>
+    <td class="prio-low">P3</td>
+    <td><strong>Price Limit 閾值調整</strong><br>9.5% → 10.0%</td>
+    <td>極微</td>
+    <td>否</td>
+  </tr>
+  <tr>
+    <td class="prio-low">P3</td>
+    <td><strong>Ensemble 加權</strong><br>按 validation AUC 或 IC 加權而非等權</td>
+    <td>預估 Sharpe +0.05~0.1</td>
+    <td>否</td>
+  </tr>
+</table>
+
+<!-- ===== FINAL VERDICT ===== -->
+<h2>最終判定</h2>
+
+<div class="card" style="border:2px solid #38a169;background:#f0fff4">
+  <h3 style="color:#276749;font-size:1.15rem">✓ 品質達標，可以進入 Phase 5 NLP</h3>
+  <p style="margin-top:10px;font-size:.92rem">
+    經三層深度審計後確認：
+  </p>
+  <ul>
+    <li><strong>核心正確性確認</strong>：6 個 Bug Fix 中 5 個完全正確，1 個（EV cash proxy）公式正確但資料來源可改善</li>
+    <li><strong>無 Data Leakage</strong>：Walk-forward + embargo + OOF 預測全部驗證通過</li>
+    <li><strong>模型具統計顯著性</strong>：Permutation p=0.000、DSR PASS、ICIR > 1.0</li>
+    <li><strong>資料品質可接受</strong>：失效特徵（val_pb、fund_roic）已被 Feature Selection 自動排除</li>
+    <li><strong>所有發現的問題均不阻擋下一階段</strong>：上述改善項可在後續迭代中處理</li>
+  </ul>
+  <p style="margin-top:12px;font-size:.92rem;color:#276749;font-weight:600">
+    建議：直接進入 Phase 5 NLP 新聞情緒分析，上述 P1/P2 改善項可排入下一輪迭代。
+  </p>
+</div>
+
+<div class="footer">
+  台灣股票多因子預測系統 — 深度品質審計 v1.0 ｜ 自動生成於 2026-04-09
+</div>
+
+</div>
+</body>
+</html>

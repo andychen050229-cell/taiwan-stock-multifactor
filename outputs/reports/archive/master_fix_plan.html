@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>全面修復計畫 — 8 人團隊嚴格審計</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f7fa;color:#2d3748;line-height:1.7;padding:20px}
+  .container{max-width:1200px;margin:0 auto}
+  h1{font-size:1.7rem;color:#1a365d;margin-bottom:4px}
+  .subtitle{color:#718096;font-size:.9rem;margin-bottom:24px}
+  h2{font-size:1.2rem;color:#fff;margin:28px 0 0;padding:10px 16px;border-radius:8px 8px 0 0}
+  .h2-critical{background:#c53030} .h2-high{background:#dd6b20} .h2-medium{background:#d69e2e} .h2-low{background:#718096}
+  h3{font-size:1rem;color:#4a5568;margin:14px 0 6px}
+  table{border-collapse:collapse;width:100%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  th{background:#edf2f7;color:#4a5568;font-weight:600;padding:8px 12px;text-align:left;font-size:.82rem;border-bottom:2px solid #cbd5e0}
+  td{padding:8px 12px;border-bottom:1px solid #e2e8f0;font-size:.82rem;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.72rem;font-weight:600}
+  .b-crit{background:#fed7d7;color:#c53030} .b-high{background:#feebc8;color:#c05621} .b-med{background:#fefcbf;color:#975a16} .b-low{background:#e2e8f0;color:#4a5568} .b-pass{background:#c6f6d5;color:#276749}
+  .card{background:#fff;border-radius:0 0 8px 8px;padding:16px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  code{background:#edf2f7;padding:1px 5px;border-radius:3px;font-size:.82rem;font-family:Consolas,monospace}
+  pre{background:#2d3748;color:#e2e8f0;padding:12px;border-radius:6px;font-size:.78rem;overflow-x:auto;margin:8px 0;line-height:1.5}
+  .fix-box{background:#f0fff4;border:1px solid #9ae6b4;border-radius:6px;padding:10px 14px;margin:8px 0;font-size:.85rem}
+  .impact{background:#fff5f5;border:1px solid #feb2b2;border-radius:6px;padding:8px 14px;margin:6px 0;font-size:.84rem}
+  .note{background:#ebf8ff;border-left:4px solid #3182ce;padding:10px 14px;margin:10px 0;border-radius:0 6px 6px 0;font-size:.85rem}
+  .summary-card{background:linear-gradient(135deg,#2b6cb0,#3182ce);color:#fff;border-radius:12px;padding:24px;margin:20px 0;text-align:center}
+  .summary-card .big{font-size:3.5rem;font-weight:800;line-height:1}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}
+  .stat{text-align:center;background:#fff;border-radius:8px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  .stat-val{font-size:1.8rem;font-weight:700} .stat-label{font-size:.75rem;color:#718096}
+  .red{color:#c53030} .orange{color:#dd6b20} .yellow{color:#d69e2e} .green{color:#276749}
+  .footer{text-align:center;color:#a0aec0;font-size:.75rem;margin-top:40px;padding-top:12px;border-top:1px solid #e2e8f0}
+  .role{font-size:.72rem;color:#718096;font-style:italic}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>全面修復計畫：嚴格 8 人團隊審計結果</h1>
+<p class="subtitle">涵蓋 4 個核心模組 × 20+ 原始碼檔案 × 逐行審查 ｜ 2026-04-09</p>
+
+<div class="summary-card">
+  <div class="big">21 項待修復</div>
+  <div style="margin-top:8px;font-size:.95rem">跨 4 個檔案 × 5 個嚴重度等級</div>
+</div>
+
+<div class="grid4">
+  <div class="stat"><div class="stat-val red">5</div><div class="stat-label">CRITICAL</div></div>
+  <div class="stat"><div class="stat-val orange">7</div><div class="stat-label">HIGH</div></div>
+  <div class="stat"><div class="stat-val yellow">6</div><div class="stat-label">MEDIUM</div></div>
+  <div class="stat"><div class="stat-val" style="color:#718096">3</div><div class="stat-label">LOW</div></div>
+</div>
+
+<!-- ============================================ -->
+<!-- CRITICAL ISSUES -->
+<!-- ============================================ -->
+<h2 class="h2-critical">CRITICAL — 必須立即修復（5 項）</h2>
+<div class="card">
+
+<!-- C1 -->
+<h3>C1. val_pb 計算完全失效（99.99% 鎖死在 clip max）</h3>
+<p><span class="role">發現者：資料科學家 + 量化分析師</span></p>
+<p><strong>檔案：</strong><code>engineer.py</code> L390-414 ｜ <strong>影響：</strong>val_pb 特徵喪失所有鑑別力</p>
+<div class="impact"><strong>根因分析：</strong>
+<code>val_pe_rank</code>（L390）使用 <code>groupby(ticker_col)</code> 做時間序列排名而非 <code>groupby(date_col)</code> 做截面排名。
+但 val_pb 的問題更根本：<code>implied_shares = net_income / eps</code> 在單位不匹配時（net_income 以千元計、EPS 以元計），
+算出的股數極小，導致 BVPS = equity / tiny_shares → 極大 → P/B = price / huge_bvps → 極小，最後被 clip(50) 截斷。</div>
+<div class="fix-box"><strong>修復方案：</strong><br>
+① 新增 implied_shares 單位校驗：若 median(shares) < 1000，可能單位不匹配，嘗試 ×1000 修正<br>
+② 若無法修正，改用 <code>shares_outstanding</code> 欄位（若資料源有提供）<br>
+③ 若以上都不可行，val_pb 移出 Feature Store 候選，避免後續誤用<br>
+④ 加入 diagnostic logging：clip 命中率 > 50% 時發出 ERROR</div>
+
+<!-- C2 -->
+<h3>C2. val_pe_rank 錯誤：時間序列排名而非截面排名</h3>
+<p><span class="role">發現者：量化分析師</span></p>
+<p><strong>檔案：</strong><code>engineer.py</code> L390-392 ｜ <strong>影響：</strong>val_pe_rank 是模型 top-1 重要特徵，定義錯誤直接影響預測品質</p>
+<div class="impact"><strong>實測驗證：</strong>單一日期的 val_pe_rank 平均值 = 0.82（截面排名應為 ~0.5），確認為時間序列排名。</div>
+<pre># 目前（錯誤）：每檔股票對自己的歷史 P/E 排名
+df["val_pe_rank"] = df.groupby(ticker_col)["val_pe"].transform(lambda x: x.rank(pct=True))
+
+# 修正：每個日期對所有股票的 P/E 做截面排名
+df["val_pe_rank"] = df.groupby(date_col)["val_pe"].transform(lambda x: x.rank(pct=True, na_option="keep"))</pre>
+
+<!-- C3 -->
+<h3>C3. val_ev_ebitda 的 EV 計算：cash_proxy = current_assets 過於激進</h3>
+<p><span class="role">發現者：分析師 + 資料科學家</span></p>
+<p><strong>檔案：</strong><code>engineer.py</code> L461-466 ｜ <strong>影響：</strong>82% 的 EV/EBITDA 在 (0,1] 區間，經濟學意義扭曲</p>
+<div class="impact"><strong>根因：</strong>current_assets 包含存貨、應收帳款（佔總額 60-80%），不等於現金。EV 被大量低估。</div>
+<div class="fix-box"><strong>修復方案：</strong><br>
+① 優先使用 <code>cash_and_equivalents</code> 欄位<br>
+② 若無，改用 <code>current_assets × 0.3</code>（經驗比例）<br>
+③ 若以上都無，cash_proxy = 0（保守做法，不扣現金）</div>
+
+<!-- C4 -->
+<h3>C4. Phase 2 Column Pruning 導致 Backtest 流動性篩選靜默失效</h3>
+<p><span class="role">發現者：ML 工程師</span></p>
+<p><strong>檔案：</strong><code>執行Phase2_模型訓練.py</code> L196-203 ｜ <strong>影響：</strong>所有不流動股票被納入回測，回報可能虛高</p>
+<div class="impact"><strong>根因：</strong>keep_cols 僅保留 selected_features + labels + meta columns。<code>volume</code> 和 <code>turnover</code> 未在 selected_features 中，
+被 pruning 刪除。Backtest engine L88-103 找不到 volume → 靜默設定 _liquid=True，等於不做流動性過濾。</div>
+<pre># 修正：擴充 keep_cols
+keep_cols = (
+    selected_features
+    + [f"label_{h}" for h in horizons]
+    + [f"fwd_ret_{h}" for h in horizons]
+    + ["trade_date", "company_id", "close", "closing_price"]
+    + ["volume", "turnover"]  # ← 新增：回測必需
+)</pre>
+
+<!-- C5 -->
+<h3>C5. NOPAT 有效稅率：(OI-NI)/OI 包含非營業項目，且 fillna(0.2) 缺乏依據</h3>
+<p><span class="role">發現者：分析師</span></p>
+<p><strong>檔案：</strong><code>balance_sheet_processor.py</code> L243-252 ｜ <strong>影響：</strong>NOPAT 可能偏差 10-30%</p>
+<div class="impact"><strong>根因：</strong>(OI - NI) 包含利息、投資損益、匯兌損益等非營業項目。
+0.2 fallback 對高科技免稅區企業偏高，對傳產企業偏低。</div>
+<div class="fix-box"><strong>修復方案：</strong><br>
+① 若有 income_tax_expense 欄位，直接用 <code>eff_tax = income_tax / pre_tax_income</code><br>
+② 若無，改用台灣法定稅率 20% 但對 OI ≤ 0 設 0%，clip [0, 0.4]<br>
+③ NaN fallback 從 0.2 改為 0.17（台灣上市公司中位有效稅率）<br>
+④ 加入 per-industry 稅率表作為更精確的 fallback</div>
+
+</div>
+
+<!-- ============================================ -->
+<!-- HIGH ISSUES -->
+<!-- ============================================ -->
+<h2 class="h2-high">HIGH — 影響模型品質，須在重跑前修復（7 項）</h2>
+<div class="card">
+
+<h3>H1. ROE / ROA 應使用期間平均值而非期末值</h3>
+<p><strong>檔案：</strong><code>balance_sheet_processor.py</code> L228-237 ｜
+<strong>修復：</strong>需要 prev_period 的 equity/assets 做平均，若無前期資料則保留期末值</p>
+
+<h3>H2. ROIC invested_capital 不完整：缺少 bonds_payable</h3>
+<p><strong>檔案：</strong><code>balance_sheet_processor.py</code> L255-261 ｜
+<strong>修復：</strong>加入 <code>bonds_payable</code>（若存在）到 invested_capital 計算中</p>
+
+<h3>H3. fund_roic 99.4% 在 clip 邊界 — 分母 invested_capital 太小</h3>
+<p><strong>檔案：</strong><code>balance_sheet_processor.py</code> L264 ｜
+<strong>修復：</strong>① 改用 (total_assets - current_liabilities) 為替代 ② clip 改為 [-2, 2] ③ invested_capital < 某閾值時設 NaN</p>
+
+<h3>H4. missing equity 應為 NaN 而非 fillna(0)</h3>
+<p><strong>檔案：</strong><code>balance_sheet_processor.py</code> L259 ｜
+<strong>修復：</strong>equity 缺失時保持 NaN，讓 ROIC/D&E 自然為 NaN</p>
+
+<h3>H5. D&A 符號檢測 median() 不夠穩健</h3>
+<p><strong>檔案：</strong><code>balance_sheet_processor.py</code> L296-298 ｜
+<strong>修復：</strong>改為 per-company 檢測或使用 <code>mode</code>，並加入 logging</p>
+
+<h3>H6. Alpha Decay 用錯 horizon 模型</h3>
+<p><strong>檔案：</strong><code>執行Phase2_模型訓練.py</code> L487-496 ｜
+<strong>修復：</strong>每個 horizon 用自己的模型 OOF 計算 IC，而非全用 D+20</p>
+
+<h3>H7. Subsample 未保持 class balance（stratified sampling）</h3>
+<p><strong>檔案：</strong><code>trainer.py</code> L251-259 ｜
+<strong>修復：</strong>改用 stratified random sampling，確保 UP/FLAT/DOWN 比例與原始相同</p>
+
+</div>
+
+<!-- ============================================ -->
+<!-- MEDIUM ISSUES -->
+<!-- ============================================ -->
+<h2 class="h2-medium">MEDIUM — 影響嚴謹性，建議修復（6 項）</h2>
+<div class="card">
+
+<h3>M1. event_news_count 使用整日新聞（含盤後）</h3>
+<p><strong>檔案：</strong><code>engineer.py</code> L526-544 ｜
+<strong>修復：</strong>news_count 改為 shift(1)（使用前一日新聞），或僅取 09:00 前的新聞<br>
+<span class="role">注：實測 corr 僅 −0.02，影響微小但原則上不正確</span></p>
+
+<h3>M2. Clip 範圍不一致且過寬</h3>
+<p>current_ratio clip(0,20)、D/E clip(-10,50)、EBITDA margin clip(-2,5) ← 全部過寬<br>
+<strong>修復：</strong>統一使用 percentile-based clipping 或收窄到合理範圍</p>
+
+<h3>M3. 會計恆等式驗證容差 5% 過鬆</h3>
+<p><strong>檔案：</strong><code>balance_sheet_processor.py</code> L334-338 ｜
+<strong>修復：</strong>容差從 5% 降至 0.5%，違反率門檻從 5% 降至 1%</p>
+
+<h3>M4. Cost Model 台灣稅制不對稱（證交稅僅賣方）</h3>
+<p><strong>檔案：</strong><code>engine.py</code> L27-36 ｜
+<strong>修復：</strong>tax 改為僅 sell side：<code>buy_cost = comm×disc + slip</code>，<code>sell_cost = comm×disc + tax + slip</code></p>
+
+<h3>M5. Feature Selection 僅使用 Fold 0 訓練資料</h3>
+<p><strong>檔案：</strong><code>執行Phase2_模型訓練.py</code> L173-175 ｜
+<strong>修復：</strong>改用所有 fold 訓練資料的聯集，或每個 fold 獨立做 feature selection</p>
+
+<h3>M6. Calibrated OOF 未被 Backtest 使用（dead code path）</h3>
+<p><strong>檔案：</strong><code>執行Phase2_模型訓練.py</code> L618-636 ｜
+<strong>修復：</strong>calibration 後將 calibrated_oof 寫回 res["oof_predictions"]，或移除此段</p>
+
+</div>
+
+<!-- ============================================ -->
+<!-- LOW ISSUES -->
+<!-- ============================================ -->
+<h2 class="h2-low">LOW — 程式碼品質改善（3 項）</h2>
+<div class="card">
+
+<h3>L1. 硬編碼值散落各處</h3>
+<p>subsample 200K、val_split 0.85、price_limit 0.095、trading_days 252 → 移至 config</p>
+
+<h3>L2. import gc as _gc 重複匯入</h3>
+<p><code>engineer.py</code> L231/312/719 重複匯入 → 移至檔案頂部一次</p>
+
+<h3>L3. Error handling 不完善</h3>
+<p>模型訓練缺少 try/catch，fold 失敗時 OOF 部分為 NaN 但未明確報告</p>
+
+</div>
+
+<!-- ============================================ -->
+<!-- EXECUTION PLAN -->
+<!-- ============================================ -->
+<h2 style="background:#276749;color:#fff;padding:10px 16px;margin-top:28px;border-radius:8px 8px 0 0">執行計畫：修復順序與預期影響</h2>
+<div class="card">
+
+<table>
+<tr><th>#</th><th>修復項</th><th>嚴重度</th><th>檔案</th><th>預估影響</th><th>Phase</th></tr>
+<tr><td>C2</td><td>val_pe_rank → 截面排名</td><td><span class="badge b-crit">CRITICAL</span></td><td>engineer.py</td><td>Top-1 特徵重新定義 → AUC 可能 +1-3%</td><td>P1</td></tr>
+<tr><td>C4</td><td>Column Pruning 保留 volume/turnover</td><td><span class="badge b-crit">CRITICAL</span></td><td>執行Phase2</td><td>啟用流動性過濾 → 回報更真實</td><td>P2</td></tr>
+<tr><td>C3</td><td>EV cash_proxy 改善</td><td><span class="badge b-crit">CRITICAL</span></td><td>engineer.py</td><td>val_ev_ebitda 恢復正常分佈</td><td>P1</td></tr>
+<tr><td>C1</td><td>val_pb 修復或移除</td><td><span class="badge b-crit">CRITICAL</span></td><td>engineer.py</td><td>可能新增一個有效特徵</td><td>P1</td></tr>
+<tr><td>C5</td><td>NOPAT 稅率改善</td><td><span class="badge b-crit">CRITICAL</span></td><td>balance_sheet_proc</td><td>fund_nopat/roic 更精確</td><td>P1</td></tr>
+<tr><td>H1</td><td>ROE/ROA 用期間平均</td><td><span class="badge b-high">HIGH</span></td><td>balance_sheet_proc</td><td>財務比率更正確</td><td>P1</td></tr>
+<tr><td>H2</td><td>ROIC invested_capital 加 bonds</td><td><span class="badge b-high">HIGH</span></td><td>balance_sheet_proc</td><td>fund_roic clip 命中率下降</td><td>P1</td></tr>
+<tr><td>H3</td><td>fund_roic clip 改善</td><td><span class="badge b-high">HIGH</span></td><td>balance_sheet_proc</td><td>ROIC 特徵恢復鑑別力</td><td>P1</td></tr>
+<tr><td>H4</td><td>Missing equity → NaN</td><td><span class="badge b-high">HIGH</span></td><td>balance_sheet_proc</td><td>避免假 0 導致錯誤比率</td><td>P1</td></tr>
+<tr><td>H5</td><td>D&A 符號改善</td><td><span class="badge b-high">HIGH</span></td><td>balance_sheet_proc</td><td>EBITDA 更穩健</td><td>P1</td></tr>
+<tr><td>H6</td><td>Alpha Decay 修正</td><td><span class="badge b-high">HIGH</span></td><td>執行Phase2</td><td>分析結果更正確</td><td>P2</td></tr>
+<tr><td>H7</td><td>Stratified subsample</td><td><span class="badge b-high">HIGH</span></td><td>trainer.py</td><td>class balance 保持 → F1 ↑</td><td>P2</td></tr>
+<tr><td>M1</td><td>News count shift(1)</td><td><span class="badge b-med">MEDIUM</span></td><td>engineer.py</td><td>消除潛在 leakage</td><td>P1</td></tr>
+<tr><td>M2</td><td>Clip 範圍統一</td><td><span class="badge b-med">MEDIUM</span></td><td>balance_sheet_proc</td><td>更少 clip 導致的假訊號</td><td>P1</td></tr>
+<tr><td>M3</td><td>會計恆等式容差收緊</td><td><span class="badge b-med">MEDIUM</span></td><td>balance_sheet_proc</td><td>更早發現資料品質問題</td><td>P1</td></tr>
+<tr><td>M4</td><td>Cost Model 稅制修正</td><td><span class="badge b-med">MEDIUM</span></td><td>engine.py</td><td>回報更精確（影響 ~0.3%）</td><td>P2</td></tr>
+<tr><td>M5</td><td>Feature Selection 範圍</td><td><span class="badge b-med">MEDIUM</span></td><td>執行Phase2</td><td>可能發現更好特徵組合</td><td>P2</td></tr>
+<tr><td>M6</td><td>Calibration 使用或移除</td><td><span class="badge b-med">MEDIUM</span></td><td>執行Phase2</td><td>消除 dead code</td><td>P2</td></tr>
+<tr><td>L1-3</td><td>硬編碼/import/error handling</td><td><span class="badge b-low">LOW</span></td><td>多檔</td><td>程式碼品質</td><td>P2</td></tr>
+</table>
+
+<div class="note" style="margin-top:16px">
+<strong>Phase 影響範圍：</strong><br>
+• <strong>P1 修復（12 項）</strong>→ 影響 Feature Store → 必須重跑 Phase 1 + 2 + 3<br>
+• <strong>P2 修復（9 項）</strong>→ 僅影響模型訓練/回測 → 必須重跑 Phase 2 + 3<br>
+• 兩批可合併一次處理，最終只需 Phase 1 → 2 → 3 各跑一次
+</div>
+
+</div>
+
+<!-- ============================================ -->
+<!-- PREDICTED OUTCOMES -->
+<!-- ============================================ -->
+<h2 style="background:#2b6cb0;color:#fff;padding:10px 16px;margin-top:28px;border-radius:8px 8px 0 0">修復後預測效果</h2>
+<div class="card">
+
+<table>
+<tr><th>指標</th><th>目前</th><th>預測修復後</th><th>變化原因</th></tr>
+<tr><td>val_pe_rank 定義</td><td>時間序列排名（per stock）</td><td>截面排名（per date）</td><td>C2 修復，Top-1 重要特徵重新定義</td></tr>
+<tr><td>val_ev_ebitda 中位數</td><td>0.07（82% 在 0-1 區間）</td><td>~8-15（正常範圍）</td><td>C3 修復 cash_proxy</td></tr>
+<tr><td>val_pb 有效值比例</td><td>0.01%</td><td>~60-80%（或移除）</td><td>C1 implied_shares 修正</td></tr>
+<tr><td>fund_roic 有效值比例</td><td>0.6%</td><td>~50-70%</td><td>H2+H3 改善分母</td></tr>
+<tr><td>Ensemble AUC</td><td>0.638</td><td>0.65 ~ 0.68（預估）</td><td>C2 截面排名 + 流動性過濾</td></tr>
+<tr><td>Ensemble Sharpe</td><td>1.85</td><td>1.5 ~ 2.2（區間更誠實）</td><td>流動性過濾降低非真實報酬</td></tr>
+<tr><td>Liquidity Filter</td><td>靜默停用</td><td>正常運作</td><td>C4 修復 keep_cols</td></tr>
+<tr><td>NOPAT 精確度</td><td>誤差 10-30%</td><td>誤差 < 5%</td><td>C5 稅率改善</td></tr>
+</table>
+
+<div class="note">
+<strong>注意：</strong>修復後 Sharpe / Return 可能「下降」。這不代表退化，而代表<strong>更真實</strong>。
+流動性過濾會排除無法實際交易的小型股（通常報酬虛高），val_pe_rank 截面排名會改變選股邏輯。
+如果修復後指標仍在合理範圍（Sharpe > 1.0, ICIR > 0.5），代表系統品質優良。
+</div>
+
+</div>
+
+<div class="footer">
+  台灣股票多因子預測系統 — 全面修復計畫 v1.0 ｜ 8 人團隊審計 ｜ 2026-04-09
+</div>
+
+</div>
+</body>
+</html>

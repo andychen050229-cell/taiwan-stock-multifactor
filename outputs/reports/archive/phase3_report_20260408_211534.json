@@ -1,0 +1,994 @@
+{
+  "phase": "Phase 3 — 模型治理 + 部署優化 + 信號監控",
+  "timestamp": "2026-04-08T21:15:23.043762",
+  "env": "dev",
+  "results": {
+    "step1_models": {
+      "expected": [
+        "lightgbm_D5",
+        "xgboost_D5",
+        "lightgbm_D20",
+        "xgboost_D20"
+      ],
+      "available": [
+        "lightgbm_D1",
+        "lightgbm_D20",
+        "lightgbm_D5",
+        "xgboost_D1",
+        "xgboost_D20",
+        "xgboost_D5"
+      ],
+      "rebuilt": []
+    },
+    "step2_model_cards": {
+      "generated": [
+        "lightgbm_D20",
+        "lightgbm_D5",
+        "xgboost_D20",
+        "xgboost_D5"
+      ],
+      "count": 4
+    },
+    "step3_drift": {
+      "severity": "high",
+      "n_drifted": 9,
+      "top_drifted": [
+        {
+          "feature": "event_news_count_5d",
+          "psi": 1.5882,
+          "ks_sig": true,
+          "mean_shift_pct": -45.34,
+          "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+        },
+        {
+          "feature": "event_news_count_1d",
+          "psi": 1.3537,
+          "ks_sig": true,
+          "mean_shift_pct": -49.24,
+          "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+        },
+        {
+          "feature": "risk_market_breadth",
+          "psi": 1.1606,
+          "ks_sig": true,
+          "mean_shift_pct": 1.83,
+          "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+        },
+        {
+          "feature": "val_pe_rank",
+          "psi": 1.0172,
+          "ks_sig": true,
+          "mean_shift_pct": -44.32,
+          "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+        },
+        {
+          "feature": "risk_market_ret_20d",
+          "psi": 0.4592,
+          "ks_sig": true,
+          "mean_shift_pct": -18.44,
+          "action": "建議檢查此特徵的數據源是否異常，考慮重新計算或降權"
+        }
+      ]
+    },
+    "step4_signal_decay": {
+      "analysis_date": "2026-04-08T21:15:34.198421",
+      "alpha_decay_from_p2": {
+        "ensemble_1": {
+          "mean_ic": 0.0468,
+          "icir": 5.3377
+        },
+        "ensemble_5": {
+          "mean_ic": 0.0835,
+          "icir": 9.2417
+        },
+        "ensemble_20": {
+          "mean_ic": 0.0999,
+          "icir": 12.3356
+        }
+      },
+      "icir_summary": {
+        "lightgbm_D1": {
+          "mean_ic": 0.0198,
+          "icir": 0.1047
+        },
+        "xgboost_D1": {
+          "mean_ic": 0.0141,
+          "icir": 0.0715
+        },
+        "ensemble_D1": {
+          "mean_ic": 0.0173,
+          "icir": 0.0866
+        },
+        "lightgbm_D5": {
+          "mean_ic": 0.0798,
+          "icir": 0.4578
+        },
+        "xgboost_D5": {
+          "mean_ic": 0.0855,
+          "icir": 0.5136
+        },
+        "ensemble_D5": {
+          "mean_ic": 0.0855,
+          "icir": 0.4883
+        },
+        "lightgbm_D20": {
+          "mean_ic": 0.1147,
+          "icir": 1.7891
+        },
+        "xgboost_D20": {
+          "mean_ic": 0.1074,
+          "icir": 1.6461
+        },
+        "ensemble_D20": {
+          "mean_ic": 0.1123,
+          "icir": 1.7413
+        }
+      },
+      "signal_stability": {
+        "lightgbm_D1": {
+          "icir": 0.1047,
+          "stability": "weak"
+        },
+        "xgboost_D1": {
+          "icir": 0.0715,
+          "stability": "weak"
+        },
+        "ensemble_D1": {
+          "icir": 0.0866,
+          "stability": "weak"
+        },
+        "lightgbm_D5": {
+          "icir": 0.4578,
+          "stability": "moderate"
+        },
+        "xgboost_D5": {
+          "icir": 0.5136,
+          "stability": "strong"
+        },
+        "ensemble_D5": {
+          "icir": 0.4883,
+          "stability": "moderate"
+        },
+        "lightgbm_D20": {
+          "icir": 1.7891,
+          "stability": "strong"
+        },
+        "xgboost_D20": {
+          "icir": 1.6461,
+          "stability": "strong"
+        },
+        "ensemble_D20": {
+          "icir": 1.7413,
+          "stability": "strong"
+        }
+      },
+      "half_life_analysis": {
+        "D5": {
+          "half_life_months": null,
+          "decay_rate": null,
+          "trend_direction": "stable",
+          "monthly_slope": 0.000927,
+          "peak_month_idx": 13,
+          "n_months_analyzed": 21,
+          "note": "信號穩定，無明顯衰減或改善"
+        },
+        "D20": {
+          "half_life_months": null,
+          "decay_rate": null,
+          "trend_direction": "stable",
+          "monthly_slope": -0.000954,
+          "peak_month_idx": 4,
+          "n_months_analyzed": 21,
+          "note": "信號穩定，無明顯衰減或改善"
+        }
+      },
+      "monthly_ic_trends": {
+        "D5": {
+          "val_pe_rank": [
+            {
+              "month": "2023-05",
+              "ic": -0.216165
+            },
+            {
+              "month": "2023-06",
+              "ic": -0.195136
+            },
+            {
+              "month": "2023-07",
+              "ic": -0.115028
+            },
+            {
+              "month": "2023-08",
+              "ic": -0.26388
+            },
+            {
+              "month": "2023-09",
+              "ic": -0.118055
+            },
+            {
+              "month": "2023-10",
+              "ic": -0.07036
+            },
+            {
+              "month": "2023-11",
+              "ic": -0.093438
+            },
+            {
+              "month": "2023-12",
+              "ic": -0.168855
+            },
+            {
+              "month": "2024-01",
+              "ic": -0.154585
+            },
+            {
+              "month": "2024-02",
+              "ic": -0.135634
+            },
+            {
+              "month": "2024-03",
+              "ic": -0.064556
+            },
+            {
+              "month": "2024-04",
+              "ic": -0.164927
+            },
+            {
+              "month": "2024-05",
+              "ic": -0.062324
+            },
+            {
+              "month": "2024-06",
+              "ic": -0.127422
+            },
+            {
+              "month": "2024-07",
+              "ic": -0.057845
+            },
+            {
+              "month": "2024-08",
+              "ic": 0.004202
+            },
+            {
+              "month": "2024-09",
+              "ic": -0.169468
+            },
+            {
+              "month": "2024-10",
+              "ic": -0.085222
+            },
+            {
+              "month": "2024-11",
+              "ic": -0.187066
+            },
+            {
+              "month": "2024-12",
+              "ic": -0.18482
+            },
+            {
+              "month": "2025-01",
+              "ic": -0.181102
+            },
+            {
+              "month": "2025-02",
+              "ic": -0.1848
+            },
+            {
+              "month": "2025-03",
+              "ic": -0.047592
+            }
+          ],
+          "val_pe": [
+            {
+              "month": "2023-05",
+              "ic": -0.034436
+            },
+            {
+              "month": "2023-06",
+              "ic": -0.044461
+            },
+            {
+              "month": "2023-07",
+              "ic": -0.06813
+            },
+            {
+              "month": "2023-08",
+              "ic": -0.170338
+            },
+            {
+              "month": "2023-09",
+              "ic": -0.044881
+            },
+            {
+              "month": "2023-10",
+              "ic": -0.056485
+            },
+            {
+              "month": "2023-11",
+              "ic": -0.039471
+            },
+            {
+              "month": "2023-12",
+              "ic": -0.062306
+            },
+            {
+              "month": "2024-01",
+              "ic": -0.016437
+            },
+            {
+              "month": "2024-02",
+              "ic": -0.132896
+            },
+            {
+              "month": "2024-03",
+              "ic": -0.110711
+            },
+            {
+              "month": "2024-04",
+              "ic": -0.094077
+            },
+            {
+              "month": "2024-05",
+              "ic": 0.004243
+            },
+            {
+              "month": "2024-06",
+              "ic": -0.009067
+            },
+            {
+              "month": "2024-07",
+              "ic": -0.039074
+            },
+            {
+              "month": "2024-08",
+              "ic": 0.044043
+            },
+            {
+              "month": "2024-09",
+              "ic": -0.008825
+            },
+            {
+              "month": "2024-10",
+              "ic": -0.035757
+            },
+            {
+              "month": "2024-11",
+              "ic": -0.119481
+            },
+            {
+              "month": "2024-12",
+              "ic": -0.06773
+            },
+            {
+              "month": "2025-01",
+              "ic": -0.078169
+            },
+            {
+              "month": "2025-02",
+              "ic": -0.093159
+            },
+            {
+              "month": "2025-03",
+              "ic": -0.061922
+            }
+          ],
+          "trend_price_vs_ma20": [
+            {
+              "month": "2023-03",
+              "ic": -0.110607
+            },
+            {
+              "month": "2023-04",
+              "ic": -0.09645
+            },
+            {
+              "month": "2023-05",
+              "ic": -0.014336
+            },
+            {
+              "month": "2023-06",
+              "ic": -0.05165
+            },
+            {
+              "month": "2023-07",
+              "ic": -0.046138
+            },
+            {
+              "month": "2023-08",
+              "ic": -0.035039
+            },
+            {
+              "month": "2023-09",
+              "ic": -0.085293
+            },
+            {
+              "month": "2023-10",
+              "ic": -0.081753
+            },
+            {
+              "month": "2023-11",
+              "ic": -0.087665
+            },
+            {
+              "month": "2023-12",
+              "ic": -0.114231
+            },
+            {
+              "month": "2024-01",
+              "ic": -0.038216
+            },
+            {
+              "month": "2024-02",
+              "ic": -0.019264
+            },
+            {
+              "month": "2024-03",
+              "ic": -0.030074
+            },
+            {
+              "month": "2024-04",
+              "ic": -0.063421
+            },
+            {
+              "month": "2024-05",
+              "ic": -0.065358
+            },
+            {
+              "month": "2024-06",
+              "ic": -0.064944
+            },
+            {
+              "month": "2024-07",
+              "ic": 0.091684
+            },
+            {
+              "month": "2024-08",
+              "ic": -0.275109
+            },
+            {
+              "month": "2024-09",
+              "ic": -0.175216
+            },
+            {
+              "month": "2024-10",
+              "ic": -0.102409
+            },
+            {
+              "month": "2024-11",
+              "ic": -0.062344
+            },
+            {
+              "month": "2024-12",
+              "ic": -0.073583
+            },
+            {
+              "month": "2025-01",
+              "ic": -0.122254
+            },
+            {
+              "month": "2025-02",
+              "ic": -0.15722
+            },
+            {
+              "month": "2025-03",
+              "ic": -0.01458
+            }
+          ]
+        },
+        "D20": {
+          "val_pe_rank": [
+            {
+              "month": "2023-05",
+              "ic": -0.310922
+            },
+            {
+              "month": "2023-06",
+              "ic": -0.283452
+            },
+            {
+              "month": "2023-07",
+              "ic": -0.081218
+            },
+            {
+              "month": "2023-08",
+              "ic": -0.185294
+            },
+            {
+              "month": "2023-09",
+              "ic": -0.128374
+            },
+            {
+              "month": "2023-10",
+              "ic": -0.067223
+            },
+            {
+              "month": "2023-11",
+              "ic": -0.019846
+            },
+            {
+              "month": "2023-12",
+              "ic": -0.240061
+            },
+            {
+              "month": "2024-01",
+              "ic": -0.21579
+            },
+            {
+              "month": "2024-02",
+              "ic": -0.194525
+            },
+            {
+              "month": "2024-03",
+              "ic": -0.001615
+            },
+            {
+              "month": "2024-04",
+              "ic": -0.1664
+            },
+            {
+              "month": "2024-05",
+              "ic": -0.106698
+            },
+            {
+              "month": "2024-06",
+              "ic": -0.226909
+            },
+            {
+              "month": "2024-07",
+              "ic": -0.13125
+            },
+            {
+              "month": "2024-08",
+              "ic": -0.027086
+            },
+            {
+              "month": "2024-09",
+              "ic": -0.205184
+            },
+            {
+              "month": "2024-10",
+              "ic": -0.059473
+            },
+            {
+              "month": "2024-11",
+              "ic": -0.147053
+            },
+            {
+              "month": "2024-12",
+              "ic": -0.263946
+            },
+            {
+              "month": "2025-01",
+              "ic": -0.253475
+            },
+            {
+              "month": "2025-02",
+              "ic": -0.207968
+            },
+            {
+              "month": "2025-03",
+              "ic": 0.001728
+            }
+          ],
+          "val_pe": [
+            {
+              "month": "2023-05",
+              "ic": -0.076964
+            },
+            {
+              "month": "2023-06",
+              "ic": -0.047227
+            },
+            {
+              "month": "2023-07",
+              "ic": -0.094729
+            },
+            {
+              "month": "2023-08",
+              "ic": -0.132413
+            },
+            {
+              "month": "2023-09",
+              "ic": -0.057075
+            },
+            {
+              "month": "2023-10",
+              "ic": -0.064508
+            },
+            {
+              "month": "2023-11",
+              "ic": 0.003231
+            },
+            {
+              "month": "2023-12",
+              "ic": -0.065286
+            },
+            {
+              "month": "2024-01",
+              "ic": -0.08264
+            },
+            {
+              "month": "2024-02",
+              "ic": -0.274252
+            },
+            {
+              "month": "2024-03",
+              "ic": -0.107742
+            },
+            {
+              "month": "2024-04",
+              "ic": -0.134526
+            },
+            {
+              "month": "2024-05",
+              "ic": 0.00993
+            },
+            {
+              "month": "2024-06",
+              "ic": 0.016735
+            },
+            {
+              "month": "2024-07",
+              "ic": -0.100049
+            },
+            {
+              "month": "2024-08",
+              "ic": 0.033356
+            },
+            {
+              "month": "2024-09",
+              "ic": 0.006897
+            },
+            {
+              "month": "2024-10",
+              "ic": -0.090758
+            },
+            {
+              "month": "2024-11",
+              "ic": -0.078516
+            },
+            {
+              "month": "2024-12",
+              "ic": -0.138942
+            },
+            {
+              "month": "2025-01",
+              "ic": -0.095392
+            },
+            {
+              "month": "2025-02",
+              "ic": -0.169457
+            },
+            {
+              "month": "2025-03",
+              "ic": -0.135596
+            }
+          ],
+          "trend_volatility_60": [
+            {
+              "month": "2023-03",
+              "ic": -0.033421
+            },
+            {
+              "month": "2023-04",
+              "ic": -0.092489
+            },
+            {
+              "month": "2023-05",
+              "ic": 0.02513
+            },
+            {
+              "month": "2023-06",
+              "ic": 0.024989
+            },
+            {
+              "month": "2023-07",
+              "ic": -0.133249
+            },
+            {
+              "month": "2023-08",
+              "ic": -0.041493
+            },
+            {
+              "month": "2023-09",
+              "ic": -0.105249
+            },
+            {
+              "month": "2023-10",
+              "ic": -0.042829
+            },
+            {
+              "month": "2023-11",
+              "ic": 0.008429
+            },
+            {
+              "month": "2023-12",
+              "ic": -0.138203
+            },
+            {
+              "month": "2024-01",
+              "ic": 0.083882
+            },
+            {
+              "month": "2024-02",
+              "ic": -0.134145
+            },
+            {
+              "month": "2024-03",
+              "ic": -0.149844
+            },
+            {
+              "month": "2024-04",
+              "ic": -0.116746
+            },
+            {
+              "month": "2024-05",
+              "ic": 0.069517
+            },
+            {
+              "month": "2024-06",
+              "ic": 0.03023
+            },
+            {
+              "month": "2024-07",
+              "ic": -0.052227
+            },
+            {
+              "month": "2024-08",
+              "ic": -0.039129
+            },
+            {
+              "month": "2024-09",
+              "ic": -0.082027
+            },
+            {
+              "month": "2024-10",
+              "ic": -0.131025
+            },
+            {
+              "month": "2024-11",
+              "ic": -0.092468
+            },
+            {
+              "month": "2024-12",
+              "ic": -0.158875
+            },
+            {
+              "month": "2025-01",
+              "ic": -0.006854
+            },
+            {
+              "month": "2025-02",
+              "ic": -0.227263
+            },
+            {
+              "month": "2025-03",
+              "ic": -0.280468
+            }
+          ]
+        }
+      },
+      "top_features_per_horizon": {
+        "D5": [
+          "val_pe_rank",
+          "val_pe",
+          "trend_price_vs_ma20"
+        ],
+        "D20": [
+          "val_pe_rank",
+          "val_pe",
+          "trend_volatility_60"
+        ]
+      },
+      "min_half_life_months": null,
+      "recommended_retrain_cycle": "3-6 個月（信號穩定）",
+      "summary": {
+        "strong_signals": 4,
+        "moderate_signals": 2,
+        "weak_signals": 3,
+        "best_signal": "lightgbm_D20"
+      }
+    },
+    "step5_baselines": {
+      "models": [
+        "lightgbm_D5",
+        "xgboost_D5",
+        "lightgbm_D20",
+        "xgboost_D20"
+      ],
+      "count": 4
+    },
+    "step6_pipeline": {
+      "valid": true,
+      "results": {
+        "lightgbm_D1": {
+          "status": "pass",
+          "sample_size": 10,
+          "pred_shape": [
+            10,
+            3
+          ],
+          "avg_up_prob": 0.49582189043393754
+        },
+        "lightgbm_D20": {
+          "status": "pass",
+          "sample_size": 10,
+          "pred_shape": [
+            10,
+            3
+          ],
+          "avg_up_prob": 0.5922747561082706
+        },
+        "lightgbm_D5": {
+          "status": "pass",
+          "sample_size": 10,
+          "pred_shape": [
+            10,
+            3
+          ],
+          "avg_up_prob": 0.5701056085146052
+        },
+        "xgboost_D1": {
+          "status": "pass",
+          "sample_size": 10,
+          "pred_shape": [
+            10,
+            3
+          ],
+          "avg_up_prob": 0.3973247706890106
+        },
+        "xgboost_D20": {
+          "status": "pass",
+          "sample_size": 10,
+          "pred_shape": [
+            10,
+            3
+          ],
+          "avg_up_prob": 0.5769145488739014
+        },
+        "xgboost_D5": {
+          "status": "pass",
+          "sample_size": 10,
+          "pred_shape": [
+            10,
+            3
+          ],
+          "avg_up_prob": 0.5861141681671143
+        }
+      }
+    },
+    "step7_dsr": {
+      "analysis_date": "2026-04-08T13:15:34",
+      "original_n_strategies": 9,
+      "revised_n_strategies": 6,
+      "original_expected_max_sharpe": 1.6219,
+      "revised_expected_max_sharpe": 1.3866,
+      "original_results": {
+        "lightgbm_D1": {
+          "observed_sharpe": -1.2735,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "xgboost_D1": {
+          "observed_sharpe": -1.4166,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "ensemble_D1": {
+          "observed_sharpe": -1.2494,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "lightgbm_D5": {
+          "observed_sharpe": 1.8398,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "xgboost_D5": {
+          "observed_sharpe": 1.5109,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "ensemble_D5": {
+          "observed_sharpe": 1.8311,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "lightgbm_D20": {
+          "observed_sharpe": 1.998,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "xgboost_D20": {
+          "observed_sharpe": 1.9542,
+          "dsr_pass": false,
+          "n_strategies": 6
+        },
+        "ensemble_D20": {
+          "observed_sharpe": 2.0218,
+          "dsr_pass": false,
+          "n_strategies": 6
+        }
+      },
+      "revised_results": {
+        "lightgbm_D5": {
+          "dsr_statistic": 6.8001,
+          "dsr_p_value": 1.0,
+          "dsr_pass": true,
+          "observed_sharpe": 1.8398,
+          "expected_max_sharpe": 1.3866,
+          "n_strategies": 6
+        },
+        "xgboost_D5": {
+          "dsr_statistic": 1.8661,
+          "dsr_p_value": 0.969,
+          "dsr_pass": true,
+          "observed_sharpe": 1.5109,
+          "expected_max_sharpe": 1.3866,
+          "n_strategies": 6
+        },
+        "ensemble_D5": {
+          "dsr_statistic": 6.6697,
+          "dsr_p_value": 1.0,
+          "dsr_pass": true,
+          "observed_sharpe": 1.8311,
+          "expected_max_sharpe": 1.3866,
+          "n_strategies": 6
+        },
+        "lightgbm_D20": {
+          "dsr_statistic": 9.1709,
+          "dsr_p_value": 1.0,
+          "dsr_pass": true,
+          "observed_sharpe": 1.998,
+          "expected_max_sharpe": 1.3866,
+          "n_strategies": 6
+        },
+        "xgboost_D20": {
+          "dsr_statistic": 8.5147,
+          "dsr_p_value": 1.0,
+          "dsr_pass": true,
+          "observed_sharpe": 1.9542,
+          "expected_max_sharpe": 1.3866,
+          "n_strategies": 6
+        },
+        "ensemble_D20": {
+          "dsr_statistic": 9.5274,
+          "dsr_p_value": 1.0,
+          "dsr_pass": true,
+          "observed_sharpe": 2.0218,
+          "expected_max_sharpe": 1.3866,
+          "n_strategies": 6
+        }
+      },
+      "single_best_strategy": {
+        "name": "ensemble_D20",
+        "sharpe": 2.0218,
+        "dsr_statistic": 30.3258,
+        "dsr_p_value": 1.0,
+        "dsr_pass": true
+      },
+      "revised_best_dsr_pass": true,
+      "final_verdict": "PASS",
+      "explanation": "修正後 DSR 通過：排除不可行 D+1 策略後，可行策略的 Sharpe 已超過修正後的 expected max。"
+    },
+    "step8_dashboard": {
+      "governance_data_ready": true,
+      "pages_implemented": [
+        "6_🛡️_Model_Governance.py",
+        "7_📡_Signal_Monitor.py"
+      ]
+    }
+  },
+  "quality_gates": {
+    "models_available": true,
+    "model_cards_generated": true,
+    "drift_analysis_complete": true,
+    "signal_decay_assessed": true,
+    "baseline_established": true,
+    "prediction_pipeline_valid": true,
+    "dsr_revalidated": true,
+    "no_severe_drift": false,
+    "governance_data_ready": true
+  },
+  "overall_status": "NEEDS REVIEW"
+}

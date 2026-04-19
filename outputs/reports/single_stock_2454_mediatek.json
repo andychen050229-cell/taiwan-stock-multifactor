@@ -1,0 +1,212 @@
+{
+  "stock_id": "2454",
+  "stock_name": "聯發科",
+  "model": "xgboost_D20",
+  "generated_at": "2026-04-20T03:09:39",
+  "oos_range": {
+    "start": "2024-04-15",
+    "end": "2025-03-03",
+    "n_days": 213
+  },
+  "base_up_rate": 0.48826291079812206,
+  "threshold": 0.35,
+  "n_calls": 58,
+  "overall_hit_rate": 0.5862068965517241,
+  "edge_vs_base": 0.09794398575360203,
+  "monthly": [
+    {
+      "ym": "2024-04",
+      "n_days": 12,
+      "n_up": 12,
+      "n_calls": 0,
+      "n_correct_calls": 0,
+      "avg_up_prob": 0.241799995303154,
+      "up_rate": 1.0,
+      "call_rate": 0.0,
+      "hit_rate_when_called": NaN
+    },
+    {
+      "ym": "2024-05",
+      "n_days": 22,
+      "n_up": 22,
+      "n_calls": 0,
+      "n_correct_calls": 0,
+      "avg_up_prob": 0.23960000276565552,
+      "up_rate": 1.0,
+      "call_rate": 0.0,
+      "hit_rate_when_called": NaN
+    },
+    {
+      "ym": "2024-06",
+      "n_days": 19,
+      "n_up": 7,
+      "n_calls": 0,
+      "n_correct_calls": 0,
+      "avg_up_prob": 0.22990000247955322,
+      "up_rate": 0.3684,
+      "call_rate": 0.0,
+      "hit_rate_when_called": NaN
+    },
+    {
+      "ym": "2024-07",
+      "n_days": 21,
+      "n_up": 0,
+      "n_calls": 0,
+      "n_correct_calls": 0,
+      "avg_up_prob": 0.26089999079704285,
+      "up_rate": 0.0,
+      "call_rate": 0.0,
+      "hit_rate_when_called": NaN
+    },
+    {
+      "ym": "2024-08",
+      "n_days": 22,
+      "n_up": 5,
+      "n_calls": 0,
+      "n_correct_calls": 0,
+      "avg_up_prob": 0.2928999960422516,
+      "up_rate": 0.2273,
+      "call_rate": 0.0,
+      "hit_rate_when_called": NaN
+    },
+    {
+      "ym": "2024-09",
+      "n_days": 20,
+      "n_up": 16,
+      "n_calls": 0,
+      "n_correct_calls": 0,
+      "avg_up_prob": 0.2939000129699707,
+      "up_rate": 0.8,
+      "call_rate": 0.0,
+      "hit_rate_when_called": NaN
+    },
+    {
+      "ym": "2024-10",
+      "n_days": 19,
+      "n_up": 4,
+      "n_calls": 6,
+      "n_correct_calls": 0,
+      "avg_up_prob": 0.3310999870300293,
+      "up_rate": 0.2105,
+      "call_rate": 0.3158,
+      "hit_rate_when_called": 0.0
+    },
+    {
+      "ym": "2024-11",
+      "n_days": 21,
+      "n_up": 14,
+      "n_calls": 20,
+      "n_correct_calls": 13,
+      "avg_up_prob": 0.43779999017715454,
+      "up_rate": 0.6667,
+      "call_rate": 0.9524,
+      "hit_rate_when_called": 0.65
+    },
+    {
+      "ym": "2024-12",
+      "n_days": 22,
+      "n_up": 13,
+      "n_calls": 21,
+      "n_correct_calls": 12,
+      "avg_up_prob": 0.43380001187324524,
+      "up_rate": 0.5909,
+      "call_rate": 0.9545,
+      "hit_rate_when_called": 0.5714
+    },
+    {
+      "ym": "2025-01",
+      "n_days": 15,
+      "n_up": 11,
+      "n_calls": 11,
+      "n_correct_calls": 9,
+      "avg_up_prob": 0.3912999927997589,
+      "up_rate": 0.7333,
+      "call_rate": 0.7333,
+      "hit_rate_when_called": 0.8182
+    },
+    {
+      "ym": "2025-02",
+      "n_days": 19,
+      "n_up": 0,
+      "n_calls": 0,
+      "n_correct_calls": 0,
+      "avg_up_prob": 0.2928999960422516,
+      "up_rate": 0.0,
+      "call_rate": 0.0,
+      "hit_rate_when_called": NaN
+    },
+    {
+      "ym": "2025-03",
+      "n_days": 1,
+      "n_up": 0,
+      "n_calls": 0,
+      "n_correct_calls": 0,
+      "avg_up_prob": 0.26759999990463257,
+      "up_rate": 0.0,
+      "call_rate": 0.0,
+      "hit_rate_when_called": NaN
+    }
+  ],
+  "top10_probability_days": [
+    {
+      "trade_date": "2024-12-31",
+      "up_prob": 0.4860000014305115,
+      "方向": "上漲",
+      "結果": "✅"
+    },
+    {
+      "trade_date": "2024-11-25",
+      "up_prob": 0.4860000014305115,
+      "方向": "上漲",
+      "結果": "✅"
+    },
+    {
+      "trade_date": "2024-11-18",
+      "up_prob": 0.4779999852180481,
+      "方向": "上漲",
+      "結果": "✅"
+    },
+    {
+      "trade_date": "2024-12-11",
+      "up_prob": 0.4779999852180481,
+      "方向": "上漲",
+      "結果": "✅"
+    },
+    {
+      "trade_date": "2024-11-14",
+      "up_prob": 0.47200000286102295,
+      "方向": "上漲",
+      "結果": "✅"
+    },
+    {
+      "trade_date": "2024-12-20",
+      "up_prob": 0.47200000286102295,
+      "方向": "flat",
+      "結果": "—"
+    },
+    {
+      "trade_date": "2025-01-02",
+      "up_prob": 0.4659999907016754,
+      "方向": "上漲",
+      "結果": "✅"
+    },
+    {
+      "trade_date": "2024-11-15",
+      "up_prob": 0.4659999907016754,
+      "方向": "上漲",
+      "結果": "✅"
+    },
+    {
+      "trade_date": "2024-11-19",
+      "up_prob": 0.4650000035762787,
+      "方向": "上漲",
+      "結果": "✅"
+    },
+    {
+      "trade_date": "2024-11-21",
+      "up_prob": 0.460999995470047,
+      "方向": "上漲",
+      "結果": "✅"
+    }
+  ]
+}

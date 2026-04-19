@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>最終修復驗證報告 — 台股多因子預測系統</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 1100px; margin: 0 auto; padding: 20px; background: #f8f9fa; color: #333; }
+  h1 { color: #1a5276; border-bottom: 3px solid #2ecc71; padding-bottom: 10px; }
+  h2 { color: #2c3e50; margin-top: 30px; }
+  h3 { color: #34495e; }
+  .summary-box { background: #d5f5e3; border: 2px solid #2ecc71; border-radius: 8px; padding: 20px; margin: 20px 0; }
+  .summary-box h2 { color: #27ae60; margin-top: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+  th, td { border: 1px solid #bdc3c7; padding: 10px 12px; text-align: left; }
+  th { background: #2c3e50; color: white; }
+  tr:nth-child(even) { background: #ecf0f1; }
+  .pass { color: #27ae60; font-weight: bold; }
+  .file-section { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .fix-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-right: 5px; }
+  .critical { background: #e74c3c; color: white; }
+  .high { background: #e67e22; color: white; }
+  .medium { background: #f39c12; color: white; }
+  .low { background: #3498db; color: white; }
+  .score-box { text-align: center; font-size: 3em; font-weight: bold; color: #27ae60; }
+  .score-label { text-align: center; font-size: 1.2em; color: #7f8c8d; }
+  code { background: #ecf0f1; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 20px 0; }
+  .stat-card { background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .stat-num { font-size: 2em; font-weight: bold; }
+  .green { color: #27ae60; }
+  .blue { color: #2980b9; }
+  .orange { color: #e67e22; }
+  pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 6px; overflow-x: auto; font-size: 0.85em; }
+</style>
+</head>
+<body>
+
+<h1>🔬 最終修復驗證報告</h1>
+<p><strong>日期：</strong>2026-04-09 &nbsp;|&nbsp; <strong>系統：</strong>台股多因子預測系統 &nbsp;|&nbsp; <strong>驗證方式：</strong>語法檢查 + 逐項程式碼審查</p>
+
+<div class="summary-box">
+  <h2>✅ 總結：19/19 修復項目全部通過驗證</h2>
+  <p>所有 5 個檔案的 19 項修復均已正確實施，語法檢查全部通過。系統已準備好重新執行 Phase 1→2→3。</p>
+</div>
+
+<div class="grid">
+  <div class="stat-card"><div class="stat-num green">19/19</div><div>修復完成</div></div>
+  <div class="stat-card"><div class="stat-num blue">5</div><div>修改檔案</div></div>
+  <div class="stat-card"><div class="stat-num green">5/5</div><div>語法檢查通過</div></div>
+</div>
+
+<!-- ========== File 1 ========== -->
+<div class="file-section">
+<h2>📄 balance_sheet_processor.py <small style="color:#7f8c8d">(9 項修復)</small></h2>
+<table>
+<tr><th>編號</th><th>優先級</th><th>修復項目</th><th>狀態</th><th>驗證摘要</th></tr>
+<tr><td>C5</td><td><span class="fix-tag critical">嚴重</span></td><td>NOPAT 有效稅率</td><td class="pass">✅ 通過</td><td>使用 <code>TAX_RATE_CLIP</code>(0,0.4) 和 <code>TAX_RATE_FALLBACK</code>(0.17)，台灣中位數</td></tr>
+<tr><td>H1</td><td><span class="fix-tag high">高</span></td><td>ROE/ROA 期間平均</td><td class="pass">✅ 通過</td><td>groupby + shift(1) + 平均計算，符合 GAAP/IFRS 要求</td></tr>
+<tr><td>H2</td><td><span class="fix-tag high">高</span></td><td>invested_capital 含 bonds_payable</td><td class="pass">✅ 通過</td><td><code>invested_capital = equity + ibd + sbd + bonds</code></td></tr>
+<tr><td>H3</td><td><span class="fix-tag high">高</span></td><td>ROIC clip + 最低門檻</td><td class="pass">✅ 通過</td><td>使用 <code>MIN_INVESTED_CAPITAL</code>(1e6) 和 <code>CLIP_RANGES["roic"]</code>(-2,2)</td></tr>
+<tr><td>H4</td><td><span class="fix-tag high">高</span></td><td>缺失 equity 保持 NaN</td><td class="pass">✅ 通過</td><td>不再 fillna(0)，避免虛假的零值</td></tr>
+<tr><td>H5</td><td><span class="fix-tag high">高</span></td><td>D&A 正負號偵測</td><td class="pass">✅ 通過</td><td>百分比法（>70% 負值 → abs），取代脆弱的 median()</td></tr>
+<tr><td>M2</td><td><span class="fix-tag medium">中</span></td><td>D/E + Current Ratio clip</td><td class="pass">✅ 通過</td><td>使用 <code>CLIP_RANGES</code> 常數 (0,10)</td></tr>
+<tr><td>M3</td><td><span class="fix-tag medium">中</span></td><td>會計恆等式容差</td><td class="pass">✅ 通過</td><td><code>ACCOUNTING_TOLERANCE = 0.005</code>（0.5%，原 5%）</td></tr>
+<tr><td>L1</td><td><span class="fix-tag low">低</span></td><td>常數集中管理</td><td class="pass">✅ 通過</td><td>檔案頂部新增 CLIP_RANGES、TAX_RATE_CLIP 等常數區塊</td></tr>
+</table>
+</div>
+
+<!-- ========== File 2 ========== -->
+<div class="file-section">
+<h2>📄 engineer.py <small style="color:#7f8c8d">(4 項修復)</small></h2>
+<table>
+<tr><th>編號</th><th>優先級</th><th>修復項目</th><th>狀態</th><th>驗證摘要</th></tr>
+<tr><td>C1</td><td><span class="fix-tag critical">嚴重</span></td><td>implied_shares 單位 + val_pb</td><td class="pass">✅ 通過</td><td>median < 1000 → ×1000 修正；val_pb clip (0,30)；含診斷日誌</td></tr>
+<tr><td>C2</td><td><span class="fix-tag critical">嚴重</span></td><td>val_pe_rank 橫截面排名</td><td class="pass">✅ 通過</td><td><code>groupby(date_col)</code> 而非 groupby(ticker_col)，確保每日排名</td></tr>
+<tr><td>C3</td><td><span class="fix-tag critical">嚴重</span></td><td>EV cash_proxy</td><td class="pass">✅ 通過</td><td>不再使用 current_assets；優先用 cash_and_equivalents，否則 cash_proxy=0</td></tr>
+<tr><td>M1</td><td><span class="fix-tag medium">中</span></td><td>event_news_count shift(1)</td><td class="pass">✅ 通過</td><td><code>shift(1).rolling()</code> 防止前視偏差</td></tr>
+</table>
+</div>
+
+<!-- ========== File 3 ========== -->
+<div class="file-section">
+<h2>📄 執行Phase2_模型訓練.py <small style="color:#7f8c8d">(4 項修復)</small></h2>
+<table>
+<tr><th>編號</th><th>優先級</th><th>修復項目</th><th>狀態</th><th>驗證摘要</th></tr>
+<tr><td>C4</td><td><span class="fix-tag critical">嚴重</span></td><td>keep_cols 加入 volume/turnover</td><td class="pass">✅ 通過</td><td>backtest 流動性篩選所需欄位不再被 prune</td></tr>
+<tr><td>H6</td><td><span class="fix-tag high">高</span></td><td>Alpha Decay 各 horizon 獨立</td><td class="pass">✅ 通過</td><td>每個 horizon 使用自己的 OOF 計算 IC，不再混用最長 horizon 模型</td></tr>
+<tr><td>M5</td><td><span class="fix-tag medium">中</span></td><td>特徵選擇用全 fold 聯集</td><td class="pass">✅ 通過</td><td><code>np.unique(np.concatenate([f.train_idx for f in folds]))</code></td></tr>
+<tr><td>M6</td><td><span class="fix-tag medium">中</span></td><td>校準後 OOF 實際使用</td><td class="pass">✅ 通過</td><td>更新 <code>res['oof_predictions']</code>，後續分析使用校準版本</td></tr>
+</table>
+</div>
+
+<!-- ========== File 4 ========== -->
+<div class="file-section">
+<h2>📄 trainer.py <small style="color:#7f8c8d">(1 項修復)</small></h2>
+<table>
+<tr><th>編號</th><th>優先級</th><th>修復項目</th><th>狀態</th><th>驗證摘要</th></tr>
+<tr><td>H7</td><td><span class="fix-tag high">高</span></td><td>分層抽樣</td><td class="pass">✅ 通過</td><td>按類別比例抽樣，保持三分類平衡 (down/flat/up)</td></tr>
+</table>
+</div>
+
+<!-- ========== File 5 ========== -->
+<div class="file-section">
+<h2>📄 engine.py <small style="color:#7f8c8d">(1 項修復)</small></h2>
+<table>
+<tr><th>編號</th><th>優先級</th><th>修復項目</th><th>狀態</th><th>驗證摘要</th></tr>
+<tr><td>M4</td><td><span class="fix-tag medium">中</span></td><td>台灣稅制非對稱</td><td class="pass">✅ 通過</td><td>買入: comm×disc + slip；賣出: comm×disc + tax + slip（證交稅僅賣出）</td></tr>
+</table>
+</div>
+
+<!-- ========== Remaining Issues ========== -->
+<div class="file-section">
+<h2>📋 已知限制與後續建議</h2>
+<table>
+<tr><th>類型</th><th>說明</th><th>影響</th><th>建議時機</th></tr>
+<tr><td>設計考量</td><td>概率校準 (Step 11) 在 Backtest (Step 9) 之後執行</td><td>Backtest 使用原始概率，非校準版</td><td>Phase 3 重構時可將校準移至 Step 9 前</td></tr>
+<tr><td>資料限制</td><td>無 cash_and_equivalents 欄位</td><td>EV 公式不扣除現金（保守偏高）</td><td>若取得 TEJ/FinMind 現金欄位可立即啟用</td></tr>
+<tr><td>可選優化</td><td>engineer.py clip 範圍仍為行內常數</td><td>不影響正確性，僅可維護性</td><td>低優先，未來可遷移至 config.yaml</td></tr>
+</table>
+</div>
+
+<!-- ========== Next Steps ========== -->
+<div class="summary-box" style="background: #d6eaf8; border-color: #2980b9;">
+<h2 style="color: #2980b9;">🚀 下一步行動</h2>
+<ol>
+  <li><strong>重新執行 Phase 1（資料處理）</strong>— balance_sheet_processor.py 和 engineer.py 的修復需要重建 Feature Store</li>
+  <li><strong>重新執行 Phase 2（模型訓練）</strong>— 特徵選擇、分層抽樣、Alpha Decay 等修復生效</li>
+  <li><strong>重新執行 Phase 3（回測）</strong>— 成本模型修正 + volume/turnover 欄位可用</li>
+  <li><strong>驗證結果</strong>— 確認 val_pb 不再 99% 飽和、ROIC 分布合理、IC/ICIR 穩定</li>
+  <li><strong>Phase 5 NLP</strong>— 所有基礎品質達標後進入 NLP 特徵工程</li>
+</ol>
+</div>
+
+<p style="text-align: center; color: #95a5a6; margin-top: 40px;">
+  報告生成時間：2026-04-09 | 驗證方法：AST 語法檢查 + 逐行程式碼審查 + 邏輯一致性核對
+</p>
+</body>
+</html>
