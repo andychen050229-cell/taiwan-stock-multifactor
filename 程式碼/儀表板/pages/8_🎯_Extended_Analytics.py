@@ -1,9 +1,9 @@
-"""Extended Analytics — Phase 3 擴充分析儀表板
+"""Extended Analytics — 延伸分析儀表板
 
-展示四個核心擴充分析：
+展示四個核心延伸分析：
   A. Cost Sensitivity — 9 模型 × 3 成本情境
   B. Cross-Horizon   — 3 引擎 × 3 地平線
-  C. Pillar Contribution — 特徵支柱貢獻
+  C. Pillar Contribution — 因子支柱貢獻
   D. Case Study — 個股（2330/2317/2454/2303）命中率
 """
 
@@ -41,8 +41,8 @@ st.markdown("""
     <span class="gl-hero-eyebrow">PHASE 3 · 四項延伸診斷</span>
     <div class="gl-hero-title">延伸分析<span style="opacity:.55;font-weight:600;"> · 模型能賺錢嗎？</span></div>
     <div class="gl-hero-subtitle">
-        從四個角度壓力測試我們的模型：<strong>成本</strong>、<strong>地平線</strong>、<strong>特徵</strong>、<strong>個股</strong>。
-        綜合回答「實戰部署前還需要注意什麼」—— 這是走向 Phase 6 LOPO 深度驗證前的最後一站。
+        從四個角度壓力測試我們的模型：<strong>成本</strong>、<strong>地平線</strong>、<strong>因子</strong>、<strong>個股</strong>。
+        綜合回答「實戰部署前還需要注意什麼」—— 這是走向驗證壓力測試 LOPO 拔測前的最後一站。
     </div>
     <div class="gl-chip-explain">
       <div class="item">
@@ -63,7 +63,7 @@ st.markdown("""
       </div>
     </div>
     <div style="margin-top:14px; padding-top:12px; border-top:1px dashed rgba(37,99,235,0.18);">
-        <span class="gl-chip danger">→ 想看更嚴格的 LOPO/Threshold/2454 月度拆解？跳到 <strong>Phase 6 深度驗證</strong></span>
+        <span class="gl-chip danger">→ 想看更嚴格的 LOPO/Threshold/2454 月度拆解？跳到 <strong>驗證壓力測試</strong></span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -72,7 +72,7 @@ st.markdown("""
 analytics_data = load_phase3_analytics()
 if analytics_data[0] is None:
     st.warning(
-        "尚未產生 Phase 3 擴充分析報告。請先執行：\n\n"
+        "尚未產生 Phase 3 延伸分析報告。請先執行：\n\n"
         "```bash\npython 程式碼/執行Phase3_分析擴充.py\n```"
     )
     st.stop()
@@ -335,12 +335,12 @@ st.markdown("""
 <div class="gl-panel gl-panel-tint" style="margin:16px 0;">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:20px;">
         <div>
-            <div style="font-size:0.72rem; color:var(--gl-text-3); font-weight:600; letter-spacing:.06em; text-transform:uppercase;">DEEPER VALIDATION</div>
+            <div style="font-size:0.72rem; color:var(--gl-text-3); font-weight:600; letter-spacing:.06em; text-transform:uppercase;">VALIDATION LAB</div>
             <div style="font-size:1.15rem; font-weight:700; color:var(--gl-text); margin-top:4px;">
-                🔭 Phase 6 深度驗證
+                🔭 驗證壓力測試
             </div>
             <div style="font-size:.88rem; color:var(--gl-text-2); margin-top:6px;">
-                Phase 3 回答「有多大貢獻」，Phase 6 回答「<strong>拿掉會掉多少</strong>」——
+                延伸分析回答「有多大貢獻」，驗證壓力測試回答「<strong>拿掉會掉多少</strong>」——
                 LOPO 嚴格量化、閾值敏感度逐點掃描、2454 聯發科月度拆解。
             </div>
         </div>
@@ -353,7 +353,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-if st.button("🔭  前往 Phase 6 深度驗證", use_container_width=True, type="primary"):
+if st.button("🔭  前往 驗證壓力測試", use_container_width=True, type="primary"):
     st.switch_page(str(Path(__file__).resolve().parent / "A_🔭_Phase6_深度驗證.py"))
 
 # ----- Footer -----

@@ -1,6 +1,6 @@
-"""Phase 6 — 深度驗證儀表板
+"""驗證壓力測試 — Validation Lab
 
-展示三項 Phase 6 補件分析：
+展示三項壓力測試補件分析：
   §1. LOPO 支柱貢獻（Leave-One-Pillar-Out）
   §2. 閾值敏感度（Threshold Sweep / Top-K Precision）
   §3. 個股深度案例（2454 聯發科月度命中）
@@ -34,33 +34,28 @@ inject_custom_css()
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
     crumb_left="股票預測系統",
-    crumb_current="Phase 6 深度驗證",
+    crumb_current="驗證壓力測試",
     chips=[("LOPO ablation", "pri"), ("threshold sweep", "vio"), ("2454 deep-case", "ok")],
     show_clock=True,
 )
 
 # ============================================================================
-# Hero
+# Hero — v4 §6.3 Validation Lab spec
 # ============================================================================
-st.markdown("""
-<div class="gl-hero">
-    <span class="gl-hero-eyebrow">PHASE 6 · DEEP VALIDATION</span>
-    <div class="gl-hero-title">深度驗證:LOPO · 閾值 · 個股</div>
-    <div class="gl-hero-subtitle">
-        三項補件分析回答三個核心問題 ─<br>
-        <strong>「哪些特徵真的有用?」</strong>(LOPO)、
-        <strong>「該多嚴格地出手?」</strong>(Threshold Sweep)、
-        <strong>「訊號能落地到個股嗎?」</strong>(2454 聯發科個案)。<br>
-        所有分析皆基於 <span class="gl-mono">xgboost_D20</span> OOF 預測(404k 筆 OOS 樣本)。
-    </div>
-    <div style="margin-top:18px;">
-        <span class="gl-live">live · phase 6 validated</span>
-        <span class="gl-chip primary" style="margin-left:8px;">xgboost_D20</span>
-        <span class="gl-chip violet" style="margin-left:4px;">oos n=404,724</span>
-        <span class="gl-chip ok" style="margin-left:4px;">9 pillars · 91 features</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+_utils.render_page_heading(
+    icon="🔭",
+    title_zh="驗證壓力測試",
+    title_en="Validation Lab",
+    command_line="LOPO 支柱拔測 · 閾值敏感度 · 2454 實證個案｜所有分析基於 xgboost_D20 OOF 預測（404,724 筆 OOS）。",
+    tone="violet",
+)
+
+_utils.render_trust_strip([
+    ("模型", "xgboost_D20", "info"),
+    ("OOS 樣本", "404,724", "neutral"),
+    ("支柱 / 特徵", "9 / 91", "neutral"),
+    ("壓力測試", "3 項", "ok"),
+])
 
 # ============================================================================
 # 白話導讀 — 用吃早餐的比喻說明三個分析(非技術使用者友善)
@@ -239,13 +234,16 @@ if thresh_data is None: missing.append("threshold_sweep_xgb_D20.json")
 if case_data is None:   missing.append("single_stock_2454_mediatek.json")
 
 if missing:
-    st.error(
-        f"找不到以下 Phase 6 報告：`{', '.join(missing)}`\n\n"
-        "請先執行：\n"
-        "```bash\n"
-        "python 程式碼/執行Phase6_LOPO驗證.py\n"
-        "python 程式碼/執行Phase6_閾值敏感度與個股.py\n"
-        "```"
+    _utils.render_degraded_banner(
+        title="壓力測試報告缺件",
+        reason=f"找不到以下驗證報告：`{', '.join(missing)}`",
+        available="Hero、白話導讀、方法論區塊仍可閱讀。",
+        unavailable="LOPO 排名、閾值敏感度曲線、2454 個股命中分析需重跑報告才能呈現。",
+        tone="warn",
+    )
+    st.caption(
+        "重跑指令：`python 程式碼/執行Phase6_LOPO驗證.py` 及 "
+        "`python 程式碼/執行Phase6_閾值敏感度與個股.py`"
     )
     st.stop()
 
@@ -266,14 +264,33 @@ with tab1:
     ranking = lopo_data["ranking_by_delta_auc"]
     pillar_counts = lopo_data["pillar_counts"]
 
-    st.markdown("### 方法論")
+    st.markdown("### 方法論 · LOPO 三層解釋（v4 §6.4）")
     st.markdown("""
     <div class="gl-box-info">
-    <strong>Leave-One-Pillar-Out (LOPO)</strong> 是量化每個特徵支柱對最終模型**邊際貢獻**的標準做法：
-    依次把 9 個支柱的所有特徵「移除」重訓，用 <span class="gl-mono">ΔAUC = baseline − LOPO</span>
-    來衡量該支柱的真實價值。<strong>ΔAUC 越大 → 該支柱越不可或缺</strong>。
+    <strong>第一層 · 一句話：</strong>
+    「拿掉這個支柱，模型會退步多少？」<br>
+    <strong>第二層 · 怎麼量：</strong>
+    依次把 9 個支柱的所有因子從訓練集中「移除」重訓，計算
+    <span class="gl-mono">ΔAUC = baseline − LOPO</span>——
+    <strong>ΔAUC 越大 → 該支柱越不可或缺。</strong><br>
+    <strong>第三層 · 怎麼用：</strong>
+    ΔAUC &gt; 50 bps 代表強必要（紅色警戒，不能拔）；
+    20–50 bps 代表中度必要（橘色）；&lt; 20 bps 代表可替代
+    （灰色，可考慮簡化模型降低維度）。
     </div>
     """, unsafe_allow_html=True)
+
+    with st.expander("🔎 為什麼是 Leave-One-Pillar-Out 而不是 permutation importance？", expanded=False):
+        st.markdown("""
+        **Leave-One-Pillar-Out (LOPO)** 與 **permutation importance** 回答不同問題：
+
+        - **Permutation importance**：對既訓練好的模型打亂某一欄位，觀察 AUC 下降 ——
+          衡量「這個因子被模型用了多少」，對**共線因子**會嚴重低估（兩個相關因子互相頂替）。
+        - **LOPO（我們採用）**：**整個支柱重訓** —— 若 fund 支柱拿掉，trend / val / risk 可以
+          重新瓜分訊號空間。衡量「**這個支柱有沒有其他支柱無法取代的獨立資訊**」。
+
+        對多因子模型而言，LOPO 更嚴格、更誠實 —— 這也是本儀表板採用它作為壓力測試的理由。
+        """)
 
     # KPI row
     k1, k2, k3, k4 = st.columns(4)

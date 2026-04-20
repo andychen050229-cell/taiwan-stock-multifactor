@@ -9,7 +9,7 @@
   - 近期價格走勢圖 + 技術指標（MA20、RSI）
   - 漸進式揭露（expandable 設計）
   - 交易成本試算（用於教育目的）
-  - 市場信號分佈 + 報酬分析
+  - 市場訊號分佈 + 報酬分析
   - 投資教育與方法論說明
 
 FIX NOTES:
@@ -48,7 +48,7 @@ load_phase6_json = _utils.load_phase6_json
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
     crumb_left="股票預測系統",
-    crumb_current="投資觀察台",
+    crumb_current="投資觀察",
     chips=[
         ("歷史判讀", "pri"),
         ("2023/03–2025/03", "vio"),
@@ -638,7 +638,7 @@ try:
         st.stop()
 
     if recs.empty:
-        st.info(f"在 D+{horizon} 週期的判讀中，目前沒有偏多信號。")
+        st.info(f"在 D+{horizon} 週期的判讀中，目前沒有偏多訊號。")
         st.stop()
 
     # ===== Market Environment Alert =====
@@ -1067,7 +1067,7 @@ try:
                     "股票": recs_h["short_name"].fillna(recs_h["company_id"]),
                     "代碼": recs_h["company_id"],
                     "歷史報酬": recs_h[ret_col_h].apply(lambda x: f"{x:+.1%}" if pd.notna(x) else "—") if ret_col_h in recs_h.columns else "—",
-                    "信號": recs_h[label_col_h].apply(lambda x: "🟢 偏多" if x == 1.0 else ("🟡 中性" if x == 0.0 else "🔴 觀望")) if label_col_h in recs_h.columns else "—",
+                    "訊號": recs_h[label_col_h].apply(lambda x: "🟢 偏多" if x == 1.0 else ("🟡 中性" if x == 0.0 else "🔴 觀望")) if label_col_h in recs_h.columns else "—",
                 })
                 st.dataframe(comp_df, use_container_width=True, hide_index=True)
             else:
@@ -1209,7 +1209,7 @@ try:
     # ===== Market Distribution =====
     if has_full_market and total_stocks > 0:
         st.divider()
-        st.markdown("### 📈 全市場信號分佈")
+        st.markdown("### 📈 全市場訊號分佈")
         st.caption(f"基於 {total_stocks:,} 支股票的模型判讀結果，非僅限上方展示的 Top {len(recs)} 支。")
 
         dist_col1, dist_col2 = st.columns([1, 1])
@@ -1225,7 +1225,7 @@ try:
                 insidetextorientation="radial",
             )])
             fig_pie.update_layout(
-                title=dict(text=f"D+{horizon} 全市場信號分佈（{total_stocks:,} 支）", font=dict(size=14)),
+                title=dict(text=f"D+{horizon} 全市場訊號分佈（{total_stocks:,} 支）", font=dict(size=14)),
                 height=400,
                 margin=dict(l=10, r=10, t=60, b=30),
                 legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5),

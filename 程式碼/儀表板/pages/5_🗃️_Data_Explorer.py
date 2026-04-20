@@ -408,7 +408,7 @@ try:
 │   └── pages/
 │       ├── 0_📊_新手看板          # 新手友善推薦儀表板
 │       ├── 1_📊_Model_Metrics    # AUC / Per-Class AUC / Fold 穩定性
-│       ├── 2_📈_ICIR_Analysis    # 信號穩定性分析 / IC 分布
+│       ├── 2_📈_ICIR_Analysis    # 訊號穩定性分析 / IC 分布
 │       ├── 3_💰_Backtest         # 多情境策略回測 / 成本分析
 │       ├── 4_🔬_Feature_Analysis # 特徵篩選 / SHAP / Quintile
 │       └── 5_🗃️_Data_Explorer   # 資料探索 / 品質門控

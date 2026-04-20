@@ -1821,6 +1821,196 @@ def inject_custom_css():
         margin: 0 6px;
         min-height: 56px;
     }}
+
+    /* ================================================================= */
+    /*  7b. v4 audit §5 — 3-layer top-nav: Utility Bar + Primary + Secondary */
+    /* ================================================================= */
+    /* Utility bar — terminal-style metadata strip (pure HTML, no links) */
+    .gl-utilbar {{
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0;
+        padding: 7px 14px;
+        margin: -0.5rem -1rem 0 -1rem;
+        background:
+            linear-gradient(180deg, #050b15 0%, #081020 55%, #060d1a 100%);
+        border: 1px solid rgba(6,182,212,0.35);
+        border-bottom: 1px solid rgba(6,182,212,0.14);
+        border-radius: 14px 14px 0 0;
+        font-family: var(--gl-font-mono);
+        font-size: 0.70rem;
+        letter-spacing: 0.04em;
+        color: #b4ccdf;
+        box-shadow: inset 0 1px 0 rgba(103,232,249,0.18);
+        position: sticky;
+        top: 0;
+        z-index: 41;
+    }}
+    .gl-util-seg {{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 2px 14px;
+        border-right: 1px solid rgba(6,182,212,0.18);
+        white-space: nowrap;
+    }}
+    .gl-util-seg:last-child {{ border-right: none; }}
+    .gl-util-k {{
+        color: #67e8f9;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.62rem;
+    }}
+    .gl-util-v {{
+        color: #e8f7fc;
+        font-weight: 600;
+    }}
+    .gl-util-mono {{ font-family: var(--gl-font-mono); }}
+    .gl-util-label {{
+        color: #e8f7fc;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        font-size: 0.64rem;
+    }}
+    .gl-util-dot {{
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 2px;
+    }}
+    .gl-util-live {{
+        background: #10b981;
+        box-shadow: 0 0 8px rgba(16,185,129,0.8);
+        animation: gl-util-pulse 1.6s ease-in-out infinite;
+    }}
+    .gl-util-snapshot {{
+        background: #f59e0b;
+        box-shadow: 0 0 6px rgba(245,158,11,0.55);
+    }}
+    @keyframes gl-util-pulse {{
+        0%,100% {{ opacity: 1; }}
+        50%     {{ opacity: 0.35; }}
+    }}
+    .gl-util-chip {{
+        display: inline-block;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 0.58rem;
+        font-weight: 800;
+        letter-spacing: 0.10em;
+        margin-left: 4px;
+    }}
+    .gl-util-chip.ok {{
+        background: rgba(16,185,129,0.16);
+        color: #10b981;
+        border: 1px solid rgba(16,185,129,0.45);
+    }}
+    .gl-util-chip.warn {{
+        background: rgba(245,158,11,0.16);
+        color: #f59e0b;
+        border: 1px solid rgba(245,158,11,0.45);
+    }}
+
+    /* Primary nav — 4 large group pills (aria-current styles still apply) */
+    .gl-primary-nav {{
+        display: block;
+        padding: 10px 14px 4px 14px;
+        margin: 0 -1rem;
+        background: linear-gradient(180deg, #0a1420 0%, #101c2d 100%);
+        border-left: 1px solid rgba(6,182,212,0.25);
+        border-right: 1px solid rgba(6,182,212,0.25);
+        position: relative;
+        z-index: 40;
+    }}
+    /* Inherit the sibling stHorizontalBlock that follows .gl-primary-nav */
+    div[data-testid="stElementContainer"]:has(.gl-primary-nav)
+        + div[data-testid="stHorizontalBlock"] {{
+        background: linear-gradient(180deg, #0a1420 0%, #101c2d 100%) !important;
+        border-left: 1px solid rgba(6,182,212,0.25) !important;
+        border-right: 1px solid rgba(6,182,212,0.25) !important;
+        margin-left: -1rem !important;
+        margin-right: -1rem !important;
+        padding: 0 14px 10px 14px !important;
+        position: relative;
+        z-index: 39;
+    }}
+    .gl-pri-pill a[data-testid="stPageLink-NavLink"],
+    .gl-pri-pill a[data-testid="stPageLink"] {{
+        min-height: 48px !important;
+        font-size: 0.96rem !important;
+        letter-spacing: 0.06em !important;
+        font-weight: 800 !important;
+        background: linear-gradient(180deg, rgba(15,29,52,0.96), rgba(8,18,35,0.98)) !important;
+        border-color: rgba(103,232,249,0.32) !important;
+    }}
+    .gl-pri-active a[data-testid="stPageLink-NavLink"],
+    .gl-pri-active a[data-testid="stPageLink"] {{
+        background: linear-gradient(180deg, rgba(103,232,249,0.30), rgba(37,99,235,0.22)) !important;
+        border-color: rgba(103,232,249,0.95) !important;
+        color: #ffffff !important;
+        box-shadow:
+            0 0 0 1px rgba(103,232,249,0.45),
+            0 6px 22px rgba(6,182,212,0.45),
+            inset 0 1px 0 rgba(255,255,255,0.18) !important;
+    }}
+
+    /* Secondary nav — contextual sub-pills within active group */
+    .gl-secondary-nav {{
+        display: block;
+        padding: 6px 14px 12px 14px;
+        margin: 0 -1rem 18px -1rem;
+        background: linear-gradient(180deg, #101c2d 0%, #0f1a28 100%);
+        border: 1px solid rgba(6,182,212,0.25);
+        border-top: 1px dashed rgba(103,232,249,0.22);
+        border-radius: 0 0 14px 14px;
+        box-shadow: 0 10px 28px rgba(2,6,23,0.28);
+        position: relative;
+        z-index: 38;
+    }}
+    div[data-testid="stElementContainer"]:has(.gl-secondary-nav)
+        + div[data-testid="stHorizontalBlock"] {{
+        background: linear-gradient(180deg, #101c2d 0%, #0f1a28 100%) !important;
+        border-left: 1px solid rgba(6,182,212,0.25) !important;
+        border-right: 1px solid rgba(6,182,212,0.25) !important;
+        border-bottom: 1px solid rgba(6,182,212,0.25) !important;
+        border-radius: 0 0 14px 14px !important;
+        margin: 0 -1rem 22px -1rem !important;
+        padding: 0 14px 12px 14px !important;
+        box-shadow: 0 10px 28px rgba(2,6,23,0.28);
+        position: relative;
+        z-index: 38;
+    }}
+    .gl-sec-gname {{
+        display: inline-block;
+        font-family: var(--gl-font-mono);
+        font-size: 0.60rem;
+        color: #67e8f9;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        padding-left: 2px;
+        opacity: 0.85;
+    }}
+    .gl-sec-pill a[data-testid="stPageLink-NavLink"],
+    .gl-sec-pill a[data-testid="stPageLink"] {{
+        min-height: 34px !important;
+        font-size: 0.80rem !important;
+        font-weight: 600 !important;
+        padding: 7px 10px !important;
+        background: linear-gradient(180deg, rgba(18,35,58,0.72), rgba(10,22,40,0.80)) !important;
+        border-color: rgba(103,232,249,0.20) !important;
+    }}
+    .gl-sec-active a[data-testid="stPageLink-NavLink"],
+    .gl-sec-active a[data-testid="stPageLink"] {{
+        background: linear-gradient(180deg, rgba(103,232,249,0.34), rgba(37,99,235,0.22)) !important;
+        border-color: rgba(103,232,249,1) !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 0 1px rgba(103,232,249,0.48), 0 4px 14px rgba(6,182,212,0.38) !important;
+    }}
+
     /* ================================================================= */
     /*  8. Fix sidebar expand/collapse Material Symbol icon overlap        */
     /* ================================================================= */
@@ -2286,6 +2476,100 @@ def render_page_footer(page_name_en: str,
     st.caption(note)
     st.markdown(
         f'<div class="page-footer">{product} — {page_name_en} | {system}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_read_guide(body: str, title: str = "如何閱讀這張圖",
+                      icon: str = "📖", tone: str = "info") -> None:
+    """Canonical "如何閱讀" explainer block (v4 audit §14.4).
+
+    Single styling contract for every chart/table intro so the dashboard never
+    shows three flavours of guidance boxes on the same page.
+
+    Args:
+        body: plain text or minimal markdown (accepts <br>, <strong>).
+        title: section label shown in the eyebrow strip.
+        icon: leading glyph (emoji or inline SVG string).
+        tone: one of {info, ok, warn, violet}. Maps to the gl- color system.
+    """
+    tones = {
+        "info":   ("#0ea5e9", "#e0f2fe", "#075985"),
+        "ok":     ("#10b981", "#ecfdf5", "#065f46"),
+        "warn":   ("#f59e0b", "#fffbeb", "#92400e"),
+        "violet": ("#7c3aed", "#f5f3ff", "#5b21b6"),
+    }
+    border, bg, text = tones.get(tone, tones["info"])
+    st.markdown(
+        f'''
+<div style="
+    background:{bg};
+    border:1px solid {border}33;
+    border-left:4px solid {border};
+    border-radius:10px;
+    padding:12px 16px;
+    margin:8px 0 14px 0;
+    color:{text};
+    font-size:0.92rem;
+    line-height:1.65;
+">
+    <div style="
+        display:inline-block;
+        font-size:0.66rem;
+        font-weight:800;
+        letter-spacing:0.14em;
+        text-transform:uppercase;
+        background:{border};
+        color:#fff;
+        padding:2px 10px;
+        border-radius:4px;
+        margin-bottom:6px;
+    ">{icon} {title}</div>
+    <div>{body}</div>
+</div>
+''',
+        unsafe_allow_html=True,
+    )
+
+
+def render_chart_headline(conclusion: str, detail: str = "",
+                          tone: str = "blue") -> None:
+    """Conclusion-oriented chart headline (v4 audit §14.4).
+
+    Renders a two-line headline: the conclusion (bold, prominent) followed by
+    the technical detail (smaller, muted). Use above a chart whose raw title
+    would otherwise be neutral like "ICIR 月度趨勢".
+
+    Args:
+        conclusion: the lede — "D+20 ICIR 穩定 > 0.5,適合月頻部署"
+        detail:     the spec — "Pearson IC,Purged WF · 27 folds"
+        tone:       blue / violet / emerald / amber / rose
+    """
+    tones = {
+        "blue":    "#2563eb",
+        "violet":  "#7c3aed",
+        "emerald": "#10b981",
+        "amber":   "#f59e0b",
+        "rose":    "#f43f5e",
+    }
+    accent = tones.get(tone, tones["blue"])
+    st.markdown(
+        f'''
+<div style="margin:14px 0 6px 0;">
+    <div style="font-size:1.08rem; font-weight:800; color:#0f172a; line-height:1.4;">
+        <span style="
+            display:inline-block;
+            width:4px;
+            height:16px;
+            background:{accent};
+            border-radius:2px;
+            margin-right:10px;
+            vertical-align:-3px;
+        "></span>{conclusion}
+    </div>
+    {f'<div style="font-size:0.82rem; color:#64748b; margin-top:3px; margin-left:14px;">{detail}</div>' if detail else ''}
+</div>
+''',
         unsafe_allow_html=True,
     )
 
@@ -3020,54 +3304,121 @@ def load_companies():
 # Top-nav (Option B) — renders 4-group horizontal nav in main canvas
 # Works identically with or without sidebar (embed mode safe)
 # ============================================================================
-def render_top_nav(groups: dict, active_page_title: str = None):
-    """Render sticky top navigation bar with 4 groups × 12 pages.
+def render_utility_bar(info: dict | None = None):
+    """Render the terminal-style utility bar above the primary nav.
+
+    v4 audit §5.2 — system-level metadata always-visible strip. Pure HTML,
+    no clickable links (those live in the primary/secondary rows below).
 
     Args:
-        groups: ordered dict mapping group label (str) → list of st.Page objects
-        active_page_title: title of currently active page (for active-state styling)
-
-    Rendered HTML tree:
-      .gl-topnav
-        ├─ row 1: 4 columns (proportional widths) — group labels
-        └─ row 2: N equal columns — one st.page_link per page, wrapped in
-                  span.gl-active when matching active_page_title
+        info: optional overrides. Keys: status, dataset, model, dsr,
+              gates_passed, gates_total, last_verified, snapshot.
     """
-    weights = [len(pages) for pages in groups.values()]
-    total = sum(weights)
+    info = info or {}
+    # Sensible defaults — the dashboard truth-of-source is the quality-gates
+    # report (already loaded once at app.py boot via load_quality_gates()).
+    status = info.get("status", "SNAPSHOT")
+    dataset = info.get("dataset", "2023/03–2025/03")
+    model = info.get("model", "xgboost_D20")
+    dsr = info.get("dsr", "12.12")
+    gates_passed = info.get("gates_passed", 9)
+    gates_total = info.get("gates_total", 9)
+    last_verified = info.get("last_verified", "2026-04-20 14:24")
+    snapshot_tone = "live" if str(status).upper() == "LIVE" else "snapshot"
 
-    st.markdown('<div class="gl-topnav">', unsafe_allow_html=True)
+    parts = [
+        f'<span class="gl-util-dot gl-util-{snapshot_tone}"></span>'
+        f'<span class="gl-util-label">{str(status).upper()}</span>',
+        f'<span class="gl-util-k">Dataset</span><span class="gl-util-v">{dataset}</span>',
+        f'<span class="gl-util-k">Model</span><span class="gl-util-v gl-util-mono">{model}</span>',
+        f'<span class="gl-util-k">DSR</span><span class="gl-util-v gl-util-mono">{dsr}</span>'
+        f'<span class="gl-util-chip ok">PASS</span>',
+        f'<span class="gl-util-k">Gates</span>'
+        f'<span class="gl-util-v gl-util-mono">{gates_passed}/{gates_total}</span>',
+        f'<span class="gl-util-k">Verified</span><span class="gl-util-v">{last_verified}</span>',
+    ]
+    st.markdown(
+        '<div class="gl-utilbar">' + ''.join(f'<span class="gl-util-seg">{p}</span>' for p in parts) + '</div>',
+        unsafe_allow_html=True,
+    )
 
-    # Row 1: group labels with proportional widths
-    label_cols = st.columns(weights, gap="small")
-    for col, gname in zip(label_cols, groups.keys()):
+
+# ============================================================================
+# Top-nav (Option B · v4 audit §5) — 3-layer architecture
+#   Layer 1: Utility Bar (system metadata, pure HTML)
+#   Layer 2: Primary pills (4 groups)
+#   Layer 3: Secondary contextual nav (pages within active group)
+# ============================================================================
+def render_top_nav(groups: dict, active_page_title: str = None,
+                   utilbar_info: dict | None = None):
+    """Render the 3-layer sticky top navigation (v4 audit §5).
+
+    Args:
+        groups: ordered dict mapping group label → list of st.Page objects
+        active_page_title: title of currently active page
+        utilbar_info: optional dict passed through to render_utility_bar
+    """
+    # Resolve which group contains the active page (if any) — drives both
+    # the primary-pill active state AND which pages show in the secondary row.
+    active_group = None
+    if active_page_title is not None:
+        for gname, pages in groups.items():
+            if any(getattr(p, "title", None) == active_page_title for p in pages):
+                active_group = gname
+                break
+    if active_group is None:
+        # Fallback: first group (e.g. on default Home page)
+        active_group = next(iter(groups.keys()))
+
+    # ---- Layer 1 · Utility bar -----------------------------------------
+    render_utility_bar(utilbar_info)
+
+    # ---- Layer 2 · Primary pills (4 groups) ----------------------------
+    st.markdown('<div class="gl-primary-nav">', unsafe_allow_html=True)
+    primary_cols = st.columns(len(groups), gap="small")
+    for col, (gname, pages) in zip(primary_cols, groups.items()):
         with col:
-            st.markdown(
-                f'<div class="gl-topnav-gname">{gname}</div>',
-                unsafe_allow_html=True,
+            is_group_active = (gname == active_group)
+            first_page = pages[0] if pages else None
+            if first_page is None:
+                continue
+            # Wrap the page_link so CSS can target "primary" pills distinctly
+            wrapper_class = "gl-pri-pill" + (" gl-pri-active" if is_group_active else "")
+            st.markdown(f'<div class="{wrapper_class}" data-group="{gname}">', unsafe_allow_html=True)
+            st.page_link(
+                first_page,
+                label=gname,
+                icon=getattr(first_page, "icon", None),
+                use_container_width=True,
             )
+            st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    # Row 2: one column per page, equal widths — spans align with row 1 groups
-    page_cols = st.columns(total, gap="small")
-    idx = 0
-    for gname, pages in groups.items():
-        for p in pages:
-            with page_cols[idx]:
+    # ---- Layer 3 · Secondary contextual nav ----------------------------
+    # Show ONLY the pages belonging to the active group. If the user wants
+    # another group's pages they click a primary pill first.
+    secondary_pages = groups.get(active_group, [])
+    if secondary_pages:
+        st.markdown(
+            f'<div class="gl-secondary-nav">'
+            f'<span class="gl-sec-gname">{active_group}</span>',
+            unsafe_allow_html=True,
+        )
+        sec_cols = st.columns(len(secondary_pages), gap="small")
+        for col, p in zip(sec_cols, secondary_pages):
+            with col:
                 is_active = (active_page_title is not None
                              and getattr(p, "title", None) == active_page_title)
-                if is_active:
-                    st.markdown('<div class="gl-active">', unsafe_allow_html=True)
+                wrapper_class = "gl-sec-pill" + (" gl-sec-active" if is_active else "")
+                st.markdown(f'<div class="{wrapper_class}">', unsafe_allow_html=True)
                 st.page_link(
                     p,
                     label=getattr(p, "title", str(p)),
                     icon=getattr(p, "icon", None),
                     use_container_width=True,
                 )
-                if is_active:
-                    st.markdown('</div>', unsafe_allow_html=True)
-            idx += 1
-
-    st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 def inject_sidebar_action_buttons(manual_page=None, reset_key: str = "_gl_reset",

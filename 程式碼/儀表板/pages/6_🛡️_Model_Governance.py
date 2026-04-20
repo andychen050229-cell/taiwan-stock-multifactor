@@ -141,7 +141,7 @@ gate_names_zh = {
     "models_available": "模型可用",
     "model_cards_generated": "Model Card 已生成",
     "drift_analysis_complete": "漂移分析完成",
-    "signal_decay_assessed": "信號衰減評估",
+    "signal_decay_assessed": "訊號衰減評估",
     "baseline_established": "效能基線建立",
     "prediction_pipeline_valid": "預測管線有效",
     "dsr_revalidated": "DSR 重新驗證",
@@ -559,7 +559,7 @@ with snap_c1:
 with snap_c2:
     _hl = _decay_summary.get("min_half_life_months", "—")
     st.metric("最短半衰期", f"{_hl} 月" if _hl != "—" else "—",
-              help="模型預測力衰減到一半所需的月數,越長 = 信號越耐久。")
+              help="模型預測力衰減到一半所需的月數,越長 = 訊號越耐久。")
 with snap_c3:
     _retrain = _decay_summary.get("recommended_retrain_cycle", "—")
     _retrain_short = str(_retrain).split("(")[0].strip() if "(" in str(_retrain) else str(_retrain)

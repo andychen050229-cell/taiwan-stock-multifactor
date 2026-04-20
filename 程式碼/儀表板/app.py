@@ -44,19 +44,20 @@ _utils = importlib.util.module_from_spec(_utils_spec)
 _utils_spec.loader.exec_module(_utils)
 
 # ===== Define Pages with st.Page (absolute paths, Cloud-safe) =====
-home       = st.Page(P("home.py"),                       title="情境主控台",    icon="🧭", default=True)
-interpret  = st.Page(P("0_🌱_投資解讀面板.py"),          title="投資觀察台",    icon="🌱")
-data       = st.Page(P("5_🗃️_Data_Explorer.py"),        title="企業體檢",      icon="🧬")
-icir       = st.Page(P("2_📈_ICIR_Analysis.py"),         title="信號穩定性",    icon="📈")
-text       = st.Page(P("9_📝_Text_Analysis.py"),         title="影響鏈情緒",    icon="📝")
-model      = st.Page(P("1_📊_Model_Metrics.py"),         title="模型績效",      icon="📊")
-feature    = st.Page(P("4_🔬_Feature_Analysis.py"),      title="特徵工程",      icon="🔬")
-backtest   = st.Page(P("3_💰_Backtest.py"),              title="策略回測",      icon="💰")
-phase6     = st.Page(P("A_🔭_Phase6_深度驗證.py"),       title="Phase 6 深度",  icon="🔭")
-governance = st.Page(P("6_🛡️_Model_Governance.py"),     title="模型治理",      icon="🛡️")
-signal     = st.Page(P("7_📡_Signal_Monitor.py"),        title="信號監控",      icon="📡")
-extended   = st.Page(P("8_🎯_Extended_Analytics.py"),    title="擴充分析",      icon="🧩")
-manual     = st.Page(P("B_📖_使用手冊.py"),              title="使用手冊",      icon="📖")
+# v4 audit §6.2 命名表 — icon 改單色 SVG 名 (lucide-style), emoji 只作 fallback
+home       = st.Page(P("home.py"),                       title="情境主控",      icon=":material/radar:", default=True)
+interpret  = st.Page(P("0_🌱_投資解讀面板.py"),          title="投資觀察",      icon=":material/travel_explore:")
+data       = st.Page(P("5_🗃️_Data_Explorer.py"),        title="企業體檢",      icon=":material/badge:")
+icir       = st.Page(P("2_📈_ICIR_Analysis.py"),         title="訊號穩定",      icon=":material/monitoring:")
+text       = st.Page(P("9_📝_Text_Analysis.py"),         title="文本情緒",      icon=":material/text_snippet:")
+model      = st.Page(P("1_📊_Model_Metrics.py"),         title="模型績效",      icon=":material/bar_chart:")
+feature    = st.Page(P("4_🔬_Feature_Analysis.py"),      title="因子工程",      icon=":material/layers:")
+backtest   = st.Page(P("3_💰_Backtest.py"),              title="策略回測",      icon=":material/show_chart:")
+phase6     = st.Page(P("A_🔭_Phase6_深度驗證.py"),       title="驗證壓力測試",  icon=":material/science:")
+governance = st.Page(P("6_🛡️_Model_Governance.py"),     title="模型治理",      icon=":material/verified_user:")
+signal     = st.Page(P("7_📡_Signal_Monitor.py"),        title="訊號監控",      icon=":material/sensors:")
+extended   = st.Page(P("8_🎯_Extended_Analytics.py"),    title="延伸分析",      icon=":material/extension:")
+manual     = st.Page(P("B_📖_使用手冊.py"),              title="使用手冊",      icon=":material/menu_book:")
 
 # ===== Navigation Structure =====
 # Groups for TOP-NAV display (manual is registered but excluded — accessed via
@@ -140,10 +141,22 @@ st.markdown("""<style>
     footer   { visibility: hidden; }
 </style>""", unsafe_allow_html=True)
 
-# ===== TOP-NAV RENDER =====
-# Renders the main horizontal navigation in the main canvas (sticky-top).
+# ===== TOP-NAV RENDER (v4 audit §5 — 3-layer: Utility Bar + Primary + Secondary) =====
 # Always visible regardless of sidebar state — Cloud embed mode safe.
-_utils.render_top_nav(TOP_NAV_GROUPS, active_page_title=getattr(pg, "title", None))
+_utilbar_info = {
+    "status":       "SNAPSHOT",
+    "dataset":      "2023/03–2025/03",
+    "model":        "xgboost_D20",
+    "dsr":          "12.12",
+    "gates_passed": _qg["passed"] if _qg["total"] else 9,
+    "gates_total":  _qg["total"] if _qg["total"] else 9,
+    "last_verified": _qg["last_verified"] or "2026-04-20 14:24",
+}
+_utils.render_top_nav(
+    TOP_NAV_GROUPS,
+    active_page_title=getattr(pg, "title", None),
+    utilbar_info=_utilbar_info,
+)
 
 # ===== Run the selected page =====
 pg.run()

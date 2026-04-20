@@ -1,4 +1,4 @@
-"""Signal Monitor — 信號監控儀表板（Phase 3）"""
+"""Signal Monitor — 訊號監控儀表板（Phase 3）"""
 
 import streamlit as st
 import json
@@ -27,16 +27,16 @@ inject_custom_css()
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
     crumb_left="股票預測系統",
-    crumb_current="信號監控",
+    crumb_current="訊號監控",
     chips=[("live signal feed", "pri"), ("threshold sweep", "vio"), ("embargo=20", "default")],
     show_clock=True,
 )
 
 render_page_heading(
     icon="📡",
-    title_zh="信號監控",
+    title_zh="訊號監控",
     title_en="Signal Monitor",
-    command_line="追蹤資料漂移 × 信號衰減，PSI / KS / 半衰期三路夾擊——即時提醒何時該重新訓練。",
+    command_line="追蹤資料漂移 × 訊號衰減，PSI / KS / 半衰期三路夾擊——即時提醒何時該重新訓練。",
     tone="cyan",
 )
 render_trust_strip([
@@ -49,7 +49,7 @@ render_trust_strip([
 with st.expander("ℹ️ 如何閱讀本頁？", expanded=False):
     st.markdown("""
 - **PSI**（漂移指標）：< 0.1 ＝ 穩定；0.1–0.2 ＝ 輕微偏移；> 0.2 ＝ 顯著偏移。
-- **ICIR**（信號穩定性）：|ICIR| > 0.5 ＝ 強信號。
+- **ICIR**（訊號穩定性）：|ICIR| > 0.5 ＝ 強訊號。
 - **半衰期**：預測能力多久會衰減一半，決定何時需要重新訓練。
 """)
 
@@ -83,7 +83,7 @@ decay_data = _load_gov_json("signal_decay_report.json")
 
 if not drift_data and not decay_data:
     render_degraded_banner(
-        title="摘要版模式 · 信號監控尚未產生",
+        title="摘要版模式 · 訊號監控尚未產生",
         reason="本機執行 `python run_phase3.py` 以產生漂移 / 衰減報告；Cloud 預覽會略過此區。",
         available=[
             ("頁面導覽", "頂部麵包屑與左側導覽可正常使用"),
@@ -91,7 +91,7 @@ if not drift_data and not decay_data:
         ],
         unavailable=[
             ("資料漂移偵測", "需要 outputs/governance/drift_report.json"),
-            ("信號衰減分析", "需要 outputs/governance/signal_decay_report.json"),
+            ("訊號衰減分析", "需要 outputs/governance/signal_decay_report.json"),
             ("再訓練建議", "依賴上述兩份報告"),
         ],
         tone="blue",
@@ -100,7 +100,7 @@ if not drift_data and not decay_data:
 
 # --- Sidebar ---
 with st.sidebar:
-    st.markdown("### 📡 信號監控")
+    st.markdown("### 📡 訊號監控")
     if decay_data:
         st.markdown(f"**分析日期**: {decay_data.get('analysis_date', '—')[:10]}")
         st.markdown(f"**再訓練建議**: {decay_data.get('recommended_retrain_cycle', '—')}")
@@ -283,16 +283,16 @@ st.divider()
 # ============================================================
 # Section 2: Signal Stability
 # ============================================================
-st.header("信號穩定性分析")
+st.header("訊號穩定性分析")
 
 st.info("""
 **ICIR（Information Coefficient Information Ratio）是什麼？**
 
-ICIR = Mean(IC) / Std(IC)，衡量信號的穩定程度。
+ICIR = Mean(IC) / Std(IC)，衡量訊號的穩定程度。
 
-ICIR > 0.5 = 強信號（可靠），0.2~0.5 = 中等信號，< 0.2 = 弱信號。
+ICIR > 0.5 = 強訊號（可靠），0.2~0.5 = 中等訊號，< 0.2 = 弱訊號。
 
-強信號意味著模型的預測能力在不同時間段表現一致。
+強訊號意味著模型的預測能力在不同時間段表現一致。
 """)
 
 if decay_data:
@@ -300,20 +300,20 @@ if decay_data:
     retrain = decay_data.get("recommended_retrain_cycle", "—")
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("強信號", summary.get("strong_signals", 0))
-    c2.metric("中等信號", summary.get("moderate_signals", 0))
-    c3.metric("弱信號", summary.get("weak_signals", 0))
+    c1.metric("強訊號", summary.get("strong_signals", 0))
+    c2.metric("中等訊號", summary.get("moderate_signals", 0))
+    c3.metric("弱訊號", summary.get("weak_signals", 0))
     # Shorten long retrain text to prevent metric truncation
     retrain_short = str(retrain).split("（")[0].strip() if "（" in str(retrain) else str(retrain)
     c4.metric("再訓練週期", retrain_short)
 
     best = summary.get("best_signal", "—")
-    st.markdown(f"**最佳信號來源**：{best}")
+    st.markdown(f"**最佳訊號來源**：{best}")
 
     # Signal stability by strategy
     stability = decay_data.get("signal_stability", {})
     if stability:
-        st.markdown("#### 各策略信號穩定度")
+        st.markdown("#### 各策略訊號穩定度")
 
         strat_names = []
         icir_vals = []
@@ -335,13 +335,13 @@ if decay_data:
         ))
 
         fig.add_hline(y=0.5, line_dash="dash", line_color="green",
-                      annotation_text="強信號 (0.5)", annotation_position="top right")
+                      annotation_text="強訊號 (0.5)", annotation_position="top right")
         fig.add_hline(y=0.2, line_dash="dash", line_color="orange",
-                      annotation_text="中等信號 (0.2)", annotation_position="top right")
+                      annotation_text="中等訊號 (0.2)", annotation_position="top right")
 
         fig.update_layout(**glint_plotly_layout(
-            title="各策略信號穩定度 · |ICIR|",
-            subtitle="|ICIR| > 0.5 = 強信號,可靠;0.2~0.5 = 中等;< 0.2 = 弱",
+            title="各策略訊號穩定度 · |ICIR|",
+            subtitle="|ICIR| > 0.5 = 強訊號,可靠;0.2~0.5 = 中等;< 0.2 = 弱",
             height=360, ylabel="|ICIR|",
         ), showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
@@ -385,7 +385,7 @@ if decay_data:
     # Half-life analysis with visualization
     half_life = decay_data.get("half_life_analysis", {})
     if half_life:
-        st.markdown("#### 信號半衰期分析 | Signal Half-Life")
+        st.markdown("#### 訊號半衰期分析 | Signal Half-Life")
 
         hl_rows = []
         for name, vals in half_life.items():
@@ -421,7 +421,7 @@ if decay_data:
                 ))
             fig_hl.add_hline(y=0, line_dash="dash", line_color="rgba(148,163,184,0.5)")
             fig_hl.update_layout(**glint_plotly_layout(
-                title="信號月度斜率 · Monthly IC Slope",
+                title="訊號月度斜率 · Monthly IC Slope",
                 subtitle="正值=預測力持續改善,負值=衰退中",
                 height=320, ylabel="IC 月斜率",
             ))
@@ -430,7 +430,7 @@ if decay_data:
         st.markdown("""
         <div style="background:#ecfdf5; border-left:4px solid #059669; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#065f46;">
         <strong>📌 半衰期解讀：</strong><br>
-        D+5 與 D+20 的信號均呈<strong>持續改善</strong>趨勢（正斜率），表示模型的預測能力在研究期間內尚未出現衰減。<br>
+        D+5 與 D+20 的訊號均呈<strong>持續改善</strong>趨勢（正斜率），表示模型的預測能力在研究期間內尚未出現衰減。<br>
         建議再訓練週期：<strong>3-6 個月</strong>。
         </div>
         """, unsafe_allow_html=True)
@@ -449,7 +449,7 @@ if decay_data:
             st.dataframe(rows, use_container_width=True, hide_index=True)
 
 else:
-    st.warning("信號衰減分析資料尚未生成")
+    st.warning("訊號衰減分析資料尚未生成")
 
 st.divider()
 
@@ -475,8 +475,8 @@ if has_data:
 |------|------|
 | 資料漂移嚴重度 | {drift_sev} |
 | PSI > 0.2 特徵數 | {n_drifted} |
-| 強信號數量 | {strong} |
-| 弱信號數量 | {weak} |
+| 強訊號數量 | {strong} |
+| 弱訊號數量 | {weak} |
 | 最短半衰期 | {f'{min_hl} 個月' if min_hl else '尚未偵測到衰減'} |
 | 建議再訓練週期 | **{retrain_cycle}** |
 """)
@@ -491,9 +491,9 @@ if has_data:
         st.success("特徵分佈穩定，模型可繼續使用。")
 
     if weak > strong:
-        st.warning("弱信號數量超過強信號,建議縮短再訓練週期或調整特徵組合。")
+        st.warning("弱訊號數量超過強訊號,建議縮短再訓練週期或調整特徵組合。")
     elif strong >= 3:
-        st.success("D+20 策略信號穩定性最佳(ICIR > 0.5),適合作為主力策略。")
+        st.success("D+20 策略訊號穩定性最佳(ICIR > 0.5),適合作為主力策略。")
 
     # === 白話一句話總結(給非技術使用者) ===
     _traffic = "🟢 綠燈" if drift_sev in ("low", "—") and weak <= strong else (
@@ -525,7 +525,7 @@ if has_data:
         <div style="font-size: 0.92rem; color: #334155; line-height: 1.85; margin-top: 8px;">
             漂移 <strong>{drift_sev}</strong> ·
             PSI&gt;0.2 特徵 <strong>{n_drifted}</strong> 個 ·
-            強/中/弱信號 <strong>{strong}</strong>/<strong>{moderate}</strong>/<strong>{weak}</strong> ·
+            強/中/弱訊號 <strong>{strong}</strong>/<strong>{moderate}</strong>/<strong>{weak}</strong> ·
             最短半衰期 <strong>{f'{min_hl} 月' if min_hl else '未衰減'}</strong><br>
             <strong style="color: #0891b2;">→ 建議 {retrain_cycle}</strong>
         </div>
@@ -544,7 +544,7 @@ else:
 render_page_footer(
     "Signal Monitor",
     limits_note=(
-        "信號監控基於 Phase 3 自動分析 ｜ PSI 閾值：0.1（輕微）/ 0.2（顯著）"
+        "訊號監控基於 Phase 3 自動分析 ｜ PSI 閾值：0.1（輕微）/ 0.2（顯著）"
         "｜ ICIR 閾值：0.2（中等）/ 0.5（強）"
     ),
 )

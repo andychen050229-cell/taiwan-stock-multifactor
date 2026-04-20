@@ -1,4 +1,4 @@
-"""ICIR Analysis — 信號穩定性分析（量化分析工作台）"""
+"""ICIR Analysis — 訊號穩定性分析（量化分析工作台）"""
 
 import streamlit as st
 import pandas as pd
@@ -29,7 +29,7 @@ inject_custom_css()
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
     crumb_left="股票預測系統",
-    crumb_current="ICIR 信號穩定性",
+    crumb_current="ICIR 訊號穩定性",
     chips=[("Rank IC · 24 months", "pri"), ("purged WF · 4-fold", "vio"), ("IC > 0.015", "ok")],
     show_clock=True,
 )
@@ -44,7 +44,7 @@ except Exception as e:
 
 render_page_heading(
     icon="📈",
-    title_zh="ICIR 信號穩定性",
+    title_zh="訊號穩定",
     title_en="Signal Stability",
     command_line="以 Rank IC / std 拆解預測訊號的穩定度。|ICIR| > 0.5 視為可用，> 1.0 為優秀。D+20 月頻表現最佳。",
     tone="violet",
@@ -85,8 +85,8 @@ st.markdown("""
 with st.expander("ℹ️ 如何閱讀本頁?", expanded=False):
     st.markdown("""
 - **IC**（Information Coefficient）衡量模型預測排序與實際報酬排序的相關性。
-- **ICIR** = IC 的平均值 / IC 的標準差，類似「信號的夏普比率」。
-- **|ICIR| > 0.5** 表示預測信號穩定可用，**> 1.0** 為優秀。
+- **ICIR** = IC 的平均值 / IC 的標準差，類似「訊號的夏普比率」。
+- **|ICIR| > 0.5** 表示預測訊號穩定可用，**> 1.0** 為優秀。
 - **D+20** 的 ICIR 通常優於 D+1，因為短期價格雜訊較大。
 """)
 
@@ -94,7 +94,7 @@ st.markdown("""
 <div class="insight-box">
 <strong>❓ 什麼是 ICIR | What is ICIR？</strong><br><br>
 ICIR 本質上是 IC 的 t-statistic。<br>
-|ICIR| > 0.5 為良好信號，> 1.0 為優秀。<br><br>
+|ICIR| > 0.5 為良好訊號，> 1.0 為優秀。<br><br>
 即使 IC 不高，只要足夠穩定，ICIR 也可以很高——這正是長期超額收益的基礎。
 </div>
 """, unsafe_allow_html=True)
@@ -142,7 +142,7 @@ try:
         with kpi_col3:
             if best_d20:
                 st.metric(
-                    "D+20 月度信號",
+                    "D+20 月度訊號",
                     f"{best_d20['ICIR']:.4f}",
                     delta="長期品質"
                 )
@@ -150,7 +150,7 @@ try:
             icir_threshold = 0.5
             above_threshold = sum(1 for r in icir_rows if r["ICIR"] > icir_threshold)
             st.metric(
-                "優質信號",
+                "優質訊號",
                 f"{above_threshold}/{len(icir_rows)}",
                 delta="ICIR > 0.5"
             )
@@ -205,7 +205,7 @@ try:
         # ===== IC Distribution Histograms =====
         st.divider()
         st.subheader("📈 IC 分布直方圖 | IC Distribution")
-        st.caption("Daily Rank IC 分佈特徵 — 評估信號的穩定性與偏度")
+        st.caption("Daily Rank IC 分佈特徵 — 評估訊號的穩定性與偏度")
 
         st.warning("⚠️ 以下圖表使用模擬數據（np.random）作為示意，非正式回測輸出。正式 IC/ICIR 數據請參考 Phase 2 報告。")
 
@@ -284,7 +284,7 @@ try:
         # ===== Rolling ICIR (Simulated) =====
         st.divider()
         st.subheader("⏰ 滾動 ICIR 趨勢 | Rolling ICIR Evolution")
-        st.caption("ICIR 在時間上的變化 — 反映信號穩定性的動態")
+        st.caption("ICIR 在時間上的變化 — 反映訊號穩定性的動態")
 
         st.warning("⚠️ 以下滾動趨勢圖使用模擬數據（np.random）作為示意，非正式回測輸出。正式 IC/ICIR 數據請參考 Phase 2 報告。")
 
@@ -339,7 +339,7 @@ try:
                 "Rank IC 範圍": ["-0.006 ~ -0.001", "+0.008 ~ +0.025", "+0.013 ~ +0.015"],
                 "ICIR 範圍": ["-0.124 ~ -0.094", "-0.126 ~ -0.071", "-0.035 ~ +0.036"],
                 "AUC_macro (OOS)": ["~0.52", "~0.58", "0.64-0.65"],
-                "信號品質": ["❌ 噪音主導", "⚠️ 正向但薄弱", "✅ 月頻可用"],
+                "訊號品質": ["❌ 噪音主導", "⚠️ 正向但薄弱", "✅ 月頻可用"],
                 "可行性 | Feasibility": ["❌ 不可行", "⚠️ 邊際", "✅ 推薦（配合閾值過濾）"],
             })
             st.dataframe(freq_data, use_container_width=True, hide_index=True)
@@ -418,8 +418,8 @@ try:
 
         # ===== Phase 3 Signal Stability Integration =====
         st.divider()
-        st.subheader("🛡️ Phase 3 信號穩定性評估 | Signal Stability Assessment")
-        st.caption("Phase 3 治理模組自動評估的信號品質等級")
+        st.subheader("🛡️ Phase 3 訊號穩定性評估 | Signal Stability Assessment")
+        st.caption("Phase 3 治理模組自動評估的訊號品質等級")
 
         try:
             _here = Path(__file__).resolve()
@@ -458,7 +458,7 @@ try:
 
                     s_kpi1, s_kpi2 = st.columns(2)
                     with s_kpi1:
-                        st.metric("強信號數量", f"{strong_ct}/{len(stab_rows)}")
+                        st.metric("強訊號數量", f"{strong_ct}/{len(stab_rows)}")
                     with s_kpi2:
                         # Shorten long retrain text for metric display
                         retrain_short = str(_retrain).split("（")[0].strip() if "（" in str(_retrain) else str(_retrain)
@@ -482,7 +482,7 @@ try:
         alpha_decay = results.get("alpha_decay", {})
         if alpha_decay:
             st.subheader("📉 Alpha 衰減分析 | Alpha Decay")
-            st.caption("↓ Alpha 衰減分析：隨著預測天數拉長，模型的預測力如何變化。曲線越平緩代表信號越持久。")
+            st.caption("↓ Alpha 衰減分析：隨著預測天數拉長，模型的預測力如何變化。曲線越平緩代表訊號越持久。")
             st.caption("使用 D+5 模型的預測分數，檢測其對不同 horizon 報酬的預測力衰減")
 
             for eng, metrics in alpha_decay.items():

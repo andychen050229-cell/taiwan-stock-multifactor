@@ -2,7 +2,7 @@
 台股多因子預測系統 — Landing Page (glint-light design, Design-ported)
 
 Dual-mode tab layout per 2026/04 Design spec:
-  🌱 投資觀察台  (plain-language, warm amber wash)
+  🌱 投資觀察  (plain-language, warm amber wash)
   ⚙️ 研究工作站  (dense KPIs, charts, Bloomberg-terminal feel)
 """
 
@@ -151,7 +151,7 @@ best_dsr = best_dsr or 12.12
 # ============================================================================
 render_topbar(
     crumb_left="股票預測系統",
-    crumb_current="情境主控台",
+    crumb_current="情境主控",
     chips=[
         ("xgboost_D20", "pri"),
         ("purged WF · embargo=20", "vio"),
@@ -209,16 +209,16 @@ render_ticker_tape([
 
 
 # ============================================================================
-# MODE TABS — 🌱 投資觀察台  /  ⚙️ 研究工作站
+# MODE TABS — 🌱 投資觀察  /  ⚙️ 研究工作站
 # ============================================================================
 tab_observe, tab_workstation = st.tabs([
-    "🌱　投資觀察台",
+    "🌱　投資觀察",
     "⚙️　研究工作站",
 ])
 
 
 # ----------------------------------------------------------------------------
-# 🌱 投資觀察台  (Observation Deck)
+# 🌱 投資觀察  (Observation Deck)
 # ----------------------------------------------------------------------------
 with tab_observe:
     st.markdown(
@@ -358,7 +358,7 @@ with tab_observe:
         '<div style="color:var(--gl-text-2);font-size:.92rem;margin-bottom:12px;">'
         f'以下是模型在判讀日 <strong>{_h20_date}</strong> 產出的前五名。<br>'
         '每張卡片顯示<strong>股票代號、產業、歷史同情境 20 日後報酬</strong>。'
-        '完整解讀、成本試算、風險提示請點下方「投資觀察台」。'
+        '完整解讀、成本試算、風險提示請點下方「投資觀察」。'
         '</div>', unsafe_allow_html=True,
     )
 
@@ -421,7 +421,7 @@ with tab_observe:
             '</div>', unsafe_allow_html=True,
         )
     else:
-        st.info("目前沒有可用的推薦資料。請嘗試重新整理，或查看「投資觀察台」。")
+        st.info("目前沒有可用的推薦資料。請嘗試重新整理，或查看「投資觀察」。")
 
     # ====================================================================
     # 🗓 短週期同步：D+5 週度 + D+1 日度 (compact, lower density than D+20)
@@ -565,7 +565,7 @@ with tab_observe:
     </div>
 </div>
 """, unsafe_allow_html=True)
-        if st.button("🌱  進入投資觀察台", use_container_width=True, type="primary", key="btn_obs"):
+        if st.button("🌱  進入投資觀察", use_container_width=True, type="primary", key="btn_obs"):
             st.switch_page(str(Path(__file__).resolve().parent / "0_🌱_投資解讀面板.py"))
 
     with col_b:
@@ -630,7 +630,7 @@ with tab_observe:
     📊 5 分鐘細看
   </div>
   <div style="font-size:0.9rem;color:#1e40af;line-height:1.72;">
-    · 進入 <strong>🌱 投資觀察台</strong><br>
+    · 進入 <strong>🌱 投資觀察</strong><br>
     · 逐一展開推薦股票的<strong>四件事</strong>解讀<br>
     · 用成本<strong>試算機</strong>估算折價空間<br>
     <br>
@@ -791,7 +791,7 @@ with tab_workstation:
     <div class="path-tags">
         <span class="gl-chip primary">模型績效</span>
         <span class="gl-chip primary">ICIR 分析</span>
-        <span class="gl-chip violet">信號監控</span>
+        <span class="gl-chip violet">訊號監控</span>
         <span class="gl-chip ok">模型治理</span>
     </div>
 </div>
@@ -809,7 +809,7 @@ with tab_workstation:
         LOPO 深度驗證與個股 deep-case。完整研究流程呈現。
     </div>
     <div class="path-tags">
-        <span class="gl-chip violet">特徵工程</span>
+        <span class="gl-chip violet">因子工程</span>
         <span class="gl-chip violet">文本情緒</span>
         <span class="gl-chip danger">LOPO · DSR</span>
         <span class="gl-chip">2454 case</span>
@@ -894,7 +894,7 @@ with tab_workstation:
         ("特徵篩選",       "Phase 1", "#06b6d4"),
         ("模型訓練",       "Phase 2", "#2563eb"),
         ("策略回測",       "Phase 2", "#2563eb"),
-        ("擴充分析",       "Phase 3", "#7c3aed"),
+        ("延伸分析",       "Phase 3", "#7c3aed"),
         ("模型治理",       "Phase 4", "#7c3aed"),
         ("文本情緒",       "Phase 5", "#7c3aed"),
         ("LOPO 驗證",      "Phase 6", "#f43f5e"),

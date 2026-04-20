@@ -1,4 +1,4 @@
-"""Feature Analysis — 特徵工程分析（量化分析工作台）"""
+"""Feature Analysis — 因子工程（量化分析工作台）"""
 
 import streamlit as st
 import pandas as pd
@@ -28,7 +28,7 @@ inject_custom_css()
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
     crumb_left="股票預測系統",
-    crumb_current="特徵工程分析",
+    crumb_current="因子工程",
     chips=[("1,623 → 91", "pri"), ("IC · Chi² · VIF", "vio"), ("SHAP top-20", "ok")],
     show_clock=True,
 )
@@ -46,9 +46,9 @@ _n_candidates = results.get("feature_selection", {}).get("n_candidates", 59)
 
 render_page_heading(
     icon="🔬",
-    title_zh="特徵工程分析",
-    title_en="Feature Engineering",
-    command_line=f"三階段因子篩選（MI → VIF → Cross-fold 穩定性）：候選 {_n_candidates} 個 → 最終 {_n_final} 個特徵入模。",
+    title_zh="因子工程",
+    title_en="Factor Engineering",
+    command_line=f"三階段因子篩選（MI → VIF → Cross-fold 穩定性）：候選 {_n_candidates} 個 → 最終 {_n_final} 個因子入模。",
     tone="cyan",
 )
 render_trust_strip([
@@ -65,7 +65,7 @@ try:
     st.info("""
 **如何閱讀本頁？**
 
-特徵工程是模型的核心。本頁展示因子如何從候選池中被篩選出來：
+因子工程是模型的核心。本頁展示因子如何從候選池中被篩選出來：
 
 Step 1：Mutual Information（MI）移除與目標無關的特徵。
 
@@ -127,7 +127,7 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
         ⚠️ <strong>版本說明</strong>：此為 <strong>Phase 1 初版</strong>的 43 候選特徵（僅趨勢 / 基本面 / 估值 / 事件 / 風險 5 個支柱）。
         生產版本已升級為 <strong>Phase 5B 九支柱架構 1,623 → 91 特徵</strong>（新增 chip 籌碼、ind 產業、
         <span class="gl-pillar" data-p="txt">txt</span> 文本、<span class="gl-pillar" data-p="sent">sent</span> 情緒 4 個支柱）。
-        保留此表作為歷史演進的追蹤文件。最新特徵統計請見下方「特徵支柱分布」區塊與 🔭 Phase 6 深度驗證 頁面。
+        保留此表作為歷史演進的追蹤文件。最新因子統計請見下方「因子支柱分布」區塊與 🔭 驗證壓力測試 頁面。
         </div>
         """, unsafe_allow_html=True)
         st.markdown("以下為 Phase 1 初版五支柱的全部 43 個候選特徵，標註各階段篩選結果：")
@@ -148,7 +148,7 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
             {"特徵名稱 | Feature": "trend_bb_upper_20", "支柱 | Pillar": "趨勢動能", "說明 | Description": "20 日布林帶上軌距離", "MI 篩選": "✅", "VIF 篩選": "❌ 淘汰", "最終": "❌", "淘汰原因": "VIF > 10，與 bb_width 高度共線"},
             {"特徵名稱 | Feature": "trend_atr_14", "支柱 | Pillar": "趨勢動能", "說明 | Description": "14 日平均真實波幅（ATR）", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
             {"特徵名稱 | Feature": "trend_rsi_14", "支柱 | Pillar": "趨勢動能", "說明 | Description": "14 日相對強弱指標", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
-            {"特徵名稱 | Feature": "trend_macd_signal", "支柱 | Pillar": "趨勢動能", "說明 | Description": "MACD 信號線差值", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
+            {"特徵名稱 | Feature": "trend_macd_signal", "支柱 | Pillar": "趨勢動能", "說明 | Description": "MACD 訊號線差值", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
             {"特徵名稱 | Feature": "trend_obv_change", "支柱 | Pillar": "趨勢動能", "說明 | Description": "OBV 變化率", "MI 篩選": "❌ 淘汰", "VIF 篩選": "—", "最終": "❌", "淘汰原因": "MI 值低於 60% 門檻"},
             # Fundamental (prefix: fund_)
             {"特徵名稱 | Feature": "fund_revenue_yoy", "支柱 | Pillar": "基本面", "說明 | Description": "營收年增率", "MI 篩選": "✅", "VIF 篩選": "✅", "最終": "✅", "淘汰原因": "—"},
@@ -216,7 +216,7 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
         • 淘汰主因：MI 不足（{n_mi_fail} 個）&gt; VIF 共線性（{n_vif_fail} 個）<br>
         <hr style="margin:8px 0; border:none; border-top:1px dashed #cbd5e1;">
         📦 <strong>最新生產版本（Phase 5B）</strong>：<strong>1,623 → 91</strong> 特徵（9 支柱）·
-        IC prescreen → Chi²/MI → VIF 三階段 · 詳見 🔭 Phase 6 深度驗證 頁面的 LOPO 支柱貢獻排序。
+        IC prescreen → Chi²/MI → VIF 三階段 · 詳見 🔭 驗證壓力測試 頁面的 LOPO 支柱貢獻排序。
         </div>
         """, unsafe_allow_html=True)
 
@@ -377,7 +377,7 @@ try:
             <div class="insight-box">
             <strong>💡 跨天期特徵差異 | Cross-Horizon Pattern：</strong><br>
             短期（D+1）主要依賴技術面動能指標，中長期（D+20）則更重視基本面與估值因子。<br>
-            這反映了「頻率結構」——不同天期的驅動因子本質完全不同，短期是噪音，長期是信號。
+            這反映了「頻率結構」——不同天期的驅動因子本質完全不同，短期是噪音，長期是訊號。
             </div>
             """, unsafe_allow_html=True)
 
@@ -627,7 +627,7 @@ try:
         <div class="insight-box">
         <strong>📌 解讀 | Interpretation：</strong><br>
         理想情況下，報酬應從 Q1 到 Q5 單調遞增（或 Q5 明顯優於 Q1）。<br>
-        若不存在單調性，表示模型信號不夠清晰，或包含噪音。
+        若不存在單調性，表示模型訊號不夠清晰，或包含噪音。
         </div>
         """, unsafe_allow_html=True)
 

@@ -318,7 +318,7 @@ try:
         AUC > 0.52 表示模型優於隨機預測，超越品質門檻。<br>
         ENSEMBLE 通常結合個別模型優勢，實現更穩定的預測。<br><br>
         <strong>✅ 應用建議：</strong><br>
-        在 <strong>月度頻率（D+20）</strong> 策略部署；D+1/D+5 信號品質不足，不推薦實盤使用。
+        在 <strong>月度頻率（D+20）</strong> 策略部署；D+1/D+5 訊號品質不足，不推薦實盤使用。
         </div>
         """, unsafe_allow_html=True)
 except Exception as e:
@@ -456,7 +456,7 @@ try:
             fig2.update_traces(line=dict(width=2.2), marker=dict(size=7))
             fig2.update_layout(**glint_plotly_layout(
                 title=f"D+{horizon} AUC 跨 Fold 演進",
-                subtitle="紅線 0.52 = 通過門檻；穿越代表 fold 信號不穩",
+                subtitle="紅線 0.52 = 通過門檻；穿越代表 fold 訊號不穩",
                 height=350, xlabel="Fold", ylabel="AUC",
             ))
             fig2.update_layout(hovermode="x unified")
