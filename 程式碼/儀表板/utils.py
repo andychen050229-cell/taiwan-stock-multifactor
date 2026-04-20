@@ -133,6 +133,15 @@ def inject_custom_css():
     h2 {{ font-weight: 700; font-size: 1.5rem; }}
     h3 {{ font-weight: 600; font-size: 1.15rem; }}
     p, li, span, div {{ font-family: var(--gl-font-sans); }}
+    /* CJK-aware line-break defaults — 避免中文在奇怪位置斷字 */
+    p, li, .gl-panel, .gl-box-info, .gl-box-warn, .path-card, .path-desc,
+    .mn-tile-body, .mn-tile-example, .mn-callout, .mn-flow-step-desc,
+    .stMarkdown p, .stMarkdown li {{
+        word-break: keep-all;          /* 中文不在字元中間斷 */
+        overflow-wrap: break-word;
+        line-break: strict;
+        line-height: 1.78;             /* CJK 適度行高 */
+    }}
     code, kbd, pre, .gl-mono, [data-testid="stMetricValue"] {{
         font-family: var(--gl-font-mono) !important;
         font-feature-settings: "tnum" 1, "zero" 1;
@@ -474,17 +483,11 @@ def inject_custom_css():
         font-family: var(--gl-font-mono);
         font-variant-numeric: tabular-nums;
     }}
-    /* Tabs */
+    /* Tabs — minimal base (detailed rules appear later in CSS cascade,
+       near st.tabs section — override font/weight/color there).            */
     button[data-baseweb="tab"] {{
         font-family: var(--gl-font-sans) !important;
         font-weight: 600 !important;
-    }}
-    button[data-baseweb="tab"][aria-selected="true"] {{
-        color: var(--gl-blue) !important;
-    }}
-    [data-baseweb="tab-highlight"] {{
-        background: var(--gl-grad-pri) !important;
-        height: 3px !important;
     }}
     /* Buttons */
     .stButton > button {{
@@ -778,29 +781,53 @@ def inject_custom_css():
     }}
     /* ---- Enhanced tab styling (mode switcher at top of home) ---- */
     div[data-baseweb="tab-list"] {{
-        gap: 2px !important;
-        border-bottom: 1px solid var(--gl-border) !important;
+        gap: 4px !important;
+        border-bottom: 1px solid rgba(6,182,212,0.18) !important;
         background: transparent !important;
+        padding-bottom: 2px !important;
     }}
     button[data-baseweb="tab"] {{
-        padding: 12px 20px !important;
+        padding: 12px 22px !important;
         background: transparent !important;
-        border-radius: 0 !important;
+        border-radius: 10px 10px 0 0 !important;
         border-bottom: 2px solid transparent !important;
-        color: var(--gl-text-2) !important;
+        color: #475569 !important;            /* dark slate on light canvas — readable */
         font-family: var(--gl-font-sans) !important;
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
-        letter-spacing: -0.005em !important;
+        font-size: 0.96rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.02em !important;    /* CJK-friendly spacing */
+        transition: all .2s ease !important;
+        position: relative;
+    }}
+    button[data-baseweb="tab"] p {{
+        color: inherit !important;
+        font-weight: inherit !important;
+        font-size: inherit !important;
     }}
     button[data-baseweb="tab"]:hover {{
-        color: var(--gl-text) !important;
-        background: rgba(37,99,235,.04) !important;
+        color: #0f172a !important;           /* near-black on white hover */
+        background: linear-gradient(180deg, rgba(6,182,212,0.06), rgba(37,99,235,0.03)) !important;
     }}
     button[data-baseweb="tab"][aria-selected="true"] {{
-        color: var(--gl-blue) !important;
-        border-bottom-color: var(--gl-blue) !important;
+        color: #0b1220 !important;            /* deep slate — HIGH contrast on light bg */
+        background: linear-gradient(180deg, rgba(6,182,212,0.12), rgba(37,99,235,0.05)) !important;
+        border-bottom-color: #06b6d4 !important;
+        box-shadow: 0 -1px 12px rgba(6,182,212,0.12) inset;
+    }}
+    /* Cyan glow underline pulse for active tab */
+    button[data-baseweb="tab"][aria-selected="true"]::after {{
+        content: "";
+        position: absolute;
+        left: 10%; right: 10%;
+        bottom: -2px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #06b6d4, #2563eb, transparent);
+        box-shadow: 0 0 10px rgba(6,182,212,0.55);
+    }}
+    /* Baseweb-generated underline — hide (we use our own) */
+    [data-baseweb="tab-highlight"] {{
         background: transparent !important;
+        height: 0 !important;
     }}
     /* ---- Path card variants (inv / qnt from Design) ---- */
     .path-card.path-inv {{ background: linear-gradient(135deg, #fff 0%, #fffbeb 100%); }}
@@ -1298,84 +1325,138 @@ def inject_custom_css():
         gap: 6px;
     }}
     /* ================================================================= */
-    /*  7. Top navigation pills (Option B — works in embed mode)           */
+    /*  7. Top navigation pills — CYBERPUNK DARK (match dark sidebar)      */
     /* ================================================================= */
-    /* Wraps the rendered st.page_link row + group labels. Cloud embed
-       mode hides the sidebar, so this is the PRIMARY navigation.        */
+    /* Design target: 與左側 股票預測系統 sidebar 同血統 —
+       深色漸層、青藍霓虹邊框、等寬字體、淡網格背景、scan-line 輝光。    */
     .gl-topnav {{
         position: sticky;
         top: 0;
         z-index: 40;
-        background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.82) 100%);
-        backdrop-filter: saturate(1.2) blur(10px);
-        -webkit-backdrop-filter: saturate(1.2) blur(10px);
-        border-bottom: 1px solid rgba(6,182,212,0.12);
-        padding: 12px 4px 10px 4px;
-        margin: -0.5rem -1rem 18px -1rem;
-        box-shadow: 0 4px 16px rgba(15,23,42,0.04);
+        background:
+            radial-gradient(140% 90% at 0% 0%, rgba(6,182,212,0.14), transparent 55%),
+            radial-gradient(120% 80% at 100% 100%, rgba(37,99,235,0.12), transparent 60%),
+            linear-gradient(180deg, #0a1420 0%, #101c2d 55%, #0c1725 100%);
+        border: 1px solid rgba(6,182,212,0.22);
+        border-radius: 0 0 14px 14px;
+        padding: 14px 14px 12px 14px;
+        margin: -0.5rem -1rem 22px -1rem;
+        box-shadow:
+            0 10px 28px rgba(2,6,23,0.28),
+            inset 0 1px 0 rgba(6,182,212,0.18),
+            inset 0 -1px 0 rgba(6,182,212,0.08);
+        overflow: hidden;
     }}
+    /* Subtle tech-grid backdrop (matches sidebar) */
+    .gl-topnav::before {{
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(6,182,212,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(6,182,212,0.05) 1px, transparent 1px);
+        background-size: 28px 28px;
+        pointer-events: none;
+        opacity: 0.55;
+        mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.35));
+        -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.35));
+    }}
+    /* Top scan-line accent */
+    .gl-topnav::after {{
+        content: "";
+        position: absolute;
+        top: 0; left: 10%; right: 10%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(103,232,249,0.75), rgba(37,99,235,0.55), transparent);
+        box-shadow: 0 0 8px rgba(103,232,249,0.4);
+    }}
+    /* Group label — cyan mono eyebrow */
     .gl-topnav-gname {{
         font-family: var(--gl-font-mono);
-        font-size: 0.62rem;
-        color: var(--gl-text-3);
-        letter-spacing: 0.14em;
+        font-size: 0.64rem;
+        color: #67e8f9 !important;
+        letter-spacing: 0.20em;
         font-weight: 700;
         text-transform: uppercase;
-        padding: 0 6px 6px 8px;
+        padding: 0 6px 8px 10px;
         position: relative;
+        text-shadow: 0 0 8px rgba(103,232,249,0.35);
     }}
     .gl-topnav-gname::before {{
         content: "";
         display: inline-block;
         width: 3px;
-        height: 9px;
+        height: 10px;
         vertical-align: -1px;
-        margin-right: 6px;
-        background: var(--gl-grad-tech);
+        margin-right: 7px;
+        background: linear-gradient(180deg, #67e8f9, #2563eb);
         border-radius: 2px;
-        box-shadow: 0 0 4px rgba(6,182,212,0.35);
+        box-shadow: 0 0 6px rgba(103,232,249,0.6);
     }}
-    /* Style st.page_link pills inside the top-nav wrapper */
+    /* Page-link pills — dark glass on dark nav */
     .gl-topnav [data-testid="stPageLink-NavLink"],
     .gl-topnav a[data-testid="stPageLink"] {{
         display: flex;
         align-items: center;
-        gap: 6px;
-        padding: 9px 10px !important;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 12px !important;
         border-radius: 10px !important;
-        border: 1px solid var(--gl-border) !important;
-        background: var(--gl-surface) !important;
+        border: 1px solid rgba(103,232,249,0.18) !important;
+        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)) !important;
         font-family: var(--gl-font-sans) !important;
-        font-size: 0.82rem !important;
+        font-size: 0.84rem !important;
         font-weight: 600 !important;
-        color: var(--gl-text) !important;
-        transition: all .2s ease !important;
-        box-shadow: 0 1px 2px rgba(15,23,42,0.03);
+        letter-spacing: 0.04em !important;    /* CJK breathing room — 避免密集 */
+        color: #cfe1f2 !important;
+        transition: all .22s ease !important;
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.04),
+            0 1px 2px rgba(0,0,0,0.25);
         position: relative;
         overflow: hidden;
+        white-space: nowrap !important;        /* 禁止分頁名稱奇怪斷行 */
+        text-overflow: ellipsis;
+        min-height: 40px;
+        line-height: 1.2 !important;
     }}
-    .gl-topnav [data-testid="stPageLink-NavLink"]:hover,
-    .gl-topnav a[data-testid="stPageLink"]:hover {{
-        border-color: rgba(6,182,212,0.45) !important;
-        background: linear-gradient(135deg, #ffffff 0%, #f0fafe 100%) !important;
-        transform: translateY(-1px);
-        box-shadow: 0 6px 18px rgba(6,182,212,0.12), 0 0 0 1px rgba(6,182,212,0.08) !important;
-        color: var(--gl-blue) !important;
-    }}
+    /* Override any inner text elements — force bright-on-dark readability */
+    .gl-topnav [data-testid="stPageLink-NavLink"] *,
+    .gl-topnav a[data-testid="stPageLink"] *,
     .gl-topnav [data-testid="stPageLink-NavLink"] p,
-    .gl-topnav a[data-testid="stPageLink"] p {{
+    .gl-topnav a[data-testid="stPageLink"] p,
+    .gl-topnav [data-testid="stPageLink-NavLink"] span,
+    .gl-topnav a[data-testid="stPageLink"] span {{
         color: inherit !important;
         font-weight: inherit !important;
         font-size: inherit !important;
+        letter-spacing: inherit !important;
         margin: 0 !important;
+        text-shadow: none !important;
     }}
-    /* Active page — brighter cyan tint + glow */
+    /* Hover — cyan neon accent */
+    .gl-topnav [data-testid="stPageLink-NavLink"]:hover,
+    .gl-topnav a[data-testid="stPageLink"]:hover {{
+        border-color: rgba(103,232,249,0.55) !important;
+        background: linear-gradient(180deg, rgba(6,182,212,0.14), rgba(37,99,235,0.10)) !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow:
+            0 8px 22px rgba(6,182,212,0.28),
+            inset 0 1px 0 rgba(255,255,255,0.08),
+            0 0 0 1px rgba(103,232,249,0.18) !important;
+    }}
+    /* Active page — bright cyan glow, obvious contrast */
     .gl-topnav .gl-active [data-testid="stPageLink-NavLink"],
     .gl-topnav .gl-active a[data-testid="stPageLink"] {{
-        background: linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(37,99,235,0.08) 100%) !important;
-        border-color: rgba(6,182,212,0.55) !important;
-        color: var(--gl-blue) !important;
-        box-shadow: 0 4px 14px rgba(6,182,212,0.18), inset 0 0 0 1px rgba(6,182,212,0.18) !important;
+        background: linear-gradient(180deg, rgba(103,232,249,0.22), rgba(37,99,235,0.16)) !important;
+        border-color: rgba(103,232,249,0.85) !important;
+        color: #ecfeff !important;
+        box-shadow:
+            0 0 0 1px rgba(103,232,249,0.28),
+            0 6px 22px rgba(6,182,212,0.38),
+            inset 0 1px 0 rgba(255,255,255,0.12) !important;
+        text-shadow: 0 0 10px rgba(103,232,249,0.55);
     }}
     .gl-topnav .gl-active [data-testid="stPageLink-NavLink"]::before,
     .gl-topnav .gl-active a[data-testid="stPageLink"]::before {{
@@ -1383,13 +1464,37 @@ def inject_custom_css():
         position: absolute;
         left: 0; top: 0; bottom: 0;
         width: 3px;
-        background: var(--gl-grad-tech);
+        background: linear-gradient(180deg, #67e8f9 0%, #2563eb 100%);
         border-radius: 2px 0 0 2px;
+        box-shadow: 0 0 8px rgba(103,232,249,0.75);
     }}
-    /* Group divider — subtle vertical rule between group columns */
+    /* Animated sweep for active pill (subtle cyber feel) */
+    .gl-topnav .gl-active [data-testid="stPageLink-NavLink"]::after,
+    .gl-topnav .gl-active a[data-testid="stPageLink"]::after {{
+        content: "";
+        position: absolute;
+        top: 0; bottom: 0;
+        left: -60%;
+        width: 50%;
+        background: linear-gradient(90deg, transparent, rgba(103,232,249,0.18), transparent);
+        animation: gl-topnav-sweep 3.5s ease-in-out infinite;
+        pointer-events: none;
+    }}
+    @keyframes gl-topnav-sweep {{
+        0%   {{ left: -60%; }}
+        60%  {{ left: 120%; }}
+        100% {{ left: 120%; }}
+    }}
+    /* Icon tint (emoji or Material glyph preceding the label) */
+    .gl-topnav [data-testid="stPageLink-NavLink"] [data-testid="stIconMaterial"],
+    .gl-topnav a[data-testid="stPageLink"] [data-testid="stIconMaterial"] {{
+        color: #67e8f9 !important;
+        text-shadow: 0 0 6px rgba(103,232,249,0.45);
+    }}
+    /* Group divider — subtle vertical cyan rule */
     .gl-topnav-sep {{
         width: 1px;
-        background: linear-gradient(180deg, transparent, rgba(6,182,212,0.25), transparent);
+        background: linear-gradient(180deg, transparent, rgba(103,232,249,0.35), transparent);
         margin: 0 6px;
         min-height: 56px;
     }}

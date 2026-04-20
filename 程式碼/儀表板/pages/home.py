@@ -162,10 +162,14 @@ render_hero(
     eyebrow="TERMINAL · 股票預測研究平台",
     title_html="股票預測分析系統<span class=\"gl-hero-accent\">　九大面向．一眼看懂</span>",
     subtitle=(
-        "把台股研究拆成 <strong>9 大面向</strong>（趨勢、基本面、估值、事件、風險、籌碼、產業、文字、情緒），<br>"
-        "搭配 <strong>2023/03–2025/03 歷史資料</strong> 與 <strong>雙引擎機器學習模型</strong>，"
-        "濃縮成一張<strong>可回看、可解釋、可治理</strong>的研究快照。<br>"
-        "<span style=\"opacity:0.7;font-size:0.86em;\">· 學術研究展示平台　·　非投資建議 ·</span>"
+        "把台股研究拆成 <strong>9 大面向</strong>"
+        "（趨勢、基本面、估值、事件、風險、籌碼、產業、文字、情緒），<br>"
+        "搭配 <strong>2023/03–2025/03 歷史資料</strong> "
+        "與 <strong>雙引擎機器學習模型</strong>，<br>"
+        "濃縮成一張 <strong>可回看、可解釋、可治理</strong> 的研究快照。<br>"
+        "<span style=\"opacity:0.7;font-size:0.86em;\">"
+        "· 學術研究展示平台　·　非投資建議 ·"
+        "</span>"
     ),
     meta_chips=[
         ("phase 1-6 · all gates passed", "default"),
@@ -200,8 +204,8 @@ render_ticker_tape([
 # MODE TABS — 🌱 投資觀察台  /  ⚙️ 研究工作站
 # ============================================================================
 tab_observe, tab_workstation = st.tabs([
-    "🌱 投資觀察台　",
-    "⚙️ 研究工作站　",
+    "🌱　投資觀察台",
+    "⚙️　研究工作站",
 ])
 
 
