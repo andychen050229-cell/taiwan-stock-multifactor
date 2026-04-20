@@ -34,21 +34,29 @@ st.set_page_config(
 # ===== Force sidebar visibility in Streamlit Cloud /~/+/ embed mode =====
 # Without ?embed_options=show_sidebar_nav, Streamlit Cloud's wrapper iframe
 # hides sidebar nav + st.sidebar.markdown content entirely (tested 2026-04-20).
-# This one-shot JS redirect adds the param and reloads the iframe URL.
-st.markdown("""<script>
+# Script injected via markdown doesn't execute (innerHTML script semantics);
+# use st.components.v1.html which creates a proper iframe that executes JS.
+# The inner iframe targets window.parent (the Streamlit app frame) to reload.
+import streamlit.components.v1 as _components
+_components.html(
+    """<script>
 (function(){
   try {
-    var qs = new URLSearchParams(window.location.search);
+    var parentWin = window.parent;
+    if (!parentWin || !parentWin.location) return;
+    var qs = new URLSearchParams(parentWin.location.search);
     var opts = (qs.get('embed_options') || '').toLowerCase();
     if (opts.indexOf('show_sidebar_nav') === -1) {
       var newOpts = opts ? (opts + ',show_sidebar_nav') : 'show_sidebar_nav';
       qs.set('embed_options', newOpts);
-      var newUrl = window.location.pathname + '?' + qs.toString() + window.location.hash;
-      window.location.replace(newUrl);
+      var newUrl = parentWin.location.pathname + '?' + qs.toString() + parentWin.location.hash;
+      parentWin.location.replace(newUrl);
     }
-  } catch(e) { /* noop */ }
+  } catch(e) { console.warn('sidebar-nav bootstrap failed', e); }
 })();
-</script>""", unsafe_allow_html=True)
+</script>""",
+    height=0,
+)
 
 # ===== Load utils (brand + health injectors) =====
 _utils_spec = importlib.util.spec_from_file_location("dashboard_utils_app", str(HERE / "utils.py"))
