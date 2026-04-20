@@ -1,8 +1,23 @@
 """
 台灣股市多因子預測系統 — Navigation Router
 Streamlit st.navigation API (v1.36+) powered navigation.
+
+⚠️ Absolute paths required:
+   Streamlit Cloud uses `dashboard/app.py` (the shim) as its *main script*;
+   when the shim exec()s this file, st.Page() resolves relative paths against
+   the shim's directory, NOT this file's directory. Absolute paths via
+   __file__ work identically on local dev and Cloud.
 """
+from pathlib import Path
 import streamlit as st
+
+# ===== Path anchors =====
+HERE = Path(__file__).resolve().parent           # 程式碼/儀表板
+PAGES = HERE / "pages"
+
+def P(name: str) -> str:
+    """Build absolute path string for a page file inside pages/."""
+    return str(PAGES / name)
 
 # ===== Page Config (MUST be before st.navigation) =====
 st.set_page_config(
@@ -11,19 +26,19 @@ st.set_page_config(
     layout="wide",
 )
 
-# ===== Define Pages with st.Page =====
-home = st.Page("pages/home.py", title="首頁", icon="🏠", default=True)
-interpret = st.Page("pages/0_🌱_投資解讀面板.py", title="投資解讀面板", icon="🌱")
-model = st.Page("pages/1_📊_Model_Metrics.py", title="模型績效", icon="📊")
-icir = st.Page("pages/2_📈_ICIR_Analysis.py", title="ICIR 信號穩定性", icon="📈")
-backtest = st.Page("pages/3_💰_Backtest.py", title="策略回測", icon="💰")
-feature = st.Page("pages/4_🔬_Feature_Analysis.py", title="特徵工程分析", icon="🔬")
-data = st.Page("pages/5_🗃️_Data_Explorer.py", title="資料品質總覽", icon="🗃️")
-governance = st.Page("pages/6_🛡️_Model_Governance.py", title="模型治理", icon="🛡️")
-signal = st.Page("pages/7_📡_Signal_Monitor.py", title="信號監控", icon="📡")
-extended = st.Page("pages/8_🎯_Extended_Analytics.py", title="擴充分析", icon="🎯")
-text = st.Page("pages/9_📝_Text_Analysis.py", title="文本分析", icon="📝")
-phase6 = st.Page("pages/A_🔭_Phase6_深度驗證.py", title="Phase 6 深度驗證", icon="🔭")
+# ===== Define Pages with st.Page (absolute paths, Cloud-safe) =====
+home = st.Page(P("home.py"), title="首頁", icon="🏠", default=True)
+interpret = st.Page(P("0_🌱_投資解讀面板.py"), title="投資解讀面板", icon="🌱")
+model = st.Page(P("1_📊_Model_Metrics.py"), title="模型績效", icon="📊")
+icir = st.Page(P("2_📈_ICIR_Analysis.py"), title="ICIR 信號穩定性", icon="📈")
+backtest = st.Page(P("3_💰_Backtest.py"), title="策略回測", icon="💰")
+feature = st.Page(P("4_🔬_Feature_Analysis.py"), title="特徵工程分析", icon="🔬")
+data = st.Page(P("5_🗃️_Data_Explorer.py"), title="資料品質總覽", icon="🗃️")
+governance = st.Page(P("6_🛡️_Model_Governance.py"), title="模型治理", icon="🛡️")
+signal = st.Page(P("7_📡_Signal_Monitor.py"), title="信號監控", icon="📡")
+extended = st.Page(P("8_🎯_Extended_Analytics.py"), title="擴充分析", icon="🎯")
+text = st.Page(P("9_📝_Text_Analysis.py"), title="文本分析", icon="📝")
+phase6 = st.Page(P("A_🔭_Phase6_深度驗證.py"), title="Phase 6 深度驗證", icon="🔭")
 
 # ===== Navigation Structure =====
 pg = st.navigation({
