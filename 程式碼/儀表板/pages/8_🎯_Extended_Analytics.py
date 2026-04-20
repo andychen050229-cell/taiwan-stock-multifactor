@@ -107,10 +107,16 @@ if cs:
             colorbar={"title": "Return"},
         ))
         fig.update_layout(
-            title="Total Return by (Model × Cost Scenario)",
+            title=dict(text="Total Return by (Model × Cost Scenario)", font=dict(color="#0f172a", size=15)),
             height=460,
             xaxis_title="Cost Scenario",
             yaxis_title="Model × Horizon",
+            plot_bgcolor="#ffffff",
+            paper_bgcolor="#ffffff",
+            font=dict(color="#0f172a", family="-apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif"),
+            xaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
+            yaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
+            margin=dict(t=60, b=50, l=80, r=40),
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -151,7 +157,16 @@ if ch:
                 zmid=0,
                 colorbar={"title": "Rank IC"},
             ))
-            fig.update_layout(title="Rank IC", height=320)
+            fig.update_layout(
+                title=dict(text="Rank IC", font=dict(color="#0f172a", size=14)),
+                height=320,
+                plot_bgcolor="#ffffff",
+                paper_bgcolor="#ffffff",
+                font=dict(color="#0f172a", family="-apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif"),
+                xaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
+                yaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
+                margin=dict(t=50, b=40, l=70, r=30),
+            )
             st.plotly_chart(fig, use_container_width=True)
 
     with col2:
@@ -166,7 +181,16 @@ if ch:
                 zmid=0,
                 colorbar={"title": "Sharpe"},
             ))
-            fig.update_layout(title="Sharpe Ratio", height=320)
+            fig.update_layout(
+                title=dict(text="Sharpe Ratio", font=dict(color="#0f172a", size=14)),
+                height=320,
+                plot_bgcolor="#ffffff",
+                paper_bgcolor="#ffffff",
+                font=dict(color="#0f172a", family="-apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif"),
+                xaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
+                yaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
+                margin=dict(t=50, b=40, l=70, r=30),
+            )
             st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("""
@@ -208,9 +232,16 @@ if pc:
                 ],
             ))
             fig.update_layout(
-                title="Average Pillar Contribution Across 6 Models",
+                title=dict(text="Average Pillar Contribution Across 6 Models", font=dict(color="#0f172a", size=15)),
                 yaxis_title="Normalized Importance",
                 height=420,
+                plot_bgcolor="#ffffff",
+                paper_bgcolor="#ffffff",
+                font=dict(color="#0f172a", family="-apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif"),
+                xaxis=dict(gridcolor="rgba(6,182,212,0.08)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
+                yaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a"), tickformat=".0%"),
+                margin=dict(t=60, b=50, l=70, r=30),
+                bargap=0.35,
             )
             st.plotly_chart(fig, use_container_width=True)
         with col2:
@@ -269,10 +300,17 @@ if cs_d:
         marker_color=["#10b981" if v > 0 else "#ef4444" for v in df_cs["邊際優勢"]],
     ))
     fig.update_layout(
-        title="Hit Rate Edge (Model Hit Rate − Base Up Rate)",
+        title=dict(text="Hit Rate Edge (Model Hit Rate − Base Up Rate)", font=dict(color="#0f172a", size=15)),
         yaxis_title="Edge",
         height=360,
         yaxis_tickformat=".1%",
+        plot_bgcolor="#ffffff",
+        paper_bgcolor="#ffffff",
+        font=dict(color="#0f172a", family="-apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif"),
+        xaxis=dict(gridcolor="rgba(6,182,212,0.08)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
+        yaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a"), tickformat=".1%"),
+        margin=dict(t=60, b=50, l=70, r=30),
+        bargap=0.35,
     )
     st.plotly_chart(fig, use_container_width=True)
 

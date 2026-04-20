@@ -44,18 +44,44 @@ except Exception as e:
     st.stop()
 
 st.title("📈 ICIR 信號穩定性分析")
-st.caption("因子 IC（Information Coefficient）穩定性分析，衡量預測信號的持續性與可靠度")
+st.caption("因子 IC(Information Coefficient)穩定性分析,衡量預測信號的持續性與可靠度")
+
+# 白話版資料產生說明
+st.markdown("""
+<div style="
+    background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
+    border: 1px solid rgba(6,182,212,0.18);
+    border-left: 4px solid #06b6d4;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin: 14px 0;
+">
+    <div style="
+        display: inline-block; background: #06b6d4; color: white;
+        font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+        padding: 3px 10px; border-radius: 4px; margin-bottom: 10px;
+    ">資料怎麼來? · DATA PROVENANCE</div>
+    <div style="font-size: 0.95rem; color: #334155; line-height: 1.85;">
+        <strong style="color: #0f172a;">這一頁的 ICIR 數字怎麼算出來的?</strong><br>
+        ① 先對每個交易日算出<strong>模型預測排序</strong>和<strong>實際報酬排序</strong>的相關性(Rank IC);<br>
+        ② 把過去 ~500 個交易日的 Rank IC 收集起來,算出平均值與標準差;<br>
+        ③ <code style="background:#e0f2fe;padding:1px 6px;border-radius:3px;">ICIR = 平均 / 標準差</code>,像「訊號的夏普比率」。<br>
+        <strong style="color: #0891b2;">|ICIR| &gt; 0.5 → 訊號穩定可用</strong>;&gt; 1.0 為優秀。<br>
+        D+20 通常優於 D+1,因為日內價格雜訊比月頻趨勢大得多。
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 st.info("""
-**如何閱讀本頁？**
+**如何閱讀本頁?**
 
-IC（Information Coefficient）衡量模型預測排序與實際報酬排序的相關性。
+IC(Information Coefficient)衡量模型預測排序與實際報酬排序的相關性。
 
-ICIR = IC 的平均值 / IC 的標準差，類似「信號的夏普比率」。
+ICIR = IC 的平均值 / IC 的標準差,類似「信號的夏普比率」。
 
-|ICIR| > 0.5 表示預測信號穩定可用，> 1.0 為優秀。
+|ICIR| > 0.5 表示預測信號穩定可用,> 1.0 為優秀。
 
-D+20 的 ICIR 通常優於 D+1，因為短期價格雜訊較大。
+D+20 的 ICIR 通常優於 D+1,因為短期價格雜訊較大。
 """)
 
 st.markdown("""
@@ -349,7 +375,19 @@ try:
         st.divider()
         st.subheader("📊 IC 時間序列圖表 | IC Time Series")
 
-        fig_dir = Path(__file__).parent.parent.parent / "outputs" / "figures"
+        # Cloud shim chdir-safe: walk up 4 levels first (pages → 儀表板 → 程式碼 → project_root)
+        _fig_here = Path(__file__).resolve()
+        fig_dir = None
+        for _c in (
+            _fig_here.parent.parent.parent.parent / "outputs" / "figures",
+            _fig_here.parent.parent.parent / "outputs" / "figures",
+            Path.cwd() / "outputs" / "figures",
+            Path.cwd().parent / "outputs" / "figures",
+        ):
+            if _c.exists():
+                fig_dir = _c
+                break
+        fig_dir = fig_dir or (_fig_here.parent.parent.parent / "outputs" / "figures")
         ic_charts = sorted(fig_dir.glob("ic_timeseries_*.png"))
         if ic_charts:
             # Display each chart full-width inside an expander for clarity
@@ -366,10 +404,19 @@ try:
         st.caption("Phase 3 治理模組自動評估的信號品質等級")
 
         try:
-            _p3_report_dir = Path(__file__).resolve().parent.parent.parent / "outputs" / "reports"
-            if not _p3_report_dir.exists():
-                _p3_report_dir = Path.cwd() / "outputs" / "reports"
-            _p3_files = sorted(_p3_report_dir.glob("phase3_report_*.json"), reverse=True)
+            _here = Path(__file__).resolve()
+            _p3_report_dir = None
+            for _c in (
+                _here.parent.parent.parent.parent / "outputs" / "reports",  # project_root/outputs
+                _here.parent.parent.parent / "outputs" / "reports",         # 程式碼/outputs (legacy)
+                Path.cwd() / "outputs" / "reports",
+                Path.cwd().parent / "outputs" / "reports",
+                Path.cwd().parent.parent / "outputs" / "reports",
+            ):
+                if _c.exists():
+                    _p3_report_dir = _c
+                    break
+            _p3_files = sorted(_p3_report_dir.glob("phase3_report_*.json"), reverse=True) if _p3_report_dir else []
             if _p3_files:
                 with open(_p3_files[0], "r", encoding="utf-8") as _f:
                     _p3 = json.load(_f)

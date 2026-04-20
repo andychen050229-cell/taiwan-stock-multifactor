@@ -516,10 +516,19 @@ try:
     # Reload report independently to ensure quintile data is available
     # (avoids potential scope issues with the 'results' variable from upstream try blocks)
     import json as _json
-    _qr_dir = Path(__file__).resolve().parent.parent.parent / "outputs" / "reports"
-    if not _qr_dir.exists():
-        _qr_dir = Path.cwd() / "outputs" / "reports"
-    _qr_files = sorted(_qr_dir.glob("phase2_report_*.json"), reverse=True)
+    _qr_here = Path(__file__).resolve()
+    _qr_dir = None
+    for _c in (
+        _qr_here.parent.parent.parent.parent / "outputs" / "reports",   # project_root/outputs
+        _qr_here.parent.parent.parent / "outputs" / "reports",          # 程式碼/outputs (legacy)
+        Path.cwd() / "outputs" / "reports",
+        Path.cwd().parent / "outputs" / "reports",
+        Path.cwd().parent.parent / "outputs" / "reports",
+    ):
+        if _c.exists():
+            _qr_dir = _c
+            break
+    _qr_files = sorted(_qr_dir.glob("phase2_report_*.json"), reverse=True) if _qr_dir else []
     _qr_report = {}
     if _qr_files:
         with open(_qr_files[0], "r", encoding="utf-8") as _qf:

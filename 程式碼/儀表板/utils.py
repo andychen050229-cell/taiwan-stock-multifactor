@@ -2130,15 +2130,36 @@ def inject_advanced_sidebar(report_name: str = "", report: dict = None, current_
 # ============================================================================
 # Data loaders
 # ============================================================================
+def _project_outputs_dir():
+    """Resolve the project-root outputs directory.
+
+    Handles the Streamlit Cloud shim case where dashboard/app.py does
+    os.chdir(程式碼/儀表板/) — Path.cwd() alone is insufficient.
+    """
+    here = Path(__file__).resolve()
+    for candidate in (
+        here.parent.parent.parent / "outputs",   # project_root/outputs  ← canonical
+        here.parent.parent / "outputs",          # 程式碼/outputs (legacy layout)
+        Path.cwd() / "outputs",
+        Path.cwd().parent / "outputs",
+        Path.cwd().parent.parent / "outputs",
+    ):
+        if candidate.exists():
+            return candidate
+    # Last resort so callers get a consistent return type
+    return Path.cwd() / "outputs"
+
+
 @st.cache_data
 def load_report():
     """Load the latest Phase 2 report JSON with caching."""
-    report_dir = Path(__file__).resolve().parent.parent / "outputs" / "reports"
-    if not report_dir.exists():
-        report_dir = Path.cwd() / "outputs" / "reports"
+    report_dir = _project_outputs_dir() / "reports"
     reports = sorted(report_dir.glob("phase2_report_*.json"), reverse=True)
     if not reports:
-        st.error("找不到 Phase 2 報告。請先執行 `python run_phase2.py`。")
+        st.error(
+            "找不到 Phase 2 報告。請先執行 `python run_phase2.py`。\n\n"
+            f"(已掃描路徑: `{report_dir}`)"
+        )
         st.stop()
     with open(reports[0], "r", encoding="utf-8") as f:
         return json.load(f), reports[0].name
@@ -2147,27 +2168,12 @@ def load_report():
 @st.cache_data
 def load_phase3_report():
     """Load the latest Phase 3 report JSON with caching."""
-    report_dir = Path(__file__).resolve().parent.parent / "outputs" / "reports"
-    if not report_dir.exists():
-        report_dir = Path.cwd() / "outputs" / "reports"
+    report_dir = _project_outputs_dir() / "reports"
     reports = sorted(report_dir.glob("phase3_report_*.json"), reverse=True)
     if not reports:
         return None, None
     with open(reports[0], "r", encoding="utf-8") as f:
         return json.load(f), reports[0].name
-
-
-def _project_outputs_dir():
-    """Resolve the project-root outputs directory."""
-    here = Path(__file__).resolve()
-    for candidate in (
-        here.parent.parent.parent / "outputs",
-        here.parent.parent / "outputs",
-        Path.cwd() / "outputs",
-    ):
-        if candidate.exists():
-            return candidate
-    return Path.cwd() / "outputs"
 
 
 @st.cache_data
@@ -2203,9 +2209,7 @@ def figures_dir():
 @st.cache_data
 def load_governance_json(filename):
     """Load a governance JSON file with caching."""
-    gov_dir = Path(__file__).resolve().parent.parent / "outputs" / "governance"
-    if not gov_dir.exists():
-        gov_dir = Path.cwd() / "outputs" / "governance"
+    gov_dir = _project_outputs_dir() / "governance"
     fp = gov_dir / filename
     if fp.exists():
         with open(fp, "r", encoding="utf-8") as f:

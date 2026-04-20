@@ -613,9 +613,19 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 try:
-    figures_dir = Path(__file__).resolve().parent.parent / "outputs" / "figures"
-    if not figures_dir.exists():
-        figures_dir = Path.cwd() / "outputs" / "figures"
+    _mm_here = Path(__file__).resolve()
+    figures_dir = None
+    for _c in (
+        _mm_here.parent.parent.parent.parent / "outputs" / "figures",   # project_root/outputs
+        _mm_here.parent.parent.parent / "outputs" / "figures",          # 程式碼/outputs (legacy)
+        _mm_here.parent.parent / "outputs" / "figures",
+        Path.cwd() / "outputs" / "figures",
+        Path.cwd().parent / "outputs" / "figures",
+    ):
+        if _c.exists():
+            figures_dir = _c
+            break
+    figures_dir = figures_dir or (_mm_here.parent.parent / "outputs" / "figures")
 
     cm_col1, cm_col2 = st.columns(2)
     for col, engine in zip([cm_col1, cm_col2], ["lightgbm", "xgboost"]):
@@ -711,9 +721,18 @@ st.divider()
 st.subheader("📊 綜合比較圖表 | Overview Charts")
 
 try:
-    figures_dir = Path(__file__).resolve().parent.parent.parent / "outputs" / "figures"
-    if not figures_dir.exists():
-        figures_dir = Path.cwd() / "outputs" / "figures"
+    _ov_here = Path(__file__).resolve()
+    figures_dir = None
+    for _c in (
+        _ov_here.parent.parent.parent.parent / "outputs" / "figures",   # project_root/outputs
+        _ov_here.parent.parent.parent / "outputs" / "figures",          # 程式碼/outputs (legacy)
+        Path.cwd() / "outputs" / "figures",
+        Path.cwd().parent / "outputs" / "figures",
+    ):
+        if _c.exists():
+            figures_dir = _c
+            break
+    figures_dir = figures_dir or (_ov_here.parent.parent.parent / "outputs" / "figures")
 
     ov_col1, ov_col2 = st.columns(2)
     with ov_col1:

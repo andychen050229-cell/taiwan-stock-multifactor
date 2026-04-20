@@ -41,12 +41,13 @@ render_topbar(
 st.markdown("""
 <div class="gl-hero">
     <span class="gl-hero-eyebrow">PHASE 6 · DEEP VALIDATION</span>
-    <div class="gl-hero-title">深度驗證：LOPO · 閾值 · 個股</div>
+    <div class="gl-hero-title">深度驗證:LOPO · 閾值 · 個股</div>
     <div class="gl-hero-subtitle">
-        三項補件分析回答三個核心問題 ─ <strong>「哪些特徵真的有用？」</strong>（LOPO）、
-        <strong>「該多嚴格地出手？」</strong>（Threshold Sweep）、
-        <strong>「訊號能落地到個股嗎？」</strong>（2454 聯發科個案）。
-        所有分析皆基於 <span class="gl-mono">xgboost_D20</span> OOF 預測（404k 筆 OOS 樣本）。
+        三項補件分析回答三個核心問題 ─<br>
+        <strong>「哪些特徵真的有用?」</strong>(LOPO)、
+        <strong>「該多嚴格地出手?」</strong>(Threshold Sweep)、
+        <strong>「訊號能落地到個股嗎?」</strong>(2454 聯發科個案)。<br>
+        所有分析皆基於 <span class="gl-mono">xgboost_D20</span> OOF 預測(404k 筆 OOS 樣本)。
     </div>
     <div style="margin-top:18px;">
         <span class="gl-live">live · phase 6 validated</span>
@@ -54,6 +55,168 @@ st.markdown("""
         <span class="gl-chip violet" style="margin-left:4px;">oos n=404,724</span>
         <span class="gl-chip ok" style="margin-left:4px;">9 pillars · 91 features</span>
     </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ============================================================================
+# 白話導讀 — 用吃早餐的比喻說明三個分析(非技術使用者友善)
+# ============================================================================
+st.markdown("""
+<div style="
+    background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 50%, #f0f9ff 100%);
+    border: 1px solid rgba(6,182,212,0.18);
+    border-left: 4px solid #06b6d4;
+    border-radius: 14px;
+    padding: 22px 26px;
+    margin: 18px 0 8px 0;
+    box-shadow: 0 2px 8px rgba(6,182,212,0.06);
+">
+    <div style="
+        display: inline-block;
+        background: #06b6d4;
+        color: #ffffff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        padding: 3px 10px;
+        border-radius: 4px;
+        margin-bottom: 12px;
+    ">白話導讀 · PLAIN-LANGUAGE GUIDE</div>
+    <div style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;">
+        這一頁在做什麼?一句話:
+        <span style="color: #0891b2;">檢驗模型是不是真的懂股票,還是只是運氣好。</span>
+    </div>
+    <div style="font-size: 0.95rem; color: #334155; line-height: 1.85;">
+        想像一個廚師宣稱自己做的菜很好吃,<br>
+        我們要做三件事來驗證他:
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# 三個白話比喻卡片
+col_g1, col_g2, col_g3 = st.columns(3, gap="medium")
+
+with col_g1:
+    st.markdown("""
+    <div style="
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-top: 3px solid #2563eb;
+        border-radius: 12px;
+        padding: 20px;
+        height: 100%;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    ">
+        <div style="
+            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+        ">
+            <span style="font-size: 1.5rem;">🔬</span>
+            <span style="
+                font-size: 0.7rem; font-weight: 700; color: #2563eb;
+                letter-spacing: 0.08em; text-transform: uppercase;
+            ">§1 LOPO · 把食材一個一個拔掉</span>
+        </div>
+        <div style="font-size: 1.0rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+            哪個食材最不可或缺?
+        </div>
+        <div style="font-size: 0.88rem; color: #475569; line-height: 1.7;">
+            就像大廚的招牌菜,<br>
+            我們把番茄、洋蔥、蒜頭 <strong>一個一個拿掉</strong>,<br>
+            看少了哪一樣最難吃。<br><br>
+            我們總共試 <strong>9 次</strong>,<br>
+            每次拔掉一個面向的所有資料<br>
+            (技術面、基本面、風險面......),<br>
+            少了它,模型的準確度掉多少?<br>
+            <strong style="color: #2563eb;">掉越多 → 這面向越重要。</strong>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_g2:
+    st.markdown("""
+    <div style="
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-top: 3px solid #7c3aed;
+        border-radius: 12px;
+        padding: 20px;
+        height: 100%;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    ">
+        <div style="
+            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+        ">
+            <span style="font-size: 1.5rem;">🎯</span>
+            <span style="
+                font-size: 0.7rem; font-weight: 700; color: #7c3aed;
+                letter-spacing: 0.08em; text-transform: uppercase;
+            ">§2 閾值敏感度 · 要多有把握才出手</span>
+        </div>
+        <div style="font-size: 1.0rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+            模型說「會漲」時,我該多信任?
+        </div>
+        <div style="font-size: 0.88rem; color: #475569; line-height: 1.7;">
+            就像紅綠燈的紅有深淺,<br>
+            機率 60% 跟 90% 意義不同。<br><br>
+            把門檻從 30% 拉到 50%,<br>
+            看 <strong>出手次數</strong> 跟 <strong>命中率</strong><br>
+            怎麼跟著變化。<br><br>
+            門檻高 → 出手少但命中高(保守),<br>
+            門檻低 → 出手多但命中低(積極)。<br>
+            <strong style="color: #7c3aed;">找出「兼顧次數與準度」的甜蜜點。</strong>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_g3:
+    st.markdown("""
+    <div style="
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-top: 3px solid #10b981;
+        border-radius: 12px;
+        padding: 20px;
+        height: 100%;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    ">
+        <div style="
+            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+        ">
+            <span style="font-size: 1.5rem;">📈</span>
+            <span style="
+                font-size: 0.7rem; font-weight: 700; color: #10b981;
+                letter-spacing: 0.08em; text-transform: uppercase;
+            ">§3 2454 聯發科 · 真的拿去買會賺嗎</span>
+        </div>
+        <div style="font-size: 1.0rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+            紙上 OK,實戰呢?
+        </div>
+        <div style="font-size: 0.88rem; color: #475569; line-height: 1.7;">
+            挑一檔大家熟悉的股票 ─<br>
+            <strong>2454 聯發科</strong>,<br>
+            用過去一年真實盤面驗證。<br><br>
+            當模型說「會漲」,我們買進,<br>
+            看實際 <strong>漲了幾次 / 錯了幾次</strong>。<br><br>
+            模型該在行情來時提高機率,<br>
+            在盤整震盪時閉嘴不亂喊。<br>
+            <strong style="color: #10b981;">會講話、會閉嘴,才是真本事。</strong>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("""
+<div style="
+    background: #fefce8;
+    border: 1px solid rgba(234,179,8,0.25);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 14px 0 18px 0;
+    font-size: 0.88rem;
+    color: #713f12;
+">
+    <strong>💡 小提醒</strong>:下方三個分頁(🔬/🎯/📈)對應上面三個白話問題,
+    每個分頁都附「方法論」說明與圖表,<br>
+    不理解技術細節也能從 <strong>「關鍵洞察」區塊</strong> 看到重點結論。
 </div>
 """, unsafe_allow_html=True)
 
@@ -185,8 +348,8 @@ with tab1:
         yaxis_title="ΔAUC (basis points, bps)",
         xaxis_title="特徵支柱（依 ΔAUC 降序）",
         height=460,
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="#ffffff",
+        paper_bgcolor="#ffffff",
         font=dict(family="Inter, sans-serif", color="#0f172a"),
         showlegend=False,
     )
@@ -209,6 +372,37 @@ with tab1:
 
     # Detailed table
     st.markdown("### 完整結果表")
+
+    # 欄位說明 — 每一欄代表什麼（白話版）
+    st.markdown("""
+    <div style="
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 12px;
+        font-size: 0.86rem;
+        color: #334155;
+        line-height: 1.75;
+    ">
+        <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">
+            📘 欄位說明 — 每一欄代表什麼?
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 6px 20px;">
+            <div><strong style="color: #2563eb;">支柱代碼</strong>:技術代稱(trend/risk/fund...)</div>
+            <div><strong style="color: #2563eb;">中文名稱</strong>:白話說明(技術面/風險面/基本面...)</div>
+            <div><strong style="color: #7c3aed;">特徵數</strong>:這個面向用了幾個資料欄位</div>
+            <div><strong style="color: #10b981;">ΔAUC (bps)</strong>:拿掉這面向後,模型整體準度掉多少(越大越不可少)</div>
+            <div><strong style="color: #f59e0b;">ΔAUC_up (bps)</strong>:對「會漲」這件事的判斷力掉多少</div>
+            <div><strong style="color: #ef4444;">ΔIC_up</strong>:預測機率與實際表現的相關性變化</div>
+        </div>
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #cbd5e1; font-size: 0.82rem; color: #64748b;">
+            <strong>bps</strong> = basis point(基點),1 bps = 0.01% 準確度。
+            <strong>AUC</strong> 是分類準確度的指標,越靠近 1 越準。
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
     df_display = df_rank.copy()
     df_display["pillar"] = df_display.apply(
         lambda r: f'<span class="gl-pillar" data-p="{r["pillar"]}">{r["pillar"]}</span>',
@@ -256,7 +450,7 @@ with tab1:
         )
         fig2.update_layout(
             height=340,
-            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="#ffffff", paper_bgcolor="#ffffff",
             showlegend=False, coloraxis_showscale=False,
         )
         fig2.update_yaxes(gridcolor="#e2e8f0")
@@ -348,8 +542,8 @@ with tab2:
         yaxis2=dict(title="Call Rate (%)", overlaying="y", side="right",
                     tickfont=dict(color="#f59e0b")),
         height=460,
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="#ffffff",
+        paper_bgcolor="#ffffff",
         font=dict(family="Inter, sans-serif", color="#0f172a"),
         legend=dict(x=0.02, y=0.98, bgcolor="rgba(255,255,255,0.9)", bordercolor="#e2e8f0"),
         hovermode="x unified",
@@ -375,8 +569,8 @@ with tab2:
         xaxis_title="Probability Threshold t",
         yaxis_title="Edge (percentage points, pp)",
         height=360,
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="#ffffff",
+        paper_bgcolor="#ffffff",
         font=dict(family="Inter, sans-serif", color="#0f172a"),
     )
     fig_edge.update_yaxes(gridcolor="#e2e8f0")
@@ -418,8 +612,8 @@ with tab2:
         title="精度曲線：模型最強訊號的命中率",
         yaxis_title="Hit Rate (%)",
         height=380,
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="#ffffff",
+        paper_bgcolor="#ffffff",
         font=dict(family="Inter, sans-serif", color="#0f172a"),
     )
     fig_topk.update_yaxes(gridcolor="#e2e8f0")
@@ -518,8 +712,8 @@ with tab3:
         yaxis2=dict(title="Hit Rate When Called (%)", overlaying="y", side="right",
                     tickfont=dict(color="#10b981"), range=[0, 100]),
         height=460,
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="#ffffff",
+        paper_bgcolor="#ffffff",
         font=dict(family="Inter, sans-serif", color="#0f172a"),
         legend=dict(x=0.02, y=0.98, bgcolor="rgba(255,255,255,0.9)", bordercolor="#e2e8f0"),
     )
@@ -537,6 +731,39 @@ with tab3:
 
     # Monthly table
     st.markdown("### 月度明細表")
+
+    st.markdown("""
+    <div style="
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 12px;
+        font-size: 0.86rem;
+        color: #334155;
+        line-height: 1.75;
+    ">
+        <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">
+            📘 欄位說明 — 每一欄怎麼看?
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 20px;">
+            <div><strong style="color: #2563eb;">月份</strong>:OOS 期間的月份(YYYY-MM)</div>
+            <div><strong style="color: #2563eb;">交易日</strong>:該月 2454 有多少個交易日</div>
+            <div><strong style="color: #10b981;">實際上漲天數</strong>:真實結果,該月漲了幾天</div>
+            <div><strong style="color: #7c3aed;">出手次數</strong>:模型認為會漲(機率≥門檻)的天數</div>
+            <div><strong style="color: #10b981;">命中次數</strong>:出手後實際真的漲了幾次</div>
+            <div><strong style="color: #f59e0b;">平均上漲機率</strong>:該月模型平均預測有多看好</div>
+            <div><strong style="color: #f59e0b;">當月上漲率</strong>:實際上漲天數 / 總交易日</div>
+            <div><strong style="color: #ef4444;">出手率</strong>:模型出手次數 / 總交易日</div>
+            <div><strong style="color: #10b981;">出手命中率</strong>:命中次數 / 出手次數(越高越準)</div>
+        </div>
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #cbd5e1; font-size: 0.82rem; color: #64748b;">
+            <strong>怎麼讀?</strong>重點看「平均上漲機率」是否有在行情來前上升,
+            以及「出手命中率」是否 > 當月上漲率(代表選時能力)。
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
     m_display = monthly.copy()
     m_display["avg_up_prob"] = m_display["avg_up_prob"].apply(lambda v: f"{v:.3f}")
     m_display["up_rate"] = m_display["up_rate"].apply(lambda v: f"{v:.2%}")
