@@ -459,8 +459,8 @@ if card_files:
             polar=dict(
                 bgcolor="rgba(0,0,0,0)",
                 radialaxis=dict(visible=True, range=[0, 1],
-                                 tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569")),
-                angularaxis=dict(tickfont=dict(family="JetBrains Mono, monospace", size=11, color="#475569")),
+                                 tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#8397AC")),
+                angularaxis=dict(tickfont=dict(family="JetBrains Mono, monospace", size=11, color="#8397AC")),
             ),
         )
         st.plotly_chart(fig_radar, use_container_width=True)

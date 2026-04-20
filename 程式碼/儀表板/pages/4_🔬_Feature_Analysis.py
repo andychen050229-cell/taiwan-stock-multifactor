@@ -127,7 +127,7 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
         ⚠️ <strong>版本說明</strong>：此為 <strong>Phase 1 初版</strong>的 43 候選特徵（僅趨勢 / 基本面 / 估值 / 事件 / 風險 5 個支柱）。
         生產版本已升級為 <strong>Phase 5B 九支柱架構 1,623 → 91 特徵</strong>（新增 chip 籌碼、ind 產業、
         <span class="gl-pillar" data-p="txt">txt</span> 文本、<span class="gl-pillar" data-p="sent">sent</span> 情緒 4 個支柱）。
-        保留此表作為歷史演進的追蹤文件。最新因子統計請見下方「因子支柱分布」區塊與 🔭 驗證壓力測試 頁面。
+        保留此表作為歷史演進的追蹤文件。最新因子統計請見下方「因子支柱分布」區塊與 🔭 驗證壓測 頁面。
         </div>
         """, unsafe_allow_html=True)
         st.markdown("以下為 Phase 1 初版五支柱的全部 43 個候選特徵，標註各階段篩選結果：")
@@ -216,7 +216,7 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
         • 淘汰主因：MI 不足（{n_mi_fail} 個）&gt; VIF 共線性（{n_vif_fail} 個）<br>
         <hr style="margin:8px 0; border:none; border-top:1px dashed #cbd5e1;">
         📦 <strong>最新生產版本（Phase 5B）</strong>：<strong>1,623 → 91</strong> 特徵（9 支柱）·
-        IC prescreen → Chi²/MI → VIF 三階段 · 詳見 🔭 驗證壓力測試 頁面的 LOPO 支柱貢獻排序。
+        IC prescreen → Chi²/MI → VIF 三階段 · 詳見 🔭 驗證壓測 頁面的 LOPO 支柱貢獻排序。
         </div>
         """, unsafe_allow_html=True)
 

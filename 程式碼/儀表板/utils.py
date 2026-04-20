@@ -1828,9 +1828,10 @@ def inject_custom_css():
     /* Utility bar — terminal-style metadata strip (pure HTML, no links) */
     .gl-utilbar {{
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
-        gap: 0;
+        justify-content: space-between;
+        gap: 8px;
         padding: 7px 14px;
         margin: -0.5rem -1rem 0 -1rem;
         background:
@@ -1847,6 +1848,18 @@ def inject_custom_css():
         top: 0;
         z-index: 41;
     }}
+    .gl-util-left {{
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+        flex: 1 1 auto;
+        min-width: 0;
+    }}
+    .gl-util-right {{
+        display: inline-flex;
+        align-items: center;
+        flex: 0 0 auto;
+    }}
     .gl-util-seg {{
         display: inline-flex;
         align-items: center;
@@ -1855,7 +1868,52 @@ def inject_custom_css():
         border-right: 1px solid rgba(6,182,212,0.18);
         white-space: nowrap;
     }}
-    .gl-util-seg:last-child {{ border-right: none; }}
+    .gl-util-left .gl-util-seg:last-child {{ border-right: none; }}
+    /* Fake command-palette search placeholder — visual hint, not functional */
+    .gl-util-search {{
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 3px 8px 3px 10px;
+        background: rgba(103,232,249,0.06);
+        border: 1px solid rgba(103,232,249,0.28);
+        border-radius: 6px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.68rem;
+        color: #8397ac;
+        letter-spacing: 0.04em;
+        min-width: 220px;
+        max-width: 360px;
+        transition: all .2s ease;
+    }}
+    .gl-util-search:hover {{
+        background: rgba(103,232,249,0.10);
+        border-color: rgba(103,232,249,0.50);
+        color: #b4ccdf;
+    }}
+    .gl-util-search-icon {{
+        display: inline-flex;
+        color: #67e8f9;
+        opacity: 0.85;
+    }}
+    .gl-util-search-text {{
+        flex: 1 1 auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }}
+    .gl-util-kbd {{
+        display: inline-block;
+        padding: 1px 6px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: #67e8f9;
+        background: rgba(6,10,18,0.85);
+        border: 1px solid rgba(103,232,249,0.32);
+        border-radius: 3px;
+        margin-left: auto;
+    }}
     .gl-util-k {{
         color: #67e8f9;
         font-weight: 700;
@@ -1936,24 +1994,50 @@ def inject_custom_css():
         position: relative;
         z-index: 39;
     }}
+    /* v7 §10 — terminal-tab style (flat top, seamless into content below) */
     .gl-pri-pill a[data-testid="stPageLink-NavLink"],
     .gl-pri-pill a[data-testid="stPageLink"] {{
-        min-height: 48px !important;
-        font-size: 0.96rem !important;
-        letter-spacing: 0.06em !important;
-        font-weight: 800 !important;
-        background: linear-gradient(180deg, rgba(15,29,52,0.96), rgba(8,18,35,0.98)) !important;
-        border-color: rgba(103,232,249,0.32) !important;
+        min-height: 42px !important;
+        font-size: 0.88rem !important;
+        letter-spacing: 0.08em !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        background: rgba(10,20,32,0.72) !important;
+        border: 1px solid rgba(103,232,249,0.18) !important;
+        border-bottom: 1px solid rgba(103,232,249,0.28) !important;
+        border-radius: 6px 6px 0 0 !important;
+        color: #8397ac !important;
+        padding: 8px 14px !important;
+        box-shadow: none !important;
+        position: relative;
+        transition: all .2s ease !important;
+    }}
+    .gl-pri-pill a[data-testid="stPageLink-NavLink"]:hover,
+    .gl-pri-pill a[data-testid="stPageLink"]:hover {{
+        background: rgba(15,29,52,0.90) !important;
+        color: #b4ccdf !important;
+        border-color: rgba(103,232,249,0.35) !important;
     }}
     .gl-pri-active a[data-testid="stPageLink-NavLink"],
     .gl-pri-active a[data-testid="stPageLink"] {{
-        background: linear-gradient(180deg, rgba(103,232,249,0.30), rgba(37,99,235,0.22)) !important;
-        border-color: rgba(103,232,249,0.95) !important;
-        color: #ffffff !important;
+        background: linear-gradient(180deg, #101c2d 0%, #0f1a28 100%) !important;
+        border: 1px solid rgba(103,232,249,0.55) !important;
+        /* Seamless bottom — the tab "belongs" to the secondary row below */
+        border-bottom: 1px solid transparent !important;
+        border-radius: 6px 6px 0 0 !important;
+        color: #E8F7FC !important;
         box-shadow:
-            0 0 0 1px rgba(103,232,249,0.45),
-            0 6px 22px rgba(6,182,212,0.45),
-            inset 0 1px 0 rgba(255,255,255,0.18) !important;
+            0 -2px 0 0 #67E8F9 inset,
+            0 -4px 14px rgba(103,232,249,0.30) !important;
+    }}
+    .gl-pri-active a[data-testid="stPageLink-NavLink"]::before,
+    .gl-pri-active a[data-testid="stPageLink"]::before {{
+        content: "";
+        position: absolute;
+        top: -1px; left: 8%; right: 8%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #67E8F9 50%, transparent);
+        opacity: 0.85;
     }}
 
     /* Secondary nav — contextual sub-pills within active group */
@@ -2104,6 +2188,187 @@ def inject_custom_css():
     }}
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button:active {{
         transform: translateY(0);
+    }}
+    /* ================================================================= */
+    /* 10. v7 Dark-Terminal tokens (surface layer — panels / banners)    */
+    /* ================================================================= */
+    :root {{
+        --gl-bg-root:     #060A12;   /* App canvas — under everything       */
+        --gl-bg-shell:    #0A1420;   /* Shell / chrome                      */
+        --gl-bg-panel:    #0F1725;   /* Default panel surface               */
+        --gl-bg-card:     #111B2B;   /* Card surface                        */
+        --gl-bg-elevated: #152235;   /* Elevated card (hovered / active)    */
+        --gl-fg-primary:  #E8F7FC;   /* High-contrast text                  */
+        --gl-fg-muted:    #B4CCDF;   /* Body text                           */
+        --gl-fg-dim:      #8397AC;   /* Tertiary / caption text             */
+        --gl-cyan-bright: #67E8F9;
+        --gl-cyan-core:   #06B6D4;
+        --gl-border-dim:  rgba(103,232,249,0.12);
+        --gl-border-acc:  rgba(103,232,249,0.28);
+    }}
+    /* ================================================================= */
+    /* 11. Terminal banner (render_terminal_banner)                       */
+    /* ================================================================= */
+    .gl-term-banner {{
+        background: var(--tb-bg);
+        border: 1px solid var(--tb-border);
+        border-left: 3px solid var(--tb-accent);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 10px 0 16px;
+        color: var(--tb-text);
+        font-family: var(--gl-font-sans);
+    }}
+    .gl-term-head {{
+        display: flex; align-items: center; gap: 10px;
+        font-size: 0.88rem; font-weight: 600;
+    }}
+    .gl-term-glyph {{
+        color: var(--tb-accent);
+        font-family: var(--gl-font-mono);
+        font-size: 1.05rem; line-height: 1;
+    }}
+    .gl-term-label {{
+        font-family: var(--gl-font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
+        color: var(--tb-accent);
+        opacity: 0.85;
+        padding: 2px 7px;
+        border: 1px solid var(--tb-border);
+        border-radius: 4px;
+    }}
+    .gl-term-title {{
+        color: var(--tb-text);
+        font-weight: 600;
+    }}
+    .gl-term-cmd {{
+        margin-top: 6px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.78rem;
+        color: var(--tb-accent);
+        opacity: 0.85;
+    }}
+    .gl-term-body {{
+        margin-top: 6px;
+        font-size: 0.85rem;
+        line-height: 1.7;
+        color: var(--tb-text);
+        opacity: 0.92;
+    }}
+    /* ================================================================= */
+    /* 12. Signal / status / decision cards                               */
+    /* ================================================================= */
+    .gl-signal-card {{
+        background: linear-gradient(180deg, var(--sc-bg), transparent);
+        border: 1px solid var(--sc-border);
+        border-radius: 10px;
+        padding: 10px 14px;
+        min-height: 78px;
+        font-family: var(--gl-font-sans);
+        color: var(--sc-text);
+        box-shadow: 0 2px 10px rgba(6,10,18,.25);
+    }}
+    .gl-sig-head {{
+        display: flex; align-items: center; gap: 8px;
+        font-size: 0.72rem; letter-spacing: 0.08em;
+        color: var(--sc-accent);
+        text-transform: uppercase;
+    }}
+    .gl-sig-glyph {{ font-family: var(--gl-font-mono); line-height: 1; }}
+    .gl-sig-value {{
+        font-family: var(--gl-font-mono);
+        font-size: 1.35rem; font-weight: 700; margin-top: 4px;
+        color: var(--sc-text);
+    }}
+    .gl-sig-delta {{
+        margin-left: 8px;
+        font-size: 0.78rem;
+        color: var(--sc-accent);
+        opacity: 0.9;
+    }}
+    .gl-sig-hint {{
+        margin-top: 4px;
+        font-size: 0.75rem;
+        color: var(--gl-fg-dim, #8397AC);
+        line-height: 1.55;
+    }}
+    .gl-status-card {{
+        background: var(--st-bg);
+        border: 1px solid var(--st-border);
+        border-left: 3px solid var(--st-accent);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 6px 0;
+        color: var(--st-text);
+    }}
+    .gl-stat-head {{
+        display: flex; align-items: center; gap: 10px;
+        font-family: var(--gl-font-sans);
+    }}
+    .gl-stat-glyph {{ color: var(--st-accent); font-family: var(--gl-font-mono); }}
+    .gl-stat-label {{ font-weight: 600; color: var(--st-text); }}
+    .gl-stat-state {{
+        margin-left: auto;
+        font-family: var(--gl-font-mono);
+        font-size: 0.78rem;
+        color: var(--st-accent);
+        padding: 2px 8px;
+        border: 1px solid var(--st-border);
+        border-radius: 4px;
+    }}
+    .gl-stat-detail {{
+        margin-top: 4px;
+        font-size: 0.82rem;
+        color: var(--st-text);
+        opacity: 0.9;
+        line-height: 1.65;
+    }}
+    .gl-decision-card {{
+        background: linear-gradient(180deg, var(--dc-bg), transparent);
+        border: 1px solid var(--dc-border);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin: 10px 0 16px;
+        color: var(--dc-text);
+    }}
+    .gl-dec-head {{
+        display: flex; align-items: center; gap: 10px;
+        font-size: 0.72rem; letter-spacing: 0.12em;
+        color: var(--dc-accent);
+    }}
+    .gl-dec-glyph {{ font-family: var(--gl-font-mono); }}
+    .gl-dec-label {{
+        font-family: var(--gl-font-mono);
+        padding: 2px 7px;
+        border: 1px solid var(--dc-border);
+        border-radius: 4px;
+    }}
+    .gl-dec-conf {{
+        margin-left: auto;
+        font-family: var(--gl-font-mono);
+        font-size: 0.72rem;
+        color: var(--dc-accent);
+        opacity: 0.85;
+    }}
+    .gl-dec-verdict {{
+        margin-top: 8px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--dc-text);
+    }}
+    .gl-dec-reason {{
+        margin-top: 4px;
+        font-size: 0.88rem;
+        color: var(--dc-text);
+        opacity: 0.92;
+        line-height: 1.7;
+    }}
+    .gl-dec-action {{
+        margin-top: 10px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.82rem;
+        color: var(--dc-accent);
     }}
 </style>
     """, unsafe_allow_html=True)
@@ -2812,56 +3077,207 @@ _GL_FONT_SANS = "Inter, 'Noto Sans TC', 'Microsoft JhengHei', -apple-system, Bli
 _GL_FONT_MONO = "'JetBrains Mono', 'Noto Sans TC', SF Mono, Consolas, monospace"
 
 
+GLINT_DARK_COLORWAY = [
+    "#67e8f9",  # cyan-bright — primary line
+    "#7c3aed",  # violet — secondary
+    "#10b981",  # emerald — positive
+    "#f59e0b",  # amber — caution
+    "#f43f5e",  # rose — negative
+    "#2563eb",  # blue — tertiary
+    "#a78bfa",  # violet-light — fallback
+    "#22d3ee",  # cyan — fallback
+]
+
+
 def glint_plotly_layout(title: str = "", height: int = 360,
                         subtitle: str = "", show_grid: bool = True,
-                        ylabel: str = "", xlabel: str = "") -> dict:
-    """Return a glint-themed Plotly layout dict for any figure.
+                        ylabel: str = "", xlabel: str = "",
+                        dark: bool = True) -> dict:
+    """Return a glint-themed Plotly layout dict for any figure (v7 §14.4).
 
-    Aligned with `colors_and_type.css` tokens. Use with
-    ``fig.update_layout(**glint_plotly_layout(title=..., height=...))``
-    to unify chart styling across all pages.
+    Defaults to DARK terminal styling per v7 audit. Set ``dark=False`` only
+    for printing/export scenarios that need the legacy light palette.
+
+    Aligned with dark tokens:
+      paper / plot bg = gl-bg-panel / transparent
+      grid            = rgba(103,232,249,0.06)
+      text            = gl-text / gl-text-2
+      colorway        = cyan / violet / emerald / amber / rose / blue
     """
+    if dark:
+        title_color = "#E8F7FC"
+        subtitle_color = "#8397ac"
+        body_color = "#B4CCDF"
+        tick_color = "#8397ac"
+        axis_label_color = "#5B7186"
+        grid_color = "rgba(103,232,249,0.06)"
+        line_color = "rgba(103,232,249,0.22)"
+        zero_color = "rgba(103,232,249,0.18)"
+        tick_line = "rgba(103,232,249,0.22)"
+        hover_bg = "#0A1420"
+        hover_border = "rgba(103,232,249,0.55)"
+        hover_text = "#E8F7FC"
+        legend_text = "#B4CCDF"
+        legend_bg = "rgba(15,23,37,0.88)"
+        legend_border = "rgba(103,232,249,0.22)"
+        paper_bg = "rgba(15,23,37,0)"
+        plot_bg = "rgba(10,20,32,0)"
+        colorway = GLINT_DARK_COLORWAY
+    else:
+        title_color = "#0f172a"
+        subtitle_color = "#94a3b8"
+        body_color = "#334155"
+        tick_color = "#64748b"
+        axis_label_color = "#94a3b8"
+        grid_color = "rgba(37,99,235,0.06)"
+        line_color = "rgba(37,99,235,0.18)"
+        zero_color = "rgba(37,99,235,0.15)"
+        tick_line = "rgba(37,99,235,0.15)"
+        hover_bg = "#0f1419"
+        hover_border = "rgba(6,182,212,0.45)"
+        hover_text = "#e8f7fc"
+        legend_text = "#475569"
+        legend_bg = "rgba(255,255,255,0.75)"
+        legend_border = "rgba(37,99,235,0.18)"
+        paper_bg = "rgba(0,0,0,0)"
+        plot_bg = "rgba(255,255,255,0)"
+        colorway = ["#2563eb", "#7c3aed", "#06b6d4", "#10b981", "#f59e0b", "#f43f5e", "#4f46e5", "#ec4899"]
+
     title_obj = dict(
-        text=f"<b>{title}</b>" + (f"<br><span style='font-size:11px;color:#94a3b8;font-weight:400;'>{subtitle}</span>" if subtitle else ""),
+        text=f"<b>{title}</b>" + (f"<br><span style='font-size:11px;color:{subtitle_color};font-weight:400;'>{subtitle}</span>" if subtitle else ""),
         x=0.01, y=0.97, xanchor="left",
-        font=dict(family=_GL_FONT_SANS, size=15, color="#0f172a"),
+        font=dict(family=_GL_FONT_SANS, size=15, color=title_color),
     )
     return dict(
         title=title_obj,
-        font=dict(family=_GL_FONT_SANS, color="#334155", size=12),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(255,255,255,0)",
+        font=dict(family=_GL_FONT_SANS, color=body_color, size=12),
+        paper_bgcolor=paper_bg,
+        plot_bgcolor=plot_bg,
         height=height,
         margin=dict(t=60 if subtitle else 48, b=44, l=54, r=28),
         xaxis=dict(
-            title=dict(text=xlabel, font=dict(family=_GL_FONT_MONO, size=10, color="#94a3b8")) if xlabel else None,
-            gridcolor="rgba(37,99,235,0.06)" if show_grid else "rgba(0,0,0,0)",
-            linecolor="rgba(37,99,235,0.18)",
-            zerolinecolor="rgba(37,99,235,0.15)",
-            tickfont=dict(family=_GL_FONT_MONO, size=10, color="#64748b"),
-            showline=True, mirror=False, ticks="outside", ticklen=4, tickcolor="rgba(37,99,235,0.15)",
+            title=dict(text=xlabel, font=dict(family=_GL_FONT_MONO, size=10, color=axis_label_color)) if xlabel else None,
+            gridcolor=grid_color if show_grid else "rgba(0,0,0,0)",
+            linecolor=line_color,
+            zerolinecolor=zero_color,
+            tickfont=dict(family=_GL_FONT_MONO, size=10, color=tick_color),
+            showline=True, mirror=False, ticks="outside", ticklen=4, tickcolor=tick_line,
         ),
         yaxis=dict(
-            title=dict(text=ylabel, font=dict(family=_GL_FONT_MONO, size=10, color="#94a3b8")) if ylabel else None,
-            gridcolor="rgba(37,99,235,0.06)" if show_grid else "rgba(0,0,0,0)",
-            linecolor="rgba(37,99,235,0.18)",
-            zerolinecolor="rgba(37,99,235,0.15)",
-            tickfont=dict(family=_GL_FONT_MONO, size=10, color="#64748b"),
-            showline=True, mirror=False, ticks="outside", ticklen=4, tickcolor="rgba(37,99,235,0.15)",
+            title=dict(text=ylabel, font=dict(family=_GL_FONT_MONO, size=10, color=axis_label_color)) if ylabel else None,
+            gridcolor=grid_color if show_grid else "rgba(0,0,0,0)",
+            linecolor=line_color,
+            zerolinecolor=zero_color,
+            tickfont=dict(family=_GL_FONT_MONO, size=10, color=tick_color),
+            showline=True, mirror=False, ticks="outside", ticklen=4, tickcolor=tick_line,
         ),
         hoverlabel=dict(
-            bgcolor="#0f1419",
-            bordercolor="rgba(6,182,212,0.45)",
-            font=dict(family=_GL_FONT_MONO, color="#e8f7fc", size=11),
+            bgcolor=hover_bg,
+            bordercolor=hover_border,
+            font=dict(family=_GL_FONT_MONO, color=hover_text, size=11),
         ),
         legend=dict(
-            font=dict(family=_GL_FONT_SANS, size=11, color="#475569"),
-            bgcolor="rgba(255,255,255,0.75)",
-            bordercolor="rgba(37,99,235,0.18)",
+            font=dict(family=_GL_FONT_SANS, size=11, color=legend_text),
+            bgcolor=legend_bg,
+            bordercolor=legend_border,
             borderwidth=1, itemsizing="constant",
         ),
-        colorway=["#2563eb", "#7c3aed", "#06b6d4", "#10b981", "#f59e0b", "#f43f5e", "#4f46e5", "#ec4899"],
+        colorway=colorway,
     )
+
+
+# v7 §18.3 — canonical dark helpers. Aliases that guarantee dark mode.
+def glint_dark_layout(**kwargs) -> dict:
+    """Canonical dark Plotly layout (v7 §14.4, §18.3). Wrapper that forces
+    ``dark=True`` — use this when intent should be obvious."""
+    kwargs["dark"] = True
+    return glint_plotly_layout(**kwargs)
+
+
+def glint_dark_colorway() -> list:
+    """Canonical dark colorway — cyan / violet / emerald / amber / rose / blue."""
+    return list(GLINT_DARK_COLORWAY)
+
+
+def glint_dark_tooltip() -> dict:
+    """Dark terminal hoverlabel dict for ``fig.update_traces(hoverlabel=...)``."""
+    return dict(
+        bgcolor="#0A1420",
+        bordercolor="rgba(103,232,249,0.55)",
+        font=dict(family=_GL_FONT_MONO, color="#E8F7FC", size=11),
+    )
+
+
+def glint_dark_table_style() -> dict:
+    """Dark terminal Plotly ``go.Table`` header/cells style dict.
+
+    Use ``go.Table(header=dict(**style["header"]), cells=dict(**style["cells"]))``.
+    Returns typography/color only — caller supplies ``values``.
+    """
+    return {
+        "header": dict(
+            fill_color="#0F1725",
+            line_color="rgba(103,232,249,0.18)",
+            font=dict(family=_GL_FONT_MONO, color="#67E8F9", size=11),
+            align="left",
+            height=30,
+        ),
+        "cells": dict(
+            fill_color=["#0A1420", "#111B2B"],   # alternating rows
+            line_color="rgba(103,232,249,0.08)",
+            font=dict(family=_GL_FONT_SANS, color="#E8F7FC", size=11),
+            align="left",
+            height=26,
+        ),
+    }
+
+
+# --- v7 §18.2 Schema-safe helpers ----------------------------------------
+def safe_col(df, primary, fallbacks=(), default=None):
+    """Return a Series from ``df`` using a schema-safe lookup chain.
+
+    Tries ``primary`` first, then each name in ``fallbacks`` in order. If
+    none are present, returns ``default`` (can be a scalar, Series or
+    iterable). This prevents ``KeyError`` crashes when upstream data frames
+    evolve — pages should call ``safe_col`` instead of ``df[col]`` whenever
+    the column is not strictly guaranteed by a schema contract.
+
+    Example::
+
+        name_series = safe_col(df, "short_name",
+                               fallbacks=("company_name", "name"),
+                               default=df.get("company_id", ""))
+    """
+    try:
+        import pandas as _pd
+    except Exception:
+        _pd = None
+    # Primary
+    if df is not None and hasattr(df, "columns") and primary in df.columns:
+        return df[primary]
+    if isinstance(fallbacks, str):
+        fallbacks = (fallbacks,)
+    for fb in (fallbacks or ()):
+        if df is not None and hasattr(df, "columns") and fb in df.columns:
+            return df[fb]
+    # No match — return default verbatim (may be Series/scalar/None)
+    return default
+
+
+def safe_html(value) -> str:
+    """Minimal HTML-escape for values interpolated into ``st.markdown(...,
+    unsafe_allow_html=True)`` templates.
+
+    Uses :func:`html.escape` with ``quote=True`` so single/double quotes are
+    also escaped. ``None`` becomes an empty string. Non-string values are
+    coerced via :func:`str`. This prevents accidental tag injection when
+    rendering user-supplied or data-derived fragments (e.g. ticker symbols,
+    company names) into HTML blocks.
+    """
+    import html as _html
+    if value is None:
+        return ""
+    return _html.escape(str(value), quote=True)
 
 
 # --- Unified colorscales for heatmaps -------------------------------------
@@ -2984,16 +3400,176 @@ def render_chart_note(text: str, tone: str = "insight") -> None:
     """
     import streamlit as _st
     tone_map = {
-        "insight": ("#2563eb", "rgba(37,99,235,0.06)"),
-        "caveat":  ("#f59e0b", "rgba(245,158,11,0.08)"),
-        "risk":    ("#f43f5e", "rgba(244,63,94,0.08)"),
+        "insight": ("#67E8F9", "rgba(103,232,249,0.08)", "#B4CCDF"),
+        "caveat":  ("#F59E0B", "rgba(245,158,11,0.10)",  "#FDE68A"),
+        "risk":    ("#F43F5E", "rgba(244,63,94,0.10)",   "#FECDD3"),
     }
-    color, bg = tone_map.get(tone, tone_map["insight"])
+    color, bg, text_color = tone_map.get(tone, tone_map["insight"])
     html = (
         f'<div class="gl-chart-note" style="border-left:3px solid {color};'
         f'background:{bg};padding:8px 14px;margin:4px 0 18px;'
-        f'border-radius:0 8px 8px 0;font-size:0.85rem;color:#334155;'
+        f'border-radius:0 8px 8px 0;font-size:0.85rem;color:{text_color};'
         f'line-height:1.55;">{text}</div>'
+    )
+    _st.markdown(html, unsafe_allow_html=True)
+
+
+# --- v7 §13 Terminal-style banners / cards -------------------------------
+# 4-tone vocabulary (info/ok/warn/danger) aligned with Dark Terminal tokens.
+# Use these for signal/status/decision panels so semantics are consistent
+# across pages (no ad-hoc ``st.info`` / ``st.warning``).
+_GL_TERMINAL_TONES = {
+    "info":   {"accent": "#67E8F9", "bg": "rgba(103,232,249,0.07)",
+               "border": "rgba(103,232,249,0.28)", "text": "#E8F7FC",
+               "label": "INFO",   "glyph": "●"},
+    "ok":     {"accent": "#10B981", "bg": "rgba(16,185,129,0.08)",
+               "border": "rgba(16,185,129,0.30)", "text": "#D1FAE5",
+               "label": "OK",     "glyph": "✓"},
+    "warn":   {"accent": "#F59E0B", "bg": "rgba(245,158,11,0.08)",
+               "border": "rgba(245,158,11,0.32)", "text": "#FDE68A",
+               "label": "WARN",   "glyph": "▲"},
+    "danger": {"accent": "#F43F5E", "bg": "rgba(244,63,94,0.10)",
+               "border": "rgba(244,63,94,0.34)", "text": "#FECDD3",
+               "label": "DANGER", "glyph": "!"},
+}
+
+
+def render_terminal_banner(title: str, body: str = "", tone: str = "info",
+                           command: str = "") -> None:
+    """Render a dark-terminal status banner (v7 §13.1).
+
+    Use for page-level status announcements (degraded mode, freshness,
+    stress-test result summaries). Supports 4 tones: info / ok / warn /
+    danger. Optional ``command`` renders a small monospace prompt line
+    beneath the title (e.g. ``"$ lopo --pillar=trend --stress"``).
+    """
+    import streamlit as _st
+    t = _GL_TERMINAL_TONES.get(tone, _GL_TERMINAL_TONES["info"])
+    safe_title = safe_html(title)
+    safe_body = safe_html(body) if body else ""
+    safe_cmd = safe_html(command) if command else ""
+    cmd_html = (
+        f'<div class="gl-term-cmd">$ {safe_cmd}</div>' if safe_cmd else ""
+    )
+    body_html = (
+        f'<div class="gl-term-body">{safe_body}</div>' if safe_body else ""
+    )
+    html = (
+        f'<div class="gl-term-banner gl-term-{tone}" '
+        f'style="--tb-accent:{t["accent"]};--tb-bg:{t["bg"]};'
+        f'--tb-border:{t["border"]};--tb-text:{t["text"]};">'
+        f'<div class="gl-term-head">'
+        f'<span class="gl-term-glyph">{t["glyph"]}</span>'
+        f'<span class="gl-term-label">{t["label"]}</span>'
+        f'<span class="gl-term-title">{safe_title}</span>'
+        f'</div>'
+        f'{cmd_html}{body_html}'
+        f'</div>'
+    )
+    _st.markdown(html, unsafe_allow_html=True)
+
+
+def render_signal_card(label: str, value: str, delta: str = "",
+                       tone: str = "info", hint: str = "") -> None:
+    """Render a compact terminal-style signal card (v7 §13.2).
+
+    One card = one signal reading. ``delta`` is a small trend annotation
+    (e.g. "+0.02" or "↑"). ``hint`` is a 1-line caption underneath.
+    """
+    import streamlit as _st
+    t = _GL_TERMINAL_TONES.get(tone, _GL_TERMINAL_TONES["info"])
+    safe_label = safe_html(label)
+    safe_value = safe_html(value)
+    safe_delta = safe_html(delta) if delta else ""
+    safe_hint = safe_html(hint) if hint else ""
+    delta_html = (
+        f'<span class="gl-sig-delta">{safe_delta}</span>' if safe_delta else ""
+    )
+    hint_html = (
+        f'<div class="gl-sig-hint">{safe_hint}</div>' if safe_hint else ""
+    )
+    html = (
+        f'<div class="gl-signal-card gl-signal-{tone}" '
+        f'style="--sc-accent:{t["accent"]};--sc-bg:{t["bg"]};'
+        f'--sc-border:{t["border"]};--sc-text:{t["text"]};">'
+        f'<div class="gl-sig-head">'
+        f'<span class="gl-sig-glyph">{t["glyph"]}</span>'
+        f'<span class="gl-sig-label">{safe_label}</span>'
+        f'</div>'
+        f'<div class="gl-sig-value">{safe_value}{delta_html}</div>'
+        f'{hint_html}'
+        f'</div>'
+    )
+    _st.markdown(html, unsafe_allow_html=True)
+
+
+def render_status_card(label: str, state: str, detail: str = "",
+                       tone: str = "ok") -> None:
+    """Render a status / health card (v7 §13.3).
+
+    Used for quality-gate readouts, guardrail states, data-freshness
+    banners. ``state`` is a terse indicator (e.g. "PASS" / "DEGRADED" /
+    "FAIL"). ``detail`` adds a sentence of context.
+    """
+    import streamlit as _st
+    t = _GL_TERMINAL_TONES.get(tone, _GL_TERMINAL_TONES["ok"])
+    safe_label = safe_html(label)
+    safe_state = safe_html(state)
+    safe_detail = safe_html(detail) if detail else ""
+    detail_html = (
+        f'<div class="gl-stat-detail">{safe_detail}</div>' if safe_detail else ""
+    )
+    html = (
+        f'<div class="gl-status-card gl-status-{tone}" '
+        f'style="--st-accent:{t["accent"]};--st-bg:{t["bg"]};'
+        f'--st-border:{t["border"]};--st-text:{t["text"]};">'
+        f'<div class="gl-stat-head">'
+        f'<span class="gl-stat-glyph">{t["glyph"]}</span>'
+        f'<span class="gl-stat-label">{safe_label}</span>'
+        f'<span class="gl-stat-state">{safe_state}</span>'
+        f'</div>'
+        f'{detail_html}'
+        f'</div>'
+    )
+    _st.markdown(html, unsafe_allow_html=True)
+
+
+def render_decision_card(verdict: str, reason: str = "", tone: str = "info",
+                         confidence: str = "", action: str = "") -> None:
+    """Render a decision / recommendation card (v7 §13.4).
+
+    Used at the end of an analysis section to surface a "so what" call.
+    ``verdict`` is the headline (e.g. "建議加碼 成長股"), ``reason`` the
+    supporting one-liner, ``confidence`` a probability/score string, and
+    ``action`` the suggested next step.
+    """
+    import streamlit as _st
+    t = _GL_TERMINAL_TONES.get(tone, _GL_TERMINAL_TONES["info"])
+    safe_verdict = safe_html(verdict)
+    safe_reason = safe_html(reason) if reason else ""
+    safe_conf = safe_html(confidence) if confidence else ""
+    safe_action = safe_html(action) if action else ""
+    conf_html = (
+        f'<div class="gl-dec-conf">信心度 · {safe_conf}</div>' if safe_conf else ""
+    )
+    reason_html = (
+        f'<div class="gl-dec-reason">{safe_reason}</div>' if safe_reason else ""
+    )
+    action_html = (
+        f'<div class="gl-dec-action">→ {safe_action}</div>' if safe_action else ""
+    )
+    html = (
+        f'<div class="gl-decision-card gl-decision-{tone}" '
+        f'style="--dc-accent:{t["accent"]};--dc-bg:{t["bg"]};'
+        f'--dc-border:{t["border"]};--dc-text:{t["text"]};">'
+        f'<div class="gl-dec-head">'
+        f'<span class="gl-dec-glyph">{t["glyph"]}</span>'
+        f'<span class="gl-dec-label">DECISION</span>'
+        f'{conf_html}'
+        f'</div>'
+        f'<div class="gl-dec-verdict">{safe_verdict}</div>'
+        f'{reason_html}{action_html}'
+        f'</div>'
     )
     _st.markdown(html, unsafe_allow_html=True)
 
@@ -3307,28 +3883,31 @@ def load_companies():
 def render_utility_bar(info: dict | None = None):
     """Render the terminal-style utility bar above the primary nav.
 
-    v4 audit §5.2 — system-level metadata always-visible strip. Pure HTML,
-    no clickable links (those live in the primary/secondary rows below).
+    v7 §10 — system-level metadata + command-palette search placeholder.
+    Metadata segments on the left, a compact "search" indicator on the right
+    (visual only — it cues the user to the in-page ticker input rather than
+    implementing global search here).
 
     Args:
         info: optional overrides. Keys: status, dataset, model, dsr,
-              gates_passed, gates_total, last_verified, snapshot.
+              gates_passed, gates_total, last_verified, snapshot, search_hint.
     """
     info = info or {}
     # Sensible defaults — the dashboard truth-of-source is the quality-gates
     # report (already loaded once at app.py boot via load_quality_gates()).
-    status = info.get("status", "SNAPSHOT")
-    dataset = info.get("dataset", "2023/03–2025/03")
-    model = info.get("model", "xgboost_D20")
-    dsr = info.get("dsr", "12.12")
-    gates_passed = info.get("gates_passed", 9)
-    gates_total = info.get("gates_total", 9)
-    last_verified = info.get("last_verified", "2026-04-20 14:24")
-    snapshot_tone = "live" if str(status).upper() == "LIVE" else "snapshot"
+    status = safe_html(info.get("status", "SNAPSHOT"))
+    dataset = safe_html(info.get("dataset", "2023/03–2025/03"))
+    model = safe_html(info.get("model", "xgboost_D20"))
+    dsr = safe_html(info.get("dsr", "12.12"))
+    gates_passed = safe_html(info.get("gates_passed", 9))
+    gates_total = safe_html(info.get("gates_total", 9))
+    last_verified = safe_html(info.get("last_verified", "2026-04-20 14:24"))
+    search_hint = safe_html(info.get("search_hint", "輸入股票代碼 / 頁面關鍵字"))
+    snapshot_tone = "live" if str(info.get("status", "SNAPSHOT")).upper() == "LIVE" else "snapshot"
 
-    parts = [
+    left_parts = [
         f'<span class="gl-util-dot gl-util-{snapshot_tone}"></span>'
-        f'<span class="gl-util-label">{str(status).upper()}</span>',
+        f'<span class="gl-util-label">{status}</span>',
         f'<span class="gl-util-k">Dataset</span><span class="gl-util-v">{dataset}</span>',
         f'<span class="gl-util-k">Model</span><span class="gl-util-v gl-util-mono">{model}</span>',
         f'<span class="gl-util-k">DSR</span><span class="gl-util-v gl-util-mono">{dsr}</span>'
@@ -3337,8 +3916,25 @@ def render_utility_bar(info: dict | None = None):
         f'<span class="gl-util-v gl-util-mono">{gates_passed}/{gates_total}</span>',
         f'<span class="gl-util-k">Verified</span><span class="gl-util-v">{last_verified}</span>',
     ]
+    left_html = ''.join(f'<span class="gl-util-seg">{p}</span>' for p in left_parts)
+    search_html = (
+        '<span class="gl-util-search">'
+        '<span class="gl-util-search-icon" aria-hidden="true">'
+        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+        'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'
+        '<circle cx="11" cy="11" r="7"/>'
+        '<line x1="21" y1="21" x2="16.65" y2="16.65"/>'
+        '</svg>'
+        '</span>'
+        f'<span class="gl-util-search-text">{search_hint}</span>'
+        '<span class="gl-util-kbd">/</span>'
+        '</span>'
+    )
     st.markdown(
-        '<div class="gl-utilbar">' + ''.join(f'<span class="gl-util-seg">{p}</span>' for p in parts) + '</div>',
+        '<div class="gl-utilbar">'
+        f'<span class="gl-util-left">{left_html}</span>'
+        f'<span class="gl-util-right">{search_html}</span>'
+        '</div>',
         unsafe_allow_html=True,
     )
 

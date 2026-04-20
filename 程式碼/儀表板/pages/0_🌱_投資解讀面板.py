@@ -875,17 +875,17 @@ try:
                     height=320,
                     paper_bgcolor="rgba(0,0,0,0)",
                     plot_bgcolor="rgba(0,0,0,0)",
-                    font=dict(family="Inter, 'Noto Sans TC', sans-serif", color="#334155", size=11),
+                    font=dict(family="Inter, 'Noto Sans TC', sans-serif", color="#B4CCDF", size=11),
                     margin=dict(l=10, r=10, t=40, b=10),
                     hovermode="x unified",
                     showlegend=True,
                     legend=dict(x=0.01, y=0.98,
                                 font=dict(family="JetBrains Mono, monospace", size=10)),
                 )
-                fig.update_xaxes(showgrid=True, gridcolor="rgba(148,163,184,0.16)",
-                                 tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"))
-                fig.update_yaxes(showgrid=True, gridcolor="rgba(148,163,184,0.16)",
-                                 tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"))
+                fig.update_xaxes(showgrid=True, gridcolor="rgba(103,232,249,0.08)",
+                                 tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#8397AC"))
+                fig.update_yaxes(showgrid=True, gridcolor="rgba(103,232,249,0.08)",
+                                 tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#8397AC"))
                 st.plotly_chart(fig, use_container_width=True, key=f"price_{cid}_{horizon}")
             else:
                 st.info("無價格資料")
@@ -1063,8 +1063,15 @@ try:
             ret_col_h = f"fwd_ret_{h_val}"
             label_col_h = f"label_{h_val}"
             if not recs_h.empty:
+                # v7 §18.2 schema-safe: short_name may be missing on some datasets
+                name_series = _utils.safe_col(
+                    recs_h,
+                    primary="short_name",
+                    fallbacks=("company_name", "name"),
+                    default=recs_h.get("company_id", pd.Series(dtype=object)),
+                )
                 comp_df = pd.DataFrame({
-                    "股票": recs_h["short_name"].fillna(recs_h["company_id"]),
+                    "股票": name_series.fillna(recs_h["company_id"]) if hasattr(name_series, "fillna") else name_series,
                     "代碼": recs_h["company_id"],
                     "歷史報酬": recs_h[ret_col_h].apply(lambda x: f"{x:+.1%}" if pd.notna(x) else "—") if ret_col_h in recs_h.columns else "—",
                     "訊號": recs_h[label_col_h].apply(lambda x: "🟢 偏多" if x == 1.0 else ("🟡 中性" if x == 0.0 else "🔴 觀望")) if label_col_h in recs_h.columns else "—",
@@ -1261,18 +1268,18 @@ try:
                     title=dict(text=f"D+{horizon} 全市場報酬分佈統計",
                                font=dict(family="Inter, 'Noto Sans TC', sans-serif", size=14, color="#1e293b")),
                     yaxis_title=dict(text="報酬率 (%)",
-                                     font=dict(family="Inter, 'Noto Sans TC', sans-serif", size=12, color="#475569")),
+                                     font=dict(family="Inter, 'Noto Sans TC', sans-serif", size=12, color="#8397AC")),
                     height=400,
                     paper_bgcolor="rgba(0,0,0,0)",
                     plot_bgcolor="rgba(0,0,0,0)",
-                    font=dict(family="Inter, 'Noto Sans TC', sans-serif", color="#334155", size=11),
+                    font=dict(family="Inter, 'Noto Sans TC', sans-serif", color="#B4CCDF", size=11),
                     margin=dict(l=20, r=20, t=60, b=30),
                     showlegend=False,
                 )
                 fig_bar.update_xaxes(showgrid=False,
-                                     tickfont=dict(family="Inter, 'Noto Sans TC', sans-serif", size=11, color="#475569"))
-                fig_bar.update_yaxes(showgrid=True, gridcolor="rgba(148,163,184,0.16)",
-                                     tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"))
+                                     tickfont=dict(family="Inter, 'Noto Sans TC', sans-serif", size=11, color="#8397AC"))
+                fig_bar.update_yaxes(showgrid=True, gridcolor="rgba(103,232,249,0.08)",
+                                     tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#8397AC"))
                 st.plotly_chart(fig_bar, use_container_width=True)
                 st.caption(f"📊 全市場中位數報酬 {median_ret:+.1%}，標準差 {std_ret:.1%}。上方展示的判讀股為模型篩選的少數偏多標的。")
             else:
@@ -1313,16 +1320,16 @@ try:
             height=280,
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Inter, 'Noto Sans TC', sans-serif", color="#334155", size=11),
+            font=dict(family="Inter, 'Noto Sans TC', sans-serif", color="#B4CCDF", size=11),
             margin=dict(l=20, r=20, t=20, b=30),
             yaxis_title=dict(text="波動度指標",
-                             font=dict(family="Inter, 'Noto Sans TC', sans-serif", size=12, color="#475569")),
+                             font=dict(family="Inter, 'Noto Sans TC', sans-serif", size=12, color="#8397AC")),
             showlegend=False,
         )
-        fig_vol.update_xaxes(showgrid=True, gridcolor="rgba(148,163,184,0.16)",
-                             tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"))
-        fig_vol.update_yaxes(showgrid=True, gridcolor="rgba(148,163,184,0.16)",
-                             tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"))
+        fig_vol.update_xaxes(showgrid=True, gridcolor="rgba(103,232,249,0.08)",
+                             tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#8397AC"))
+        fig_vol.update_yaxes(showgrid=True, gridcolor="rgba(103,232,249,0.08)",
+                             tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#8397AC"))
         st.plotly_chart(fig_vol, use_container_width=True)
 
         # Explanatory note

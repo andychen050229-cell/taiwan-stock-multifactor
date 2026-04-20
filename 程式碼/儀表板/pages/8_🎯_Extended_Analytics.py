@@ -42,7 +42,7 @@ st.markdown("""
     <div class="gl-hero-title">延伸分析<span style="opacity:.55;font-weight:600;"> · 模型能賺錢嗎？</span></div>
     <div class="gl-hero-subtitle">
         從四個角度壓力測試我們的模型：<strong>成本</strong>、<strong>地平線</strong>、<strong>因子</strong>、<strong>個股</strong>。
-        綜合回答「實戰部署前還需要注意什麼」—— 這是走向驗證壓力測試 LOPO 拔測前的最後一站。
+        綜合回答「實戰部署前還需要注意什麼」—— 這是走向驗證壓測 LOPO 拔測前的最後一站。
     </div>
     <div class="gl-chip-explain">
       <div class="item">
@@ -63,7 +63,7 @@ st.markdown("""
       </div>
     </div>
     <div style="margin-top:14px; padding-top:12px; border-top:1px dashed rgba(37,99,235,0.18);">
-        <span class="gl-chip danger">→ 想看更嚴格的 LOPO/Threshold/2454 月度拆解？跳到 <strong>驗證壓力測試</strong></span>
+        <span class="gl-chip danger">→ 想看更嚴格的 LOPO/Threshold/2454 月度拆解？跳到 <strong>驗證壓測</strong></span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -337,10 +337,10 @@ st.markdown("""
         <div>
             <div style="font-size:0.72rem; color:var(--gl-text-3); font-weight:600; letter-spacing:.06em; text-transform:uppercase;">VALIDATION LAB</div>
             <div style="font-size:1.15rem; font-weight:700; color:var(--gl-text); margin-top:4px;">
-                🔭 驗證壓力測試
+                🔭 驗證壓測
             </div>
             <div style="font-size:.88rem; color:var(--gl-text-2); margin-top:6px;">
-                延伸分析回答「有多大貢獻」，驗證壓力測試回答「<strong>拿掉會掉多少</strong>」——
+                延伸分析回答「有多大貢獻」，驗證壓測回答「<strong>拿掉會掉多少</strong>」——
                 LOPO 嚴格量化、閾值敏感度逐點掃描、2454 聯發科月度拆解。
             </div>
         </div>
@@ -353,7 +353,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-if st.button("🔭  前往 驗證壓力測試", use_container_width=True, type="primary"):
+if st.button("🔭  前往 驗證壓測", use_container_width=True, type="primary"):
     st.switch_page(str(Path(__file__).resolve().parent / "A_🔭_Phase6_深度驗證.py"))
 
 # ----- Footer -----

@@ -456,9 +456,9 @@ $$
                     colorscale=[[0, "#f43f5e"], [0.5, "#f59e0b"], [1, "#10b981"]],
                     showscale=True,
                     colorbar=dict(
-                        title=dict(text="Horizon", font=dict(family="JetBrains Mono, monospace", size=11, color="#475569")),
+                        title=dict(text="Horizon", font=dict(family="JetBrains Mono, monospace", size=11, color="#8397AC")),
                         tickvals=[1, 5, 20],
-                        tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"),
+                        tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#8397AC"),
                         outlinewidth=0,
                     ),
                     line=dict(color="white", width=1)
@@ -491,9 +491,9 @@ $$
                     colorscale=[[0, "#f43f5e"], [0.5, "#f59e0b"], [1, "#10b981"]],
                     showscale=True,
                     colorbar=dict(
-                        title=dict(text="Horizon", font=dict(family="JetBrains Mono, monospace", size=11, color="#475569")),
+                        title=dict(text="Horizon", font=dict(family="JetBrains Mono, monospace", size=11, color="#8397AC")),
                         tickvals=[1, 5, 20],
-                        tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"),
+                        tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#8397AC"),
                         outlinewidth=0,
                     ),
                     line=dict(color="white", width=1)

@@ -223,12 +223,12 @@ try:
                 height=450,
             ),
             polar=dict(
-                bgcolor="rgba(255,255,255,0)",
+                bgcolor="rgba(0,0,0,0)",
                 radialaxis=dict(visible=True, range=[0, 1],
-                                gridcolor="rgba(37,99,235,0.12)",
-                                tickfont=dict(family="JetBrains Mono", size=10, color="#64748b")),
-                angularaxis=dict(gridcolor="rgba(37,99,235,0.12)",
-                                 tickfont=dict(family="Inter", size=11, color="#334155")),
+                                gridcolor="rgba(103,232,249,0.12)",
+                                tickfont=dict(family="JetBrains Mono", size=10, color="#8397AC")),
+                angularaxis=dict(gridcolor="rgba(103,232,249,0.12)",
+                                 tickfont=dict(family="Inter", size=11, color="#B4CCDF")),
             ),
         )
         st.plotly_chart(fig_radar, use_container_width=True)
