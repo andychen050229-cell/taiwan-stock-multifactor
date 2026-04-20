@@ -46,9 +46,21 @@ governance = st.Page(P("6_🛡️_Model_Governance.py"),     title="模型治理
 signal     = st.Page(P("7_📡_Signal_Monitor.py"),        title="信號監控",      icon="📡")
 extended   = st.Page(P("8_🎯_Extended_Analytics.py"),    title="擴充分析",      icon="🧩")
 
-# ===== Sidebar — Brand + System Health INJECTED BEFORE navigation =====
-# Streamlit renders sidebar elements in call-order, so these appear ABOVE nav.
-# This puts 品牌 + 系統健康度 at the top of the sidebar (the "headline / 吸睛之處").
+# ===== Navigation Structure (Claude-Design later-version: 總覽/個股研究/量化引擎/治理監控) =====
+# NOTE: st.navigation() must run BEFORE any st.sidebar.* call — otherwise the
+# sidebar DOM never materialises on Streamlit Cloud (tested 2026-04-20).
+# Visual order (品牌 + 系統健康度 at TOP, nav below) is achieved via CSS flex
+# ordering on [data-testid="stSidebarContent"] children (see CSS block below).
+pg = st.navigation({
+    "總覽":      [home, interpret],
+    "個股研究":  [data, icir, text],
+    "量化引擎":  [model, feature, backtest, phase6],
+    "治理監控":  [governance, signal, extended],
+})
+
+# ===== Sidebar — Brand + System Health INJECTED AFTER navigation =====
+# Call-order places them below nav in the DOM, but CSS flex `order`
+# re-orders them visually ABOVE the nav list (top-of-sidebar eye-catcher).
 _utils.inject_sidebar_brand()
 _utils.inject_sidebar_health(
     gates_passed=9,
@@ -59,14 +71,6 @@ _utils.inject_sidebar_health(
     dsr="12.12",
     last_verified="2026-04-20 14:24",
 )
-
-# ===== Navigation Structure (Claude-Design later-version: 總覽/個股研究/量化引擎/治理監控) =====
-pg = st.navigation({
-    "總覽":      [home, interpret],
-    "個股研究":  [data, icir, text],
-    "量化引擎":  [model, feature, backtest, phase6],
-    "治理監控":  [governance, signal, extended],
-})
 
 # ===== Global Dark Sidebar CSS — 股票預測系統 brand ================
 st.markdown("""<style>
@@ -80,6 +84,25 @@ st.markdown("""<style>
     section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
         background: transparent !important;
         padding-top: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    /* Visual re-ordering: brand + syshealth TOP, nav BOTTOM —
+       DOM order is determined by call-order in app.py (nav first, then injections),
+       but CSS flex `order` overrides this for visual rendering. */
+    section[data-testid="stSidebar"] [data-testid="stSidebarNav"] {
+        order: 10 !important;  /* navigation list: pushed after markdown injections */
+    }
+    /* All markdown injections (brand, syshealth, etc) appear before nav */
+    section[data-testid="stSidebar"] [data-testid="stSidebarContent"] > [data-testid="stElementContainer"] {
+        order: 1 !important;
+    }
+    /* More specific: brand first (order 1), syshealth second (order 2) */
+    section[data-testid="stSidebar"] [data-testid="stSidebarContent"] > [data-testid="stElementContainer"]:has(.gl-brand) {
+        order: 1 !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stSidebarContent"] > [data-testid="stElementContainer"]:has(.gl-syshealth) {
+        order: 2 !important;
     }
     /* Subtle tech grid behind sidebar */
     section[data-testid="stSidebar"]::before {
