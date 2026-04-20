@@ -12,12 +12,21 @@ _spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_pat
 _utils = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_utils)
 inject_custom_css = _utils.inject_custom_css
+render_topbar = _utils.render_topbar
 
 inject_custom_css()
 
+# ---- Top-bar (sticky breadcrumb + model chips + clock) ----
+render_topbar(
+    crumb_left="量化研究終端",
+    crumb_current="模型治理",
+    chips=[("Model Card", "pri"), ("DSR 12.12 → PASS", "vio"), ("PSI · KS drift", "ok")],
+    show_clock=True,
+)
+
 # Data Context Banner
 st.markdown("""
-<div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e; margin-bottom:20px;">
+<div class="gl-box-info">
 🛡️ <strong>Phase 3 — 模型治理</strong>：Model Card ｜ DSR 重新驗證 ｜ 效能基線 ｜ 預測管線驗證
 </div>
 """, unsafe_allow_html=True)
@@ -92,7 +101,6 @@ if overall == "PASS":
 else:
     st.warning(f"整體狀態：**{overall}** — 請檢查未通過項目")
 
-cols = st.columns(3)
 gate_names_zh = {
     "models_available": "模型可用",
     "model_cards_generated": "Model Card 已生成",
@@ -105,33 +113,54 @@ gate_names_zh = {
     "governance_data_ready": "治理資料就緒",
 }
 
-for i, (gate_key, passed) in enumerate(gates.items()):
-    col = cols[i % 3]
-    icon = "✅" if passed else "❌"
-    label = gate_names_zh.get(gate_key, gate_key)
-    col.markdown(f"{icon} **{label}**")
-
-# Quality gate gauge
+# ---- Design-ported gates grid (9-up, colored left-accent bars) --------
 n_pass = sum(1 for v in gates.values() if v)
 n_total = len(gates)
-fig_gate = go.Figure(go.Indicator(
-    mode="gauge+number+delta",
-    value=n_pass,
-    delta={"reference": n_total, "suffix": f"/{n_total}"},
-    title={"text": "品質閘門通過率 | Gates Passed"},
-    gauge={
-        "axis": {"range": [0, n_total]},
-        "bar": {"color": "#059669" if n_pass == n_total else "#f59e0b"},
-        "steps": [
-            {"range": [0, n_total * 0.5], "color": "#fee2e2"},
-            {"range": [n_total * 0.5, n_total * 0.8], "color": "#fef3c7"},
-            {"range": [n_total * 0.8, n_total], "color": "#ecfdf5"},
-        ],
-    },
-    number={"suffix": f" / {n_total}"},
-))
-fig_gate.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20))
-st.plotly_chart(fig_gate, use_container_width=True)
+
+gate_cards_html = []
+for gate_key, passed in gates.items():
+    label = gate_names_zh.get(gate_key, gate_key)
+    icon = "✅" if passed else "❌"
+    accent = "var(--gl-emerald)" if passed else "var(--gl-rose)"
+    status_txt = "PASS" if passed else "FAIL"
+    status_cls = "ok" if passed else "danger"
+    gate_cards_html.append(f"""
+      <div style="background:var(--gl-surface);border:1px solid var(--gl-border);
+                  border-radius:10px;padding:14px 16px 14px 18px;position:relative;overflow:hidden;">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:{accent};"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:0.72rem;color:var(--gl-text-3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;">
+            GATE {list(gates.keys()).index(gate_key)+1:02d}
+          </div>
+          <span class="gl-chip {status_cls}" style="font-size:0.66rem;">{status_txt}</span>
+        </div>
+        <div style="font-weight:600;font-size:0.95rem;color:var(--gl-text);margin-top:4px;">
+          {icon} {label}
+        </div>
+      </div>
+    """)
+
+st.markdown(
+    '<div class="gl-grid-3" style="margin:6px 0 14px;">'
+    + "".join(gate_cards_html) + "</div>",
+    unsafe_allow_html=True,
+)
+
+# ---- Design-ported ring summary (SVG gauge repurposed for gate pass rate) ----
+render_auc_gauge = _utils.render_auc_gauge
+gauge_val_ratio = n_pass / max(n_total, 1)
+# Map to 0–1 range using a display val ∈ [0, 1]
+ring_html = render_auc_gauge(
+    val=gauge_val_ratio,
+    min_v=0.0, max_v=1.0,
+    label=f"{n_pass} / {n_total} gates PASS · overall {overall}",
+    width=300, height=170,
+)
+st.markdown(
+    f'<div class="gl-panel" style="display:flex;align-items:center;justify-content:center;padding:14px 22px;">'
+    f'{ring_html}</div>',
+    unsafe_allow_html=True,
+)
 
 st.divider()
 

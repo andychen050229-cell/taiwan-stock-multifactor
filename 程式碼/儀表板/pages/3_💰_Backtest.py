@@ -13,15 +13,24 @@ _spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_pat
 _utils = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_utils)
 inject_custom_css = _utils.inject_custom_css
+render_topbar = _utils.render_topbar
 inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
 
 inject_custom_css()
 
+# ---- Top-bar (sticky breadcrumb + model chips + clock) ----
+render_topbar(
+    crumb_left="量化研究終端",
+    crumb_current="策略回測",
+    chips=[("D+20 monthly", "pri"), ("cost ladder 3 scenarios", "vio"), ("edge +11.7pp", "ok")],
+    show_clock=True,
+)
+
 # Data Context Banner
 st.markdown("""
-<div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e; margin-bottom:20px;">
-📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）｜Purged Walk-Forward CV（4 Folds）｜LightGBM + XGBoost Ensemble
+<div class="gl-box-info" style="margin-top:14px;">
+📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）&nbsp;·&nbsp;Purged Walk-Forward CV（4 Folds）&nbsp;·&nbsp;LightGBM + XGBoost Ensemble
 </div>
 """, unsafe_allow_html=True)
 
@@ -555,7 +564,7 @@ try:
         st.divider()
         st.subheader("🧪 統計顯著性驗證 | Statistical Significance Tests")
         st.markdown("""
-        <div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e;">
+        <div class="gl-box-info">
         <strong>❓ 什麼是 Permutation Test？</strong><br>
         隨機打亂標籤 1,000 次，計算每次「偽模型」的 AUC。<br>
         若真實模型的 AUC 遠超所有偽模型（p < 0.01），證明模型的預測能力並非偶然——具有統計顯著性。

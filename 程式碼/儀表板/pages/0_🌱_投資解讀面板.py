@@ -39,6 +39,19 @@ _spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_pat
 _utils = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_utils)
 _utils.inject_custom_css()  # Inter + JetBrains Mono + tech-grid background + gl-* vars
+render_topbar = _utils.render_topbar
+
+# ---- Top-bar (sticky breadcrumb + model chips + clock) ----
+render_topbar(
+    crumb_left="量化研究終端",
+    crumb_current="投資觀察台",
+    chips=[
+        ("歷史判讀", "pri"),
+        ("2023/03–2025/03", "vio"),
+        ("D+20 月度", "default"),
+    ],
+    show_clock=True,
+)
 
 # ===== Beginner-panel specific CSS (layered on top of global) =====
 st.markdown("""

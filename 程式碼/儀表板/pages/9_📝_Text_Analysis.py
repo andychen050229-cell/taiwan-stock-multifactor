@@ -20,13 +20,22 @@ _spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_pat
 _utils = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_utils)
 inject_custom_css = _utils.inject_custom_css
+render_topbar = _utils.render_topbar
 figures_dir = _utils.figures_dir
 
 inject_custom_css()
 
+# ---- Top-bar (sticky breadcrumb + model chips + clock) ----
+render_topbar(
+    crumb_left="量化研究終端",
+    crumb_current="文本情緒分析",
+    chips=[("jieba + SnowNLP", "pri"), ("500 keywords", "vio"), ("phase 5B", "ok")],
+    show_clock=True,
+)
+
 # ===== Banner =====
 st.markdown("""
-<div style="background:#e0f2fe; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#075985; margin-bottom:20px;">
+<div class="gl-box-info" style="margin-top:14px;">
 📝 <strong>Phase 5B 文本分析儀表板</strong>：1,125,134 篇文章 → 500 selected keywords + 11 sentiment features → 1,532 txt_/sent_ 特徵入 feature_store
 </div>
 """, unsafe_allow_html=True)
@@ -80,6 +89,56 @@ if kw_path.exists():
     top30["rank_combined"] = top30["rank_combined"].round(2)
     with st.expander("📋 Top 30 by combined rank — 詳細數值", expanded=False):
         st.dataframe(top30, use_container_width=True, hide_index=True)
+
+    # ---- Design-ported interactive heat cloud (size ∝ Chi², color ∝ lift) ----
+    st.markdown("### 🔥 關鍵字熱度雲 — Interactive Heat Cloud")
+    st.caption("字體大小 ∝ Chi² 指標；顏色越暖代表 Lift 越高（對正報酬樣本的相對發生率越強）")
+
+    # Normalize sizes (0.85rem–2.2rem) and pick tint by lift quantile
+    max_chi2 = max(top30["chi2"].max(), 1.0)
+    min_chi2 = max(top30["chi2"].min(), 0.01)
+    lift_q66 = top30["lift"].quantile(0.66)
+    lift_q33 = top30["lift"].quantile(0.33)
+    spans = []
+    for _, r in top30.iterrows():
+        # Size 0.85rem – 2.2rem scaled logarithmically against chi2
+        import math
+        t = (math.log(r["chi2"] + 1) - math.log(min_chi2 + 1)) / (math.log(max_chi2 + 1) - math.log(min_chi2 + 1) + 1e-9)
+        size = 0.85 + t * 1.35
+        # Color by lift (rose for low, amber for mid, emerald for high)
+        if r["lift"] >= lift_q66:
+            color = "var(--gl-emerald)"
+            bg = "rgba(16,185,129,0.08)"
+        elif r["lift"] >= lift_q33:
+            color = "var(--gl-amber)"
+            bg = "rgba(245,158,11,0.08)"
+        else:
+            color = "var(--gl-rose)"
+            bg = "rgba(244,63,94,0.07)"
+        spans.append(
+            f'<span style="display:inline-block;padding:4px 12px;margin:4px;'
+            f'background:{bg};border-radius:999px;'
+            f'font-size:{size:.2f}rem;font-weight:{600 + int(t*2)*100};'
+            f'color:{color};line-height:1.2;" '
+            f'title="Chi² {r["chi2"]:.2f} · Lift {r["lift"]:.3f}">{r["term"]}</span>'
+        )
+    st.markdown(
+        '<div class="gl-panel" style="padding:18px 22px;display:flex;flex-wrap:wrap;'
+        'align-items:center;justify-content:center;min-height:180px;">'
+        + "".join(spans) + "</div>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<div style="display:flex;gap:14px;font-size:0.82rem;color:var(--gl-text-3);margin-top:8px;">'
+        '<span><span class="gl-dot" style="background:var(--gl-emerald);display:inline-block;'
+        'width:8px;height:8px;border-radius:50%;margin-right:6px;"></span>Lift ≥ Q66（高正面性）</span>'
+        '<span><span class="gl-dot" style="background:var(--gl-amber);display:inline-block;'
+        'width:8px;height:8px;border-radius:50%;margin-right:6px;"></span>Q33 ≤ Lift &lt; Q66（中性）</span>'
+        '<span><span class="gl-dot" style="background:var(--gl-rose);display:inline-block;'
+        'width:8px;height:8px;border-radius:50%;margin-right:6px;"></span>Lift &lt; Q33（低正面性）</span>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
 
 # ===== C. Sentiment distribution =====
 st.header("C. 情緒特徵分布 — Sentiment Features")

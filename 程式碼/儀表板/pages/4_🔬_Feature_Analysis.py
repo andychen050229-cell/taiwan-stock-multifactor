@@ -13,14 +13,23 @@ _spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_pat
 _utils = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_utils)
 inject_custom_css = _utils.inject_custom_css
+render_topbar = _utils.render_topbar
 inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
 
 inject_custom_css()
 
+# ---- Top-bar (sticky breadcrumb + model chips + clock) ----
+render_topbar(
+    crumb_left="量化研究終端",
+    crumb_current="特徵工程分析",
+    chips=[("1,623 → 91", "pri"), ("IC · Chi² · VIF", "vio"), ("SHAP top-20", "ok")],
+    show_clock=True,
+)
+
 # Data Context Banner
 st.markdown("""
-<div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e; margin-bottom:20px;">
+<div class="gl-box-info">
 📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）｜Purged Walk-Forward CV（4 Folds）｜LightGBM + XGBoost Ensemble<br>
 🆕 <strong>Phase 4 擴充</strong>：新增 16 個因子（ROE/ROIC/EBITDA/P&sol;B/P&sol;S/EV&sol;EBITDA/市場寬度/波動率期限結構/複合機制指標等），候選池擴充至 59 個
 </div>

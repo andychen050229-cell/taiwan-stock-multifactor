@@ -20,11 +20,20 @@ _spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_pat
 _utils = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_utils)
 inject_custom_css = _utils.inject_custom_css
+render_topbar = _utils.render_topbar
 load_phase6_json = _utils.load_phase6_json
 figures_dir = _utils.figures_dir
 render_kpi = _utils.render_kpi
 
 inject_custom_css()
+
+# ---- Top-bar (sticky breadcrumb + model chips + clock) ----
+render_topbar(
+    crumb_left="量化研究終端",
+    crumb_current="Phase 6 深度驗證",
+    chips=[("LOPO ablation", "pri"), ("threshold sweep", "vio"), ("2454 deep-case", "ok")],
+    show_clock=True,
+)
 
 # ============================================================================
 # Hero
@@ -115,6 +124,32 @@ with tab1:
                    sub="across 9 pillars", accent="cyan")
 
     st.markdown("### 各支柱 ΔAUC 貢獻排序")
+
+    # Design-ported pillar-bar quick-scan summary (color-coded per pillar)
+    render_pillar_bar = _utils.render_pillar_bar
+    pillar_labels = {
+        "risk": "風險面", "fund": "基本面", "chip": "籌碼面",
+        "trend": "技術面", "val": "評價面", "event": "事件面",
+        "ind": "產業面", "txt": "文本面", "sent": "情緒面",
+    }
+    max_d = max(abs(r["delta_auc"]) for r in ranking) or 0.001
+    rows_html = []
+    for r in ranking:
+        pk = r["pillar"]
+        delta_bps = r["delta_auc"] * 10000
+        pct = (abs(r["delta_auc"]) / max_d) * 100
+        rows_html.append(render_pillar_bar(
+            pillar_key=pk,
+            label=pillar_labels.get(pk, r.get("zh", pk)),
+            feat_count=r.get("n_feats", r.get("n_features", 0)),
+            pct=pct,
+            delta_bps=delta_bps,
+        ))
+    st.markdown(
+        '<div class="gl-panel" style="padding:18px 22px;margin-bottom:14px;">'
+        + "".join(rows_html) + "</div>",
+        unsafe_allow_html=True,
+    )
 
     # PNG (static) — keep for fidelity with paper/report
     png = fig_dir / "lopo_pillar_contribution_D20.png"

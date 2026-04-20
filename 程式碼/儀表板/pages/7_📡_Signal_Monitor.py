@@ -13,12 +13,21 @@ _spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_pat
 _utils = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_utils)
 inject_custom_css = _utils.inject_custom_css
+render_topbar = _utils.render_topbar
 
 inject_custom_css()
 
+# ---- Top-bar (sticky breadcrumb + model chips + clock) ----
+render_topbar(
+    crumb_left="量化研究終端",
+    crumb_current="信號監控",
+    chips=[("live signal feed", "pri"), ("threshold sweep", "vio"), ("embargo=20", "default")],
+    show_clock=True,
+)
+
 # Data Context Banner
 st.markdown("""
-<div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e; margin-bottom:20px;">
+<div class="gl-box-info">
 📡 <strong>Phase 3 — 信號監控</strong>：資料漂移偵測 ｜ 信號衰減分析 ｜ 再訓練建議
 </div>
 """, unsafe_allow_html=True)

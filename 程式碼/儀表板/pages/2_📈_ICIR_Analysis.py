@@ -14,15 +14,24 @@ _spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_pat
 _utils = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_utils)
 inject_custom_css = _utils.inject_custom_css
+render_topbar = _utils.render_topbar
 inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
 
 inject_custom_css()
 
+# ---- Top-bar (sticky breadcrumb + model chips + clock) ----
+render_topbar(
+    crumb_left="量化研究終端",
+    crumb_current="ICIR 信號穩定性",
+    chips=[("Rank IC · 24 months", "pri"), ("purged WF · 4-fold", "vio"), ("IC > 0.015", "ok")],
+    show_clock=True,
+)
+
 # Data Context Banner
 st.markdown("""
-<div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e; margin-bottom:20px;">
-📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）｜Purged Walk-Forward CV（4 Folds）｜LightGBM + XGBoost Ensemble
+<div class="gl-box-info" style="margin-top:14px;">
+📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）&nbsp;·&nbsp;Purged Walk-Forward CV（4 Folds）&nbsp;·&nbsp;LightGBM + XGBoost Ensemble
 </div>
 """, unsafe_allow_html=True)
 

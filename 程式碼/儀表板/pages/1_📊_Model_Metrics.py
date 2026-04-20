@@ -14,13 +14,29 @@ _spec.loader.exec_module(_utils)
 inject_custom_css = _utils.inject_custom_css
 inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
+render_topbar = _utils.render_topbar
+render_phase_timeline = _utils.render_phase_timeline
+render_auc_gauge = _utils.render_auc_gauge
+render_horizon_segmented = _utils.render_horizon_segmented
 
 inject_custom_css()
 
-# Data Context Banner
+# ---- Top-bar (sticky breadcrumb + model chips + clock) ------------------
+render_topbar(
+    crumb_left="量化研究終端",
+    crumb_current="模型績效分析",
+    chips=[
+        ("Purged WF · 4-Fold", "pri"),
+        ("LightGBM + XGBoost", "vio"),
+        ("all gates → PASS", "ok"),
+    ],
+    show_clock=True,
+)
+
+# ---- Data Context Banner -----------------------------------------------
 st.markdown("""
-<div style="background:#f0f9ff; border-left:4px solid #0284c7; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#0c4a6e; margin-bottom:20px;">
-📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）｜Purged Walk-Forward CV（4 Folds）｜LightGBM + XGBoost Ensemble
+<div class="gl-box-info" style="margin-top:14px;">
+📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）&nbsp;·&nbsp;Purged Walk-Forward CV（4 Folds）&nbsp;·&nbsp;LightGBM + XGBoost Ensemble
 </div>
 """, unsafe_allow_html=True)
 
@@ -47,10 +63,24 @@ LogLoss 衡量預測機率的校準程度，越低代表模型越有信心且準
 各 Fold 代表不同時間段的驗證結果。
 """)
 
-# Horizon selector
-col_ctrl = st.columns([1, 4])
-with col_ctrl[0]:
-    horizon = st.selectbox("選擇 Horizon | Select Horizon", [1, 5, 20], index=2, format_func=lambda x: f"D+{x}")
+# ===== Horizon selector =====
+st.markdown("**選擇 Horizon | Select Horizon**")
+sel_col, seg_col = st.columns([1, 3])
+with sel_col:
+    horizon = st.selectbox(
+        " ",
+        [1, 5, 20],
+        index=2,
+        format_func=lambda x: f"D+{x}",
+        label_visibility="collapsed",
+        key="mm_horizon",
+    )
+with seg_col:
+    render_horizon_segmented(
+        options=["D+1", "D+5", "D+20"],
+        current=f"D+{horizon}",
+        key_prefix="mm",
+    )
 
 # ===== Summary KPI Row =====
 try:
@@ -118,6 +148,27 @@ try:
                 f"D+{horizon}",
                 delta="前瞻天數"
             )
+
+        # ===== Signature AUC Gauge (half-ring SVG) =====
+        st.markdown("")
+        auc_html = render_auc_gauge(
+            val=best_auc_engine["auc"],
+            min_v=0.5, max_v=0.7,
+            label=f"AUC · {best_auc_engine['engine']} · D+{horizon} · target ≥ 0.52",
+            width=320, height=180,
+        )
+        st.markdown(
+            f'<div class="gl-panel" style="display:flex;align-items:center;justify-content:center;padding:18px 22px;">{auc_html}</div>',
+            unsafe_allow_html=True,
+        )
+
+        # ===== Phase timeline (full-width below the gauge) =====
+        st.markdown(
+            '<div style="font-size:0.72rem;color:var(--gl-text-3);font-weight:600;'
+            'letter-spacing:.06em;text-transform:uppercase;margin:14px 0 6px;">RESEARCH PROGRESS · PHASE 2 ACTIVE</div>',
+            unsafe_allow_html=True,
+        )
+        render_phase_timeline(current_phase=2)
 
         st.divider()
 except Exception as e:
@@ -675,6 +726,57 @@ try:
             st.image(str(mc_img), caption="模型對標比較 | Model Comparison", use_container_width=True)
 except Exception:
     pass
+
+# ===== LOPO Pillar Contribution Bars (ported from Design system) =====
+st.divider()
+st.subheader("🧩 LOPO · 九支柱邊際貢獻 | Leave-One-Pillar-Out Contribution")
+st.caption(
+    "逐一移除每個支柱後重訓模型，量化該支柱對 D+20 AUC 的真實邊際貢獻（單位：bps）。"
+    "越高代表該支柱對整體預測越不可或缺。"
+)
+
+try:
+    load_phase6_json = _utils.load_phase6_json
+    lopo_data, _ = load_phase6_json(f"lopo_pillar_contribution_D{horizon}.json")
+    if not lopo_data:
+        lopo_data, _ = load_phase6_json("lopo_pillar_contribution_D20.json")
+
+    pillar_labels = {
+        "risk": "風險面", "fund": "基本面", "chip": "籌碼面",
+        "trend": "技術面", "val": "評價面", "event": "事件面",
+        "ind": "產業面", "txt": "文本面", "sent": "情緒面",
+    }
+
+    render_pillar_bar = _utils.render_pillar_bar
+
+    if lopo_data and "ranking_by_delta_auc" in lopo_data:
+        ranking = lopo_data["ranking_by_delta_auc"]
+        max_d = max(abs(r["delta_auc"]) for r in ranking) or 0.001
+        rows_html = []
+        for r in ranking:
+            pk = r["pillar"]
+            delta_bps = r["delta_auc"] * 10000
+            pct = (abs(r["delta_auc"]) / max_d) * 100
+            rows_html.append(render_pillar_bar(
+                pillar_key=pk,
+                label=pillar_labels.get(pk, pk),
+                feat_count=r.get("n_features", 0),
+                pct=pct,
+                delta_bps=delta_bps,
+            ))
+        st.markdown(
+            '<div class="gl-panel" style="padding:18px 22px;">' + "".join(rows_html) + "</div>",
+            unsafe_allow_html=True,
+        )
+        baseline = lopo_data.get("baseline", {}).get("auc_macro", 0.649)
+        st.caption(
+            f"📐 Baseline AUC (full pillar set, D+{horizon})：**{baseline:.4f}**　·　"
+            f"ranking by |Δ AUC|（越大越重要）"
+        )
+    else:
+        st.info(f"D+{horizon} LOPO 資料不可用，請檢查 outputs/phase6/ 目錄。")
+except Exception as e:
+    st.warning(f"LOPO 支柱貢獻載入失敗：{str(e)}")
 
 # ===== Footer & Limitations =====
 st.markdown("---")

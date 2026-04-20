@@ -435,6 +435,21 @@ def inject_custom_css():
         line-height: 1.6;
         max-width: 780px;
     }}
+    .gl-hero-orb {{
+        position: absolute;
+        top: -40%; left: -10%;
+        width: 360px; height: 360px;
+        background: radial-gradient(circle, rgba(124,58,237,0.08), transparent 70%);
+        filter: blur(40px);
+        pointer-events: none;
+        z-index: 0;
+    }}
+    .gl-hero-accent {{
+        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 55%, #06b6d4 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }}
     /* Pillar badges (9-pillar taxonomy) */
     .gl-pillar {{
         display: inline-flex;
@@ -537,6 +552,258 @@ def inject_custom_css():
         font-size: 1.8rem; font-weight: 700; color: var(--gl-blue); margin: 8px 0;
     }}
     .metric-card-label {{ font-size: .84rem; color: var(--gl-text-2); font-weight: 600; }}
+    /* ================================================================= */
+    /* Design-system extensions — ported from Claude Design bundle       */
+    /* ================================================================= */
+    /* ---- Sticky topbar (breadcrumb + model chips + live clock) ---- */
+    .gl-topbar {{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 18px;
+        background: rgba(255,255,255,.72);
+        border: 1px solid var(--gl-border);
+        border-radius: 12px;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        margin-bottom: 14px;
+        box-shadow: var(--gl-shadow-sm);
+        font-size: 0.82rem;
+    }}
+    .gl-topbar-l {{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--gl-text-2);
+    }}
+    .gl-topbar-l .gl-slash {{ color: var(--gl-text-3); }}
+    .gl-topbar-l .gl-crumb-cur {{ color: var(--gl-text); font-weight: 600; }}
+    .gl-topbar-r {{
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.72rem;
+        color: var(--gl-text-3);
+    }}
+    .gl-topbar-r .gl-sep {{ opacity: .4; }}
+    .gl-topbar-clock {{
+        font-family: var(--gl-font-mono);
+        font-variant-numeric: tabular-nums;
+        color: var(--gl-text-2);
+        font-weight: 600;
+    }}
+    /* ---- AUC gauge SVG wrapper ---- */
+    .gl-gauge {{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 6px 0;
+    }}
+    .gl-gauge-val {{
+        font-family: var(--gl-font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--gl-text);
+        line-height: 1;
+        margin-top: 8px;
+    }}
+    .gl-gauge-lbl {{
+        font-size: 0.72rem;
+        color: var(--gl-text-3);
+        margin-top: 4px;
+        font-family: var(--gl-font-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }}
+    /* ---- Segmented control (horizon switcher) ---- */
+    .gl-seg-wrap {{
+        display: inline-flex;
+        background: var(--gl-subtle);
+        border: 1px solid var(--gl-border);
+        border-radius: 8px;
+        padding: 3px;
+        gap: 2px;
+    }}
+    .gl-seg-btn {{
+        background: transparent;
+        border: none;
+        padding: 5px 14px;
+        font-size: 0.72rem;
+        font-family: var(--gl-font-mono);
+        font-weight: 700;
+        color: var(--gl-text-2);
+        border-radius: 6px;
+        letter-spacing: 0.04em;
+    }}
+    .gl-seg-btn.on {{
+        background: var(--gl-surface);
+        color: var(--gl-blue);
+        box-shadow: var(--gl-shadow-sm);
+    }}
+    /* ---- Pillar progress bar (colored pill + bar + delta) ---- */
+    .gl-pb {{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.72rem;
+        padding: 3px 0;
+    }}
+    .gl-pb-pill {{
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-weight: 700;
+        font-size: 0.66rem;
+        width: 58px;
+        text-align: center;
+        flex-shrink: 0;
+    }}
+    .gl-pb-pill[data-p="trend"] {{ background: #dbeafe; color: #1e40af; }}
+    .gl-pb-pill[data-p="fund"]  {{ background: #dcfce7; color: #166534; }}
+    .gl-pb-pill[data-p="val"]   {{ background: #fae8ff; color: #86198f; }}
+    .gl-pb-pill[data-p="event"] {{ background: #fef3c7; color: #92400e; }}
+    .gl-pb-pill[data-p="risk"]  {{ background: #ffe4e6; color: #9f1239; }}
+    .gl-pb-pill[data-p="chip"]  {{ background: #e0e7ff; color: #3730a3; }}
+    .gl-pb-pill[data-p="ind"]   {{ background: #cffafe; color: #155e75; }}
+    .gl-pb-pill[data-p="txt"]   {{ background: #f3e8ff; color: #6b21a8; }}
+    .gl-pb-pill[data-p="sent"]  {{ background: #fce7f3; color: #9d174d; }}
+    .gl-pb-bar-wrap {{
+        flex: 1;
+        height: 10px;
+        background: var(--gl-subtle);
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+    }}
+    .gl-pb-bar {{
+        height: 100%;
+        border-radius: 4px;
+        transition: width .6s cubic-bezier(.34,1.56,.64,1);
+    }}
+    .gl-pb-num {{
+        color: var(--gl-text);
+        font-weight: 600;
+        width: 46px;
+        text-align: right;
+        font-size: 0.72rem;
+    }}
+    .gl-pb-delta {{
+        color: var(--gl-emerald);
+        font-size: 0.66rem;
+        width: 64px;
+        text-align: right;
+        font-weight: 600;
+    }}
+    .gl-pb-delta.down {{ color: var(--gl-rose); }}
+    /* ---- Ticker tape (running marquee) ---- */
+    .gl-ticker {{
+        overflow: hidden;
+        border-top: 1px solid var(--gl-border);
+        border-bottom: 1px solid var(--gl-border);
+        background: linear-gradient(90deg, var(--gl-tint), #fff 50%, var(--gl-tint));
+        padding: 6px 0;
+        white-space: nowrap;
+        position: relative;
+        border-radius: 10px;
+        margin-bottom: 14px;
+    }}
+    .gl-ticker-track {{
+        display: inline-block;
+        animation: gl-ticker-scroll 60s linear infinite;
+        font-family: var(--gl-font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: 0.78rem;
+    }}
+    .gl-ticker-track .gl-ticker-item {{
+        display: inline-block;
+        padding: 0 22px;
+        color: var(--gl-text-2);
+    }}
+    .gl-ticker-track .gl-ticker-item.up   {{ color: var(--gl-emerald); }}
+    .gl-ticker-track .gl-ticker-item.down {{ color: var(--gl-rose);    }}
+    .gl-ticker-track .gl-ticker-item b    {{ color: var(--gl-text); font-weight: 700; margin-right: 6px; }}
+    @keyframes gl-ticker-scroll {{
+        0%   {{ transform: translateX(0); }}
+        100% {{ transform: translateX(-50%); }}
+    }}
+    /* ---- Enhanced tab styling (mode switcher at top of home) ---- */
+    div[data-baseweb="tab-list"] {{
+        gap: 2px !important;
+        border-bottom: 1px solid var(--gl-border) !important;
+        background: transparent !important;
+    }}
+    button[data-baseweb="tab"] {{
+        padding: 12px 20px !important;
+        background: transparent !important;
+        border-radius: 0 !important;
+        border-bottom: 2px solid transparent !important;
+        color: var(--gl-text-2) !important;
+        font-family: var(--gl-font-sans) !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.005em !important;
+    }}
+    button[data-baseweb="tab"]:hover {{
+        color: var(--gl-text) !important;
+        background: rgba(37,99,235,.04) !important;
+    }}
+    button[data-baseweb="tab"][aria-selected="true"] {{
+        color: var(--gl-blue) !important;
+        border-bottom-color: var(--gl-blue) !important;
+        background: transparent !important;
+    }}
+    /* ---- Path card variants (inv / qnt from Design) ---- */
+    .path-card.path-inv {{ background: linear-gradient(135deg, #fff 0%, #fffbeb 100%); }}
+    .path-card.path-inv::before {{ background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%) !important; }}
+    .path-card.path-qnt {{ background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%); }}
+    /* ---- Compact stock table ---- */
+    .gl-stk-tbl {{
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+    }}
+    .gl-stk-tbl th {{
+        text-align: left;
+        font-size: 0.66rem;
+        color: var(--gl-text-3);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--gl-border);
+        background: var(--gl-tint);
+        font-family: var(--gl-font-sans);
+    }}
+    .gl-stk-tbl td {{
+        padding: 9px 10px;
+        border-bottom: 1px solid var(--gl-border);
+        font-family: var(--gl-font-mono);
+        font-variant-numeric: tabular-nums;
+        color: var(--gl-text);
+        vertical-align: middle;
+    }}
+    .gl-stk-tbl tr:hover td {{ background: rgba(37,99,235,.03); }}
+    .gl-stk-tbl .ticker {{ font-weight: 700; color: var(--gl-blue); }}
+    .gl-stk-tbl .name-zh {{ font-family: var(--gl-font-sans); color: var(--gl-text); }}
+    .gl-stk-tbl .ret-up {{ color: var(--gl-emerald); font-weight: 600; }}
+    .gl-stk-tbl .ret-dn {{ color: var(--gl-rose); font-weight: 600; }}
+    .gl-stk-tbl .ind-chip {{
+        display: inline-block;
+        padding: 1px 7px;
+        background: var(--gl-subtle);
+        color: var(--gl-text-2);
+        border-radius: 4px;
+        font-size: 0.68rem;
+        font-family: var(--gl-font-sans);
+        font-weight: 500;
+    }}
+    /* ---- Methodology card (span-4 layout helpers) ---- */
+    .gl-grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }}
+    .gl-grid-6 {{ display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }}
+    @media (max-width: 1200px) {{ .gl-grid-6 {{ grid-template-columns: repeat(3, 1fr); }} }}
+    @media (max-width: 900px) {{ .gl-grid-3 {{ grid-template-columns: 1fr; }} .gl-grid-6 {{ grid-template-columns: repeat(2, 1fr); }} }}
 </style>
     """, unsafe_allow_html=True)
 
@@ -564,6 +831,237 @@ def render_kpi(label: str, value, delta=None, sub=None, accent="blue"):
         {sub_html}
     </div>
     """, unsafe_allow_html=True)
+
+
+# ============================================================================
+# Design-system helpers — ported from Claude Design bundle
+# ============================================================================
+def render_topbar(crumb_left: str = "量化研究終端", crumb_current: str = "首頁",
+                  chips: list = None, show_clock: bool = True):
+    """Sticky top-bar with breadcrumb + model chips + live clock.
+
+    Args:
+        crumb_left: Left-side breadcrumb root (e.g. "量化研究終端").
+        crumb_current: Right-side active crumb (e.g. "首頁", "模型績效").
+        chips: Optional list of (label, variant) tuples. Variant ∈ {pri, vio, ok, warn, default}.
+        show_clock: Render the JetBrains-mono clock on the right.
+    """
+    chips = chips or []
+    chip_html = "".join(
+        f'<span class="gl-chip {v}">{lbl}</span>' for lbl, v in chips
+    )
+    clock_html = ''
+    if show_clock:
+        clock_html = (
+            '<span class="gl-chip" style="font-family: var(--gl-font-mono);" id="gl-clock">--:--:--</span>'
+            '<script>(function(){var el=document.getElementById("gl-clock");'
+            'if(!el)return;function t(){var d=new Date();'
+            'el.textContent=String(d.getHours()).padStart(2,"0")+":"+'
+            'String(d.getMinutes()).padStart(2,"0")+":"+'
+            'String(d.getSeconds()).padStart(2,"0");}'
+            't();setInterval(t,1000);})();</script>'
+        )
+    st.markdown(f"""
+<div class="gl-topbar">
+  <div class="gl-topbar-l">
+    <span style="color:var(--gl-text-3);font-size:0.85rem;">{crumb_left}</span>
+    <span style="color:var(--gl-text-3);">›</span>
+    <span style="color:var(--gl-text-1);font-weight:600;font-size:0.9rem;">{crumb_current}</span>
+  </div>
+  <div class="gl-topbar-r">
+    {chip_html}
+    {clock_html}
+  </div>
+</div>
+    """, unsafe_allow_html=True)
+
+
+def render_auc_gauge(val: float, min_v: float = 0.5, max_v: float = 0.7,
+                     label: str = "AUC · target ≥ 0.52", width: int = 260, height: int = 150):
+    """SVG half-ring gauge for AUC / ratio metrics.
+
+    Args:
+        val: The measured value.
+        min_v: Minimum of the arc (left end).
+        max_v: Maximum of the arc (right end).
+        label: Sub-label under the number.
+        width/height: SVG dimensions.
+    """
+    import math
+    cx, cy, r = width / 2, height - 20, min(width, height * 2) / 2 - 20
+    clamped = max(min_v, min(max_v, val))
+    t = (clamped - min_v) / (max_v - min_v)
+    angle = math.pi * (1 - t)
+    x2 = cx + r * math.cos(angle)
+    y2 = cy - r * math.sin(angle)
+    large_arc = 0
+    path_full = f"M {cx - r} {cy} A {r} {r} 0 0 1 {cx + r} {cy}"
+    path_val = f"M {cx - r} {cy} A {r} {r} 0 {large_arc} 1 {x2} {y2}"
+    # Tick marks at min, mid, max
+    def tick(t_val):
+        a = math.pi * (1 - t_val)
+        x1 = cx + (r - 6) * math.cos(a)
+        y1 = cy - (r - 6) * math.sin(a)
+        x = cx + r * math.cos(a)
+        y = cy - r * math.sin(a)
+        return f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x:.1f}" y2="{y:.1f}" stroke="#cbd5e1" stroke-width="1.5"/>'
+    ticks = "".join(tick(v) for v in [0, 0.5, 1])
+    return f"""
+<div class="gl-gauge-wrap">
+  <svg class="gl-gauge" viewBox="0 0 {width} {height}" width="{width}" height="{height}">
+    <defs>
+      <linearGradient id="ggrad-{int(val*10000)}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#2563eb"/>
+        <stop offset="60%" stop-color="#7c3aed"/>
+        <stop offset="100%" stop-color="#06b6d4"/>
+      </linearGradient>
+    </defs>
+    <path d="{path_full}" fill="none" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
+    <path d="{path_val}" fill="none" stroke="url(#ggrad-{int(val*10000)})" stroke-width="10" stroke-linecap="round"/>
+    {ticks}
+    <text x="{cx}" y="{cy - r * 0.4}" text-anchor="middle"
+          font-family="JetBrains Mono, monospace" font-size="28" font-weight="700"
+          fill="#0f172a">{val:.4f}</text>
+    <text x="{cx - r}" y="{cy + 16}" text-anchor="middle"
+          font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b">{min_v:.2f}</text>
+    <text x="{cx + r}" y="{cy + 16}" text-anchor="middle"
+          font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b">{max_v:.2f}</text>
+  </svg>
+  <div class="gl-gauge-lbl">{label}</div>
+</div>
+"""
+
+
+def render_pillar_bar(pillar_key: str, label: str, feat_count: int, pct: float,
+                      delta_bps: float = None) -> str:
+    """Return HTML for a single pillar bar row.
+
+    Args:
+        pillar_key: One of trend/fund/val/event/risk/chip/ind/txt/sent.
+        label: Chinese label (e.g. "技術面").
+        feat_count: Feature count (shown on right).
+        pct: Progress bar fill 0–100.
+        delta_bps: Optional delta in basis points (e.g. +24 → "+24bps").
+    """
+    pct = max(0, min(100, pct))
+    delta_html = ""
+    if delta_bps is not None:
+        sign = "+" if delta_bps >= 0 else ""
+        cls = "up" if delta_bps >= 0 else "dn"
+        delta_html = f'<span class="gl-pb-delta {cls}">{sign}{delta_bps:.1f}bps</span>'
+    return f"""
+<div class="gl-pb">
+  <span class="gl-pb-pill" data-p="{pillar_key}">{label}</span>
+  <div class="gl-pb-bar-wrap"><div class="gl-pb-bar" data-p="{pillar_key}" style="width:{pct:.1f}%"></div></div>
+  <span class="gl-pb-num">{feat_count}</span>
+  {delta_html}
+</div>"""
+
+
+def render_phase_timeline(current_phase: int = 6, phases: list = None):
+    """Render Phase 1–6 chip row with the current phase highlighted.
+
+    Args:
+        current_phase: 1–6, which chip gets the ``cur`` styling.
+        phases: Optional override list of dicts with keys {num, title, subtitle}.
+    """
+    phases = phases or [
+        {"num": 1, "title": "資料清洗",       "subtitle": "Stage 1 Cleaning"},
+        {"num": 2, "title": "因子建構",       "subtitle": "9 Pillars · 1,623"},
+        {"num": 3, "title": "特徵篩選",       "subtitle": "Purged WF CV"},
+        {"num": 4, "title": "模型訓練",       "subtitle": "LGBM + XGB"},
+        {"num": 5, "title": "解釋與文本",     "subtitle": "SHAP · NLP"},
+        {"num": 6, "title": "整合驗證",       "subtitle": "LOPO · DSR"},
+    ]
+    chips = []
+    for p in phases:
+        cur = " cur" if p["num"] == current_phase else ""
+        chips.append(
+            f'<div class="phase-chip{cur}">'
+            f'<div style="font-size:.72rem;color:var(--gl-text-3);font-weight:600;letter-spacing:.06em;">PHASE {p["num"]}</div>'
+            f'<div style="font-weight:700;font-size:.92rem;color:var(--gl-text-1);margin-top:2px;">{p["title"]}</div>'
+            f'<div style="font-size:.76rem;color:var(--gl-text-3);font-family:var(--gl-font-mono);margin-top:2px;">{p["subtitle"]}</div>'
+            f'</div>'
+        )
+    st.markdown(
+        f'<div class="gl-grid-6" style="margin:14px 0;">{"".join(chips)}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_ticker_tape(items: list):
+    """Render a horizontal scrolling ticker tape (marquee).
+
+    Args:
+        items: List of dicts {ticker, name, value, direction} where direction ∈ {up, down, neu}.
+    """
+    html_parts = []
+    # Duplicate list so the marquee can loop seamlessly
+    for it in items + items:
+        d = it.get("direction", "neu")
+        html_parts.append(
+            f'<span class="gl-ticker-item">'
+            f'<span style="font-family:var(--gl-font-mono);font-weight:700;">{it["ticker"]}</span> '
+            f'<span style="color:var(--gl-text-2);">{it["name"]}</span> '
+            f'<span class="{d}" style="font-family:var(--gl-font-mono);font-weight:600;">{it["value"]}</span>'
+            f'</span>'
+        )
+    st.markdown(
+        f'<div class="gl-ticker"><div class="gl-ticker-track">{"".join(html_parts)}</div></div>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_horizon_segmented(options: list = None, current: str = "D+20", key_prefix: str = "seg"):
+    """Visual segmented control (non-interactive display only — pair with st.radio for state).
+
+    Args:
+        options: list of horizon labels (e.g. ["D+1", "D+5", "D+20"]).
+        current: Label currently highlighted.
+    """
+    options = options or ["D+1", "D+5", "D+20"]
+    btns = "".join(
+        f'<span class="gl-seg-btn{" on" if o == current else ""}">{o}</span>' for o in options
+    )
+    st.markdown(f'<div class="gl-seg-wrap">{btns}</div>', unsafe_allow_html=True)
+
+
+def render_hero(eyebrow: str, title_html: str, meta_chips: list = None, subtitle: str = ""):
+    """Hero block with gradient title + eyebrow + meta chips + blur orb.
+
+    Args:
+        eyebrow: Uppercase eyebrow text (letter-spaced).
+        title_html: Hero title (may include <span class="gl-hero-accent"> for gradient highlight).
+        meta_chips: Optional list of (label, variant) tuples.
+        subtitle: Short Chinese subtitle under the title.
+    """
+    meta_chips = meta_chips or []
+    chip_html = "".join(
+        f'<span class="gl-chip {v}">{lbl}</span>' for lbl, v in meta_chips
+    )
+    subtitle_html = ""
+    if subtitle:
+        subtitle_html = (
+            f'<div style="margin-top:14px;color:var(--gl-text-2);font-size:0.98rem;max-width:860px;">'
+            f'{subtitle}</div>'
+        )
+    st.markdown(f"""
+<div class="gl-hero">
+  <div class="gl-hero-orb"></div>
+  <span class="gl-hero-eyebrow">{eyebrow}</span>
+  <div class="gl-hero-title">{title_html}</div>
+  {subtitle_html}
+  <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;">{chip_html}</div>
+</div>
+    """, unsafe_allow_html=True)
+
+
+def render_live_chip(text: str = "LIVE · 研究快照"):
+    """Pulsing emerald dot chip for live-status indicators."""
+    st.markdown(
+        f'<span class="gl-live">{text}</span>',
+        unsafe_allow_html=True,
+    )
 
 
 def inject_advanced_sidebar(report_name: str = "", report: dict = None, current_page: str = ""):
