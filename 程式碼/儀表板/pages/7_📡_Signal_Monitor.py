@@ -14,6 +14,9 @@ _utils = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_utils)
 inject_custom_css = _utils.inject_custom_css
 render_topbar = _utils.render_topbar
+glint_plotly_layout = _utils.glint_plotly_layout
+glint_heatmap_colorscale = _utils.glint_heatmap_colorscale
+glint_colorbar = _utils.glint_colorbar
 
 inject_custom_css()
 
@@ -154,17 +157,11 @@ if drift_data:
         fig.add_hline(y=0.1, line_dash="dash", line_color="orange",
                       annotation_text="輕微偏移 (0.1)", annotation_position="top right")
 
-        fig.update_layout(
-            yaxis_title="PSI",
-            height=350,
-            margin=dict(t=30, b=30),
-            showlegend=False,
-            plot_bgcolor="#ffffff",
-            paper_bgcolor="#ffffff",
-            font=dict(color="#0f172a"),
-            xaxis=dict(gridcolor="rgba(6,182,212,0.08)", linecolor="rgba(15,23,42,0.2)"),
-            yaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)"),
-        )
+        fig.update_layout(**glint_plotly_layout(
+            title="Top 10 漂移特徵 · PSI 排序",
+            subtitle="PSI > 0.2 = 分佈顯著偏移,需要立即處理",
+            height=360, ylabel="PSI",
+        ), showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
 
         # Per-feature actionable insights
@@ -230,12 +227,14 @@ if drift_data:
                             [0.2/max(max(psi_values, default=1), 0.01), "#f59e0b"], [1, "#ef4444"]],
                 hovertemplate="<b>%{x}</b><br>PSI: %{z:.4f}<extra></extra>",
             ))
-            fig_heat.update_layout(
+            _layout = glint_plotly_layout(
                 title="所有特徵 PSI 漂移熱力圖",
-                height=200, template="plotly_white",
-                xaxis_tickangle=-45,
-                margin=dict(l=40, r=20, t=50, b=100),
+                subtitle="綠=穩定 黃=輕微偏移 紅=顯著偏移",
+                height=220,
             )
+            _layout["xaxis"]["tickangle"] = -45
+            _layout["margin"] = dict(l=40, r=20, t=70, b=110)
+            fig_heat.update_layout(**_layout)
             st.plotly_chart(fig_heat, use_container_width=True)
 
     # Label drift
@@ -324,17 +323,11 @@ if decay_data:
         fig.add_hline(y=0.2, line_dash="dash", line_color="orange",
                       annotation_text="中等信號 (0.2)", annotation_position="top right")
 
-        fig.update_layout(
-            yaxis_title="|ICIR|",
-            height=350,
-            margin=dict(t=30, b=30),
-            showlegend=False,
-            plot_bgcolor="#ffffff",
-            paper_bgcolor="#ffffff",
-            font=dict(color="#0f172a"),
-            xaxis=dict(gridcolor="rgba(6,182,212,0.08)", linecolor="rgba(15,23,42,0.2)"),
-            yaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)"),
-        )
+        fig.update_layout(**glint_plotly_layout(
+            title="各策略信號穩定度 · |ICIR|",
+            subtitle="|ICIR| > 0.5 = 強信號,可靠;0.2~0.5 = 中等;< 0.2 = 弱",
+            height=360, ylabel="|ICIR|",
+        ), showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
 
     # === Monthly IC Trends Chart (NEW) ===
@@ -363,14 +356,14 @@ if decay_data:
                         marker=dict(size=5),
                     ))
 
-            fig_ic.add_hline(y=0, line_dash="dash", line_color="gray", line_width=1)
-            fig_ic.update_layout(
-                yaxis_title="Rank IC",
-                xaxis_title="月份",
-                height=350,
-                margin=dict(t=30, b=30),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+            fig_ic.add_hline(y=0, line_dash="dash", line_color="rgba(148,163,184,0.5)", line_width=1)
+            _lay_ic = glint_plotly_layout(
+                title="月度 Rank IC · 前 3 強特徵",
+                subtitle="正值區間越多,該特徵預測力越穩定",
+                height=360, xlabel="月份", ylabel="Rank IC",
             )
+            _lay_ic["legend"].update(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5)
+            fig_ic.update_layout(**_lay_ic)
             st.plotly_chart(fig_ic, use_container_width=True)
 
     # Half-life analysis with visualization
@@ -410,11 +403,12 @@ if decay_data:
                     marker_color=color, showlegend=False,
                     text=[f"{row['月斜率']:+.4f}"], textposition="outside",
                 ))
-            fig_hl.add_hline(y=0, line_dash="dash", line_color="gray")
-            fig_hl.update_layout(
-                title="信號月度斜率 | Monthly IC Slope（正值=改善中）",
-                yaxis_title="IC 月斜率", height=300, template="plotly_white",
-            )
+            fig_hl.add_hline(y=0, line_dash="dash", line_color="rgba(148,163,184,0.5)")
+            fig_hl.update_layout(**glint_plotly_layout(
+                title="信號月度斜率 · Monthly IC Slope",
+                subtitle="正值=預測力持續改善,負值=衰退中",
+                height=320, ylabel="IC 月斜率",
+            ))
             st.plotly_chart(fig_hl, use_container_width=True)
 
         st.markdown("""
@@ -454,8 +448,10 @@ if has_data:
     drift_sev = drift_data.get("overall_severity", "—") if drift_data else "—"
     retrain_cycle = decay_data.get("recommended_retrain_cycle", "—") if decay_data else "—"
     n_drifted = drift_data.get("n_drifted_features", 0) if drift_data else 0
-    strong = decay_data.get("summary", {}).get("strong_signals", 0) if decay_data else 0
-    weak = decay_data.get("summary", {}).get("weak_signals", 0) if decay_data else 0
+    _decay_summary = decay_data.get("summary", {}) if decay_data else {}
+    strong = _decay_summary.get("strong_signals", 0)
+    moderate = _decay_summary.get("moderate_signals", 0)
+    weak = _decay_summary.get("weak_signals", 0)
     min_hl = decay_data.get("min_half_life_months") if decay_data else None
 
     st.markdown(f"""
@@ -513,7 +509,7 @@ if has_data:
         <div style="font-size: 0.92rem; color: #334155; line-height: 1.85; margin-top: 8px;">
             漂移 <strong>{drift_sev}</strong> ·
             PSI&gt;0.2 特徵 <strong>{n_drifted}</strong> 個 ·
-            強/中/弱信號 <strong>{strong}</strong>/<strong>{summary.get('moderate_signals', 0) if decay_data else 0}</strong>/<strong>{weak}</strong> ·
+            強/中/弱信號 <strong>{strong}</strong>/<strong>{moderate}</strong>/<strong>{weak}</strong> ·
             最短半衰期 <strong>{f'{min_hl} 月' if min_hl else '未衰減'}</strong><br>
             <strong style="color: #0891b2;">→ 建議 {retrain_cycle}</strong>
         </div>

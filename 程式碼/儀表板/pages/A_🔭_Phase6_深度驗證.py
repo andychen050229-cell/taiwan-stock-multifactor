@@ -24,6 +24,10 @@ render_topbar = _utils.render_topbar
 load_phase6_json = _utils.load_phase6_json
 figures_dir = _utils.figures_dir
 render_kpi = _utils.render_kpi
+glint_plotly_layout = _utils.glint_plotly_layout
+glint_heatmap_colorscale = _utils.glint_heatmap_colorscale
+glint_colorbar = _utils.glint_colorbar
+GLINT_SEQUENTIAL_COOL = _utils.GLINT_SEQUENTIAL_COOL
 
 inject_custom_css()
 
@@ -342,18 +346,12 @@ with tab1:
         marker=dict(color=colors, line=dict(width=0)),
         hovertemplate="<b>%{x}</b><br>ΔAUC: %{y:+.2f} bps<extra></extra>",
     ))
-    fig.add_hline(y=0, line_dash="dash", line_color="#94a3b8", line_width=1)
-    fig.update_layout(
-        title="LOPO ΔAUC — 「拿掉該支柱後 AUC 下降多少」",
-        yaxis_title="ΔAUC (basis points, bps)",
-        xaxis_title="特徵支柱（依 ΔAUC 降序）",
-        height=460,
-        plot_bgcolor="#ffffff",
-        paper_bgcolor="#ffffff",
-        font=dict(family="Inter, sans-serif", color="#0f172a"),
-        showlegend=False,
-    )
-    fig.update_yaxes(gridcolor="#e2e8f0", zerolinecolor="#cbd5e1")
+    fig.add_hline(y=0, line_dash="dash", line_color="rgba(148,163,184,0.5)", line_width=1)
+    fig.update_layout(**glint_plotly_layout(
+        title="LOPO ΔAUC · 拿掉該支柱後 AUC 下降多少",
+        subtitle="負值越大=該支柱越不可或缺 (basis points, bps)",
+        height=460, xlabel="特徵支柱 (依 ΔAUC 降序)", ylabel="ΔAUC (bps)",
+    ), showlegend=False)
     st.plotly_chart(fig, use_container_width=True)
 
     # Key insight
@@ -445,15 +443,13 @@ with tab1:
         ]).sort_values("n_features", ascending=False)
         fig2 = px.bar(
             df_counts, x="pillar", y="n_features",
-            title="9 支柱特徵數（生產版 91 個）",
-            color="n_features", color_continuous_scale="Blues",
+            color="n_features", color_continuous_scale=GLINT_SEQUENTIAL_COOL,
         )
-        fig2.update_layout(
-            height=340,
-            plot_bgcolor="#ffffff", paper_bgcolor="#ffffff",
-            showlegend=False, coloraxis_showscale=False,
-        )
-        fig2.update_yaxes(gridcolor="#e2e8f0")
+        fig2.update_layout(**glint_plotly_layout(
+            title="9 支柱特徵數 · 生產版 91 個",
+            subtitle="每根條代表一個支柱實際納入模型的特徵數量",
+            height=340, xlabel="Pillar", ylabel="Feature count",
+        ), showlegend=False, coloraxis_showscale=False)
         st.plotly_chart(fig2, use_container_width=True)
 
 
@@ -531,23 +527,23 @@ with tab2:
         yaxis="y2",
         hovertemplate="t=%{x:.2f}<br>Call %{y:.2f}%<extra></extra>",
     ))
-    fig.add_hline(y=base_rate * 100, line_dash="dash", line_color="#94a3b8",
+    fig.add_hline(y=base_rate * 100, line_dash="dash", line_color="rgba(148,163,184,0.5)",
                   annotation_text=f"Base rate {base_rate:.1%}",
                   annotation_position="top left")
-    fig.update_layout(
-        title="閾值 vs 命中率 / 出手率（藍=hit、橙=call）",
-        xaxis=dict(title="Probability Threshold t"),
-        yaxis=dict(title="Hit Rate (%)", tickfont=dict(color="#2563eb"),
-                   gridcolor="#e2e8f0"),
-        yaxis2=dict(title="Call Rate (%)", overlaying="y", side="right",
-                    tickfont=dict(color="#f59e0b")),
-        height=460,
-        plot_bgcolor="#ffffff",
-        paper_bgcolor="#ffffff",
-        font=dict(family="Inter, sans-serif", color="#0f172a"),
-        legend=dict(x=0.02, y=0.98, bgcolor="rgba(255,255,255,0.9)", bordercolor="#e2e8f0"),
+    _lay = glint_plotly_layout(
+        title="閾值 vs 命中率 / 出手率",
+        subtitle="藍=hit rate (越嚴越準),橙=call rate (越嚴越少)",
+        height=460, xlabel="Probability Threshold t", ylabel="Hit Rate (%)",
+    )
+    _lay["yaxis"]["tickfont"] = dict(family="JetBrains Mono", color="#2563eb", size=10)
+    fig.update_layout(**_lay,
+        yaxis2=dict(title=dict(text="Call Rate (%)", font=dict(family="JetBrains Mono", size=10, color="#f59e0b")),
+                    overlaying="y", side="right",
+                    tickfont=dict(family="JetBrains Mono", color="#f59e0b", size=10),
+                    gridcolor="rgba(0,0,0,0)"),
         hovermode="x unified",
     )
+    fig.update_layout(legend=dict(x=0.02, y=0.98, bgcolor="rgba(255,255,255,0.9)", bordercolor="rgba(37,99,235,0.18)"))
     st.plotly_chart(fig, use_container_width=True)
 
     # Edge curve
@@ -563,17 +559,12 @@ with tab2:
         fillcolor="rgba(16,185,129,0.1)",
         hovertemplate="t=%{x:.2f}<br>Edge +%{y:.2f}pp<extra></extra>",
     ))
-    fig_edge.add_hline(y=0, line_dash="dash", line_color="#94a3b8")
-    fig_edge.update_layout(
-        title="Edge = P(label=up | prob>=t) − base_up_rate",
-        xaxis_title="Probability Threshold t",
-        yaxis_title="Edge (percentage points, pp)",
-        height=360,
-        plot_bgcolor="#ffffff",
-        paper_bgcolor="#ffffff",
-        font=dict(family="Inter, sans-serif", color="#0f172a"),
-    )
-    fig_edge.update_yaxes(gridcolor="#e2e8f0")
+    fig_edge.add_hline(y=0, line_dash="dash", line_color="rgba(148,163,184,0.5)")
+    fig_edge.update_layout(**glint_plotly_layout(
+        title="Edge 曲線 · 命中率 - 基準率",
+        subtitle="正值=模型比隨機有優勢,曲線越陡越有 alpha",
+        height=360, xlabel="Probability Threshold t", ylabel="Edge (pp)",
+    ))
     st.plotly_chart(fig_edge, use_container_width=True)
 
     st.markdown(f"""
@@ -606,17 +597,13 @@ with tab2:
         hovertemplate="%{x}<br>n=%{customdata[0]:,}<br>Hit %{y:.2f}%<extra></extra>",
         customdata=topk[["n_picks"]].values,
     ))
-    fig_topk.add_hline(y=base_rate * 100, line_dash="dash", line_color="#94a3b8",
+    fig_topk.add_hline(y=base_rate * 100, line_dash="dash", line_color="rgba(148,163,184,0.5)",
                        annotation_text=f"Base {base_rate:.1%}")
-    fig_topk.update_layout(
-        title="精度曲線：模型最強訊號的命中率",
-        yaxis_title="Hit Rate (%)",
-        height=380,
-        plot_bgcolor="#ffffff",
-        paper_bgcolor="#ffffff",
-        font=dict(family="Inter, sans-serif", color="#0f172a"),
-    )
-    fig_topk.update_yaxes(gridcolor="#e2e8f0")
+    fig_topk.update_layout(**glint_plotly_layout(
+        title="Top-K Precision · 精度曲線",
+        subtitle="只看最強 K% 訊號的命中率,越靠左越嚴格、越該有 alpha",
+        height=380, ylabel="Hit Rate (%)",
+    ))
     st.plotly_chart(fig_topk, use_container_width=True)
 
     best = topk.iloc[0]
@@ -705,18 +692,19 @@ with tab3:
             hovertemplate="%{x}<br>hit %{y:.1f}%<br>calls %{customdata}<extra></extra>",
             customdata=called["n_calls"],
         ))
-    fig_m.update_layout(
-        title="2454 聯發科 — 月度平均上漲機率 vs 實際命中率",
-        xaxis=dict(title="Month"),
-        yaxis=dict(title="Avg Up Prob (%)", tickfont=dict(color="#2563eb"), gridcolor="#e2e8f0"),
-        yaxis2=dict(title="Hit Rate When Called (%)", overlaying="y", side="right",
-                    tickfont=dict(color="#10b981"), range=[0, 100]),
-        height=460,
-        plot_bgcolor="#ffffff",
-        paper_bgcolor="#ffffff",
-        font=dict(family="Inter, sans-serif", color="#0f172a"),
-        legend=dict(x=0.02, y=0.98, bgcolor="rgba(255,255,255,0.9)", bordercolor="#e2e8f0"),
+    _lay_m = glint_plotly_layout(
+        title="2454 聯發科 · 月度平均上漲機率 vs 命中率",
+        subtitle="藍=模型信心 (左軸),綠=實際命中 (右軸),高度吻合代表機率校準佳",
+        height=460, xlabel="Month", ylabel="Avg Up Prob (%)",
     )
+    _lay_m["yaxis"]["tickfont"] = dict(family="JetBrains Mono", color="#2563eb", size=10)
+    fig_m.update_layout(**_lay_m,
+        yaxis2=dict(title=dict(text="Hit Rate When Called (%)", font=dict(family="JetBrains Mono", size=10, color="#10b981")),
+                    overlaying="y", side="right", range=[0, 100],
+                    tickfont=dict(family="JetBrains Mono", color="#10b981", size=10),
+                    gridcolor="rgba(0,0,0,0)"),
+    )
+    fig_m.update_layout(legend=dict(x=0.02, y=0.98, bgcolor="rgba(255,255,255,0.9)", bordercolor="rgba(37,99,235,0.18)"))
     st.plotly_chart(fig_m, use_container_width=True)
 
     st.markdown("""

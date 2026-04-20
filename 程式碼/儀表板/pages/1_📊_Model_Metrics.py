@@ -18,6 +18,9 @@ render_topbar = _utils.render_topbar
 render_phase_timeline = _utils.render_phase_timeline
 render_auc_gauge = _utils.render_auc_gauge
 render_horizon_segmented = _utils.render_horizon_segmented
+glint_plotly_layout = _utils.glint_plotly_layout
+glint_heatmap_colorscale = _utils.glint_heatmap_colorscale
+glint_colorbar = _utils.glint_colorbar
 
 inject_custom_css()
 
@@ -374,15 +377,19 @@ try:
                 z=heatmap_data.values,
                 x=[f"Fold {c}" for c in heatmap_data.columns],
                 y=heatmap_data.index,
-                colorscale="RdYlGn",
-                zmid=0.52,
-                hovertemplate="<b>%{y}</b><br>%{x}<br>AUC: %{z:.4f}<extra></extra>"
+                text=[[f"{v:.3f}" for v in row] for row in heatmap_data.values],
+                texttemplate="%{text}",
+                textfont={"family": "JetBrains Mono", "size": 11, "color": "#0f172a"},
+                colorscale=glint_heatmap_colorscale("diverging"),
+                zmid=0.52, xgap=3, ygap=3,
+                colorbar=glint_colorbar(title="AUC", fmt=".3f"),
+                hovertemplate="<b>%{y}</b><br>%{x}<br>AUC: <b>%{z:.4f}</b><extra></extra>"
             ))
-            fig_heat.update_layout(
+            fig_heat.update_layout(**glint_plotly_layout(
                 title=f"D+{horizon} UP 類別 AUC 熱力圖",
-                height=300,
-                template="plotly_white"
-            )
+                subtitle="色中線 0.52 = 最低通過門檻,綠色=高於、紅色=低於",
+                height=320,
+            ))
             st.plotly_chart(fig_heat, use_container_width=True)
 except Exception as e:
     st.warning(f"Per-Class AUC 分析失敗：{str(e)}")

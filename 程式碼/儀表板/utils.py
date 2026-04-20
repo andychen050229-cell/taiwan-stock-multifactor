@@ -204,25 +204,138 @@ def inject_custom_css():
         font-variant-numeric: tabular-nums;
     }}
     /* ================================================================= */
-    /* 4. Tables / DataFrames                                              */
+    /* 4. Tables / DataFrames — refined per design-system st-tbl           */
     /* ================================================================= */
-    div[data-testid="stDataFrame"] {{
+    div[data-testid="stDataFrame"], div[data-testid="stTable"] {{
         border: 1px solid var(--gl-border);
-        border-radius: 10px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--gl-shadow-sm);
+        background: var(--gl-surface);
+        transition: box-shadow .25s var(--gl-ease), border-color .25s var(--gl-ease);
+    }}
+    div[data-testid="stDataFrame"]:hover, div[data-testid="stTable"]:hover {{
+        border-color: rgba(37,99,235,0.22) !important;
+        box-shadow: var(--gl-shadow-glow);
+    }}
+    div[data-testid="stDataFrame"] thead tr th,
+    div[data-testid="stTable"] thead tr th {{
+        background: var(--gl-tint) !important;
+        color: var(--gl-text-2) !important;
+        font-family: var(--gl-font-mono) !important;
+        font-weight: 700 !important;
+        font-size: 0.72rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border-bottom: 1px solid var(--gl-border) !important;
+        padding: 10px 12px !important;
+    }}
+    div[data-testid="stDataFrame"] tbody tr td,
+    div[data-testid="stTable"] tbody tr td {{
+        font-family: var(--gl-font-mono) !important;
+        font-variant-numeric: tabular-nums;
+        font-size: 0.84rem !important;
+        color: var(--gl-text) !important;
+        border-bottom: 1px solid var(--gl-border) !important;
+        padding: 9px 12px !important;
+    }}
+    div[data-testid="stDataFrame"] tbody tr:hover td,
+    div[data-testid="stTable"] tbody tr:hover td {{
+        background: rgba(37,99,235,0.03) !important;
+    }}
+    /* Native HTML tables in markdown (for case-study / methodology blocks) */
+    .gl-table {{
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.86rem;
+        background: var(--gl-surface);
+        border: 1px solid var(--gl-border);
+        border-radius: 12px;
         overflow: hidden;
         box-shadow: var(--gl-shadow-sm);
     }}
-    div[data-testid="stDataFrame"] thead tr th {{
-        background: var(--gl-subtle) !important;
-        color: var(--gl-text) !important;
-        font-weight: 600 !important;
-        font-size: 0.8rem !important;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-    }}
-    div[data-testid="stDataFrame"] tbody tr td {{
+    .gl-table thead th {{
+        background: var(--gl-tint);
+        color: var(--gl-text-2);
         font-family: var(--gl-font-mono);
-        font-size: 0.86rem;
+        font-weight: 700;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--gl-border);
+    }}
+    .gl-table tbody td {{
+        font-family: var(--gl-font-mono);
+        font-variant-numeric: tabular-nums;
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--gl-border);
+        color: var(--gl-text);
+    }}
+    .gl-table tbody tr:hover td {{
+        background: rgba(37,99,235,0.03);
+    }}
+    .gl-table tbody tr:last-child td {{ border-bottom: none; }}
+    .gl-table .cell-up   {{ color: var(--gl-emerald); font-weight: 600; }}
+    .gl-table .cell-down {{ color: var(--gl-rose);    font-weight: 600; }}
+    .gl-table .cell-ticker {{ color: var(--gl-blue); font-weight: 700; }}
+    .gl-table .cell-dim  {{ color: var(--gl-text-3); }}
+    /* Section-header accent bar (matches design-system .sh h2) */
+    .gl-section-head {{
+        display: flex; align-items: baseline; justify-content: space-between;
+        margin: 22px 0 12px;
+    }}
+    .gl-section-head h2 {{
+        font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em;
+        position: relative; padding-left: 14px; color: var(--gl-text);
+    }}
+    .gl-section-head h2::before {{
+        content: ""; position: absolute; left: 0; top: 5px; bottom: 5px;
+        width: 4px; background: var(--gl-grad-pri); border-radius: 4px;
+    }}
+    .gl-section-head .sub {{
+        font-size: 12px; color: var(--gl-text-3);
+        font-family: var(--gl-font-mono);
+    }}
+    /* Chip-explainer grid (used on hero blocks for per-chip rationale) */
+    .gl-chip-explain {{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px; margin-top: 14px;
+    }}
+    .gl-chip-explain .item {{
+        background: rgba(255,255,255,0.72);
+        border: 1px solid var(--gl-border);
+        border-left: 3px solid var(--gl-blue);
+        border-radius: 10px;
+        padding: 10px 14px;
+        transition: all .25s var(--gl-ease);
+    }}
+    .gl-chip-explain .item:hover {{
+        border-left-color: var(--gl-violet);
+        box-shadow: var(--gl-shadow-glow);
+        transform: translateY(-1px);
+    }}
+    .gl-chip-explain .item .head {{
+        font-family: var(--gl-font-mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--gl-blue);
+        margin-bottom: 4px;
+    }}
+    .gl-chip-explain .item.vio .head {{ color: var(--gl-violet); }}
+    .gl-chip-explain .item.vio {{ border-left-color: var(--gl-violet); }}
+    .gl-chip-explain .item.ok  .head {{ color: var(--gl-emerald); }}
+    .gl-chip-explain .item.ok  {{ border-left-color: var(--gl-emerald); }}
+    .gl-chip-explain .item.warn .head {{ color: var(--gl-amber); }}
+    .gl-chip-explain .item.warn {{ border-left-color: var(--gl-amber); }}
+    .gl-chip-explain .item .desc {{
+        font-size: 0.82rem;
+        color: var(--gl-text-2);
+        line-height: 1.55;
     }}
     /* ================================================================= */
     /* 5. Custom components — panels, boxes, chips, badges                */
@@ -2148,43 +2261,109 @@ def render_pillar_radar(values: dict, title: str = "九支柱雷達圖",
     return fig
 
 
-def glint_plotly_layout(title: str = "", height: int = 360) -> dict:
+_GL_FONT_SANS = "Inter, 'Noto Sans TC', 'Microsoft JhengHei', -apple-system, BlinkMacSystemFont, sans-serif"
+_GL_FONT_MONO = "'JetBrains Mono', 'Noto Sans TC', SF Mono, Consolas, monospace"
+
+
+def glint_plotly_layout(title: str = "", height: int = 360,
+                        subtitle: str = "", show_grid: bool = True,
+                        ylabel: str = "", xlabel: str = "") -> dict:
     """Return a glint-themed Plotly layout dict for any figure.
 
-    Use with ``fig.update_layout(**glint_plotly_layout(title=..., height=...))``
+    Aligned with `colors_and_type.css` tokens. Use with
+    ``fig.update_layout(**glint_plotly_layout(title=..., height=...))``
     to unify chart styling across all pages.
     """
+    title_obj = dict(
+        text=f"<b>{title}</b>" + (f"<br><span style='font-size:11px;color:#94a3b8;font-weight:400;'>{subtitle}</span>" if subtitle else ""),
+        x=0.01, y=0.97, xanchor="left",
+        font=dict(family=_GL_FONT_SANS, size=15, color="#0f172a"),
+    )
     return dict(
-        title=dict(text=title, x=0.02, y=0.97,
-                   font=dict(family="Inter, 'Microsoft JhengHei'", size=14,
-                             color="#0f172a")),
-        font=dict(family="Inter, 'Microsoft JhengHei'", color="#334155", size=12),
+        title=title_obj,
+        font=dict(family=_GL_FONT_SANS, color="#334155", size=12),
         paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(255,255,255,0.6)",
+        plot_bgcolor="rgba(255,255,255,0)",
         height=height,
-        margin=dict(t=46, b=40, l=50, r=28),
+        margin=dict(t=60 if subtitle else 48, b=44, l=54, r=28),
         xaxis=dict(
-            gridcolor="rgba(37,99,235,0.06)",
-            linecolor="rgba(37,99,235,0.15)",
-            tickfont=dict(family="JetBrains Mono", size=10, color="#64748b"),
+            title=dict(text=xlabel, font=dict(family=_GL_FONT_MONO, size=10, color="#94a3b8")) if xlabel else None,
+            gridcolor="rgba(37,99,235,0.06)" if show_grid else "rgba(0,0,0,0)",
+            linecolor="rgba(37,99,235,0.18)",
+            zerolinecolor="rgba(37,99,235,0.15)",
+            tickfont=dict(family=_GL_FONT_MONO, size=10, color="#64748b"),
+            showline=True, mirror=False, ticks="outside", ticklen=4, tickcolor="rgba(37,99,235,0.15)",
         ),
         yaxis=dict(
-            gridcolor="rgba(37,99,235,0.06)",
-            linecolor="rgba(37,99,235,0.15)",
-            tickfont=dict(family="JetBrains Mono", size=10, color="#64748b"),
+            title=dict(text=ylabel, font=dict(family=_GL_FONT_MONO, size=10, color="#94a3b8")) if ylabel else None,
+            gridcolor="rgba(37,99,235,0.06)" if show_grid else "rgba(0,0,0,0)",
+            linecolor="rgba(37,99,235,0.18)",
+            zerolinecolor="rgba(37,99,235,0.15)",
+            tickfont=dict(family=_GL_FONT_MONO, size=10, color="#64748b"),
+            showline=True, mirror=False, ticks="outside", ticklen=4, tickcolor="rgba(37,99,235,0.15)",
         ),
         hoverlabel=dict(
-            bgcolor="#0f1a28",
-            bordercolor="rgba(6,182,212,0.4)",
-            font=dict(family="JetBrains Mono", color="#e8f7fc", size=11),
+            bgcolor="#0f1419",
+            bordercolor="rgba(6,182,212,0.45)",
+            font=dict(family=_GL_FONT_MONO, color="#e8f7fc", size=11),
         ),
         legend=dict(
-            font=dict(family="Inter", size=11, color="#475569"),
-            bgcolor="rgba(255,255,255,0.6)",
-            bordercolor="rgba(37,99,235,0.15)",
-            borderwidth=1,
+            font=dict(family=_GL_FONT_SANS, size=11, color="#475569"),
+            bgcolor="rgba(255,255,255,0.75)",
+            bordercolor="rgba(37,99,235,0.18)",
+            borderwidth=1, itemsizing="constant",
         ),
+        colorway=["#2563eb", "#7c3aed", "#06b6d4", "#10b981", "#f59e0b", "#f43f5e", "#4f46e5", "#ec4899"],
     )
+
+
+# --- Unified colorscales for heatmaps -------------------------------------
+GLINT_DIVERGING = [
+    [0.00, "#9f1239"],   # deep rose
+    [0.18, "#f43f5e"],
+    [0.35, "#fda4af"],
+    [0.50, "#f8fafc"],   # neutral center
+    [0.65, "#7dd3fc"],
+    [0.82, "#06b6d4"],
+    [1.00, "#065f46"],   # deep emerald
+]
+GLINT_SEQUENTIAL_COOL = [
+    [0.00, "#f0f9ff"],
+    [0.25, "#bae6fd"],
+    [0.50, "#06b6d4"],
+    [0.75, "#2563eb"],
+    [1.00, "#1e3a8a"],
+]
+GLINT_SEQUENTIAL_WARM = [
+    [0.00, "#fffbeb"],
+    [0.25, "#fde68a"],
+    [0.50, "#f59e0b"],
+    [0.75, "#ea580c"],
+    [1.00, "#7c2d12"],
+]
+
+
+def glint_heatmap_colorscale(kind: str = "diverging") -> list:
+    """Return a glint-themed colorscale.
+
+    ``kind`` ∈ {"diverging", "cool", "warm"}. Diverging goes rose→neutral→emerald
+    so green = good (positive return / strong signal) by convention.
+    """
+    return {"diverging": GLINT_DIVERGING,
+            "cool": GLINT_SEQUENTIAL_COOL,
+            "warm": GLINT_SEQUENTIAL_WARM}.get(kind, GLINT_DIVERGING)
+
+
+def glint_colorbar(title: str = "", fmt: str = "") -> dict:
+    """Return a compact, glint-styled Plotly colorbar config."""
+    cb = dict(
+        title=dict(text=f"<b>{title}</b>", font=dict(family=_GL_FONT_MONO, size=10, color="#64748b"), side="right"),
+        thickness=10, len=0.75, outlinewidth=0,
+        tickfont=dict(family=_GL_FONT_MONO, size=10, color="#64748b"),
+        tickformat=fmt, ticks="outside", ticklen=3, tickcolor="rgba(37,99,235,0.15)",
+        bgcolor="rgba(255,255,255,0.5)",
+    )
+    return cb
 
 
 GLINT_COLORS = {

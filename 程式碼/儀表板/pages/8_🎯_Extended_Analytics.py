@@ -21,6 +21,9 @@ inject_custom_css = _utils.inject_custom_css
 render_topbar = _utils.render_topbar
 load_phase3_analytics = _utils.load_phase3_analytics
 figures_dir = _utils.figures_dir
+glint_plotly_layout = _utils.glint_plotly_layout
+glint_heatmap_colorscale = _utils.glint_heatmap_colorscale
+glint_colorbar = _utils.glint_colorbar
 
 inject_custom_css()
 
@@ -28,25 +31,39 @@ inject_custom_css()
 render_topbar(
     crumb_left="股票預測系統",
     crumb_current="延伸分析",
-    chips=[("cross-horizon", "pri"), ("pillar stability", "vio"), ("case study", "default")],
+    chips=[("cost sensitivity", "pri"), ("cross-horizon", "vio"), ("case study", "ok")],
     show_clock=True,
 )
 
 # ---- Hero ---------------------------------------------------------------
 st.markdown("""
 <div class="gl-hero">
-    <span class="gl-hero-eyebrow">PHASE 3 · EXTENDED ANALYTICS</span>
-    <div class="gl-hero-title">擴充分析 Extended Analytics</div>
+    <span class="gl-hero-eyebrow">PHASE 3 · 四項延伸診斷</span>
+    <div class="gl-hero-title">延伸分析<span style="opacity:.55;font-weight:600;"> · 模型能賺錢嗎？</span></div>
     <div class="gl-hero-subtitle">
-        四個核心擴充分析，回答「模型在真實成本下還能賺錢嗎？」、「哪個地平線最穩？」、
-        「哪些特徵支柱驅動模型？」、「訊號能否落地到龍頭個股？」
+        從四個角度壓力測試我們的模型：<strong>成本</strong>、<strong>地平線</strong>、<strong>特徵</strong>、<strong>個股</strong>。
+        綜合回答「實戰部署前還需要注意什麼」—— 這是走向 Phase 6 LOPO 深度驗證前的最後一站。
     </div>
-    <div style="margin-top:16px;">
-        <span class="gl-chip primary">A. Cost Sensitivity</span>
-        <span class="gl-chip violet">B. Cross-Horizon</span>
-        <span class="gl-chip ok">C. Pillar Contribution</span>
-        <span class="gl-chip warn">D. Case Study</span>
-        <span class="gl-chip danger" style="margin-left:8px;">→ Phase 6 深度驗證（LOPO / Threshold / 2454 月度）</span>
+    <div class="gl-chip-explain">
+      <div class="item">
+        <div class="head">A · 成本敏感度</div>
+        <div class="desc">9 模型 × 3 手續費情境，看哪個組合在真實交易成本下仍有正報酬。</div>
+      </div>
+      <div class="item vio">
+        <div class="head">B · 跨地平線穩定性</div>
+        <div class="desc">比較 D+1 / D+5 / D+20 的 Rank IC 與 Sharpe，挑出最穩的持有期。</div>
+      </div>
+      <div class="item ok">
+        <div class="head">C · 特徵支柱貢獻</div>
+        <div class="desc">看 trend/fund/risk 等 9 個特徵支柱各貢獻多少預測力，驗證多因子設計是否分散。</div>
+      </div>
+      <div class="item warn">
+        <div class="head">D · 龍頭個股實測</div>
+        <div class="desc">2330/2317/2454/2303 的模型命中率對照基準上漲率，檢查訊號是否真能落地。</div>
+      </div>
+    </div>
+    <div style="margin-top:14px; padding-top:12px; border-top:1px dashed rgba(37,99,235,0.18);">
+        <span class="gl-chip danger">→ 想看更嚴格的 LOPO/Threshold/2454 月度拆解？跳到 <strong>Phase 6 深度驗證</strong></span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -94,30 +111,25 @@ if cs:
     if rows:
         df = pd.DataFrame(rows).set_index("model")
 
-        # Heatmap via Plotly
+        # Heatmap via Plotly — glint-themed
         fig = go.Figure(data=go.Heatmap(
             z=df.values,
             x=df.columns.tolist(),
             y=df.index.tolist(),
             text=[[f"{v:+.2%}" for v in row] for row in df.values],
             texttemplate="%{text}",
-            textfont={"size": 11, "color": "#111"},
-            colorscale="RdYlGn",
+            textfont={"family": "JetBrains Mono", "size": 11, "color": "#0f172a"},
+            colorscale=glint_heatmap_colorscale("diverging"),
             zmid=0,
-            colorbar={"title": "Return"},
+            xgap=3, ygap=3,
+            colorbar=glint_colorbar(title="Return", fmt=".0%"),
+            hovertemplate="<b>%{y}</b><br>%{x}: <b>%{z:+.2%}</b><extra></extra>",
         ))
-        fig.update_layout(
-            title=dict(text="Total Return by (Model × Cost Scenario)", font=dict(color="#0f172a", size=15)),
-            height=460,
-            xaxis_title="Cost Scenario",
-            yaxis_title="Model × Horizon",
-            plot_bgcolor="#ffffff",
-            paper_bgcolor="#ffffff",
-            font=dict(color="#0f172a", family="-apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif"),
-            xaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
-            yaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
-            margin=dict(t=60, b=50, l=80, r=40),
-        )
+        fig.update_layout(**glint_plotly_layout(
+            title="Total Return · 模型 × 成本情境",
+            subtitle="綠色=正報酬,紅色=負報酬,色深=絕對值大",
+            height=480, xlabel="Cost Scenario", ylabel="Model × Horizon",
+        ))
         st.plotly_chart(fig, use_container_width=True)
 
         st.markdown("""
@@ -153,20 +165,16 @@ if ch:
                 y=engines,
                 text=[[f"{v:+.4f}" for v in row] for row in rank_ic],
                 texttemplate="%{text}",
-                colorscale="RdYlGn",
-                zmid=0,
-                colorbar={"title": "Rank IC"},
+                textfont={"family": "JetBrains Mono", "size": 11, "color": "#0f172a"},
+                colorscale=glint_heatmap_colorscale("diverging"),
+                zmid=0, xgap=3, ygap=3,
+                colorbar=glint_colorbar(title="Rank IC", fmt=".3f"),
+                hovertemplate="<b>%{y}</b> · %{x}<br>Rank IC: <b>%{z:+.4f}</b><extra></extra>",
             ))
-            fig.update_layout(
-                title=dict(text="Rank IC", font=dict(color="#0f172a", size=14)),
-                height=320,
-                plot_bgcolor="#ffffff",
-                paper_bgcolor="#ffffff",
-                font=dict(color="#0f172a", family="-apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif"),
-                xaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
-                yaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
-                margin=dict(t=50, b=40, l=70, r=30),
-            )
+            fig.update_layout(**glint_plotly_layout(
+                title="Rank IC", subtitle="截面排序相關,越高訊號越有效",
+                height=340,
+            ))
             st.plotly_chart(fig, use_container_width=True)
 
     with col2:
@@ -177,20 +185,16 @@ if ch:
                 y=engines,
                 text=[[f"{v:+.3f}" for v in row] for row in sharpe],
                 texttemplate="%{text}",
-                colorscale="RdYlGn",
-                zmid=0,
-                colorbar={"title": "Sharpe"},
+                textfont={"family": "JetBrains Mono", "size": 11, "color": "#0f172a"},
+                colorscale=glint_heatmap_colorscale("diverging"),
+                zmid=0, xgap=3, ygap=3,
+                colorbar=glint_colorbar(title="Sharpe", fmt=".2f"),
+                hovertemplate="<b>%{y}</b> · %{x}<br>Sharpe: <b>%{z:+.3f}</b><extra></extra>",
             ))
-            fig.update_layout(
-                title=dict(text="Sharpe Ratio", font=dict(color="#0f172a", size=14)),
-                height=320,
-                plot_bgcolor="#ffffff",
-                paper_bgcolor="#ffffff",
-                font=dict(color="#0f172a", family="-apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif"),
-                xaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
-                yaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
-                margin=dict(t=50, b=40, l=70, r=30),
-            )
+            fig.update_layout(**glint_plotly_layout(
+                title="Sharpe Ratio", subtitle="風險調整後報酬,>1 為優秀",
+                height=340,
+            ))
             st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("""
@@ -221,28 +225,27 @@ if pc:
 
         col1, col2 = st.columns([2, 1])
         with col1:
+            PILLAR_COLORS = _utils.PILLAR_COLORS
+            colors = [PILLAR_COLORS.get(p, "#64748b") for p in df_avg["Pillar"]]
             fig = go.Figure(go.Bar(
                 x=df_avg["Pillar"],
                 y=df_avg["AvgContribution"],
                 text=df_avg["Pct"],
                 textposition="outside",
-                marker_color=[
-                    "#1f77b4" if p in ("trend", "risk") else "#aec7e8"
-                    for p in df_avg["Pillar"]
-                ],
+                textfont=dict(family="JetBrains Mono", size=11, color="#0f172a"),
+                marker=dict(
+                    color=colors,
+                    line=dict(color="rgba(37,99,235,0.15)", width=1),
+                ),
+                hovertemplate="<b>%{x}</b><br>Contribution: <b>%{y:.2%}</b><extra></extra>",
             ))
-            fig.update_layout(
-                title=dict(text="Average Pillar Contribution Across 6 Models", font=dict(color="#0f172a", size=15)),
-                yaxis_title="Normalized Importance",
-                height=420,
-                plot_bgcolor="#ffffff",
-                paper_bgcolor="#ffffff",
-                font=dict(color="#0f172a", family="-apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif"),
-                xaxis=dict(gridcolor="rgba(6,182,212,0.08)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
-                yaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a"), tickformat=".0%"),
-                margin=dict(t=60, b=50, l=70, r=30),
-                bargap=0.35,
+            layout = glint_plotly_layout(
+                title="九支柱貢獻分解 · 6 模型平均",
+                subtitle="normalized importance 加總 = 100%,越高代表模型越依賴該支柱",
+                height=420, ylabel="Normalized Importance",
             )
+            layout["yaxis"]["tickformat"] = ".0%"
+            fig.update_layout(**layout, bargap=0.35)
             st.plotly_chart(fig, use_container_width=True)
         with col2:
             st.dataframe(df_avg, use_container_width=True, hide_index=True)
@@ -297,21 +300,20 @@ if cs_d:
         y=df_cs["邊際優勢"],
         text=[f"{v:+.2%}" for v in df_cs["邊際優勢"]],
         textposition="outside",
-        marker_color=["#10b981" if v > 0 else "#ef4444" for v in df_cs["邊際優勢"]],
+        textfont=dict(family="JetBrains Mono", size=11, color="#0f172a"),
+        marker=dict(
+            color=["#10b981" if v > 0 else "#f43f5e" for v in df_cs["邊際優勢"]],
+            line=dict(color="rgba(37,99,235,0.15)", width=1),
+        ),
+        hovertemplate="<b>%{x}</b><br>Edge: <b>%{y:+.2%}</b><extra></extra>",
     ))
-    fig.update_layout(
-        title=dict(text="Hit Rate Edge (Model Hit Rate − Base Up Rate)", font=dict(color="#0f172a", size=15)),
-        yaxis_title="Edge",
-        height=360,
-        yaxis_tickformat=".1%",
-        plot_bgcolor="#ffffff",
-        paper_bgcolor="#ffffff",
-        font=dict(color="#0f172a", family="-apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif"),
-        xaxis=dict(gridcolor="rgba(6,182,212,0.08)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a")),
-        yaxis=dict(gridcolor="rgba(6,182,212,0.10)", linecolor="rgba(15,23,42,0.2)", tickfont=dict(color="#0f172a"), tickformat=".1%"),
-        margin=dict(t=60, b=50, l=70, r=30),
-        bargap=0.35,
+    layout = glint_plotly_layout(
+        title="命中率邊際優勢 · 模型命中率 − 基準上漲率",
+        subtitle=">0 代表模型比隨機猜測有實質優勢",
+        height=380, ylabel="Edge",
     )
+    layout["yaxis"]["tickformat"] = ".1%"
+    fig.update_layout(**layout, bargap=0.35)
     st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("""
