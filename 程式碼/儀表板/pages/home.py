@@ -71,6 +71,8 @@ def load_kpis_from_report():
         quality_gates = data.get("quality_gates", {})
         gates_passed = sum(1 for v in quality_gates.values() if v is True or v == "True")
         total_gates = len(quality_gates)
+        failed_names = [k for k, v in quality_gates.items()
+                        if not (v is True or v == "True")]
 
         return {
             "rows": rows,
@@ -78,13 +80,16 @@ def load_kpis_from_report():
             "n_selected": n_selected,
             "gates_passed": gates_passed,
             "total_gates": total_gates,
+            "failed_names": failed_names,
+            "all_pass": (gates_passed == total_gates and total_gates > 0),
             "date_range": data.get("results", {}).get("feature_store", {}).get("date_range", "2023/03 - 2025/03"),
             "report_timestamp": data.get("timestamp", "")
         }
     except Exception:
         return {
             "rows": 948976, "cols": 1626, "n_selected": 91,
-            "gates_passed": 9, "total_gates": 9,
+            "gates_passed": 0, "total_gates": 0,
+            "failed_names": [], "all_pass": False,
             "date_range": "2023/03 - 2025/03",
             "report_timestamp": ""
         }
@@ -172,8 +177,11 @@ render_hero(
         "</span>"
     ),
     meta_chips=[
-        ("phase 1-6 · all gates passed", "default"),
-        ("9 / 9 quality gates", "pri"),
+        ("phase 1-6 · all gates passed" if kpis["all_pass"]
+             else f"phase 1-6 · {kpis['gates_passed']}/{kpis['total_gates']} gates passed",
+         "default" if kpis["all_pass"] else "warn"),
+        (f"{kpis['gates_passed']} / {kpis['total_gates']} quality gates",
+         "pri" if kpis["all_pass"] else "warn"),
         (f"xgboost_D20 OOS AUC {baseline_auc:.3f}", "vio"),
         (f"best edge +{best_edge*100:.1f}pp", "ok"),
     ],
@@ -258,7 +266,7 @@ with tab_observe:
     <span style="color:#065f46;font-weight:600;">歷史同情境 +{_top1_ret*100:.1f}%</span> &nbsp;·&nbsp;
     ② <strong>最強因子支柱</strong> → <span style="font-weight:700;color:#b45309;">{_tp_zh}</span>
     <span style="font-family:'JetBrains Mono',monospace;color:#065f46;">(+{_tp_bps:.1f} bps AUC)</span> &nbsp;·&nbsp;
-    ③ <strong>整體可信度</strong> → AUC {baseline_auc:.3f}、DSR {best_dsr:.2f}、9/9 gates ✓
+    ③ <strong>整體可信度</strong> → AUC {baseline_auc:.3f}、DSR {best_dsr:.2f}、{kpis['gates_passed']}/{kpis['total_gates']} gates {'✓' if kpis['all_pass'] else '⚠'}
   </div>
   <div style="font-size:0.82rem;color:#78350f;margin-top:10px;opacity:0.85;">
     💡 這三個數字是今天系統「最值得你關注的研究結論」。下方卡片逐一展開細節。
@@ -319,12 +327,27 @@ with tab_observe:
             desc="固定歷史資料集 2023/03–2025/03 共 24 個月，2025/04 之後樣本待更新。",
         ), unsafe_allow_html=True)
     with sig_c:
+        _qg_color = "green" if kpis["all_pass"] else "amber"
+        _qg_val_class = "up" if kpis["all_pass"] else ""
+        if kpis["all_pass"]:
+            _qg_desc = (
+                f"{kpis['total_gates']} 個品質閘門全數 PASS。"
+                "Embargo / Leakage / Purge 防護全開。"
+            )
+        else:
+            _failed_zh = "、".join(
+                _utils.quality_gate_zh(n) for n in kpis["failed_names"][:2]
+            ) or "部分閘門"
+            _qg_desc = (
+                f"{kpis['gates_passed']} / {kpis['total_gates']} 通過，"
+                f"待補：{_failed_zh}。Embargo / Leakage / Purge 防護仍全開。"
+            )
         st.markdown(render_traffic_signal(
-            color="green",
+            color=_qg_color,
             title="風險旗標 · 治理",
             value=f"{kpis['gates_passed']} / {kpis['total_gates']}",
-            desc="九個品質閘門全數 PASS。Embargo / Leakage / Purge 防護全開。",
-            val_class="up",
+            desc=_qg_desc,
+            val_class=_qg_val_class,
         ), unsafe_allow_html=True)
 
     # ====================================================================
@@ -399,6 +422,78 @@ with tab_observe:
         )
     else:
         st.info("目前沒有可用的推薦資料。請嘗試重新整理，或查看「投資觀察台」。")
+
+    # ====================================================================
+    # 🗓 短週期同步：D+5 週度 + D+1 日度 (compact, lower density than D+20)
+    # ====================================================================
+    def _render_short_horizon(horizon_key: str, ret_key: str,
+                               label_cn: str, label_en: str, note: str):
+        """Compact 5-card row for short-horizon recs; uses smaller typography
+        than the primary D+20 block and a neutral palette so the visual hierarchy
+        still favours the monthly view."""
+        _hd = recommendations.get(horizon_key, {}) if isinstance(recommendations, dict) else {}
+        _stocks = _hd.get("stocks", []) if isinstance(_hd, dict) else []
+        _date = (_hd.get("date", "") or "2025-03-03")[:10]
+        if not _stocks:
+            st.info(f"{label_cn} 暫無資料。")
+            return
+        st.markdown(
+            f'<div style="display:flex;align-items:baseline;gap:14px;margin-top:4px;">'
+            f'  <span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;'
+            f'color:#64748b;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;">'
+            f'{label_en}</span>'
+            f'  <span style="font-size:0.9rem;color:#475569;">判讀日 {_date} · {note}</span>'
+            f'</div>', unsafe_allow_html=True,
+        )
+        _cols = st.columns(5, gap="small")
+        for _i, (_col, _s) in enumerate(zip(_cols, _stocks[:5])):
+            _sid = _s.get("stock_id", "—")
+            _sname = _s.get("short_name", "")
+            _sind = _s.get("industry", "")
+            _ret = _s.get(ret_key, 0) or 0
+            _color = "#059669" if _ret >= 0 else "#dc2626"
+            with _col:
+                st.markdown(f"""
+<div style="background:#fbfdff;border:1px solid #e2e8f0;
+            border-left:2px solid {_color};border-radius:10px;
+            padding:10px 12px;height:100%;">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;
+              color:#94a3b8;letter-spacing:0.12em;font-weight:700;">#{_i+1}</div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:1.05rem;
+              font-weight:700;color:#0f172a;line-height:1.1;margin-top:2px;">{_sid}</div>
+  <div style="font-size:0.8rem;color:#334155;font-weight:600;margin-top:2px;
+              overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{_sname}</div>
+  <div style="font-size:0.68rem;color:#94a3b8;margin:2px 0 6px;
+              overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{_sind or '—'}</div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.95rem;
+              font-weight:700;color:{_color};line-height:1.1;">
+    {'+' if _ret >= 0 else ''}{_ret*100:.1f}%
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+    st.markdown("### 🗓 短週期同步 · D+5 週度 / D+1 日度")
+    st.markdown(
+        '<div style="color:var(--gl-text-2);font-size:.9rem;margin-bottom:10px;">'
+        '主打月度（D+20，上方）是最穩定的預測；週度與日度僅供研究者交叉驗證方向，'
+        '<strong>切勿單獨使用日度進場</strong>（短期訊號雜訊高、交易成本吃掉多數 edge）。'
+        '</div>', unsafe_allow_html=True,
+    )
+    _render_short_horizon(
+        horizon_key="horizon_5",
+        ret_key="fwd_ret_5",
+        label_cn="D+5 週度",
+        label_en="TOP 5 · D+5 WEEKLY",
+        note="5 日後平均報酬",
+    )
+    st.markdown('<div style="height:10px;"></div>', unsafe_allow_html=True)
+    _render_short_horizon(
+        horizon_key="horizon_1",
+        ret_key="fwd_ret_1",
+        label_cn="D+1 日度",
+        label_en="TOP 5 · D+1 DAILY",
+        note="下一交易日報酬（雜訊較高）",
+    )
 
     st.markdown("### 九大支柱 · 重要度快速判讀")
     st.markdown(
@@ -648,10 +743,13 @@ with tab_workstation:
             sub="D+1 · D+5 · D+20", accent="amber"
         )
     with k5:
+        _q_delta = ("ALL PASS", "up") if kpis["all_pass"] \
+                   else (f"{len(kpis['failed_names'])} TO FIX", "down")
         render_kpi(
             "QUALITY", f"{kpis['gates_passed']}/{kpis['total_gates']}",
-            delta=("ALL PASS", "up"),
-            sub="Phase 2 quality gates", accent="emerald"
+            delta=_q_delta,
+            sub="Phase 2 quality gates",
+            accent="emerald" if kpis["all_pass"] else "amber",
         )
     with k6:
         if top_pillar:

@@ -1393,73 +1393,101 @@ def inject_custom_css():
         border-radius: 2px;
         box-shadow: 0 0 6px rgba(103,232,249,0.6);
     }}
-    /* Page-link pills — dark glass on dark nav */
+    /* Page-link pills — dark glass on dark nav. Selectors are intentionally
+       broad: Streamlit's page-link DOM has shifted across versions
+       (stPageLink / stPageLink-NavLink / plain <a>), so we target every
+       anchor and button inside .gl-topnav to guarantee contrast works. */
     .gl-topnav [data-testid="stPageLink-NavLink"],
-    .gl-topnav a[data-testid="stPageLink"] {{
+    .gl-topnav a[data-testid="stPageLink"],
+    .gl-topnav a[href],
+    .gl-topnav button[kind="pageLink"] {{
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 7px;
         padding: 10px 12px !important;
         border-radius: 10px !important;
-        border: 1px solid rgba(103,232,249,0.18) !important;
-        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)) !important;
+        border: 1px solid rgba(103,232,249,0.22) !important;
+        background: linear-gradient(180deg, rgba(12,27,45,0.72), rgba(8,20,36,0.82)) !important;
         font-family: var(--gl-font-sans) !important;
-        font-size: 0.84rem !important;
-        font-weight: 600 !important;
+        font-size: 0.86rem !important;
+        font-weight: 700 !important;
         letter-spacing: 0.04em !important;    /* CJK breathing room — 避免密集 */
-        color: #cfe1f2 !important;
+        color: #f1f9ff !important;             /* near-white for max contrast */
         transition: all .22s ease !important;
         box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.04),
-            0 1px 2px rgba(0,0,0,0.25);
+            inset 0 1px 0 rgba(255,255,255,0.06),
+            0 1px 2px rgba(0,0,0,0.32);
         position: relative;
         overflow: hidden;
         white-space: nowrap !important;        /* 禁止分頁名稱奇怪斷行 */
         text-overflow: ellipsis;
         min-height: 40px;
         line-height: 1.2 !important;
+        text-decoration: none !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
     }}
-    /* Override any inner text elements — force bright-on-dark readability */
+    /* Override any inner text elements — force bright-on-dark readability.
+       This is the fix for 白字配白底 / 深字配深底: every descendant is forced
+       to inherit the pill color, so no theme stylesheet can shadow it. */
     .gl-topnav [data-testid="stPageLink-NavLink"] *,
     .gl-topnav a[data-testid="stPageLink"] *,
+    .gl-topnav a[href] *,
+    .gl-topnav button[kind="pageLink"] *,
     .gl-topnav [data-testid="stPageLink-NavLink"] p,
     .gl-topnav a[data-testid="stPageLink"] p,
     .gl-topnav [data-testid="stPageLink-NavLink"] span,
-    .gl-topnav a[data-testid="stPageLink"] span {{
+    .gl-topnav a[data-testid="stPageLink"] span,
+    .gl-topnav a[href] span,
+    .gl-topnav a[href] p {{
         color: inherit !important;
         font-weight: inherit !important;
         font-size: inherit !important;
         letter-spacing: inherit !important;
         margin: 0 !important;
-        text-shadow: none !important;
+        text-shadow: inherit !important;
+        background: transparent !important;
     }}
     /* Hover — cyan neon accent */
     .gl-topnav [data-testid="stPageLink-NavLink"]:hover,
-    .gl-topnav a[data-testid="stPageLink"]:hover {{
-        border-color: rgba(103,232,249,0.55) !important;
-        background: linear-gradient(180deg, rgba(6,182,212,0.14), rgba(37,99,235,0.10)) !important;
+    .gl-topnav a[data-testid="stPageLink"]:hover,
+    .gl-topnav a[href]:hover,
+    .gl-topnav button[kind="pageLink"]:hover {{
+        border-color: rgba(103,232,249,0.7) !important;
+        background: linear-gradient(180deg, rgba(6,182,212,0.20), rgba(37,99,235,0.14)) !important;
         color: #ffffff !important;
         transform: translateY(-1px);
         box-shadow:
-            0 8px 22px rgba(6,182,212,0.28),
-            inset 0 1px 0 rgba(255,255,255,0.08),
-            0 0 0 1px rgba(103,232,249,0.18) !important;
+            0 8px 22px rgba(6,182,212,0.34),
+            inset 0 1px 0 rgba(255,255,255,0.12),
+            0 0 0 1px rgba(103,232,249,0.28) !important;
+    }}
+    /* Keyboard focus — match hover visual so Tab users see the target */
+    .gl-topnav [data-testid="stPageLink-NavLink"]:focus-visible,
+    .gl-topnav a[data-testid="stPageLink"]:focus-visible,
+    .gl-topnav a[href]:focus-visible,
+    .gl-topnav button[kind="pageLink"]:focus-visible {{
+        outline: 2px solid #67e8f9 !important;
+        outline-offset: 2px !important;
     }}
     /* Active page — bright cyan glow, obvious contrast */
     .gl-topnav .gl-active [data-testid="stPageLink-NavLink"],
-    .gl-topnav .gl-active a[data-testid="stPageLink"] {{
-        background: linear-gradient(180deg, rgba(103,232,249,0.22), rgba(37,99,235,0.16)) !important;
-        border-color: rgba(103,232,249,0.85) !important;
-        color: #ecfeff !important;
+    .gl-topnav .gl-active a[data-testid="stPageLink"],
+    .gl-topnav .gl-active a[href],
+    .gl-topnav .gl-active button[kind="pageLink"] {{
+        background: linear-gradient(180deg, rgba(103,232,249,0.28), rgba(37,99,235,0.20)) !important;
+        border-color: rgba(103,232,249,0.95) !important;
+        color: #ffffff !important;
         box-shadow:
-            0 0 0 1px rgba(103,232,249,0.28),
-            0 6px 22px rgba(6,182,212,0.38),
-            inset 0 1px 0 rgba(255,255,255,0.12) !important;
-        text-shadow: 0 0 10px rgba(103,232,249,0.55);
+            0 0 0 1px rgba(103,232,249,0.38),
+            0 6px 22px rgba(6,182,212,0.46),
+            inset 0 1px 0 rgba(255,255,255,0.18) !important;
+        text-shadow: 0 0 10px rgba(103,232,249,0.65), 0 1px 2px rgba(0,0,0,0.5);
     }}
     .gl-topnav .gl-active [data-testid="stPageLink-NavLink"]::before,
-    .gl-topnav .gl-active a[data-testid="stPageLink"]::before {{
+    .gl-topnav .gl-active a[data-testid="stPageLink"]::before,
+    .gl-topnav .gl-active a[href]::before,
+    .gl-topnav .gl-active button[kind="pageLink"]::before {{
         content: "";
         position: absolute;
         left: 0; top: 0; bottom: 0;
@@ -1470,13 +1498,15 @@ def inject_custom_css():
     }}
     /* Animated sweep for active pill (subtle cyber feel) */
     .gl-topnav .gl-active [data-testid="stPageLink-NavLink"]::after,
-    .gl-topnav .gl-active a[data-testid="stPageLink"]::after {{
+    .gl-topnav .gl-active a[data-testid="stPageLink"]::after,
+    .gl-topnav .gl-active a[href]::after,
+    .gl-topnav .gl-active button[kind="pageLink"]::after {{
         content: "";
         position: absolute;
         top: 0; bottom: 0;
         left: -60%;
         width: 50%;
-        background: linear-gradient(90deg, transparent, rgba(103,232,249,0.18), transparent);
+        background: linear-gradient(90deg, transparent, rgba(103,232,249,0.22), transparent);
         animation: gl-topnav-sweep 3.5s ease-in-out infinite;
         pointer-events: none;
     }}
@@ -1487,7 +1517,9 @@ def inject_custom_css():
     }}
     /* Icon tint (emoji or Material glyph preceding the label) */
     .gl-topnav [data-testid="stPageLink-NavLink"] [data-testid="stIconMaterial"],
-    .gl-topnav a[data-testid="stPageLink"] [data-testid="stIconMaterial"] {{
+    .gl-topnav a[data-testid="stPageLink"] [data-testid="stIconMaterial"],
+    .gl-topnav a[href] [data-testid="stIconMaterial"],
+    .gl-topnav button[kind="pageLink"] [data-testid="stIconMaterial"] {{
         color: #67e8f9 !important;
         text-shadow: 0 0 6px rgba(103,232,249,0.45);
     }}
@@ -2268,6 +2300,62 @@ def load_report():
         st.stop()
     with open(reports[0], "r", encoding="utf-8") as f:
         return json.load(f), reports[0].name
+
+
+@st.cache_data(ttl=3600)
+def load_quality_gates():
+    """Single source of truth for quality-gate counts and their per-gate status.
+
+    Reads the latest phase2_report_*.json, returns a dict with:
+      - passed   (int)
+      - total    (int)
+      - failed_names (list[str])   human-readable names of failing gates
+      - all_pass (bool)            convenience flag
+      - last_verified (str)        report timestamp (YYYY-MM-DD HH:MM or "")
+
+    Falls back to (9, 9, [], True, "") only if the report cannot be loaded —
+    the dashboard should never silently show 9/9 when reality is 8/9.
+    """
+    report_dir = _project_outputs_dir() / "reports"
+    candidates = sorted(report_dir.glob("phase2_report_*.json"), reverse=True)
+    if not candidates:
+        return {"passed": 0, "total": 0, "failed_names": [],
+                "all_pass": False, "last_verified": ""}
+    try:
+        with open(candidates[0], "r", encoding="utf-8") as f:
+            data = json.load(f)
+        gates = data.get("quality_gates", {}) or {}
+        passed = sum(1 for v in gates.values() if v is True or v == "True")
+        total = len(gates)
+        failed_names = [k for k, v in gates.items()
+                        if not (v is True or v == "True")]
+        ts = data.get("timestamp", "") or ""
+        last_verified = ts[:19].replace("T", " ") if ts else ""
+        return {
+            "passed": passed,
+            "total": total,
+            "failed_names": failed_names,
+            "all_pass": (passed == total and total > 0),
+            "last_verified": last_verified,
+        }
+    except Exception:
+        return {"passed": 0, "total": 0, "failed_names": [],
+                "all_pass": False, "last_verified": ""}
+
+
+def quality_gate_zh(gate_name: str) -> str:
+    """Map machine gate names to human-readable Chinese labels."""
+    return {
+        "all_models_trained":     "所有模型完成訓練",
+        "auc_gate_pass":          "AUC 閘門通過",
+        "sufficient_folds":       "交叉驗證折數充足",
+        "no_data_leakage":        "無資料洩漏",
+        "oof_predictions_valid":  "OOF 預測有效",
+        "statistical_validity":   "統計顯著性",
+        "permutation_tests_pass": "置換檢定通過",
+        "feature_stability":      "特徵穩定性",
+        "best_model_ic_positive": "最佳模型 IC 為正",
+    }.get(gate_name, gate_name)
 
 
 @st.cache_data

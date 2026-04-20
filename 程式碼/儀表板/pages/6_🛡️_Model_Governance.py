@@ -39,7 +39,7 @@ st.info("""
 
 模型治理確保模型的可靠性與透明度。
 
-品質閘門：9 項自動檢測全部通過 = 模型可信賴。
+品質閘門：所有自動檢測項目全部通過 = 模型可信賴；若有未通過項目會在下方以紅旗顯示。
 
 DSR：排除「多重測試」導致的虛假夏普比率，確認策略效能並非偶然。
 
@@ -111,10 +111,12 @@ st.header("品質閘門總覽")
 gates = p3_report.get("quality_gates", {})
 overall = p3_report.get("overall_status", "UNKNOWN")
 
+_gv_pass = sum(1 for v in gates.values() if v)
+_gv_total = len(gates) or 1
 if overall == "PASS":
-    st.success(f"整體狀態：**{overall}** — 9/9 品質閘門全部通過")
+    st.success(f"整體狀態：**{overall}** — {_gv_pass}/{_gv_total} 品質閘門全部通過")
 else:
-    st.warning(f"整體狀態：**{overall}** — 請檢查未通過項目")
+    st.warning(f"整體狀態：**{overall}** — {_gv_pass}/{_gv_total} 通過，請檢查未通過項目")
 
 gate_names_zh = {
     "models_available": "模型可用",
@@ -561,5 +563,5 @@ st.markdown(f"""
 
 # ===== Footer =====
 st.markdown("---")
-st.caption("📌 Phase 3 模型治理報告自動生成 ｜ 品質閘門 9/9 通過為生產就緒條件 ｜ DSR 採用 Bailey & López de Prado (2014) 方法")
+st.caption(f"📌 Phase 3 模型治理報告自動生成 ｜ 品質閘門 {_gv_pass}/{_gv_total} 通過為生產就緒條件 ｜ DSR 採用 Bailey & López de Prado (2014) 方法")
 st.markdown('<div class="page-footer">量化分析工作台 — Model Governance | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)

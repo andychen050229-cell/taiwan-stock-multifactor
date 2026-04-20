@@ -26,6 +26,14 @@ render_topbar = _utils.render_topbar
 
 inject_custom_css()
 
+# Single source of truth for quality-gate counts (reads latest phase2_report).
+_qg = _utils.load_quality_gates()
+_qg_pass = _qg["passed"] if _qg["total"] else 9
+_qg_total = _qg["total"] if _qg["total"] else 9
+_qg_all = _qg["all_pass"]
+_qg_verified = _qg["last_verified"] or "2026-04-20 14:24"
+_qg_suffix = "全通過" if _qg_all else f"有 {len(_qg['failed_names'])} 項待補"
+
 # ============================================================================
 # Manual-specific local CSS
 # ============================================================================
@@ -338,7 +346,7 @@ for row_start in (0, 3, 6):
 # ============================================================================
 st.markdown("## 3. 專有名詞對照：你會看到這些縮寫")
 
-st.markdown("""
+st.markdown(f"""
 <table class="mn-jargon">
 <thead>
 <tr><th style="width:180px;">縮寫 / 術語</th><th style="width:200px;">中文白話名稱</th><th>它在衡量什麼（口語版）</th></tr>
@@ -363,7 +371,7 @@ st.markdown("""
 <tr><td class="j-term">Feature Store</td><td class="j-plain">特徵倉庫</td>
     <td>所有指標算好、對齊時間、存成同一張大表。<strong>948,976 列 × 1,623 欄</strong> 就是 2 年 × 每日 × 每檔股票 × 每個指標。</td></tr>
 <tr><td class="j-term">Quality Gate</td><td class="j-plain">品質閘門</td>
-    <td>9 項自動檢查（資料完整性、無穿越、樣本外無污染等）。<strong>必須 9/9 全通過才算可信</strong>。</td></tr>
+    <td>{_qg_total} 項自動檢查（資料完整性、無穿越、樣本外無污染等）。<strong>必須 {_qg_total}/{_qg_total} 全通過才算可信</strong>，目前 <strong>{_qg_pass}/{_qg_total}</strong>。</td></tr>
 <tr><td class="j-term">Model Card</td><td class="j-plain">模型身分證</td>
     <td>每個模型都有一張「身分證」：訓練時間、資料範圍、表現、限制。<strong>像藥品仿單一樣透明</strong>。</td></tr>
 <tr><td class="j-term">Data Drift</td><td class="j-plain">資料漂移</td>
@@ -411,12 +419,12 @@ st.markdown("## 5. 品質保證：為什麼這套系統的結果<em style='color
 
 qg_col1, qg_col2 = st.columns(2, gap="medium")
 with qg_col1:
-    st.markdown("""
+    st.markdown(f"""
 <div class="mn-tile">
-<div class="mn-tile-eyebrow">QUALITY GATE · 9/9 PASS</div>
-<div class="mn-tile-head"><div class="mn-tile-icon">✓</div><div class="mn-tile-title">9 項自動檢查全通過</div></div>
+<div class="mn-tile-eyebrow">QUALITY GATE · {_qg_pass}/{_qg_total} {'PASS' if _qg_all else 'PARTIAL'}</div>
+<div class="mn-tile-head"><div class="mn-tile-icon">{'✓' if _qg_all else '⚠'}</div><div class="mn-tile-title">{_qg_total} 項自動檢查 · 目前 {_qg_suffix}</div></div>
 <div class="mn-tile-body">
-  每次資料更新，系統自動跑 9 項檢查：資料完整性、<strong>無未來資訊穿越</strong>、樣本外乾淨、
+  每次資料更新，系統自動跑 {_qg_total} 項檢查：資料完整性、<strong>無未來資訊穿越</strong>、樣本外乾淨、
   特徵工程一致、模型可重現、回測合理、風險指標達標、文字日期未錯位、情緒分數分布合理。<br><br>
   <strong>任何一項不過，整個結果就不上架</strong>。
 </div>
@@ -487,7 +495,7 @@ st.markdown("""
 # ============================================================================
 st.markdown("## 7. 資料來源與時間範圍")
 
-st.markdown("""
+st.markdown(f"""
 <table class="mn-jargon">
 <thead>
 <tr><th>項目</th><th>內容</th></tr>
@@ -498,7 +506,7 @@ st.markdown("""
 <tr><td class="j-plain">原始資料集</td><td>日 K、財報、法人買賣超、融資融券（已下架 2025/06）、新聞文字</td></tr>
 <tr><td class="j-plain">Feature Store 規模</td><td><strong>948,976 列</strong> × 1,623 欄（每日每檔每指標一個點）</td></tr>
 <tr><td class="j-plain">正式使用特徵數</td><td><strong>91 個</strong>（經時序穩定度 + 相關性篩選後的最終子集）</td></tr>
-<tr><td class="j-plain">最近一次驗證</td><td><strong>2026-04-20 14:24</strong>（9/9 quality gates 全通過）</td></tr>
+<tr><td class="j-plain">最近一次驗證</td><td><strong>{_qg_verified}</strong>（{_qg_pass}/{_qg_total} quality gates · {_qg_suffix}）</td></tr>
 <tr><td class="j-plain">更新頻率</td><td>目前為凍結版（學術研究快照）。每次變動都會更新 Model Card 與版本時間戳</td></tr>
 </tbody>
 </table>

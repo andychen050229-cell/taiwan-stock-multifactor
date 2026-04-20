@@ -77,14 +77,18 @@ pg = st.navigation(all_pages_flat, position="hidden")
 # Layout order via CSS flex re-ordering below:
 #   brand (top) → syshealth → action buttons → [empty nav area]
 _utils.inject_sidebar_brand()
+
+# Single source of truth — read the latest phase2_report_*.json so the sidebar
+# count (e.g. 8/9) cannot silently disagree with the hero traffic signal.
+_qg = _utils.load_quality_gates()
 _utils.inject_sidebar_health(
-    gates_passed=9,
-    total_gates=9,
+    gates_passed=_qg["passed"] if _qg["total"] else 9,
+    total_gates=_qg["total"] if _qg["total"] else 9,
     dataset="2023/03–2025/03",
     samples="948,976",
     features="91 / 1,623",
     dsr="12.12",
-    last_verified="2026-04-20 14:24",
+    last_verified=_qg["last_verified"] or "2026-04-20 14:24",
 )
 _utils.inject_sidebar_action_buttons(manual_page=manual)
 
