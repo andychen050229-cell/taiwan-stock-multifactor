@@ -392,6 +392,149 @@ def inject_custom_css():
         color: #9f1239;
     }}
     .gl-box-danger strong {{ color: #881337; }}
+    /* Degraded-mode banner — 優雅降級提示（非錯誤，而是摘要版模式） */
+    .gl-degraded {{
+        background: var(--gl-surface);
+        border: 1px solid var(--gl-border);
+        border-left: 4px solid var(--gl-amber);
+        border-radius: 0 12px 12px 0;
+        padding: 14px 18px;
+        margin: 16px 0 20px;
+        box-shadow: var(--gl-shadow-sm);
+    }}
+    .gl-degraded-blue  {{ border-left-color: var(--gl-blue); }}
+    .gl-degraded-rose  {{ border-left-color: var(--gl-rose); }}
+    .gl-degraded-head {{
+        font-size: 0.95rem;
+        color: var(--gl-text);
+        margin-bottom: 6px;
+        font-weight: 600;
+    }}
+    .gl-degraded-body {{
+        font-size: 0.86rem;
+        color: var(--gl-text-2);
+        line-height: 1.6;
+        margin-bottom: 8px;
+    }}
+    .gl-degraded-kv {{
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.8rem;
+        color: var(--gl-text-2);
+        line-height: 1.55;
+        padding: 4px 0;
+    }}
+    .gl-degraded-kv span {{
+        flex: 0 0 70px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--gl-text-3);
+        padding-top: 2px;
+    }}
+    /* Chart note — 1-2 行短 insight，放在圖下 */
+    .gl-chart-note {{
+        font-family: var(--gl-font-sans);
+    }}
+    .gl-chart-note b {{
+        color: var(--gl-text);
+        font-weight: 600;
+    }}
+    /* Page heading — 統一的分頁 h1 + command-center 副標 */
+    .gl-page-heading {{
+        --gl-page-accent: var(--gl-blue);
+        margin: 12px 0 10px 0;
+        padding: 18px 22px 16px 22px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid var(--gl-border);
+        border-left: 4px solid var(--gl-page-accent);
+        border-radius: 12px;
+        box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+        position: relative;
+        overflow: hidden;
+    }}
+    .gl-page-heading::after {{
+        content: "";
+        position: absolute; inset: 0 0 auto auto;
+        width: 180px; height: 100%;
+        background: radial-gradient(ellipse at top right,
+            color-mix(in srgb, var(--gl-page-accent) 12%, transparent) 0%,
+            transparent 70%);
+        pointer-events: none;
+    }}
+    .gl-page-heading-title {{
+        display: flex; align-items: baseline; flex-wrap: wrap;
+        gap: 10px;
+        font-family: var(--gl-font-sans);
+    }}
+    .gl-page-heading-icon {{
+        font-size: 1.6rem; line-height: 1;
+    }}
+    .gl-page-heading-zh {{
+        font-size: 1.55rem; font-weight: 700;
+        color: var(--gl-text);
+        letter-spacing: -0.01em;
+    }}
+    .gl-page-heading-en {{
+        font-family: var(--gl-font-mono);
+        font-size: 0.82rem; font-weight: 500;
+        color: var(--gl-text-3);
+        letter-spacing: 0.02em;
+    }}
+    .gl-page-heading-cmd {{
+        margin-top: 8px;
+        display: flex; align-items: center; gap: 8px;
+        font-size: 0.92rem;
+        color: var(--gl-text-2);
+        line-height: 1.5;
+    }}
+    .gl-page-heading-cmd-dot {{
+        display: inline-block;
+        width: 7px; height: 7px; border-radius: 50%;
+        box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 10%, transparent);
+        flex-shrink: 0;
+    }}
+    /* Trust strip — 一行資料信任條 (Dataset · Samples · Gates …) */
+    .gl-trust-strip {{
+        display: flex; flex-wrap: wrap; gap: 6px;
+        margin: 10px 0 14px 0;
+        padding: 8px 10px;
+        background: #ffffff;
+        border: 1px solid var(--gl-border);
+        border-radius: 10px;
+        box-shadow: 0 1px 2px rgba(15,23,42,0.03);
+        font-family: var(--gl-font-sans);
+    }}
+    .gl-trust-cell {{
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 5px 11px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        line-height: 1;
+    }}
+    .gl-trust-k {{
+        color: var(--gl-text-3);
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 600;
+    }}
+    .gl-trust-v {{
+        font-family: var(--gl-font-mono);
+        color: var(--gl-text);
+        font-weight: 600;
+    }}
+    .gl-trust-blue    {{ border-color: rgba(37,99,235,0.25);   background: rgba(37,99,235,0.05); }}
+    .gl-trust-violet  {{ border-color: rgba(124,58,237,0.25);  background: rgba(124,58,237,0.05); }}
+    .gl-trust-cyan    {{ border-color: rgba(6,182,212,0.25);   background: rgba(6,182,212,0.05); }}
+    .gl-trust-emerald {{ border-color: rgba(16,185,129,0.25);  background: rgba(16,185,129,0.05); }}
+    .gl-trust-amber   {{ border-color: rgba(245,158,11,0.25);  background: rgba(245,158,11,0.05); }}
+    .gl-trust-rose    {{ border-color: rgba(244,63,94,0.25);   background: rgba(244,63,94,0.05); }}
     /* KPI card (custom, not Streamlit metric) */
     .gl-kpi {{
         background: var(--gl-surface);
@@ -1031,6 +1174,16 @@ def inject_custom_css():
         gap: 10px;
         font-family: var(--gl-font-sans);
         text-shadow: 0 0 18px rgba(6,182,212,0.25);
+    }}
+    .gl-brand-subtitle {{
+        margin-top: 6px;
+        font-family: var(--gl-font-sans);
+        font-size: 0.72rem;
+        color: #9fb7c6 !important;
+        letter-spacing: 0.02em;
+        line-height: 1.45;
+        font-weight: 500;
+        opacity: 0.92;
     }}
     .gl-brand-dot {{
         width: 8px; height: 8px;
@@ -2026,10 +2179,113 @@ def render_hero(eyebrow: str, title_html: str, meta_chips: list = None,
     )
 
 
+def render_page_heading(icon: str, title_zh: str, title_en: str = "",
+                         command_line: str = "", tone: str = "blue") -> None:
+    """Render a unified analyst-page heading: big Chinese title + English eyebrow
+    + a single-line *command-center* subtitle. Replaces ad-hoc
+    ``st.title / st.caption`` pairs so every page opens with the same 3-second
+    scan.
+
+    Args:
+        icon:         single emoji, shown before the Chinese title.
+        title_zh:     Chinese (primary) title.
+        title_en:     English gloss appended next to the Chinese title.
+        command_line: one-line command-center subtitle (terse, task-driven).
+        tone:         accent color — ``blue`` / ``violet`` / ``cyan`` / ``emerald``.
+    """
+    accent_map = {
+        "blue":    "#2563eb",
+        "violet":  "#7c3aed",
+        "cyan":    "#06b6d4",
+        "emerald": "#10b981",
+        "amber":   "#f59e0b",
+    }
+    accent = accent_map.get(tone, "#2563eb")
+    en_html = (
+        f'<span class="gl-page-heading-en">· {title_en}</span>' if title_en else ""
+    )
+    cmd_html = (
+        f'<div class="gl-page-heading-cmd">'
+        f'<span class="gl-page-heading-cmd-dot" style="background:{accent};"></span>'
+        f'{command_line}</div>'
+    ) if command_line else ""
+    st.markdown(
+        f'<div class="gl-page-heading" style="--gl-page-accent:{accent};">'
+        f'<div class="gl-page-heading-title">'
+        f'<span class="gl-page-heading-icon">{icon}</span>'
+        f'<span class="gl-page-heading-zh">{title_zh}</span>'
+        f'{en_html}'
+        f'</div>'
+        f'{cmd_html}'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_trust_strip(items: list) -> None:
+    """Render a single-line *trust cue* row under the hero.
+
+    ``items`` is a list of ``(label, value, tone)`` tuples where ``tone`` is
+    optional and defaults to ``"default"``. Each cell renders as
+    ``LABEL·VALUE`` with monospace value styling.
+    """
+    if not items:
+        return
+    parts = []
+    for tup in items:
+        if len(tup) == 3:
+            lbl, val, tone = tup
+        else:
+            lbl, val = tup
+            tone = "default"
+        parts.append(
+            f'<span class="gl-trust-cell gl-trust-{tone}">'
+            f'<span class="gl-trust-k">{lbl}</span>'
+            f'<span class="gl-trust-v">{val}</span>'
+            f'</span>'
+        )
+    st.markdown(
+        f'<div class="gl-trust-strip">{"".join(parts)}</div>',
+        unsafe_allow_html=True,
+    )
+
+
 def render_live_chip(text: str = "LIVE · 研究快照"):
     """Pulsing emerald dot chip for live-status indicators."""
     st.markdown(
         f'<span class="gl-live">{text}</span>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_page_footer(page_name_en: str,
+                       limits_note: str = "",
+                       product: str = "量化分析工作台",
+                       system: str = "台灣股市多因子預測系統") -> None:
+    """Unified bottom-of-page footer block (per v3 audit §27, §28).
+
+    Three fixed rows, in this exact visual order:
+      1. A horizontal divider (st.markdown("---"))
+      2. Constraints caption (📌 limits_note) — defaults to the standard
+         "固定歷史資料集 ｜ 非即時市場數據 ｜ …" line if empty
+      3. Footer band ("{product} — {page_name_en} | {system}")
+
+    Replaces the ad-hoc mixture of st.caption + page-footer div that used to
+    appear at the bottom of every analyst page, so every page now ends with
+    the same trust-closing cadence regardless of degraded state or missing
+    artefacts.
+    """
+    default_limits = (
+        "📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ "
+        "Ensemble = 簡單平均 ｜ Phase 3 治理已實現"
+    )
+    note = limits_note or default_limits
+    if not note.startswith("📌"):
+        note = f"📌 {note}"
+    st.markdown("---")
+    st.caption(note)
+    st.markdown(
+        f'<div class="page-footer">{product} — {page_name_en} | {system}</div>',
         unsafe_allow_html=True,
     )
 
@@ -2113,8 +2369,14 @@ def render_system_health_card(gates_passed: int = 9, total_gates: int = 9,
 
 
 def inject_sidebar_brand(product: str = "股票預測系統",
-                         eyebrow: str = "MULTI-FACTOR"):
+                         eyebrow: str = "MULTI-FACTOR ALPHA",
+                         subtitle: str = "台灣股市 × 三引擎集成 × Phase 3 治理"):
     """Inject the 股票預測系統 brand block at the top of the sidebar.
+
+    Three-layer layout (per v3 audit §17):
+      · eyebrow (mono, cyan, uppercased) — product category
+      · main title (sans, bold, pulsing cyan dot) — product name
+      · subtitle (sans, slate, 1-line tagline) — what this product does
 
     Renders on every page because app.py's sidebar runs first.
     Single-line HTML — CommonMark-safe.
@@ -2124,6 +2386,7 @@ def inject_sidebar_brand(product: str = "股票預測系統",
             f'<div class="gl-brand">'
             f'<div class="gl-brand-eyebrow">{eyebrow}</div>'
             f'<div class="gl-brand-title"><span class="gl-brand-dot"></span>{product}</div>'
+            f'<div class="gl-brand-subtitle">{subtitle}</div>'
             f'</div>'
         ),
         unsafe_allow_html=True,
@@ -2376,6 +2639,79 @@ GLINT_COLORS = {
     "indigo":  "#4f46e5",
     "slate":   "#64748b",
 }
+
+
+def glint_styler_cmap(kind: str = "diverging"):
+    """Return a matplotlib LinearSegmentedColormap aligned with glint tokens.
+
+    Use with ``df.style.background_gradient(cmap=glint_styler_cmap("diverging"))``
+    so pandas styler output stays in the same palette as Plotly heatmaps.
+
+    Kinds: "diverging" (rose→neutral→emerald), "cool" (light blue→deep blue),
+    "warm" (cream→amber→deep rose). Falls back to diverging.
+    """
+    try:
+        from matplotlib.colors import LinearSegmentedColormap
+    except Exception:
+        return kind
+    palettes = {
+        "diverging": ["#9f1239", "#f43f5e", "#fda4af", "#f8fafc",
+                      "#7dd3fc", "#06b6d4", "#065f46"],
+        "cool":      ["#f0f9ff", "#bae6fd", "#06b6d4", "#2563eb", "#1e3a8a"],
+        "warm":      ["#fffbeb", "#fde68a", "#f59e0b", "#ea580c", "#7c2d12"],
+    }
+    colors = palettes.get(kind, palettes["diverging"])
+    return LinearSegmentedColormap.from_list(f"glint_{kind}", colors)
+
+
+def render_degraded_banner(title: str, reason: str, available: str = "",
+                           unavailable: str = "", tone: str = "warn") -> None:
+    """Render a graceful degraded-mode banner instead of a bare error string.
+
+    ``tone`` ∈ {"warn" (amber), "info" (blue), "error" (rose)}. Use this when
+    a page can still render useful summary content despite a missing data
+    artifact (e.g. feature store not available on Streamlit Cloud).
+    """
+    import streamlit as _st
+    tone_map = {
+        "warn":  ("⚠️", "amber",   "#f59e0b"),
+        "info":  ("ℹ️",  "blue",    "#2563eb"),
+        "error": ("⛔", "rose",    "#f43f5e"),
+    }
+    icon, key, color = tone_map.get(tone, tone_map["warn"])
+    parts = [
+        f'<div class="gl-degraded gl-degraded-{key}">',
+        f'  <div class="gl-degraded-head">{icon} <b>{title}</b></div>',
+        f'  <div class="gl-degraded-body">{reason}</div>',
+    ]
+    if available:
+        parts.append(f'  <div class="gl-degraded-kv"><span>可查看</span>{available}</div>')
+    if unavailable:
+        parts.append(f'  <div class="gl-degraded-kv"><span>暫不可用</span>{unavailable}</div>')
+    parts.append("</div>")
+    _st.markdown("\n".join(parts), unsafe_allow_html=True)
+
+
+def render_chart_note(text: str, tone: str = "insight") -> None:
+    """Render a compact "so what" note below a chart (1-2 short lines).
+
+    ``tone`` ∈ {"insight" (blue), "caveat" (amber), "risk" (rose)}.
+    Keeps post-chart context consistent across pages.
+    """
+    import streamlit as _st
+    tone_map = {
+        "insight": ("#2563eb", "rgba(37,99,235,0.06)"),
+        "caveat":  ("#f59e0b", "rgba(245,158,11,0.08)"),
+        "risk":    ("#f43f5e", "rgba(244,63,94,0.08)"),
+    }
+    color, bg = tone_map.get(tone, tone_map["insight"])
+    html = (
+        f'<div class="gl-chart-note" style="border-left:3px solid {color};'
+        f'background:{bg};padding:8px 14px;margin:4px 0 18px;'
+        f'border-radius:0 8px 8px 0;font-size:0.85rem;color:#334155;'
+        f'line-height:1.55;">{text}</div>'
+    )
+    _st.markdown(html, unsafe_allow_html=True)
 
 # 9-pillar palette aligned with the .gl-pillar badges
 PILLAR_COLORS = {

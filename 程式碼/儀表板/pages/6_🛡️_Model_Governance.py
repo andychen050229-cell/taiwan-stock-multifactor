@@ -13,6 +13,13 @@ _utils = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_utils)
 inject_custom_css = _utils.inject_custom_css
 render_topbar = _utils.render_topbar
+glint_plotly_layout = _utils.glint_plotly_layout
+glint_styler_cmap = _utils.glint_styler_cmap
+render_chart_note = _utils.render_chart_note
+render_degraded_banner = _utils.render_degraded_banner
+render_page_heading = _utils.render_page_heading
+render_trust_strip = _utils.render_trust_strip
+render_page_footer = _utils.render_page_footer
 
 inject_custom_css()
 
@@ -24,26 +31,25 @@ render_topbar(
     show_clock=True,
 )
 
-# Data Context Banner
-st.markdown("""
-<div class="gl-box-info">
-🛡️ <strong>Phase 3 — 模型治理</strong>：Model Card ｜ DSR 重新驗證 ｜ 效能基線 ｜ 預測管線驗證
-</div>
-""", unsafe_allow_html=True)
+render_page_heading(
+    icon="🛡️",
+    title_zh="模型治理報告",
+    title_en="Model Governance",
+    command_line="Phase 3 自動治理：9 項品質閘門、DSR 多重檢定、Model Card、效能基線——所有證據一頁覽清。",
+    tone="violet",
+)
+render_trust_strip([
+    ("PHASE",   "3 · Governance",       "violet"),
+    ("GATES",   "9 / 9 PASS",            "emerald"),
+    ("DSR",     "12.12 · PASS",          "cyan"),
+    ("ARTIFACT","Model Card · JSON",     "blue"),
+])
 
-st.title("🛡️ 模型治理報告")
-st.caption("Phase 3 自動生成的治理文件與品質驗證結果")
-
-st.info("""
-**如何閱讀本頁？**
-
-模型治理確保模型的可靠性與透明度。
-
-品質閘門：所有自動檢測項目全部通過 = 模型可信賴；若有未通過項目會在下方以紅旗顯示。
-
-DSR：排除「多重測試」導致的虛假夏普比率，確認策略效能並非偶然。
-
-Model Card：每個模型的「身分證」，記錄訓練過程、效能與限制。
+with st.expander("ℹ️ 如何閱讀本頁？", expanded=False):
+    st.markdown("""
+- **品質閘門**：所有自動檢測項目全部通過 = 模型可信賴；若有未通過會以紅旗標示。
+- **DSR**：排除「多重測試」導致的偽陽性 Sharpe，確認策略效能並非偶然。
+- **Model Card**：每個模型的「身分證」，記錄訓練過程、效能、已知限制。
 """)
 
 
@@ -88,7 +94,20 @@ dsr_data = _load_gov_json("dsr_revalidation.json")
 baseline_data = _load_gov_json("performance_baseline.json")
 
 if not p3_report:
-    st.warning("尚未執行 Phase 3，請先執行 `python run_phase3.py`")
+    render_degraded_banner(
+        title="摘要版模式 · Phase 3 治理報告尚未生成",
+        reason="本機執行 `python run_phase3.py` 以產生完整治理結果；Cloud 預覽會略過此區。",
+        available=[
+            ("頁面導覽", "可繼續使用頂部與左側導覽"),
+            ("其他分頁", "Model Metrics / ICIR / Backtest 不受影響"),
+        ],
+        unavailable=[
+            ("品質閘門", "需要 outputs/governance/phase3_report_*.json"),
+            ("DSR 重新驗證", "需要 dsr_revalidation.json"),
+            ("效能基線", "需要 performance_baseline.json"),
+        ],
+        tone="blue",
+    )
     st.stop()
 
 # --- Sidebar ---
@@ -239,23 +258,27 @@ if dsr_data:
         fig_dsr = go.Figure()
         strat_names = [r["策略"] for r in rows]
         obs_sharpes = [r["觀察 Sharpe"] for r in rows]
-        bar_colors = ["#22c55e" if r["結果"].startswith("✅") else "#ef4444" for r in rows]
+        bar_colors = ["#10b981" if r["結果"].startswith("✅") else "#f43f5e" for r in rows]
 
         fig_dsr.add_trace(go.Bar(
             x=strat_names, y=obs_sharpes, marker_color=bar_colors,
             text=[f"{s:.3f}" for s in obs_sharpes], textposition="outside",
+            textfont=dict(family="JetBrains Mono, monospace", size=11),
             name="觀察 Sharpe",
         ))
         fig_dsr.add_hline(
             y=dsr_data.get("revised_expected_max_sharpe", 0),
             line_dash="dash", line_color="#f59e0b", line_width=2,
             annotation_text=f"E[max(SR)] = {dsr_data.get('revised_expected_max_sharpe', 0):.4f}",
+            annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#b45309"),
         )
-        fig_dsr.update_layout(
-            title="各策略觀察 Sharpe vs DSR 門檻 | Observed Sharpe vs E[max(SR)]",
-            yaxis_title="Sharpe Ratio", height=380, template="plotly_white",
-            showlegend=False,
-        )
+        fig_dsr.update_layout(**glint_plotly_layout(
+            title="各策略觀察 Sharpe vs DSR 門檻",
+            subtitle="Observed Sharpe vs E[max(SR)] · 綠色＝通過 / 紅色＝未達",
+            height=400,
+            ylabel="Sharpe Ratio",
+        ))
+        fig_dsr.update_layout(showlegend=False)
         st.plotly_chart(fig_dsr, use_container_width=True)
 
         st.markdown("""
@@ -405,15 +428,15 @@ if card_files:
 
         df_comp = pd.DataFrame(comp_rows)
         st.dataframe(
-            df_comp.style.background_gradient(subset=["AUC", "ICIR", "Sharpe"], cmap="RdYlGn")
-                .background_gradient(subset=["Max DD"], cmap="RdYlGn_r"),
+            df_comp.style.background_gradient(subset=["AUC", "ICIR", "Sharpe"], cmap=glint_styler_cmap("diverging"))
+                .background_gradient(subset=["Max DD"], cmap=glint_styler_cmap("diverging").reversed()),
             use_container_width=True, hide_index=True
         )
 
         # Radar chart comparison
         categories = ["AUC", "ICIR", "Sharpe", "勝率"]
         fig_radar = go.Figure()
-        colors = ["#636EFA", "#EF553B", "#00CC96", "#AB63FA"]
+        colors = ["#2563eb", "#7c3aed", "#10b981", "#f59e0b"]
         for i, row in df_comp.iterrows():
             # Normalize values for radar
             vals = [
@@ -426,10 +449,19 @@ if card_files:
                 r=vals, theta=categories, fill="toself",
                 name=row["模型"], line_color=colors[i % len(colors)]
             ))
+        fig_radar.update_layout(**glint_plotly_layout(
+            title="模型多維度效能比較",
+            subtitle="Multi-Dimensional Comparison · AUC · ICIR · Sharpe · 勝率",
+            height=420,
+            show_grid=False,
+        ))
         fig_radar.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
-            height=400, template="plotly_white",
-            title="模型多維度效能比較 | Multi-Dimensional Comparison"
+            polar=dict(
+                bgcolor="rgba(0,0,0,0)",
+                radialaxis=dict(visible=True, range=[0, 1],
+                                 tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569")),
+                angularaxis=dict(tickfont=dict(family="JetBrains Mono, monospace", size=11, color="#475569")),
+            ),
         )
         st.plotly_chart(fig_radar, use_container_width=True)
 
@@ -562,6 +594,10 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ===== Footer =====
-st.markdown("---")
-st.caption(f"📌 Phase 3 模型治理報告自動生成 ｜ 品質閘門 {_gv_pass}/{_gv_total} 通過為生產就緒條件 ｜ DSR 採用 Bailey & López de Prado (2014) 方法")
-st.markdown('<div class="page-footer">量化分析工作台 — Model Governance | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)
+render_page_footer(
+    "Model Governance",
+    limits_note=(
+        f"Phase 3 模型治理報告自動生成 ｜ 品質閘門 {_gv_pass}/{_gv_total} 通過為生產就緒條件 "
+        f"｜ DSR 採用 Bailey & López de Prado (2014) 方法"
+    ),
+)

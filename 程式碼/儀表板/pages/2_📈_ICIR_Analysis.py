@@ -17,6 +17,12 @@ inject_custom_css = _utils.inject_custom_css
 render_topbar = _utils.render_topbar
 inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
+glint_plotly_layout = _utils.glint_plotly_layout
+glint_styler_cmap = _utils.glint_styler_cmap
+render_chart_note = _utils.render_chart_note
+render_page_heading = _utils.render_page_heading
+render_trust_strip = _utils.render_trust_strip
+render_page_footer = _utils.render_page_footer
 
 inject_custom_css()
 
@@ -28,13 +34,6 @@ render_topbar(
     show_clock=True,
 )
 
-# Data Context Banner
-st.markdown("""
-<div class="gl-box-info" style="margin-top:14px;">
-📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）&nbsp;·&nbsp;Purged Walk-Forward CV（4 Folds）&nbsp;·&nbsp;LightGBM + XGBoost Ensemble
-</div>
-""", unsafe_allow_html=True)
-
 try:
     report, report_name = load_report()
     results = report["results"]
@@ -43,8 +42,19 @@ except Exception as e:
     st.error(f"無法載入報告：{str(e)}")
     st.stop()
 
-st.title("📈 ICIR 信號穩定性分析")
-st.caption("因子 IC(Information Coefficient)穩定性分析,衡量預測信號的持續性與可靠度")
+render_page_heading(
+    icon="📈",
+    title_zh="ICIR 信號穩定性",
+    title_en="Signal Stability",
+    command_line="以 Rank IC / std 拆解預測訊號的穩定度。|ICIR| > 0.5 視為可用，> 1.0 為優秀。D+20 月頻表現最佳。",
+    tone="violet",
+)
+render_trust_strip([
+    ("DATASET",  "2023/03 – 2025/03", "blue"),
+    ("IC WINDOW", "≈ 500 交易日",      "cyan"),
+    ("CV",        "Purged WF · 4 Folds", "violet"),
+    ("TARGET",    "|ICIR| > 0.5",      "emerald"),
+])
 
 # 白話版資料產生說明
 st.markdown("""
@@ -72,16 +82,12 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.info("""
-**如何閱讀本頁?**
-
-IC(Information Coefficient)衡量模型預測排序與實際報酬排序的相關性。
-
-ICIR = IC 的平均值 / IC 的標準差,類似「信號的夏普比率」。
-
-|ICIR| > 0.5 表示預測信號穩定可用,> 1.0 為優秀。
-
-D+20 的 ICIR 通常優於 D+1,因為短期價格雜訊較大。
+with st.expander("ℹ️ 如何閱讀本頁?", expanded=False):
+    st.markdown("""
+- **IC**（Information Coefficient）衡量模型預測排序與實際報酬排序的相關性。
+- **ICIR** = IC 的平均值 / IC 的標準差，類似「信號的夏普比率」。
+- **|ICIR| > 0.5** 表示預測信號穩定可用，**> 1.0** 為優秀。
+- **D+20** 的 ICIR 通常優於 D+1，因為短期價格雜訊較大。
 """)
 
 st.markdown("""
@@ -155,7 +161,7 @@ try:
         st.subheader("📊 ICIR 全景視圖 | ICIR Overview")
 
         fig_main = go.Figure()
-        for h, color in [("D+1", "#EF553B"), ("D+5", "#FFA15A"), ("D+20", "#00CC96")]:
+        for h, color in [("D+1", "#f43f5e"), ("D+5", "#f59e0b"), ("D+20", "#10b981")]:
             subset = df_icir[df_icir["Horizon"] == h]
             fig_main.add_trace(go.Bar(
                 name=h,
@@ -164,24 +170,34 @@ try:
                 marker_color=color,
                 text=subset["ICIR"].apply(lambda x: f"{x:.4f}"),
                 textposition="outside",
+                textfont=dict(family="JetBrains Mono, monospace", size=11),
                 hovertemplate="<b>%{x}</b><br>ICIR: %{y:.4f}<extra></extra>"
             ))
 
-        fig_main.update_layout(
-            barmode="group",
-            title="各引擎×天期 ICIR 對標 | ICIR by Engine × Horizon",
-            yaxis_title="ICIR",
-            height=450,
-            template="plotly_white",
-            hovermode="x unified",
-        )
-        fig_main.add_hline(y=0.5, line_dash="dash", line_color="green", annotation_text="優質閾值 | Good (0.5)")
-        fig_main.add_hline(y=1.0, line_dash="dash", line_color="darkgreen", annotation_text="優秀閾值 | Excellent (1.0)")
-        fig_main.add_hline(y=0, line_dash="dot", line_color="gray")
+        fig_main.update_layout(**glint_plotly_layout(
+            title="各引擎×天期 ICIR 對標",
+            subtitle="ICIR by Engine × Horizon",
+            height=460,
+            ylabel="ICIR",
+        ))
+        fig_main.update_layout(barmode="group", hovermode="x unified")
+        fig_main.add_hline(y=0.5, line_dash="dash", line_color="#10b981",
+                           annotation_text="優質閾值 Good (0.5)",
+                           annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#10b981"))
+        fig_main.add_hline(y=1.0, line_dash="dash", line_color="#065f46",
+                           annotation_text="優秀閾值 Excellent (1.0)",
+                           annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#065f46"))
+        fig_main.add_hline(y=0, line_dash="dot", line_color="#94a3b8")
         st.plotly_chart(fig_main, use_container_width=True)
+        render_chart_note(
+            "關鍵訊號：僅 <b>D+20</b> 地平線（綠柱）穩定站上零軸，<b>D+1/D+5</b>（紅/橘）普遍落於負區——驗證月頻才是可交易尺度。",
+            tone="emerald",
+        )
 
         st.dataframe(
-            df_icir.style.background_gradient(subset=["ICIR"], cmap="RdYlGn"),
+            df_icir.style.background_gradient(
+                subset=["ICIR"], cmap=glint_styler_cmap("diverging"), vmin=-0.15, vmax=0.10,
+            ),
             use_container_width=True,
             hide_index=True
         )
@@ -207,24 +223,24 @@ try:
                 x=d1_ic,
                 name="D+1 IC",
                 nbinsx=30,
-                marker_color="#EF553B",
-                opacity=0.7
+                marker_color="#f43f5e",
+                opacity=0.65
             ))
             fig_dist.add_trace(go.Histogram(
                 x=d20_ic,
                 name="D+20 IC",
                 nbinsx=30,
-                marker_color="#00CC96",
-                opacity=0.7
+                marker_color="#10b981",
+                opacity=0.65
             ))
-            fig_dist.update_layout(
-                title="短期 vs 長期 IC 分布 | D+1 vs D+20 Distribution",
-                xaxis_title="Daily Rank IC",
-                yaxis_title="頻次 | Frequency",
-                barmode="overlay",
+            fig_dist.update_layout(**glint_plotly_layout(
+                title="短期 vs 長期 IC 分布",
+                subtitle="D+1 vs D+20 Distribution · 模擬示意",
                 height=400,
-                template="plotly_white"
-            )
+                xlabel="Daily Rank IC",
+                ylabel="頻次 Frequency",
+            ))
+            fig_dist.update_layout(barmode="overlay")
             st.plotly_chart(fig_dist, use_container_width=True)
 
         with dist_col2:
@@ -241,8 +257,8 @@ try:
                 y=d20_perc,
                 mode="lines+markers",
                 name="D+1 vs D+20",
-                line=dict(color="#636EFA", width=2),
-                marker=dict(size=8)
+                line=dict(color="#2563eb", width=2),
+                marker=dict(size=7, color="#2563eb")
             ))
 
             # Diagonal reference line
@@ -253,16 +269,16 @@ try:
                 y=[min_val, max_val],
                 mode="lines",
                 name="Reference (equal)",
-                line=dict(color="gray", dash="dash")
+                line=dict(color="#94a3b8", dash="dash")
             ))
 
-            fig_qq.update_layout(
-                title="分位數比較 | Quantile-Quantile Plot",
-                xaxis_title="D+1 IC Percentile",
-                yaxis_title="D+20 IC Percentile",
+            fig_qq.update_layout(**glint_plotly_layout(
+                title="分位數比較",
+                subtitle="Quantile-Quantile Plot",
                 height=400,
-                template="plotly_white"
-            )
+                xlabel="D+1 IC Percentile",
+                ylabel="D+20 IC Percentile",
+            ))
             st.plotly_chart(fig_qq, use_container_width=True)
 
         # ===== Rolling ICIR (Simulated) =====
@@ -288,26 +304,28 @@ try:
             x=rolling_icir_d1.index,
             y=rolling_icir_d1.values,
             name="D+1 ICIR (30d MA)",
-            line=dict(color="#EF553B", width=2),
+            line=dict(color="#f43f5e", width=2),
             hovertemplate="<b>D+1</b><br>Date: %{x|%Y-%m-%d}<br>ICIR: %{y:.4f}<extra></extra>"
         ))
         fig_rolling.add_trace(go.Scatter(
             x=rolling_icir_d20.index,
             y=rolling_icir_d20.values,
             name="D+20 ICIR (30d MA)",
-            line=dict(color="#00CC96", width=2),
+            line=dict(color="#10b981", width=2),
             hovertemplate="<b>D+20</b><br>Date: %{x|%Y-%m-%d}<br>ICIR: %{y:.4f}<extra></extra>"
         ))
 
-        fig_rolling.update_layout(
-            title="30 日滾動 ICIR 趨勢 | 30-Day Rolling ICIR",
-            xaxis_title="時間 | Date",
-            yaxis_title="ICIR",
+        fig_rolling.update_layout(**glint_plotly_layout(
+            title="30 日滾動 ICIR 趨勢",
+            subtitle="30-Day Rolling ICIR · 模擬示意",
             height=400,
-            template="plotly_white",
-            hovermode="x unified"
-        )
-        fig_rolling.add_hline(y=0.5, line_dash="dash", line_color="green", annotation_text="優質閾值")
+            xlabel="時間 Date",
+            ylabel="ICIR",
+        ))
+        fig_rolling.update_layout(hovermode="x unified")
+        fig_rolling.add_hline(y=0.5, line_dash="dash", line_color="#10b981",
+                              annotation_text="優質閾值 0.5",
+                              annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#10b981"))
         st.plotly_chart(fig_rolling, use_container_width=True)
 
         # ===== 頻率結構與實務建議 =====
@@ -483,7 +501,4 @@ except Exception as e:
     st.error(f"ICIR 分析發生錯誤：{str(e)}")
 
 # ===== Footer & Limitations =====
-st.markdown("---")
-st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ Phase 3 治理已實現")
-
-st.markdown('<div class="page-footer">量化分析工作台 — ICIR Analysis | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)
+render_page_footer("ICIR Analysis")

@@ -18,6 +18,11 @@ inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
 load_feature_store = _utils.load_feature_store
 load_companies = _utils.load_companies
+glint_plotly_layout = _utils.glint_plotly_layout
+render_chart_note = _utils.render_chart_note
+render_page_heading = _utils.render_page_heading
+render_trust_strip = _utils.render_trust_strip
+render_page_footer = _utils.render_page_footer
 
 inject_custom_css()
 
@@ -29,13 +34,6 @@ render_topbar(
     show_clock=True,
 )
 
-# Data Context Banner
-st.markdown("""
-<div class="gl-box-info" style="margin-top:14px;">
-📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）&nbsp;·&nbsp;Purged Walk-Forward CV（4 Folds）&nbsp;·&nbsp;LightGBM + XGBoost Ensemble
-</div>
-""", unsafe_allow_html=True)
-
 try:
     report, report_name = load_report()
     results = report["results"]
@@ -44,8 +42,19 @@ except Exception as e:
     st.error(f"無法載入報告：{str(e)}")
     st.stop()
 
-st.title("🗃️ 資料探索")
-st.caption("Feature Store 資料品質總覽、Walk-Forward CV 架構與 Quality Gates 驗證狀態")
+render_page_heading(
+    icon="🗃️",
+    title_zh="資料探索",
+    title_en="Data Foundation",
+    command_line="資料基礎設施總覽：Feature Store 覆蓋率、Walk-Forward CV 架構、Quality Gates 驗證狀態。",
+    tone="blue",
+)
+render_trust_strip([
+    ("ROWS",     "948,976 筆",           "blue"),
+    ("SOURCES",  "bda2026 · FinMind",   "cyan"),
+    ("FEATURES", "91 / 1,623 候選",      "violet"),
+    ("PIT",      "已對齊 · 無洩漏",       "emerald"),
+])
 
 # 白話版資料產生說明
 st.markdown("""
@@ -244,15 +253,18 @@ try:
                 hovertemplate=f"<b>Fold {fid} Test</b><br>Samples: {fold['n_test']:,}<extra></extra>",
             ))
 
+        fig.update_layout(**glint_plotly_layout(
+            title="Purged Walk-Forward CV 時間軸",
+            subtitle="Temporal Structure · 防未來資訊洩露",
+            height=340,
+            show_grid=False,
+        ))
         fig.update_layout(
-            title="Purged Walk-Forward CV 時間軸 | Temporal Structure",
             barmode="stack",
-            height=320,
-            template="plotly_white",
             xaxis_visible=False,
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
-            margin=dict(l=10, r=10, t=60, b=40),
-            hovermode="closest"
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0,
+                        font=dict(family="JetBrains Mono, monospace", size=11)),
+            hovermode="closest",
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -472,12 +484,17 @@ $$
         y="Count",
         color="Label",
         barmode="group",
-        color_discrete_map={"DOWN": "#EF553B", "FLAT": "#636EFA", "UP": "#00CC96"},
-        title="各天期標籤分佈 | Label Distribution by Horizon",
-        template="plotly_white",
-        labels={"Count": "樣本數 | Sample Count", "Horizon": "預測天期 | Horizon"}
+        color_discrete_map={"DOWN": "#f43f5e", "FLAT": "#94a3b8", "UP": "#10b981"},
+        labels={"Count": "樣本數 Sample Count", "Horizon": "預測天期 Horizon"},
     )
-    fig_label.update_layout(height=400, hovermode="x unified")
+    fig_label.update_layout(**glint_plotly_layout(
+        title="各天期標籤分佈",
+        subtitle="Label Distribution by Horizon · FLAT 佔比偏高屬市場常態",
+        height=400,
+        xlabel="預測天期 Horizon",
+        ylabel="樣本數 Sample Count",
+    ))
+    fig_label.update_layout(hovermode="x unified")
     st.plotly_chart(fig_label, use_container_width=True)
 
     # ===== Raw JSON Report =====
@@ -491,7 +508,4 @@ except Exception as e:
     st.error(f"資料探索發生錯誤：{str(e)}")
 
 # ===== Footer & Limitations =====
-st.markdown("---")
-st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ Phase 3 治理已實現")
-
-st.markdown('<div class="page-footer">量化分析工作台 — Data Explorer | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)
+render_page_footer("Data Explorer")

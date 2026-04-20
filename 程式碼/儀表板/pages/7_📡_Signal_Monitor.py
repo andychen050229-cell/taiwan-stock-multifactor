@@ -17,6 +17,10 @@ render_topbar = _utils.render_topbar
 glint_plotly_layout = _utils.glint_plotly_layout
 glint_heatmap_colorscale = _utils.glint_heatmap_colorscale
 glint_colorbar = _utils.glint_colorbar
+render_degraded_banner = _utils.render_degraded_banner
+render_page_heading = _utils.render_page_heading
+render_trust_strip = _utils.render_trust_strip
+render_page_footer = _utils.render_page_footer
 
 inject_custom_css()
 
@@ -28,26 +32,25 @@ render_topbar(
     show_clock=True,
 )
 
-# Data Context Banner
-st.markdown("""
-<div class="gl-box-info">
-📡 <strong>Phase 3 — 信號監控</strong>：資料漂移偵測 ｜ 信號衰減分析 ｜ 再訓練建議
-</div>
-""", unsafe_allow_html=True)
+render_page_heading(
+    icon="📡",
+    title_zh="信號監控",
+    title_en="Signal Monitor",
+    command_line="追蹤資料漂移 × 信號衰減，PSI / KS / 半衰期三路夾擊——即時提醒何時該重新訓練。",
+    tone="cyan",
+)
+render_trust_strip([
+    ("PHASE",    "3 · Monitor",         "violet"),
+    ("DRIFT",    "PSI · KS",             "cyan"),
+    ("DECAY",    "Monthly IC · Half-Life", "blue"),
+    ("EMBARGO",  "20 交易日",             "amber"),
+])
 
-st.title("📡 信號監控")
-st.caption("持續監控模型信號品質、特徵漂移、及再訓練需求")
-
-st.info("""
-**如何閱讀本頁？**
-
-信號監控追蹤模型是否仍然可靠。
-
-PSI（漂移指標）：衡量資料分佈是否改變。PSI < 0.1 = 穩定。
-
-ICIR（信號穩定性）：衡量預測信號是否一致。|ICIR| > 0.5 = 強信號。
-
-半衰期：預測能力多久會衰減一半，決定何時需要重新訓練。
+with st.expander("ℹ️ 如何閱讀本頁？", expanded=False):
+    st.markdown("""
+- **PSI**（漂移指標）：< 0.1 ＝ 穩定；0.1–0.2 ＝ 輕微偏移；> 0.2 ＝ 顯著偏移。
+- **ICIR**（信號穩定性）：|ICIR| > 0.5 ＝ 強信號。
+- **半衰期**：預測能力多久會衰減一半，決定何時需要重新訓練。
 """)
 
 
@@ -79,7 +82,20 @@ drift_data = _load_gov_json("drift_report.json")
 decay_data = _load_gov_json("signal_decay_report.json")
 
 if not drift_data and not decay_data:
-    st.warning("尚未執行 Phase 3，請先執行 `python run_phase3.py`")
+    render_degraded_banner(
+        title="摘要版模式 · 信號監控尚未產生",
+        reason="本機執行 `python run_phase3.py` 以產生漂移 / 衰減報告；Cloud 預覽會略過此區。",
+        available=[
+            ("頁面導覽", "頂部麵包屑與左側導覽可正常使用"),
+            ("Model Card / DSR", "請至『模型治理』分頁檢視"),
+        ],
+        unavailable=[
+            ("資料漂移偵測", "需要 outputs/governance/drift_report.json"),
+            ("信號衰減分析", "需要 outputs/governance/signal_decay_report.json"),
+            ("再訓練建議", "依賴上述兩份報告"),
+        ],
+        tone="blue",
+    )
     st.stop()
 
 # --- Sidebar ---
@@ -342,7 +358,7 @@ if decay_data:
 
         if horizon_choice in monthly_trends:
             fig_ic = go.Figure()
-            colors_palette = ["#636EFA", "#EF553B", "#00CC96"]
+            colors_palette = ["#2563eb", "#7c3aed", "#06b6d4"]
 
             for i, (feat, months) in enumerate(monthly_trends[horizon_choice].items()):
                 if months:
@@ -397,7 +413,7 @@ if decay_data:
             # Trend direction visualization
             fig_hl = go.Figure()
             for row in hl_rows:
-                color = "#22c55e" if row["趨勢"] == "improving" else ("#ef4444" if row["趨勢"] == "decaying" else "#636EFA")
+                color = "#10b981" if row["趨勢"] == "improving" else ("#f43f5e" if row["趨勢"] == "decaying" else "#2563eb")
                 fig_hl.add_trace(go.Bar(
                     x=[row["天期"]], y=[row["月斜率"]],
                     marker_color=color, showlegend=False,
@@ -525,6 +541,10 @@ else:
     """)
 
 # ===== Footer =====
-st.markdown("---")
-st.caption("📌 信號監控基於 Phase 3 自動分析 ｜ PSI 閾值:0.1(輕微)/ 0.2(顯著)｜ ICIR 閾值:0.2(中等)/ 0.5(強)")
-st.markdown('<div class="page-footer">量化分析工作台 — Signal Monitor | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)
+render_page_footer(
+    "Signal Monitor",
+    limits_note=(
+        "信號監控基於 Phase 3 自動分析 ｜ PSI 閾值：0.1（輕微）/ 0.2（顯著）"
+        "｜ ICIR 閾值：0.2（中等）/ 0.5（強）"
+    ),
+)

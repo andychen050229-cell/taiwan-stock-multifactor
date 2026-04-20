@@ -68,7 +68,7 @@ st.markdown("""
     .stock-card {
         background: #ffffff;
         border: 1px solid #e0e4ea;
-        border-left: 5px solid #636EFA;
+        border-left: 5px solid #2563eb;
         border-radius: 12px;
         padding: 20px 24px;
         margin-bottom: 16px;
@@ -97,7 +97,7 @@ st.markdown("""
     }
     .stock-id {
         font-size: 0.9rem;
-        color: #636EFA;
+        color: #2563eb;
         font-weight: 600;
         margin-left: 8px;
     }
@@ -144,7 +144,7 @@ st.markdown("""
     /* Info panels */
     .info-panel {
         background: #f8fafc;
-        border-left: 4px solid #636EFA;
+        border-left: 4px solid #2563eb;
         border-radius: 8px;
         padding: 12px 16px;
         margin: 8px 0;
@@ -190,7 +190,7 @@ st.markdown("""
     }
     /* Section header */
     .section-header {
-        border-left: 4px solid #636EFA;
+        border-left: 4px solid #2563eb;
         padding-left: 12px;
         margin-top: 24px;
         margin-bottom: 16px;
@@ -823,7 +823,7 @@ try:
                     x=price_hist["trade_date"],
                     y=price_hist["closing_price"],
                     mode="lines",
-                    line=dict(color="#636EFA", width=2.5),
+                    line=dict(color="#2563eb", width=2.5),
                     fill="tozeroy",
                     fillcolor="rgba(99, 110, 250, 0.08)",
                     name="收盤價",
@@ -843,7 +843,7 @@ try:
                     x=[price_hist["trade_date"].iloc[-1]],
                     y=[price_hist["closing_price"].iloc[-1]],
                     mode="markers",
-                    marker=dict(size=12, color="#636EFA"),
+                    marker=dict(size=12, color="#2563eb"),
                     showlegend=False,
                     hoverinfo="skip",
                 ), row=1, col=1)
@@ -873,12 +873,19 @@ try:
 
                 fig.update_layout(
                     height=320,
-                    template="plotly_white",
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    font=dict(family="Inter, 'Noto Sans TC', sans-serif", color="#334155", size=11),
                     margin=dict(l=10, r=10, t=40, b=10),
                     hovermode="x unified",
                     showlegend=True,
-                    legend=dict(x=0.01, y=0.98)
+                    legend=dict(x=0.01, y=0.98,
+                                font=dict(family="JetBrains Mono, monospace", size=10)),
                 )
+                fig.update_xaxes(showgrid=True, gridcolor="rgba(148,163,184,0.16)",
+                                 tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"))
+                fig.update_yaxes(showgrid=True, gridcolor="rgba(148,163,184,0.16)",
+                                 tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"))
                 st.plotly_chart(fig, use_container_width=True, key=f"price_{cid}_{horizon}")
             else:
                 st.info("無價格資料")
@@ -1239,7 +1246,7 @@ try:
                 fig_bar = go.Figure()
                 categories = ["P10（悲觀）", "中位數", "平均值", "P90（樂觀）"]
                 bar_values = [p10 * 100, median_ret * 100, mean_ret * 100, p90 * 100]
-                colors = ["#dc2626", "#f59e0b", "#636EFA", "#059669"]
+                colors = ["#dc2626", "#f59e0b", "#2563eb", "#059669"]
 
                 fig_bar.add_trace(go.Bar(
                     x=categories, y=bar_values,
@@ -1251,13 +1258,21 @@ try:
                 ))
                 fig_bar.add_hline(y=0, line_dash="dash", line_color="#9ca3af", line_width=1)
                 fig_bar.update_layout(
-                    title=dict(text=f"D+{horizon} 全市場報酬分佈統計", font=dict(size=14)),
-                    yaxis_title="報酬率 (%)",
+                    title=dict(text=f"D+{horizon} 全市場報酬分佈統計",
+                               font=dict(family="Inter, 'Noto Sans TC', sans-serif", size=14, color="#1e293b")),
+                    yaxis_title=dict(text="報酬率 (%)",
+                                     font=dict(family="Inter, 'Noto Sans TC', sans-serif", size=12, color="#475569")),
                     height=400,
-                    template="plotly_white",
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    font=dict(family="Inter, 'Noto Sans TC', sans-serif", color="#334155", size=11),
                     margin=dict(l=20, r=20, t=60, b=30),
                     showlegend=False,
                 )
+                fig_bar.update_xaxes(showgrid=False,
+                                     tickfont=dict(family="Inter, 'Noto Sans TC', sans-serif", size=11, color="#475569"))
+                fig_bar.update_yaxes(showgrid=True, gridcolor="rgba(148,163,184,0.16)",
+                                     tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"))
                 st.plotly_chart(fig_bar, use_container_width=True)
                 st.caption(f"📊 全市場中位數報酬 {median_ret:+.1%}，標準差 {std_ret:.1%}。上方展示的判讀股為模型篩選的少數偏多標的。")
             else:
@@ -1282,7 +1297,7 @@ try:
         fig_vol.add_trace(go.Scatter(
             x=vol_dates, y=vol_vals,
             mode="lines+markers",
-            line=dict(color="#636EFA", width=2.5),
+            line=dict(color="#2563eb", width=2.5),
             marker=dict(size=5),
             name="波動度指標",
             fill="tozeroy",
@@ -1296,11 +1311,18 @@ try:
                           annotation_text=f"P90 高波動 ({vol_p90:.2f})", line_width=1)
         fig_vol.update_layout(
             height=280,
-            template="plotly_white",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter, 'Noto Sans TC', sans-serif", color="#334155", size=11),
             margin=dict(l=20, r=20, t=20, b=30),
-            yaxis_title="波動度指標",
+            yaxis_title=dict(text="波動度指標",
+                             font=dict(family="Inter, 'Noto Sans TC', sans-serif", size=12, color="#475569")),
             showlegend=False,
         )
+        fig_vol.update_xaxes(showgrid=True, gridcolor="rgba(148,163,184,0.16)",
+                             tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"))
+        fig_vol.update_yaxes(showgrid=True, gridcolor="rgba(148,163,184,0.16)",
+                             tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"))
         st.plotly_chart(fig_vol, use_container_width=True)
 
         # Explanatory note

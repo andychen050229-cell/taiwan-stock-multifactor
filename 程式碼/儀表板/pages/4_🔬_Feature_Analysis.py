@@ -16,6 +16,12 @@ inject_custom_css = _utils.inject_custom_css
 render_topbar = _utils.render_topbar
 inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
+glint_plotly_layout = _utils.glint_plotly_layout
+GLINT_SEQUENTIAL_WARM = _utils.GLINT_SEQUENTIAL_WARM
+render_chart_note = _utils.render_chart_note
+render_page_heading = _utils.render_page_heading
+render_trust_strip = _utils.render_trust_strip
+render_page_footer = _utils.render_page_footer
 
 inject_custom_css()
 
@@ -27,14 +33,6 @@ render_topbar(
     show_clock=True,
 )
 
-# Data Context Banner
-st.markdown("""
-<div class="gl-box-info">
-📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）｜Purged Walk-Forward CV（4 Folds）｜LightGBM + XGBoost Ensemble<br>
-🆕 <strong>Phase 4 擴充</strong>：新增 16 個因子（ROE/ROIC/EBITDA/P&sol;B/P&sol;S/EV&sol;EBITDA/市場寬度/波動率期限結構/複合機制指標等），候選池擴充至 59 個
-</div>
-""", unsafe_allow_html=True)
-
 try:
     report, report_name = load_report()
     results = report["results"]
@@ -43,9 +41,22 @@ except Exception as e:
     st.error(f"無法載入報告：{str(e)}")
     st.stop()
 
-st.title("🔬 特徵工程分析")
 _n_final = len(results.get("feature_selection", {}).get("selected", []))
-st.caption(f"{_n_final} 因子特徵工程流程：MI 篩選 → VIF 去共線性 → Cross-fold 穩定性驗證")
+_n_candidates = results.get("feature_selection", {}).get("n_candidates", 59)
+
+render_page_heading(
+    icon="🔬",
+    title_zh="特徵工程分析",
+    title_en="Feature Engineering",
+    command_line=f"三階段因子篩選（MI → VIF → Cross-fold 穩定性）：候選 {_n_candidates} 個 → 最終 {_n_final} 個特徵入模。",
+    tone="cyan",
+)
+render_trust_strip([
+    ("CANDIDATES", f"{_n_candidates} 因子",   "blue"),
+    ("SELECTED",   f"{_n_final} 因子",        "emerald"),
+    ("METHOD",     "MI · VIF · Jaccard",     "violet"),
+    ("PHASE 4",    "+16 新因子（ROE/ROIC/…)", "amber"),
+])
 
 # ===== Feature Selection Pipeline =====
 try:
@@ -213,7 +224,7 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
 
     # Funnel chart
     fig_funnel = go.Figure(go.Funnel(
-        y=["候選特徵 | Candidates\n(5 支柱)", "MI 篩選 | MI Filter", "VIF 去共線性 | VIF", "最終選擇 | Selected"],
+        y=["候選特徵 Candidates (5 支柱)", "MI 篩選 MI Filter", "VIF 去共線性 VIF", "最終選擇 Selected"],
         x=[
             fsel.get("n_candidates", 43),
             fsel.get("after_mi", 26),
@@ -222,13 +233,14 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
         ],
         textposition="inside",
         textinfo="value+percent initial",
-        marker=dict(color=["#636EFA", "#EF553B", "#00CC96", "#AB63FA"])
+        textfont=dict(family="JetBrains Mono, monospace", size=12, color="white"),
+        marker=dict(color=["#2563eb", "#06b6d4", "#7c3aed", "#10b981"])
     ))
-    fig_funnel.update_layout(
-        title="特徵篩選漏斗 | Feature Selection Funnel",
-        height=380,
-        template="plotly_white"
-    )
+    fig_funnel.update_layout(**glint_plotly_layout(
+        title="特徵篩選漏斗",
+        subtitle="Feature Selection Funnel · 候選 → MI → VIF → 最終",
+        height=400,
+    ))
     st.plotly_chart(fig_funnel, use_container_width=True)
 
 except Exception as e:
@@ -270,17 +282,19 @@ try:
         fig_pie = go.Figure(data=[go.Pie(
             labels=[f"{cat_labels.get(k,k)} ({v})" for k, v in cat_counts.items()],
             values=list(cat_counts.values()),
-            hole=0.4,
-            marker_colors=["#636EFA", "#00CC96", "#AB63FA", "#FFA15A", "#EF553B"],
+            hole=0.42,
+            marker_colors=["#2563eb", "#10b981", "#7c3aed", "#f59e0b", "#f43f5e"],
             textinfo="label+percent",
-            textfont_size=11,
+            textfont=dict(family="JetBrains Mono, monospace", size=11),
             hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Percentage: %{percent}<extra></extra>"
         )])
-        fig_pie.update_layout(
-            title="特徵五支柱分佈 | Feature Pillar Distribution",
+        fig_pie.update_layout(**glint_plotly_layout(
+            title="特徵五支柱分佈",
+            subtitle="Feature Pillar Distribution",
             height=400,
-            showlegend=False
-        )
+            show_grid=False,
+        ))
+        fig_pie.update_layout(showlegend=False)
 
         col_pie, col_list = st.columns([2, 3])
         with col_pie:
@@ -345,14 +359,17 @@ try:
                 color="Horizon",
                 orientation="h",
                 barmode="group",
-                color_discrete_map={"D+1": "#EF553B", "D+5": "#FFA15A", "D+20": "#00CC96"},
-                title=f"{engine_choice.upper()} — 各天期 Top-10 特徵 | Top-10 by Horizon",
-                template="plotly_white"
+                color_discrete_map={"D+1": "#f43f5e", "D+5": "#f59e0b", "D+20": "#10b981"},
             )
-            fig_imp.update_layout(
+            fig_imp.update_layout(**glint_plotly_layout(
+                title=f"{engine_choice.upper()} — 各天期 Top-10 特徵",
+                subtitle="Top-10 Features by Horizon",
                 height=600,
+                xlabel="Importance",
+            ))
+            fig_imp.update_layout(
                 yaxis={"categoryorder": "total ascending"},
-                hovermode="x unified"
+                hovermode="x unified",
             )
             st.plotly_chart(fig_imp, use_container_width=True)
 
@@ -395,20 +412,25 @@ try:
                 fig_j = go.Figure(data=[go.Bar(
                     x=[f"Fold {i} vs {i+1}" for i in range(len(jaccards))],
                     y=jaccards,
-                    marker_color=["#059669" if j > 0.8 else "#f59e0b" if j > 0.5 else "#dc2626" for j in jaccards],
+                    marker_color=["#10b981" if j > 0.8 else "#f59e0b" if j > 0.5 else "#f43f5e" for j in jaccards],
                     text=[f"{j:.3f}" for j in jaccards],
                     textposition="outside",
+                    textfont=dict(family="JetBrains Mono, monospace", size=11),
                     hovertemplate="<b>%{x}</b><br>Jaccard: %{y:.3f}<extra></extra>"
                 )])
-                fig_j.update_layout(
-                    title="逐對 Jaccard 相似度 | Pairwise Jaccard",
-                    height=350,
-                    template="plotly_white",
-                    yaxis_range=[0, 1.1],
-                    hovermode="x unified"
-                )
-                fig_j.add_hline(y=0.8, line_dash="dash", line_color="#059669", annotation_text="優秀 | Excellent (0.8)")
-                fig_j.add_hline(y=0.5, line_dash="dash", line_color="#f59e0b", annotation_text="及格 | Fair (0.5)")
+                fig_j.update_layout(**glint_plotly_layout(
+                    title="逐對 Jaccard 相似度",
+                    subtitle="Pairwise Jaccard · 綠 ≥ 0.8 / 橘 ≥ 0.5 / 紅 < 0.5",
+                    height=360,
+                    ylabel="Jaccard",
+                ))
+                fig_j.update_layout(yaxis_range=[0, 1.1], hovermode="x unified")
+                fig_j.add_hline(y=0.8, line_dash="dash", line_color="#10b981",
+                                annotation_text="優秀 Excellent (0.8)",
+                                annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#10b981"))
+                fig_j.add_hline(y=0.5, line_dash="dash", line_color="#f59e0b",
+                                annotation_text="及格 Fair (0.5)",
+                                annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#b45309"))
                 st.plotly_chart(fig_j, use_container_width=True)
 
         with col_s2:
@@ -441,12 +463,18 @@ try:
                 y="特徵 | Feature",
                 orientation="h",
                 color="VIF",
-                color_continuous_scale="Reds",
-                title="VIF 值分佈 | VIF Distribution",
-                template="plotly_white"
+                color_continuous_scale=GLINT_SEQUENTIAL_WARM,
             )
-            fig_vif.update_layout(height=350, showlegend=False, coloraxis_showscale=False)
-            fig_vif.add_vline(x=10, line_dash="dash", line_color="red", annotation_text="多共線閾值 | Threshold (10)")
+            fig_vif.update_layout(**glint_plotly_layout(
+                title="VIF 值分佈",
+                subtitle="VIF Distribution · 橫線為多共線閾值",
+                height=360,
+                xlabel="VIF",
+            ))
+            fig_vif.update_layout(showlegend=False, coloraxis_showscale=False)
+            fig_vif.add_vline(x=10, line_dash="dash", line_color="#f43f5e",
+                              annotation_text="多共線閾值 Threshold (10)",
+                              annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#9f1239"))
             st.plotly_chart(fig_vif, use_container_width=True)
             st.caption("VIF < 10 表示可接受的多重共線性水平 | VIF < 10 indicates acceptable multicollinearity")
 
@@ -568,27 +596,28 @@ try:
                 fig_q.add_trace(go.Bar(
                     x=[f"Q{k}" for k in q_keys],
                     y=q_vals,
-                    marker_color=["#EF553B", "#FFA15A", "#636EFA", "#AB63FA", "#00CC96"][:len(q_keys)],
+                    marker_color=["#f43f5e", "#f59e0b", "#2563eb", "#7c3aed", "#10b981"][:len(q_keys)],
                     text=[f"{v:+.2f}%" for v in q_vals],
                     textposition="outside",
+                    textfont=dict(family="JetBrains Mono, monospace", size=11),
                     hovertemplate="<b>%{x}</b><br>Return: %{customdata:.2f}%<extra></extra>",
                     customdata=q_vals
                 ))
 
-                fig_q.update_layout(
-                    title=f"{display_name} Quintile 報酬 | Quintile Returns",
-                    xaxis_title="分組 | Quintile (Q1=最低分數, Q5=最高分數)",
-                    yaxis_title="年化報酬 | Annualized Return",
-                    yaxis_ticksuffix="%",
+                fig_q.update_layout(**glint_plotly_layout(
+                    title=f"{display_name} Quintile 報酬",
+                    subtitle="Quintile Returns · Q1 最低分數 → Q5 最高分數",
                     height=380,
-                    template="plotly_white",
-                    hovermode="x unified"
-                )
+                    xlabel="分組 Quintile",
+                    ylabel="年化報酬 Annualized Return",
+                ))
+                fig_q.update_layout(yaxis_ticksuffix="%", hovermode="x unified")
 
                 avg_return = np.mean(q_vals)
-                fig_q.add_hline(y=avg_return, line_dash="dash", line_color="gray",
-                                annotation_text=f"平均 {avg_return:.2f}%")
-                fig_q.add_hline(y=0, line_color="gray", line_dash="dot")
+                fig_q.add_hline(y=avg_return, line_dash="dash", line_color="#94a3b8",
+                                annotation_text=f"平均 {avg_return:.2f}%",
+                                annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#64748b"))
+                fig_q.add_hline(y=0, line_color="#cbd5e1", line_dash="dot")
 
                 st.plotly_chart(fig_q, use_container_width=True)
 
@@ -608,7 +637,4 @@ except Exception as e:
     st.code(traceback.format_exc())
 
 # ===== Footer & Limitations =====
-st.markdown("---")
-st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ Phase 3 治理已實現")
-
-st.markdown('<div class="page-footer">量化分析工作台 — Feature Analysis | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)
+render_page_footer("Feature Analysis")

@@ -16,6 +16,11 @@ inject_custom_css = _utils.inject_custom_css
 render_topbar = _utils.render_topbar
 inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
+glint_plotly_layout = _utils.glint_plotly_layout
+render_chart_note = _utils.render_chart_note
+render_page_heading = _utils.render_page_heading
+render_trust_strip = _utils.render_trust_strip
+render_page_footer = _utils.render_page_footer
 
 inject_custom_css()
 
@@ -27,13 +32,6 @@ render_topbar(
     show_clock=True,
 )
 
-# Data Context Banner
-st.markdown("""
-<div class="gl-box-info" style="margin-top:14px;">
-📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）&nbsp;·&nbsp;Purged Walk-Forward CV（4 Folds）&nbsp;·&nbsp;LightGBM + XGBoost Ensemble
-</div>
-""", unsafe_allow_html=True)
-
 try:
     report, report_name = load_report()
     results = report["results"]
@@ -43,21 +41,26 @@ except Exception as e:
     st.error(f"無法載入報告：{str(e)}")
     st.stop()
 
-st.title("💰 策略回測分析")
-st.caption("基於歷史資料的策略回測結果，含交易成本、風險指標與績效歸因分析")
+render_page_heading(
+    icon="💰",
+    title_zh="策略回測分析",
+    title_en="Strategy Backtest",
+    command_line="在三種成本情境下檢驗各引擎 × 天期的年化報酬、Sharpe、最大回撤；D+20 月頻為推薦配置。",
+    tone="emerald",
+)
+render_trust_strip([
+    ("DATASET",  "2023/03 – 2025/03",       "blue"),
+    ("CV",        "Purged WF · 4 Folds",     "violet"),
+    ("COSTS",     "Discount / Std / Conservative", "amber"),
+    ("BENCHMARK", "等權組合",                 "cyan"),
+])
 
-st.info("""
-**如何閱讀本頁？**
-
-回測模擬模型在歷史資料上的交易表現。
-
-年化報酬率 > 0 代表策略有正 alpha。
-
-夏普比率（Sharpe Ratio）> 1.0 為良好的風險調整報酬。
-
-最大回撤（Max Drawdown）顯示策略最差時會虧損多少。
-
-三種成本情境（無成本 / 折扣 / 保守）幫助評估交易摩擦對策略的影響。
+with st.expander("ℹ️ 如何閱讀本頁？", expanded=False):
+    st.markdown("""
+- **年化報酬 > 0** ＝ 策略具有正 alpha。
+- **Sharpe > 1.0** ＝ 風險調整後表現良好。
+- **最大回撤 (MDD)** ＝ 策略最糟情況下的跌幅。
+- **三種成本情境**（無成本 / 折扣 / 保守）用於檢驗交易摩擦對策略的侵蝕程度。
 """)
 
 # Controls
@@ -169,7 +172,7 @@ try:
         fig = go.Figure()
         engines = [r["Engine"] for r in rows]
         returns = [r["Ann. Return"] for r in rows]
-        colors = ["#00CC96" if r > 0 else "#EF553B" for r in returns]
+        colors = ["#10b981" if r > 0 else "#f43f5e" for r in returns]
         fig.add_trace(go.Bar(
             x=engines,
             y=returns,
@@ -178,15 +181,16 @@ try:
             textposition="outside",
             hovertemplate="<b>%{x}</b><br>Return: %{y:.2%}<extra></extra>"
         ))
-        fig.update_layout(
-            title=f"D+{horizon} 年化報酬率 | Annualized Return ({cost_model})",
-            yaxis_title="年化報酬 | Return",
-            yaxis_tickformat=".1%",
+        fig.update_layout(**glint_plotly_layout(
+            title=f"D+{horizon} 年化報酬率",
+            subtitle=f"Annualized Return · {cost_model}",
             height=400,
-            template="plotly_white",
-            hovermode="x unified"
-        )
-        fig.add_hline(y=0, line_color="gray", line_dash="dash", annotation_text="零軸")
+            ylabel="年化報酬 Return",
+        ))
+        fig.update_layout(yaxis_tickformat=".1%", hovermode="x unified")
+        fig.add_hline(y=0, line_color="#94a3b8", line_dash="dash",
+                      annotation_text="零軸",
+                      annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#64748b"))
         st.plotly_chart(fig, use_container_width=True)
 
     with r2:
@@ -201,16 +205,20 @@ try:
             textposition="outside",
             hovertemplate="<b>%{x}</b><br>Sharpe: %{y:.3f}<extra></extra>"
         ))
-        fig_sr.update_layout(
-            title=f"D+{horizon} 夏普比率 | Sharpe Ratio ({cost_model})",
-            yaxis_title="夏普比率 | Sharpe",
+        fig_sr.update_layout(**glint_plotly_layout(
+            title=f"D+{horizon} 夏普比率",
+            subtitle=f"Sharpe Ratio · {cost_model}",
             height=400,
-            template="plotly_white",
-            hovermode="x unified"
-        )
-        fig_sr.add_hline(y=0.5, line_dash="dash", line_color="#059669", annotation_text="優質門檻 | Good (0.5)")
-        fig_sr.add_hline(y=1.0, line_dash="dash", line_color="#10b981", annotation_text="優秀門檻 | Excellent (1.0)")
-        fig_sr.add_hline(y=0, line_color="gray", line_dash="dot")
+            ylabel="夏普比率 Sharpe",
+        ))
+        fig_sr.update_layout(hovermode="x unified")
+        fig_sr.add_hline(y=0.5, line_dash="dash", line_color="#10b981",
+                         annotation_text="優質門檻 Good (0.5)",
+                         annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#10b981"))
+        fig_sr.add_hline(y=1.0, line_dash="dash", line_color="#065f46",
+                         annotation_text="優秀門檻 Excellent (1.0)",
+                         annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#065f46"))
+        fig_sr.add_hline(y=0, line_color="#94a3b8", line_dash="dot")
         st.plotly_chart(fig_sr, use_container_width=True)
 
     # ===== Risk-Return Scatter Plot =====
@@ -232,12 +240,12 @@ try:
     fig_scatter = go.Figure()
     for _, row in df_scatter.iterrows():
         color_map = {
-            "LIGHTGBM": "#636EFA",
-            "XGBOOST": "#EF553B",
-            "ENSEMBLE": "#00CC96",
-            "BENCHMARK": "#9CA3AF"
+            "LIGHTGBM": "#2563eb",
+            "XGBOOST": "#7c3aed",
+            "ENSEMBLE": "#10b981",
+            "BENCHMARK": "#94a3b8"
         }
-        color = color_map.get(row["Engine"], "#636EFA")
+        color = color_map.get(row["Engine"], "#2563eb")
 
         fig_scatter.add_trace(go.Scatter(
             x=[row["MDD"]],
@@ -247,27 +255,32 @@ try:
             marker=dict(
                 size=15 + row["Sharpe"] * 10,
                 color=color,
-                opacity=0.7,
+                opacity=0.82,
                 line=dict(color="white", width=2)
             ),
             text=[row["Engine"]],
             textposition="top center",
+            textfont=dict(family="JetBrains Mono, monospace", size=11),
             hovertemplate=f"<b>{row['Engine']}</b><br>MDD: {row['MDD']:.2%}<br>Return: {row['Return']:.2%}<br>Sharpe: {row['Sharpe']:.3f}<extra></extra>"
         ))
 
-    fig_scatter.update_layout(
-        title=f"D+{horizon} 風險-報酬分析 | Risk-Return Analysis",
-        xaxis_title="最大回撤 | Max Drawdown (風險 | Risk)",
-        yaxis_title="年化報酬 | Annualized Return",
-        yaxis_tickformat=".1%",
-        xaxis_tickformat=".1%",
-        height=450,
-        template="plotly_white",
-        hovermode="closest"
-    )
-    fig_scatter.add_hline(y=0, line_color="gray", line_dash="dash")
-    fig_scatter.add_vline(x=0.15, line_color="orange", line_dash="dash", annotation_text="典型回撤 | Typical DD")
+    fig_scatter.update_layout(**glint_plotly_layout(
+        title=f"D+{horizon} 風險-報酬分析",
+        subtitle="Risk-Return Analysis · 泡泡大小＝Sharpe",
+        height=460,
+        xlabel="最大回撤 Max Drawdown（風險）",
+        ylabel="年化報酬 Annualized Return",
+    ))
+    fig_scatter.update_layout(yaxis_tickformat=".1%", xaxis_tickformat=".1%", hovermode="closest")
+    fig_scatter.add_hline(y=0, line_color="#94a3b8", line_dash="dash")
+    fig_scatter.add_vline(x=0.15, line_color="#f59e0b", line_dash="dash",
+                          annotation_text="典型回撤 Typical DD",
+                          annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#b45309"))
     st.plotly_chart(fig_scatter, use_container_width=True)
+    render_chart_note(
+        "左上象限＝風險低、報酬高。Ensemble（綠）相對 LightGBM（藍）與 XGBoost（紫）通常位於較佳象限，基準（灰）落於右下提供對照。",
+        tone="violet",
+    )
 
     # ===== Cost Impact (Waterfall) =====
     st.divider()
@@ -365,12 +378,16 @@ $$
             color="Cost Model",
             barmode="group",
             text_auto=".1%",
-            color_discrete_map={"Discount": "#00CC96", "Standard": "#636EFA", "Conservative": "#EF553B"},
-            template="plotly_white",
-            title=f"D+{horizon} 各成本情境年化報酬 | Returns by Cost Model"
+            color_discrete_map={"Discount": "#10b981", "Standard": "#2563eb", "Conservative": "#f43f5e"},
         )
-        fig_cost.update_layout(height=420, yaxis_tickformat=".1%", hovermode="x unified")
-        fig_cost.add_hline(y=0, line_color="gray", line_dash="dash")
+        fig_cost.update_layout(**glint_plotly_layout(
+            title=f"D+{horizon} 各成本情境年化報酬",
+            subtitle="Returns by Cost Model",
+            height=420,
+            ylabel="年化報酬 Return",
+        ))
+        fig_cost.update_layout(yaxis_tickformat=".1%", hovermode="x unified")
+        fig_cost.add_hline(y=0, line_color="#94a3b8", line_dash="dash")
         st.plotly_chart(fig_cost, use_container_width=True)
 
         # Cost sensitivity analysis
@@ -384,21 +401,22 @@ $$
             fig_cost_sens.add_trace(go.Bar(
                 x=cost_models,
                 y=returns_by_model,
-                marker_color=["#00CC96", "#636EFA", "#EF553B"],
+                marker_color=["#10b981", "#2563eb", "#f43f5e"],
                 text=[f"{r:+.2%}" for r in returns_by_model],
                 textposition="outside",
+                textfont=dict(family="JetBrains Mono, monospace", size=11),
                 hovertemplate="<b>%{x}</b><br>Return: %{y:.2%}<extra></extra>"
             ))
 
-            fig_cost_sens.update_layout(
-                title=f"{best_strategy.get('Engine')} 成本敏感度 | Cost Sensitivity",
-                xaxis_title="成本模型 | Cost Model",
-                yaxis_title="年化報酬 | Return",
-                yaxis_tickformat=".1%",
-                height=350,
-                template="plotly_white"
-            )
-            fig_cost_sens.add_hline(y=0, line_color="gray", line_dash="dash")
+            fig_cost_sens.update_layout(**glint_plotly_layout(
+                title=f"{best_strategy.get('Engine')} 成本敏感度",
+                subtitle="Cost Sensitivity",
+                height=360,
+                xlabel="成本模型 Cost Model",
+                ylabel="年化報酬 Return",
+            ))
+            fig_cost_sens.update_layout(yaxis_tickformat=".1%")
+            fig_cost_sens.add_hline(y=0, line_color="#94a3b8", line_dash="dash")
             st.plotly_chart(fig_cost_sens, use_container_width=True)
 
     # ===== Turnover Analysis (Cross-Horizon) =====
@@ -431,27 +449,31 @@ $$
                 mode="markers+text",
                 text=df_to["Strategy"],
                 textposition="top center",
+                textfont=dict(family="JetBrains Mono, monospace", size=10),
                 marker=dict(
                     size=16,
                     color=df_to["Horizon"],
-                    colorscale=[[0, "#EF553B"], [0.5, "#FFA15A"], [1, "#00CC96"]],
+                    colorscale=[[0, "#f43f5e"], [0.5, "#f59e0b"], [1, "#10b981"]],
                     showscale=True,
-                    colorbar=dict(title="Horizon", tickvals=[1, 5, 20]),
+                    colorbar=dict(
+                        title=dict(text="Horizon", font=dict(family="JetBrains Mono, monospace", size=11, color="#475569")),
+                        tickvals=[1, 5, 20],
+                        tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"),
+                        outlinewidth=0,
+                    ),
                     line=dict(color="white", width=1)
                 ),
                 hovertemplate="<b>%{text}</b><br>Daily Cost: %{x:.4f}<br>Return: %{y:.2%}<extra></extra>"
             ))
-            fig3.update_layout(
-                title="日均成本 vs 年化報酬 | Daily Cost vs Return",
-                xaxis_title="日均成本 | Daily Cost",
-                yaxis_title="年化報酬 | Return",
-                yaxis_tickformat=".1%",
-                xaxis_tickformat=".4f",
+            fig3.update_layout(**glint_plotly_layout(
+                title="日均成本 vs 年化報酬",
+                subtitle="Daily Cost vs Return",
                 height=420,
-                template="plotly_white",
-                hovermode="closest"
-            )
-            fig3.add_hline(y=0, line_color="gray", line_dash="dash")
+                xlabel="日均成本 Daily Cost",
+                ylabel="年化報酬 Return",
+            ))
+            fig3.update_layout(yaxis_tickformat=".1%", xaxis_tickformat=".4f", hovermode="closest")
+            fig3.add_hline(y=0, line_color="#94a3b8", line_dash="dash")
             st.plotly_chart(fig3, use_container_width=True)
 
         with t2:
@@ -462,28 +484,36 @@ $$
                 mode="markers+text",
                 text=df_to["Strategy"],
                 textposition="top center",
+                textfont=dict(family="JetBrains Mono, monospace", size=10),
                 marker=dict(
                     size=16,
                     color=df_to["Horizon"],
-                    colorscale=[[0, "#EF553B"], [0.5, "#FFA15A"], [1, "#00CC96"]],
+                    colorscale=[[0, "#f43f5e"], [0.5, "#f59e0b"], [1, "#10b981"]],
                     showscale=True,
-                    colorbar=dict(title="Horizon", tickvals=[1, 5, 20]),
+                    colorbar=dict(
+                        title=dict(text="Horizon", font=dict(family="JetBrains Mono, monospace", size=11, color="#475569")),
+                        tickvals=[1, 5, 20],
+                        tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#475569"),
+                        outlinewidth=0,
+                    ),
                     line=dict(color="white", width=1)
                 ),
                 hovertemplate="<b>%{text}</b><br>Turnover: %{x:.1%}<br>Return: %{y:.2%}<extra></extra>"
             ))
-            fig4.update_layout(
-                title="平均換手率 vs 年化報酬 | Turnover vs Return",
-                xaxis_title="平均換手率 | Avg Turnover",
-                yaxis_title="年化報酬 | Return",
-                yaxis_tickformat=".1%",
-                xaxis_tickformat=".0%",
+            fig4.update_layout(**glint_plotly_layout(
+                title="平均換手率 vs 年化報酬",
+                subtitle="Turnover vs Return",
                 height=420,
-                template="plotly_white",
-                hovermode="closest"
-            )
-            fig4.add_hline(y=0, line_color="gray", line_dash="dash")
+                xlabel="平均換手率 Avg Turnover",
+                ylabel="年化報酬 Return",
+            ))
+            fig4.update_layout(yaxis_tickformat=".1%", xaxis_tickformat=".0%", hovermode="closest")
+            fig4.add_hline(y=0, line_color="#94a3b8", line_dash="dash")
             st.plotly_chart(fig4, use_container_width=True)
+        render_chart_note(
+            "色條由紅→橘→綠對應 D+1 → D+5 → D+20。綠色泡泡（月頻）明顯位於右上／低成本區——換手率愈低、成本壓力愈小，越靠近正報酬區。",
+            tone="emerald",
+        )
 
 except Exception as e:
     st.error(f"成本分析失敗：{str(e)}")
@@ -593,17 +623,25 @@ try:
 
         fig_perm.add_trace(go.Bar(
             name="觀察 AUC", x=strat_names, y=obs_aucs,
-            marker_color="#059669", text=[f"{v:.4f}" for v in obs_aucs], textposition="outside",
+            marker_color="#10b981",
+            text=[f"{v:.4f}" for v in obs_aucs],
+            textposition="outside",
+            textfont=dict(family="JetBrains Mono, monospace", size=11),
         ))
         fig_perm.add_trace(go.Bar(
             name="隨機基線", x=strat_names, y=perm_means,
-            marker_color="#d1d5db", text=[f"{v:.4f}" for v in perm_means], textposition="outside",
+            marker_color="#cbd5e1",
+            text=[f"{v:.4f}" for v in perm_means],
+            textposition="outside",
+            textfont=dict(family="JetBrains Mono, monospace", size=11),
         ))
-        fig_perm.update_layout(
-            barmode="group", title="觀察 AUC vs 隨機置換基線 | Observed vs Permuted Baseline",
-            yaxis_title="AUC", yaxis_range=[0.45, max(obs_aucs) + 0.03],
-            height=400, template="plotly_white",
-        )
+        fig_perm.update_layout(**glint_plotly_layout(
+            title="觀察 AUC vs 隨機置換基線",
+            subtitle="Observed vs Permuted Baseline · 1,000 次打亂",
+            height=400,
+            ylabel="AUC",
+        ))
+        fig_perm.update_layout(barmode="group", yaxis_range=[0.45, max(obs_aucs) + 0.03])
         st.plotly_chart(fig_perm, use_container_width=True)
 
         st.markdown("""
@@ -617,7 +655,4 @@ except Exception:
     pass  # Statistical validation is optional
 
 # ===== Footer & Limitations =====
-st.markdown("---")
-st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ Phase 3 治理已實現")
-
-st.markdown('<div class="page-footer">量化分析工作台 — Backtest | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)
+render_page_footer("Backtest")

@@ -21,6 +21,12 @@ render_horizon_segmented = _utils.render_horizon_segmented
 glint_plotly_layout = _utils.glint_plotly_layout
 glint_heatmap_colorscale = _utils.glint_heatmap_colorscale
 glint_colorbar = _utils.glint_colorbar
+GLINT_SEQUENTIAL_COOL = _utils.GLINT_SEQUENTIAL_COOL
+glint_styler_cmap = _utils.glint_styler_cmap
+render_chart_note = _utils.render_chart_note
+render_page_heading = _utils.render_page_heading
+render_trust_strip = _utils.render_trust_strip
+render_page_footer = _utils.render_page_footer
 
 inject_custom_css()
 
@@ -36,13 +42,6 @@ render_topbar(
     show_clock=True,
 )
 
-# ---- Data Context Banner -----------------------------------------------
-st.markdown("""
-<div class="gl-box-info" style="margin-top:14px;">
-📋 <strong>研究背景</strong>：固定歷史資料集（2023/03–2025/03）&nbsp;·&nbsp;Purged Walk-Forward CV（4 Folds）&nbsp;·&nbsp;LightGBM + XGBoost Ensemble
-</div>
-""", unsafe_allow_html=True)
-
 try:
     report, report_name = load_report()
     results = report["results"]
@@ -51,19 +50,25 @@ except Exception as e:
     st.error(f"無法載入報告：{str(e)}")
     st.stop()
 
-st.title("📊 模型指標分析")
-st.caption("模型在各 Fold 的 AUC、LogLoss 表現，以及雙引擎（LightGBM + XGBoost）比較")
+render_page_heading(
+    icon="📊",
+    title_zh="模型指標分析",
+    title_en="Model Metrics",
+    command_line="驗證各 Fold 的 AUC / LogLoss，對比 LightGBM × XGBoost × Ensemble 三引擎。AUC > 0.52 為最低門檻。",
+    tone="blue",
+)
+render_trust_strip([
+    ("DATASET",   "2023/03 – 2025/03", "blue"),
+    ("CV",        "Purged WF · 4 Folds", "violet"),
+    ("ENGINES",   "LightGBM + XGBoost", "cyan"),
+    ("GATES",     "9 / 9 PASS",         "emerald"),
+])
 
-st.info("""
-**如何閱讀本頁？**
-
-AUC（曲線下面積）衡量模型區分「上漲股」與「下跌股」的能力。
-
-0.5 = 隨機猜測，> 0.52 為本系統最低門檻。
-
-LogLoss 衡量預測機率的校準程度，越低代表模型越有信心且準確。
-
-各 Fold 代表不同時間段的驗證結果。
+with st.expander("ℹ️ 如何閱讀本頁？", expanded=False):
+    st.markdown("""
+- **AUC**（曲線下面積）衡量模型區分「上漲 vs 下跌」的能力——0.5 為隨機，**> 0.52** 為本系統最低門檻。
+- **LogLoss** 衡量預測機率的校準程度——越低代表模型越有把握且準確。
+- **各 Fold** 對應不同時間切片的驗證結果，檢查穩定性。
 """)
 
 # ===== Horizon selector =====
@@ -200,22 +205,31 @@ try:
         categories = ["AUC", "Accuracy", "Balanced Acc", "LogLoss"]
         fig_radar = go.Figure()
 
-        colors = {"LIGHTGBM": "#636EFA", "XGBOOST": "#EF553B"}
+        colors = {"LIGHTGBM": "#2563eb", "XGBOOST": "#7c3aed"}
         for row in radar_rows:
             fig_radar.add_trace(go.Scatterpolar(
                 r=[row[cat] for cat in categories],
                 theta=categories,
                 fill='toself',
                 name=row['Engine'],
-                marker_color=colors.get(row['Engine'], '#AB63FA'),
-                line_color=colors.get(row['Engine'], '#AB63FA'),
+                marker_color=colors.get(row['Engine'], '#06b6d4'),
+                line_color=colors.get(row['Engine'], '#06b6d4'),
             ))
 
         fig_radar.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
-            showlegend=True,
-            height=450,
-            template="plotly_white",
+            **glint_plotly_layout(
+                title=f"D+{horizon} 雙引擎雷達圖",
+                subtitle="AUC / Accuracy / Balanced Acc / LogLoss 四維比較",
+                height=450,
+            ),
+            polar=dict(
+                bgcolor="rgba(255,255,255,0)",
+                radialaxis=dict(visible=True, range=[0, 1],
+                                gridcolor="rgba(37,99,235,0.12)",
+                                tickfont=dict(family="JetBrains Mono", size=10, color="#64748b")),
+                angularaxis=dict(gridcolor="rgba(37,99,235,0.12)",
+                                 tickfont=dict(family="Inter", size=11, color="#334155")),
+            ),
         )
         st.plotly_chart(fig_radar, use_container_width=True)
 except Exception as e:
@@ -258,37 +272,45 @@ try:
     if rows:
         df = pd.DataFrame(rows)
         st.dataframe(
-            df.style.background_gradient(subset=["AUC"], cmap="RdYlGn"),
+            df.style.background_gradient(subset=["AUC"], cmap=glint_styler_cmap("diverging"), vmin=0.48, vmax=0.58),
             use_container_width=True,
             hide_index=True
         )
 
         # Visual AUC bar chart
         fig_auc = go.Figure()
-        colors = {"LIGHTGBM": "#636EFA", "XGBOOST": "#EF553B", "ENSEMBLE": "#00CC96"}
+        colors = {"LIGHTGBM": "#2563eb", "XGBOOST": "#7c3aed", "ENSEMBLE": "#10b981"}
 
         for r in sorted(rows, key=lambda x: x["AUC"]):
             fig_auc.add_trace(go.Bar(
                 x=[r["Engine"]],
                 y=[r["AUC"]],
-                marker_color=colors.get(r["Engine"], "#AB63FA"),
+                marker_color=colors.get(r["Engine"], "#06b6d4"),
                 text=[f"{r['AUC']:.4f}"],
                 textposition="outside",
+                textfont=dict(family="JetBrains Mono", size=11, color="#0f172a"),
                 showlegend=False,
                 hovertemplate=f"<b>{r['Engine']}</b><br>AUC: {r['AUC']:.4f}<extra></extra>"
             ))
 
-        fig_auc.update_layout(
-            title=f"D+{horizon} AUC-ROC 得分 | Score Comparison",
-            yaxis_title="AUC",
-            yaxis_range=[0.48, max(r["AUC"] for r in rows) + 0.02],
+        fig_auc.update_layout(**glint_plotly_layout(
+            title=f"D+{horizon} AUC-ROC 得分",
+            subtitle="灰線 0.50 為隨機基線,紅線 0.52 為通過門檻",
             height=400,
-            template="plotly_white",
-            hovermode="x unified",
-        )
-        fig_auc.add_hline(y=0.5, line_dash="dash", line_color="gray", annotation_text="隨機基線 | Random Baseline")
-        fig_auc.add_hline(y=0.52, line_dash="dash", line_color="red", annotation_text="品質門檻 | Quality Gate")
+            ylabel="AUC",
+        ))
+        fig_auc.update_yaxes(range=[0.48, max(r["AUC"] for r in rows) + 0.02])
+        fig_auc.update_layout(hovermode="x unified")
+        fig_auc.add_hline(y=0.5, line_dash="dash", line_color="#94a3b8",
+                          annotation_text="隨機基線 0.50",
+                          annotation_font=dict(family="JetBrains Mono", size=10, color="#94a3b8"))
+        fig_auc.add_hline(y=0.52, line_dash="dash", line_color="#f43f5e",
+                          annotation_text="品質門檻 0.52",
+                          annotation_font=dict(family="JetBrains Mono", size=10, color="#f43f5e"))
         st.plotly_chart(fig_auc, use_container_width=True)
+        render_chart_note(
+            "<b>所以呢：</b>ENSEMBLE 只有在 AUC 穩定高於 0.52 時才值得部署。D+20 最可靠,D+1/D+5 波動大,僅作參考。"
+        )
 
         st.markdown("""
         <div class="insight-box">
@@ -334,7 +356,7 @@ try:
 
         # Create grouped bar chart
         fig = go.Figure()
-        for cls, color in [("DOWN AUC", "#EF553B"), ("FLAT AUC", "#636EFA"), ("UP AUC", "#00CC96")]:
+        for cls, color in [("DOWN AUC", "#f43f5e"), ("FLAT AUC", "#64748b"), ("UP AUC", "#10b981")]:
             avg_by_eng = df_pc.groupby("Engine")[cls].mean()
             fig.add_trace(go.Bar(
                 name=cls.replace(" AUC", ""),
@@ -342,24 +364,27 @@ try:
                 y=avg_by_eng.values,
                 marker_color=color,
                 text=avg_by_eng.values.round(4),
-                textposition="outside"
+                textposition="outside",
+                textfont=dict(family="JetBrains Mono", size=10, color="#0f172a"),
             ))
 
-        fig.update_layout(
-            barmode="group",
-            title=f"D+{horizon} 按類別平均 AUC | Per-Class AUC (Fold Average)",
-            yaxis_title="AUC",
-            yaxis_range=[0.45, 0.75],
+        fig.update_layout(**glint_plotly_layout(
+            title=f"D+{horizon} 按類別平均 AUC",
+            subtitle="DOWN / FLAT / UP 三分類逐引擎平均,灰線為 0.50 隨機基線",
             height=420,
-            template="plotly_white",
-            hovermode="x unified",
-        )
-        fig.add_hline(y=0.5, line_dash="dash", line_color="gray", annotation_text="隨機基線")
+            ylabel="AUC",
+        ))
+        fig.update_yaxes(range=[0.45, 0.75])
+        fig.update_layout(barmode="group", hovermode="x unified")
+        fig.add_hline(y=0.5, line_dash="dash", line_color="#94a3b8",
+                      annotation_text="隨機基線 0.50",
+                      annotation_font=dict(family="JetBrains Mono", size=10, color="#94a3b8"))
         st.plotly_chart(fig, use_container_width=True)
 
         with st.expander("📋 逐折明細 | Per-Fold Details"):
             st.dataframe(
-                df_pc.style.background_gradient(subset=["DOWN AUC", "FLAT AUC", "UP AUC"], cmap="RdYlGn"),
+                df_pc.style.background_gradient(subset=["DOWN AUC", "FLAT AUC", "UP AUC"],
+                                                cmap=glint_styler_cmap("diverging"), vmin=0.45, vmax=0.75),
                 use_container_width=True,
                 hide_index=True
             )
@@ -425,31 +450,33 @@ try:
         f1, f2 = st.columns(2)
         with f1:
             fig2 = px.line(
-                df_fold,
-                x="Fold",
-                y="AUC",
-                color="Engine",
-                markers=True,
-                title=f"D+{horizon} AUC 跨 Fold 演進 | AUC Across Folds",
-                template="plotly_white",
-                color_discrete_map={"LIGHTGBM": "#636EFA", "XGBOOST": "#EF553B"}
+                df_fold, x="Fold", y="AUC", color="Engine", markers=True,
+                color_discrete_map={"LIGHTGBM": "#2563eb", "XGBOOST": "#7c3aed"},
             )
-            fig2.add_hline(y=0.52, line_dash="dash", line_color="red", annotation_text="品質門檻 | Quality Gate (0.52)")
-            fig2.update_layout(height=350, hovermode="x unified")
+            fig2.update_traces(line=dict(width=2.2), marker=dict(size=7))
+            fig2.update_layout(**glint_plotly_layout(
+                title=f"D+{horizon} AUC 跨 Fold 演進",
+                subtitle="紅線 0.52 = 通過門檻；穿越代表 fold 信號不穩",
+                height=350, xlabel="Fold", ylabel="AUC",
+            ))
+            fig2.update_layout(hovermode="x unified")
+            fig2.add_hline(y=0.52, line_dash="dash", line_color="#f43f5e",
+                           annotation_text="門檻 0.52",
+                           annotation_font=dict(family="JetBrains Mono", size=10, color="#f43f5e"))
             st.plotly_chart(fig2, use_container_width=True)
 
         with f2:
             fig3 = px.line(
-                df_fold,
-                x="Fold",
-                y="LogLoss",
-                color="Engine",
-                markers=True,
-                title=f"D+{horizon} LogLoss 跨 Fold 演進 | LogLoss Across Folds",
-                template="plotly_white",
-                color_discrete_map={"LIGHTGBM": "#636EFA", "XGBOOST": "#EF553B"}
+                df_fold, x="Fold", y="LogLoss", color="Engine", markers=True,
+                color_discrete_map={"LIGHTGBM": "#2563eb", "XGBOOST": "#7c3aed"},
             )
-            fig3.update_layout(height=350, hovermode="x unified")
+            fig3.update_traces(line=dict(width=2.2), marker=dict(size=7))
+            fig3.update_layout(**glint_plotly_layout(
+                title=f"D+{horizon} LogLoss 跨 Fold 演進",
+                subtitle="越低越好；跨 fold 變異代表模型不穩定",
+                height=350, xlabel="Fold", ylabel="LogLoss",
+            ))
+            fig3.update_layout(hovermode="x unified")
             st.plotly_chart(fig3, use_container_width=True)
 
         with st.expander("📋 逐折詳細數據 | Fold Details"):
@@ -481,16 +508,15 @@ try:
                         df_feat = df_feat.sort_values("Importance", ascending=True).tail(12)
 
                         fig_feat = px.bar(
-                            df_feat,
-                            x="Importance",
-                            y="Feature",
-                            orientation="h",
-                            color="Importance",
-                            color_continuous_scale="Blues",
-                            title=f"{engine_sel.upper()} D+{horizon} 特徵重要度 | Top-12",
-                            template="plotly_white"
+                            df_feat, x="Importance", y="Feature", orientation="h",
+                            color="Importance", color_continuous_scale=GLINT_SEQUENTIAL_COOL,
                         )
-                        fig_feat.update_layout(height=450, showlegend=False, coloraxis_showscale=False)
+                        fig_feat.update_layout(**glint_plotly_layout(
+                            title=f"{engine_sel.upper()} D+{horizon} 特徵重要度 Top-12",
+                            subtitle="由大到小排序；顏色深淺反映相對重要度",
+                            height=450, xlabel="Importance", ylabel="",
+                        ))
+                        fig_feat.update_layout(showlegend=False, coloraxis_showscale=False)
                         st.plotly_chart(fig_feat, use_container_width=True)
         else:
             # Single engine
@@ -501,16 +527,15 @@ try:
                 df_feat = df_feat.sort_values("Importance", ascending=True).tail(15)
 
                 fig_feat = px.bar(
-                    df_feat,
-                    x="Importance",
-                    y="Feature",
-                    orientation="h",
-                    color="Importance",
-                    color_continuous_scale="Viridis",
-                    title=f"{engine_sel.upper()} D+{horizon} 特徵重要度 | Top-15",
-                    template="plotly_white"
+                    df_feat, x="Importance", y="Feature", orientation="h",
+                    color="Importance", color_continuous_scale=GLINT_SEQUENTIAL_COOL,
                 )
-                fig_feat.update_layout(height=500, showlegend=False, coloraxis_showscale=False)
+                fig_feat.update_layout(**glint_plotly_layout(
+                    title=f"{engine_sel.upper()} D+{horizon} 特徵重要度 Top-15",
+                    subtitle="由大到小排序；顏色深淺反映相對重要度",
+                    height=500, xlabel="Importance", ylabel="",
+                ))
+                fig_feat.update_layout(showlegend=False, coloraxis_showscale=False)
                 st.plotly_chart(fig_feat, use_container_width=True)
 except Exception as e:
     st.warning(f"特徵重要度分析失敗：{str(e)}")
@@ -549,8 +574,10 @@ try:
 
         if cal_rows:
             df_cal = pd.DataFrame(cal_rows)
+            # 反向 diverging:ECE 越低越好,所以 vmin/vmax 讓小值=綠
             st.dataframe(
-                df_cal.style.background_gradient(subset=["校準後 ECE | After"], cmap="RdYlGn_r"),
+                df_cal.style.background_gradient(subset=["校準後 ECE | After"],
+                                                 cmap=glint_styler_cmap("diverging").reversed()),
                 use_container_width=True,
                 hide_index=True,
             )
@@ -561,21 +588,27 @@ try:
             ece_before = [r["校準前 ECE | Before"] for r in cal_rows]
             ece_after = [r["校準後 ECE | After"] for r in cal_rows]
 
+            _tf = dict(family="JetBrains Mono", size=10, color="#0f172a")
             fig_cal.add_trace(go.Bar(
-                name="校準前 | Before", x=models, y=ece_before,
-                marker_color="#EF553B", text=[f"{v:.4f}" for v in ece_before], textposition="outside"
+                name="校準前", x=models, y=ece_before,
+                marker_color="#f43f5e", text=[f"{v:.4f}" for v in ece_before],
+                textposition="outside", textfont=_tf,
             ))
             fig_cal.add_trace(go.Bar(
-                name="校準後 | After", x=models, y=ece_after,
-                marker_color="#00CC96", text=[f"{v:.4f}" for v in ece_after], textposition="outside"
+                name="校準後", x=models, y=ece_after,
+                marker_color="#10b981", text=[f"{v:.4f}" for v in ece_after],
+                textposition="outside", textfont=_tf,
             ))
-            fig_cal.update_layout(
-                barmode="group",
-                title=f"D+{horizon} ECE 校準前後對比 | ECE Before vs After Isotonic Regression",
-                yaxis_title="ECE（越低越好）",
-                height=400, template="plotly_white",
-            )
+            fig_cal.update_layout(**glint_plotly_layout(
+                title=f"D+{horizon} ECE 校準前後對比",
+                subtitle="Isotonic Regression 後 ECE 越低越好",
+                height=400, ylabel="ECE",
+            ))
+            fig_cal.update_layout(barmode="group")
             st.plotly_chart(fig_cal, use_container_width=True)
+            render_chart_note(
+                "<b>所以呢：</b>校準後 ECE 應明顯低於校準前(綠 < 紅)。若改善有限,代表原始機率已夠準,或樣本量不足以顯示差異。"
+            )
 
             # Per-fold ECE details
             with st.expander("📋 逐折 ECE 明細 | Per-Fold ECE Details"):
@@ -704,11 +737,13 @@ try:
             df_chart = pd.DataFrame(chart_rows)
             fig_hp = px.bar(
                 df_chart, x="Parameter", y="Value", color="Engine", barmode="group",
-                title=f"D+{horizon} 核心超參數對比 | Key Hyperparameters",
-                template="plotly_white",
-                color_discrete_map={"LIGHTGBM": "#636EFA", "XGBOOST": "#EF553B"},
+                color_discrete_map={"LIGHTGBM": "#2563eb", "XGBOOST": "#7c3aed"},
             )
-            fig_hp.update_layout(height=380)
+            fig_hp.update_layout(**glint_plotly_layout(
+                title=f"D+{horizon} 核心超參數對比",
+                subtitle="Optuna 搜尋後的雙引擎最佳參數",
+                height=380, xlabel="Parameter", ylabel="Value",
+            ))
             st.plotly_chart(fig_hp, use_container_width=True)
 
         st.markdown(f"""
@@ -805,7 +840,4 @@ except Exception as e:
     st.warning(f"LOPO 支柱貢獻載入失敗：{str(e)}")
 
 # ===== Footer & Limitations =====
-st.markdown("---")
-st.caption("📌 限制條件：固定歷史資料集 ｜ 非即時市場數據 ｜ 基準為等權計算 ｜ Ensemble = 簡單平均 ｜ Phase 3 治理已實現")
-
-st.markdown('<div class="page-footer">量化分析工作台 — Model Metrics | 台灣股市多因子預測系統</div>', unsafe_allow_html=True)
+render_page_footer("Model Metrics")
