@@ -504,6 +504,40 @@ def inject_custom_css():
         box-shadow: 0 6px 20px rgba(37,99,235,0.35) !important;
         transform: translateY(-1px);
     }}
+    /* Secondary / default buttons — dark-mode readable (fixes black-on-black bug) */
+    .stButton > button:not([kind="primary"]) {{
+        background: var(--gl-surface) !important;
+        color: var(--gl-text) !important;
+        border: 1px solid var(--gl-border) !important;
+    }}
+    .stButton > button:not([kind="primary"]):hover {{
+        background: var(--gl-subtle) !important;
+        border-color: var(--gl-blue) !important;
+        color: var(--gl-text) !important;
+        transform: translateY(-1px);
+    }}
+    .stButton > button:not([kind="primary"]) p,
+    .stButton > button:not([kind="primary"]) span,
+    .stButton > button:not([kind="primary"]) div {{
+        color: var(--gl-text) !important;
+    }}
+    /* Download button — match secondary style */
+    .stDownloadButton > button {{
+        background: var(--gl-surface) !important;
+        color: var(--gl-text) !important;
+        border: 1px solid var(--gl-border) !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+    }}
+    .stDownloadButton > button:hover {{
+        background: var(--gl-subtle) !important;
+        border-color: var(--gl-blue) !important;
+        color: var(--gl-text) !important;
+    }}
+    .stDownloadButton > button p,
+    .stDownloadButton > button span {{
+        color: var(--gl-text) !important;
+    }}
     /* Footer */
     .page-footer, .gl-footer {{
         text-align: center;
@@ -681,7 +715,21 @@ def inject_custom_css():
         height: 100%;
         border-radius: 4px;
         transition: width .6s cubic-bezier(.34,1.56,.64,1);
+        /* Default background (fallback for unknown pillars) */
+        background: linear-gradient(90deg, #6366f1 0%, #a78bfa 100%);
+        box-shadow: 0 0 8px rgba(99,102,241,0.25);
     }}
+    /* Per-pillar gradients — echo the pill colors but stronger saturation */
+    .gl-pb-bar[data-p="trend"] {{ background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%); box-shadow: 0 0 8px rgba(59,130,246,0.3); }}
+    .gl-pb-bar[data-p="fund"]  {{ background: linear-gradient(90deg, #10b981 0%, #34d399 100%); box-shadow: 0 0 8px rgba(16,185,129,0.3); }}
+    .gl-pb-bar[data-p="val"]   {{ background: linear-gradient(90deg, #a855f7 0%, #c084fc 100%); box-shadow: 0 0 8px rgba(168,85,247,0.3); }}
+    .gl-pb-bar[data-p="event"] {{ background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 0 8px rgba(245,158,11,0.3); }}
+    .gl-pb-bar[data-p="risk"]  {{ background: linear-gradient(90deg, #f43f5e 0%, #fb7185 100%); box-shadow: 0 0 8px rgba(244,63,94,0.3); }}
+    .gl-pb-bar[data-p="chip"]  {{ background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%); box-shadow: 0 0 8px rgba(99,102,241,0.3); }}
+    .gl-pb-bar[data-p="ind"]   {{ background: linear-gradient(90deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 0 8px rgba(6,182,212,0.3); }}
+    .gl-pb-bar[data-p="txt"]   {{ background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%); box-shadow: 0 0 8px rgba(139,92,246,0.3); }}
+    .gl-pb-bar[data-p="sent"]  {{ background: linear-gradient(90deg, #ec4899 0%, #f472b6 100%); box-shadow: 0 0 8px rgba(236,72,153,0.3); }}
+    .gl-pb:hover .gl-pb-bar {{ filter: brightness(1.12); }}
     .gl-pb-num {{
         color: var(--gl-text);
         font-weight: 600;
@@ -807,12 +855,22 @@ def inject_custom_css():
     /* ================================================================= */
     /* 6. 股票預測系統 — sidebar brand + system health card (dark theme) */
     /* ================================================================= */
-    /* Brand block at the top of the dark sidebar */
+    /* Brand block at the top of the dark sidebar — softer, tech-luxe */
     .gl-brand {{
-        padding: 16px 18px 14px 18px;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-        margin: -8px -16px 8px -16px;
-        background: linear-gradient(180deg, rgba(6,182,212,0.06), transparent);
+        padding: 18px 18px 16px 18px;
+        border-bottom: 1px solid rgba(6,182,212,0.14);
+        margin: -8px -16px 0 -16px;
+        background:
+            radial-gradient(120% 80% at 0% 0%, rgba(6,182,212,0.12), transparent 60%),
+            linear-gradient(180deg, rgba(6,182,212,0.06), transparent);
+        position: relative;
+    }}
+    .gl-brand::before {{
+        content: "";
+        position: absolute;
+        left: 0; right: 0; bottom: -1px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(6,182,212,0.4), transparent);
     }}
     .gl-brand-eyebrow {{
         font-family: var(--gl-font-mono);
@@ -821,17 +879,18 @@ def inject_custom_css():
         letter-spacing: 0.22em;
         font-weight: 700;
         text-transform: uppercase;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
     }}
     .gl-brand-title {{
-        font-size: 1.15rem;
+        font-size: 1.22rem;
         font-weight: 800;
         color: #e8f7fc !important;
-        letter-spacing: -0.01em;
+        letter-spacing: 0.02em;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         font-family: var(--gl-font-sans);
+        text-shadow: 0 0 18px rgba(6,182,212,0.25);
     }}
     .gl-brand-dot {{
         width: 8px; height: 8px;
@@ -868,12 +927,24 @@ def inject_custom_css():
         border: 1px solid rgba(255,255,255,0.06);
         letter-spacing: 0.04em;
     }}
-    /* ---- System health card (sidebar footer) ---- */
+    /* ---- System health card (now at TOP of sidebar, above nav) ---- */
     .gl-syshealth {{
-        margin: 12px -16px -16px -16px;
-        padding: 14px 16px 14px 16px;
-        background: linear-gradient(180deg, rgba(6,182,212,0.05), rgba(10,20,30,0.4));
-        border-top: 1px solid rgba(6,182,212,0.18);
+        margin: 10px 6px 14px 6px;
+        padding: 14px 14px 12px 14px;
+        background: linear-gradient(180deg, rgba(6,182,212,0.08), rgba(10,20,30,0.55));
+        border: 1px solid rgba(6,182,212,0.18);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.04);
+        position: relative;
+        overflow: hidden;
+    }}
+    .gl-syshealth::after {{
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #06b6d4, #2563eb, #7c3aed);
+        opacity: 0.7;
     }}
     .gl-syshealth-head {{
         display: flex;
@@ -1245,14 +1316,20 @@ def render_kpi(label: str, value, delta=None, sub=None, accent="blue"):
         txt, direction = delta
         delta_html = f'<div class="gl-kpi-delta {direction}">{txt}</div>'
     sub_html = f'<div class="gl-kpi-sub">{sub}</div>' if sub else ""
-    st.markdown(f"""
-    <div class="gl-kpi accent-{accent}">
-        <div class="gl-kpi-label">{label}</div>
-        <div class="gl-kpi-value">{value}</div>
-        {delta_html}
-        {sub_html}
-    </div>
-    """, unsafe_allow_html=True)
+    # Single-line HTML — CommonMark-safe (empty conditional fragments were
+    # leaving whitespace-only lines that terminated the HTML block on Cloud,
+    # causing {sub_html} to render as escaped text on a black background).
+    st.markdown(
+        (
+            f'<div class="gl-kpi accent-{accent}">'
+            f'<div class="gl-kpi-label">{label}</div>'
+            f'<div class="gl-kpi-value">{value}</div>'
+            f'{delta_html}'
+            f'{sub_html}'
+            f'</div>'
+        ),
+        unsafe_allow_html=True,
+    )
 
 
 # ============================================================================

@@ -46,6 +46,20 @@ governance = st.Page(P("6_🛡️_Model_Governance.py"),     title="模型治理
 signal     = st.Page(P("7_📡_Signal_Monitor.py"),        title="信號監控",      icon="📡")
 extended   = st.Page(P("8_🎯_Extended_Analytics.py"),    title="擴充分析",      icon="🧩")
 
+# ===== Sidebar — Brand + System Health INJECTED BEFORE navigation =====
+# Streamlit renders sidebar elements in call-order, so these appear ABOVE nav.
+# This puts 品牌 + 系統健康度 at the top of the sidebar (the "headline / 吸睛之處").
+_utils.inject_sidebar_brand()
+_utils.inject_sidebar_health(
+    gates_passed=9,
+    total_gates=9,
+    dataset="2023/03–2025/03",
+    samples="948,976",
+    features="91 / 1,623",
+    dsr="12.12",
+    last_verified="2026-04-20 14:24",
+)
+
 # ===== Navigation Structure (Claude-Design later-version: 總覽/個股研究/量化引擎/治理監控) =====
 pg = st.navigation({
     "總覽":      [home, interpret],
@@ -79,24 +93,41 @@ st.markdown("""<style>
         pointer-events: none;
         opacity: 0.5;
     }
-    /* Sidebar group-heading (財報狗 style — dense, spaced, tech-y) */
+    /* Sidebar group-heading (Claude-design + 財報狗 style — softer for Chinese) */
     /* Streamlit v1.36+ uses <header data-testid="stNavSectionHeader"> for dict-keyed groups */
     section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] {
-        padding: 14px 14px 6px 14px !important;
-        margin-top: 6px !important;
-        border-top: 1px solid rgba(255,255,255,0.05) !important;
+        padding: 18px 14px 8px 14px !important;
+        margin-top: 10px !important;
+        border-top: 1px solid rgba(255,255,255,0.06) !important;
+        position: relative;
     }
     section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"]:first-of-type {
         border-top: none !important;
-        margin-top: 0 !important;
-        padding-top: 10px !important;
+        margin-top: 2px !important;
+        padding-top: 14px !important;
+    }
+    /* Cyan accent bar before each group title */
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"]::before {
+        content: "";
+        position: absolute;
+        left: 14px;
+        top: 22px;
+        width: 3px;
+        height: 10px;
+        border-radius: 2px;
+        background: linear-gradient(180deg, #06b6d4, #2563eb);
+        box-shadow: 0 0 6px rgba(6,182,212,0.5);
+    }
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"]:first-of-type::before {
+        top: 18px;
     }
     section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] span,
     section[data-testid="stSidebar"] [data-testid="stSidebarNavSeparator"] span {
-        color: #5b7186 !important;
-        font-size: 0.72rem !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.2em !important;
+        color: #9fb6cc !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.08em !important;
+        padding-left: 10px !important;
         font-family: 'Inter', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif !important;
     }
     /* Nav list container spacing */
@@ -213,20 +244,6 @@ st.markdown("""<style>
     #MainMenu { visibility: hidden; }
     footer   { visibility: hidden; }
 </style>""", unsafe_allow_html=True)
-
-# ===== Brand block (top of sidebar) — injected on every page =====
-_utils.inject_sidebar_brand()
-
-# ===== System health card (bottom of sidebar) — injected on every page =====
-_utils.inject_sidebar_health(
-    gates_passed=9,
-    total_gates=9,
-    dataset="2023/03–2025/03",
-    samples="948,976",
-    features="91 / 1,623",
-    dsr="12.12",
-    last_verified="2026-04-20 14:24",
-)
 
 # ===== Run the selected page =====
 pg.run()

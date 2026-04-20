@@ -111,13 +111,13 @@ render_topbar(
 # Hero — updated title per Design spec
 # ============================================================================
 render_hero(
-    eyebrow="STOCK PREDICTION · MULTI-FACTOR TERMINAL",
-    title_html="1,930 檔台股 · <span class=\"gl-hero-accent\">九大支柱整合判讀</span>",
+    eyebrow="TERMINAL · 股票預測研究平台",
+    title_html="股票預測分析系統<span class=\"gl-hero-accent\">　九大面向．一眼看懂</span>",
     subtitle=(
-        "以 <strong>2023/03 – 2025/03</strong> 台股歷史資料為基礎，整合 "
-        "<strong>9 支柱 1,623 候選因子</strong>、<strong>LightGBM + XGBoost 雙引擎</strong>、"
-        "<strong>Purged Walk-Forward CV</strong> 與 <strong>LOPO 深度驗證</strong>，"
-        "提供可回看、可解釋、可治理的研究展示平台。"
+        "把台股研究拆成 <strong>9 大面向</strong>（趨勢、基本面、估值、事件、風險、籌碼、產業、文字、情緒），<br>"
+        "搭配 <strong>2023/03–2025/03 歷史資料</strong> 與 <strong>雙引擎機器學習模型</strong>，"
+        "濃縮成一張<strong>可回看、可解釋、可治理</strong>的研究快照。<br>"
+        "<span style=\"opacity:0.7;font-size:0.86em;\">· 學術研究展示平台　·　非投資建議 ·</span>"
     ),
     meta_chips=[
         ("phase 1-6 · all gates passed", "default"),
@@ -251,8 +251,10 @@ with tab_observe:
             pct = (abs(r["delta_auc"]) / max_d) * 100
             rows_html.append(render_pillar_bar(
                 pillar_key=pk,
+                # Dual-key tolerance: JSON uses "n_feats" (source of truth),
+                # legacy code may have written "n_features". Prefer n_feats.
                 label=pillar_labels.get(pk, pk),
-                feat_count=r.get("n_features", 0),
+                feat_count=r.get("n_feats", r.get("n_features", 0)),
                 pct=pct,
                 delta_bps=delta_bps,
             ))
