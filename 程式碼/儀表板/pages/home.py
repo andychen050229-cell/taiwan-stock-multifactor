@@ -276,7 +276,8 @@ with col_left:
 </div>
 """, unsafe_allow_html=True)
     if st.button("🌱  進入投資解讀面板", use_container_width=True, type="primary", key="btn_beginner"):
-        st.switch_page("pages/0_🌱_投資解讀面板.py")
+        # Absolute path — relative "pages/..." breaks on Cloud (shim main script)
+        st.switch_page(str(Path(__file__).resolve().parent / "0_🌱_投資解讀面板.py"))
 
 with col_right:
     st.markdown("""
@@ -300,7 +301,7 @@ with col_right:
 </div>
 """, unsafe_allow_html=True)
     if st.button("⚙️  進入量化研究工作台", use_container_width=True, type="secondary", key="btn_advanced"):
-        st.switch_page("pages/1_📊_Model_Metrics.py")
+        st.switch_page(str(Path(__file__).resolve().parent / "1_📊_Model_Metrics.py"))
 
 
 # ============================================================================

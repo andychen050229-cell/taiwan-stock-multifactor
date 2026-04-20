@@ -305,7 +305,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if st.button("🔭  前往 Phase 6 深度驗證", use_container_width=True, type="primary"):
-    st.switch_page("pages/A_🔭_Phase6_深度驗證.py")
+    st.switch_page(str(Path(__file__).resolve().parent / "A_🔭_Phase6_深度驗證.py"))
 
 # ----- Footer -----
 st.markdown("""
