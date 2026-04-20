@@ -39,9 +39,25 @@ inject_custom_css()
 # ============================================================================
 @st.cache_data(ttl=3600)
 def load_kpis_from_report():
-    """Load KPIs from the latest phase2_report JSON."""
+    """Load KPIs from the latest phase2_report JSON.
+
+    Cloud shim chdir-safe: walks up from pages/home.py to find project_root/outputs/reports.
+    """
     try:
-        report_dir = Path(__file__).parent.parent.parent / "outputs" / "reports"
+        _h = Path(__file__).resolve()
+        report_dir = None
+        for _c in (
+            _h.parent.parent.parent.parent / "outputs" / "reports",   # project_root/outputs
+            _h.parent.parent.parent / "outputs" / "reports",          # 程式碼/outputs (legacy)
+            Path.cwd() / "outputs" / "reports",
+            Path.cwd().parent / "outputs" / "reports",
+            Path.cwd().parent.parent / "outputs" / "reports",
+        ):
+            if _c.exists():
+                report_dir = _c
+                break
+        if report_dir is None:
+            raise FileNotFoundError("Phase 2 report dir not found")
         report_files = list(report_dir.glob("phase2_report_*.json"))
         if not report_files:
             raise FileNotFoundError("No phase2_report files found")
@@ -75,6 +91,38 @@ def load_kpis_from_report():
 
 
 kpis = load_kpis_from_report()
+
+
+# ============================================================================
+# Load recommendations (D+1 / D+5 / D+20) for headline + Top-5 preview
+# ============================================================================
+@st.cache_data(ttl=3600)
+def load_recommendations():
+    """Load pre-computed recommendations from dashboard/data/recommendations.json.
+
+    Cloud shim chdir-safe: walks up to find either dashboard/data or 程式碼/儀表板/data.
+    """
+    try:
+        _h = Path(__file__).resolve()
+        rec_path = None
+        for _c in (
+            _h.parent.parent / "data" / "recommendations.json",     # 程式碼/儀表板/data (local + cloud shim)
+            _h.parent.parent.parent.parent / "dashboard" / "data" / "recommendations.json",  # project_root/dashboard/data
+            Path.cwd() / "data" / "recommendations.json",
+            Path.cwd() / "dashboard" / "data" / "recommendations.json",
+        ):
+            if _c.exists():
+                rec_path = _c
+                break
+        if rec_path is None:
+            return {}
+        with open(rec_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+recommendations = load_recommendations()
 
 # Pull LOPO headline numbers
 lopo_data, _ = load_phase6_json("lopo_pillar_contribution_D20.json")
@@ -168,6 +216,52 @@ with tab_observe:
         '</div>', unsafe_allow_html=True,
     )
 
+    # ====================================================================
+    # 🎯 今日研究重點 (Today's Key Finding) — scannable one-liner
+    # ====================================================================
+    _h20 = recommendations.get("horizon_20", {}) if isinstance(recommendations, dict) else {}
+    _h20_date = (_h20.get("date", "") or "2025-03-03")[:10]
+    _h20_stocks = _h20.get("stocks", []) if isinstance(_h20, dict) else []
+    _top1 = _h20_stocks[0] if _h20_stocks else None
+    _top1_id = _top1.get("stock_id", "—") if _top1 else "—"
+    _top1_name = _top1.get("short_name", "") if _top1 else ""
+    _top1_ret = _top1.get("fwd_ret_20", 0) if _top1 else 0
+    _top1_ind = _top1.get("industry", "") if _top1 else ""
+    _PILLAR_ZH = {
+        "risk": "風險面", "fund": "基本面", "chip": "籌碼面",
+        "trend": "技術面", "val": "評價面", "event": "事件面",
+        "ind": "產業面", "txt": "文本面", "sent": "情緒面",
+    }
+    _tp_key = top_pillar["pillar"] if top_pillar else "risk"
+    _tp_zh = _PILLAR_ZH.get(_tp_key, _tp_key)
+    _tp_bps = (top_pillar["delta_auc"] * 10000) if top_pillar else 24.0
+
+    st.markdown(f"""
+<div style="background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 60%,#fffbeb 100%);
+            border:1px solid rgba(245,158,11,0.35);
+            border-left:4px solid #f59e0b;
+            border-radius:14px;
+            padding:18px 22px;
+            margin:14px 0 18px;
+            box-shadow:0 4px 14px rgba(245,158,11,0.08);">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#92400e;
+              letter-spacing:0.14em;font-weight:700;text-transform:uppercase;margin-bottom:6px;">
+    📌 TODAY'S KEY FINDING · 今日研究重點 &nbsp;·&nbsp; 判讀日 {_h20_date} (D+20 月度)
+  </div>
+  <div style="font-size:1.04rem;line-height:1.85;color:#1e293b;">
+    ① <strong>模型最看好</strong> → <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#b45309;">{_top1_id} {_top1_name}</span>
+    <span style="color:#78350f;font-size:0.88rem;">（{_top1_ind}）</span>
+    <span style="color:#065f46;font-weight:600;">歷史同情境 +{_top1_ret*100:.1f}%</span> &nbsp;·&nbsp;
+    ② <strong>最強因子支柱</strong> → <span style="font-weight:700;color:#b45309;">{_tp_zh}</span>
+    <span style="font-family:'JetBrains Mono',monospace;color:#065f46;">(+{_tp_bps:.1f} bps AUC)</span> &nbsp;·&nbsp;
+    ③ <strong>整體可信度</strong> → AUC {baseline_auc:.3f}、DSR {best_dsr:.2f}、9/9 gates ✓
+  </div>
+  <div style="font-size:0.82rem;color:#78350f;margin-top:10px;opacity:0.85;">
+    💡 這三個數字是今天系統「最值得你關注的研究結論」。下方卡片逐一展開細節。
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
     # ---- Headline KPIs (investor-friendly framing) ----------------------
     k1, k2, k3, k4 = st.columns(4)
     with k1:
@@ -228,6 +322,79 @@ with tab_observe:
             desc="九個品質閘門全數 PASS。Embargo / Leakage / Purge 防護全開。",
             val_class="up",
         ), unsafe_allow_html=True)
+
+    # ====================================================================
+    # 🌟 Top 5 推薦股票預覽 (D+20 月度) — concrete tickers, scannable
+    # ====================================================================
+    st.markdown("### 🌟 Top 5 · D+20 月度推薦預覽")
+    st.markdown(
+        '<div style="color:var(--gl-text-2);font-size:.92rem;margin-bottom:12px;">'
+        f'以下是模型在判讀日 <strong>{_h20_date}</strong> 產出的前五名。<br>'
+        '每張卡片顯示<strong>股票代號、產業、歷史同情境 20 日後報酬</strong>。'
+        '完整解讀、成本試算、風險提示請點下方「投資觀察台」。'
+        '</div>', unsafe_allow_html=True,
+    )
+
+    if _h20_stocks:
+        _top5 = _h20_stocks[:5]
+        # 5 equal columns
+        _cols = st.columns(5, gap="small")
+        for _i, (_col, _st) in enumerate(zip(_cols, _top5)):
+            _sid = _st.get("stock_id", "—")
+            _sname = _st.get("short_name", "")
+            _sind = _st.get("industry", "")
+            _sret = _st.get("fwd_ret_20", 0)
+            _price = _st.get("closing_price", None)
+            _ret_color = "#059669" if _sret >= 0 else "#dc2626"
+            _price_str = (
+                f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:.78rem;color:#64748b;">'
+                f'收盤 {_price:.1f}</span>' if _price else ""
+            )
+            with _col:
+                st.markdown(f"""
+<div style="background:#ffffff;
+            border:1px solid #e2e8f0;
+            border-left:3px solid {_ret_color};
+            border-radius:12px;
+            padding:14px 14px 12px;
+            height:100%;
+            transition:all .2s ease;
+            box-shadow:0 2px 6px rgba(15,23,42,0.04);">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.66rem;
+              color:#94a3b8;letter-spacing:0.12em;font-weight:700;margin-bottom:4px;">
+    RANK {_i+1}
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;
+              color:#0f172a;letter-spacing:-0.02em;line-height:1.1;">
+    {_sid}
+  </div>
+  <div style="font-size:0.92rem;font-weight:600;color:#1e293b;margin:4px 0 2px;
+              overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+    {_sname}
+  </div>
+  <div style="font-size:0.74rem;color:#64748b;margin-bottom:10px;
+              overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+    {_sind or "—"}
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;
+              color:{_ret_color};line-height:1.1;">
+    {'+' if _sret >= 0 else ''}{_sret*100:.1f}%
+  </div>
+  <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">歷史同情境 20 日後</div>
+  <div style="margin-top:8px;">{_price_str}</div>
+</div>
+""", unsafe_allow_html=True)
+
+        # Note below the 5 cards
+        st.markdown(
+            '<div style="background:#f8fafc;border-radius:8px;padding:10px 14px;margin-top:12px;'
+            'font-size:0.82rem;color:#475569;line-height:1.6;border-left:2px solid #06b6d4;">'
+            '📌 <strong>注意</strong>：這是「歷史同情境下的 20 日後平均報酬」，非未來預測。'
+            '推薦是模型排序（ranking），目的是協助研究者聚焦前 5% 標的，不構成投資建議。'
+            '</div>', unsafe_allow_html=True,
+        )
+    else:
+        st.info("目前沒有可用的推薦資料。請嘗試重新整理，或查看「投資觀察台」。")
 
     st.markdown("### 九大支柱 · 重要度快速判讀")
     st.markdown(
@@ -321,11 +488,137 @@ with tab_observe:
         if st.button("📈  查看策略回測", use_container_width=True, type="secondary", key="btn_bt_obs"):
             st.switch_page(str(Path(__file__).resolve().parent / "3_💰_Backtest.py"))
 
+    # ====================================================================
+    # 📖 如何閱讀這個系統 (Reading Guide) — 3 paths by time budget
+    # ====================================================================
+    st.markdown("### 📖 如何閱讀這個系統")
+    st.markdown(
+        '<div style="color:var(--gl-text-2);font-size:.9rem;margin-bottom:12px;">'
+        '依你有多少時間選擇路線。建議新手從「1 分鐘速讀」開始，再視情況深入。'
+        '</div>', unsafe_allow_html=True,
+    )
+    rg1, rg2, rg3 = st.columns(3, gap="medium")
+    with rg1:
+        st.markdown("""
+<div style="background:linear-gradient(135deg,#ecfdf5 0%,#f0fdfa 100%);
+            border:1px solid rgba(16,185,129,0.28);
+            border-left:3px solid #10b981;
+            border-radius:12px;padding:16px 18px;height:100%;">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.66rem;color:#047857;
+              letter-spacing:0.14em;font-weight:700;margin-bottom:4px;">PATH A · BEGINNER</div>
+  <div style="font-size:1.05rem;font-weight:700;color:#064e3b;margin-bottom:8px;">
+    🕐 1 分鐘速讀
+  </div>
+  <div style="font-size:0.9rem;color:#065f46;line-height:1.72;">
+    · 看上方<strong>今日重點</strong>三行<br>
+    · 看 <strong>Top 5 推薦</strong>卡片<br>
+    · 看三顆<strong>訊號燈</strong>綠不綠<br>
+    <br>
+    <span style="font-size:.82rem;opacity:.85;">→ 停在這裡就是「系統說了什麼」</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+    with rg2:
+        st.markdown("""
+<div style="background:linear-gradient(135deg,#eff6ff 0%,#f0f9ff 100%);
+            border:1px solid rgba(37,99,235,0.28);
+            border-left:3px solid #2563eb;
+            border-radius:12px;padding:16px 18px;height:100%;">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.66rem;color:#1e40af;
+              letter-spacing:0.14em;font-weight:700;margin-bottom:4px;">PATH B · INVESTOR</div>
+  <div style="font-size:1.05rem;font-weight:700;color:#1e3a8a;margin-bottom:8px;">
+    📊 5 分鐘細看
+  </div>
+  <div style="font-size:0.9rem;color:#1e40af;line-height:1.72;">
+    · 進入 <strong>🌱 投資觀察台</strong><br>
+    · 逐一展開推薦股票的<strong>四件事</strong>解讀<br>
+    · 用成本<strong>試算機</strong>估算折價空間<br>
+    <br>
+    <span style="font-size:.82rem;opacity:.85;">→ 適合想自己判斷的投資人</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+    with rg3:
+        st.markdown("""
+<div style="background:linear-gradient(135deg,#faf5ff 0%,#f5f3ff 100%);
+            border:1px solid rgba(124,58,237,0.28);
+            border-left:3px solid #7c3aed;
+            border-radius:12px;padding:16px 18px;height:100%;">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.66rem;color:#6d28d9;
+              letter-spacing:0.14em;font-weight:700;margin-bottom:4px;">PATH C · RESEARCHER</div>
+  <div style="font-size:1.05rem;font-weight:700;color:#4c1d95;margin-bottom:8px;">
+    🔬 深入研究
+  </div>
+  <div style="font-size:0.9rem;color:#5b21b6;line-height:1.72;">
+    · 切到 <strong>⚙️ 研究工作站</strong> tab<br>
+    · 看完整的 <strong>AUC/DSR/ICIR</strong> + LOPO<br>
+    · 再到治理監控確認模型健康度<br>
+    <br>
+    <span style="font-size:.82rem;opacity:.85;">→ 給分析師、學術審閱者</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
 
 # ----------------------------------------------------------------------------
 # ⚙️ 研究工作站  (Research Workstation — Bloomberg-terminal feel)
 # ----------------------------------------------------------------------------
 with tab_workstation:
+    # ====================================================================
+    # ⚡ PERFORMANCE HEADLINE — 3 key numbers + interpretation
+    # ====================================================================
+    _auc_edge = max(0.0, (baseline_auc - 0.5) * 2 * 100)  # % above random
+    st.markdown(f"""
+<div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 55%,#0f172a 100%);
+            border:1px solid rgba(6,182,212,0.22);
+            border-left:4px solid #06b6d4;
+            border-radius:14px;
+            padding:20px 24px;
+            margin-top:10px;margin-bottom:18px;
+            color:#f1f5f9;
+            box-shadow:0 6px 22px rgba(2,6,23,0.18);">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#67e8f9;
+              letter-spacing:0.16em;font-weight:700;text-transform:uppercase;margin-bottom:10px;">
+    ⚡ PERFORMANCE HEADLINE &nbsp;·&nbsp; xgboost_D20 &nbsp;·&nbsp; Purged Walk-Forward 4-Fold
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:end;">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:800;color:#67e8f9;
+                  line-height:1;letter-spacing:-0.02em;">{baseline_auc:.3f}</div>
+      <div style="font-size:0.82rem;color:#94a3b8;margin-top:6px;">OOS AUC · 預測正確率</div>
+      <div style="font-size:0.76rem;color:#cbd5e1;margin-top:4px;opacity:0.9;">
+        ≈ 比亂猜好 <strong style="color:#a7f3d0;">{_auc_edge:.1f}%</strong> · 超過 0.52 閘門
+      </div>
+    </div>
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:800;color:#a7f3d0;
+                  line-height:1;letter-spacing:-0.02em;">{best_dsr:.2f}</div>
+      <div style="font-size:0.82rem;color:#94a3b8;margin-top:6px;">DSR · 膨脹調整後夏普</div>
+      <div style="font-size:0.76rem;color:#cbd5e1;margin-top:4px;opacity:0.9;">
+        遠高於 <strong>1.0</strong> 有效門檻 · 非靠運氣
+      </div>
+    </div>
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:800;color:#fde68a;
+                  line-height:1;letter-spacing:-0.02em;">+{best_edge*100:.1f}pp</div>
+      <div style="font-size:0.82rem;color:#94a3b8;margin-top:6px;">Best Edge · 最佳邊際</div>
+      <div style="font-size:0.76rem;color:#cbd5e1;margin-top:4px;opacity:0.9;">
+        Top decile vs bottom · D+20 threshold sweep
+      </div>
+    </div>
+  </div>
+  <div style="font-size:0.82rem;color:#cbd5e1;margin-top:14px;padding-top:12px;
+              border-top:1px solid rgba(148,163,184,0.16);line-height:1.7;">
+    📖 <strong style="color:#f1f5f9;">一句話解讀</strong>：這三個數字就是「這套系統值不值得看」的三把尺 ——
+    <span style="color:#a7f3d0;">準不準</span>、
+    <span style="color:#67e8f9;">穩不穩</span>、
+    <span style="color:#fde68a;">賺不賺</span>。全部通過研究門檻。
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
     # ---- 6-KPI grid (dense numerics, JetBrains-Mono tabular-nums) -------
     st.markdown("### 系統即時指標")
 

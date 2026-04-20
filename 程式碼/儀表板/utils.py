@@ -2353,6 +2353,8 @@ def inject_sidebar_action_buttons(manual_page=None, reset_key: str = "_gl_reset"
             if st.button("🔄 重整", key=reset_key, use_container_width=True,
                          help="清除快取並重新載入儀表板資料"):
                 st.cache_data.clear()
+                # Give users visible feedback — otherwise "nothing happens" UX
+                st.toast("✅ 快取已清除 · 重新載入中…", icon="🔄")
                 st.rerun()
         with c2:
             if st.button("❓ 手冊", key=manual_key, use_container_width=True,
@@ -2361,5 +2363,7 @@ def inject_sidebar_action_buttons(manual_page=None, reset_key: str = "_gl_reset"
                     try:
                         st.switch_page(manual_page)
                     except Exception:
-                        st.toast("找不到手冊頁。")
+                        st.toast("找不到手冊頁。", icon="⚠️")
+                else:
+                    st.toast("手冊頁未註冊。", icon="⚠️")
         st.markdown('</div>', unsafe_allow_html=True)
