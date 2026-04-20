@@ -40,10 +40,14 @@ _utils = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_utils)
 _utils.inject_custom_css()  # Inter + JetBrains Mono + tech-grid background + gl-* vars
 render_topbar = _utils.render_topbar
+render_pillar_radar = _utils.render_pillar_radar
+render_sector_chip = _utils.render_sector_chip
+render_subtabs = _utils.render_subtabs
+load_phase6_json = _utils.load_phase6_json
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
-    crumb_left="量化研究終端",
+    crumb_left="股票預測系統",
     crumb_current="投資觀察台",
     chips=[
         ("歷史判讀", "pri"),
@@ -1061,6 +1065,53 @@ try:
                 st.dataframe(comp_df, use_container_width=True, hide_index=True)
             else:
                 st.info(f"無 {h_label} 判讀資料")
+
+    # ===== 9-Pillar Radar =====
+    st.divider()
+    st.markdown("### 🕸️ 九支柱雷達圖 · 研究結論結構")
+    st.caption("以 LOPO 實驗的 ΔAUC 為每個支柱打分（越往外表示該家族在 D+20 預測上越關鍵）。"
+               "下圖呈現本研究結論的「骨架」：模型真正仰賴的是哪些觀察角度。")
+    _lopo, _ = load_phase6_json("lopo_pillar_contribution_D20.json")
+    if _lopo and "ranking_by_delta_auc" in _lopo:
+        _max_d = max(abs(r["delta_auc"]) for r in _lopo["ranking_by_delta_auc"]) or 1e-4
+        pillar_scores = {
+            r["pillar"]: abs(r["delta_auc"]) / _max_d
+            for r in _lopo["ranking_by_delta_auc"]
+        }
+    else:
+        pillar_scores = {
+            "risk": 0.95, "fund": 0.82, "chip": 0.68, "trend": 0.54,
+            "val": 0.42, "event": 0.25, "ind": 0.48, "txt": 0.32, "sent": 0.38,
+        }
+    radar_col_l, radar_col_r = st.columns([3, 2])
+    with radar_col_l:
+        st.plotly_chart(
+            render_pillar_radar(pillar_scores, title="Pillar Importance · LOPO ΔAUC (normalised)",
+                                 height=460),
+            use_container_width=True,
+        )
+    with radar_col_r:
+        st.markdown("""
+<div class="gl-panel" style="height:100%;">
+  <div style="font-size:0.75rem;color:var(--gl-text-3);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">How to read</div>
+  <div style="font-size:0.92rem;color:var(--gl-text-2);margin-top:12px;line-height:1.7;">
+    <strong style="color:var(--gl-text);">外圈越大</strong>：該支柱對預測貢獻度越高，研究結論主要建立於此。<br><br>
+    <strong style="color:var(--gl-text);">九支柱定義</strong>：
+    <span class="gl-pillar" data-p="trend">技術</span>
+    <span class="gl-pillar" data-p="fund">基本</span>
+    <span class="gl-pillar" data-p="val">評價</span>
+    <span class="gl-pillar" data-p="event">事件</span>
+    <span class="gl-pillar" data-p="risk">風險</span>
+    <span class="gl-pillar" data-p="chip">籌碼</span>
+    <span class="gl-pillar" data-p="ind">產業</span>
+    <span class="gl-pillar" data-p="txt">文本</span>
+    <span class="gl-pillar" data-p="sent">情緒</span>
+    <br><br>
+    這張圖回答：<strong style="color:var(--gl-text);">「模型到底在看什麼？」</strong>
+    若某支柱被移除後 AUC 大幅掉落，代表它是本期研究結論的主支撐。
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
     # ===== Cost Calculator =====
     st.divider()

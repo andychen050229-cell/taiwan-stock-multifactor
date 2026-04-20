@@ -804,6 +804,394 @@ def inject_custom_css():
     .gl-grid-6 {{ display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }}
     @media (max-width: 1200px) {{ .gl-grid-6 {{ grid-template-columns: repeat(3, 1fr); }} }}
     @media (max-width: 900px) {{ .gl-grid-3 {{ grid-template-columns: 1fr; }} .gl-grid-6 {{ grid-template-columns: repeat(2, 1fr); }} }}
+    /* ================================================================= */
+    /* 6. 股票預測系統 — sidebar brand + system health card (dark theme) */
+    /* ================================================================= */
+    /* Brand block at the top of the dark sidebar */
+    .gl-brand {{
+        padding: 16px 18px 14px 18px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        margin: -8px -16px 8px -16px;
+        background: linear-gradient(180deg, rgba(6,182,212,0.06), transparent);
+    }}
+    .gl-brand-eyebrow {{
+        font-family: var(--gl-font-mono);
+        font-size: 0.62rem;
+        color: #06b6d4 !important;
+        letter-spacing: 0.22em;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }}
+    .gl-brand-title {{
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #e8f7fc !important;
+        letter-spacing: -0.01em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--gl-font-sans);
+    }}
+    .gl-brand-dot {{
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #06b6d4;
+        box-shadow: 0 0 0 0 rgba(6,182,212,0.55);
+        animation: gl-pulse-cyan 2s cubic-bezier(0.4,0,0.6,1) infinite;
+        display: inline-block;
+    }}
+    @keyframes gl-pulse-cyan {{
+        0%   {{ box-shadow: 0 0 0 0 rgba(6,182,212,0.6); }}
+        70%  {{ box-shadow: 0 0 0 10px rgba(6,182,212,0);  }}
+        100% {{ box-shadow: 0 0 0 0 rgba(6,182,212,0);    }}
+    }}
+    /* Section headers inside dark sidebar */
+    .gl-side-group-head {{
+        padding: 14px 8px 6px 4px;
+        color: #5b7186 !important;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-family: var(--gl-font-sans);
+    }}
+    /* Count pill on right of sidebar nav items */
+    .gl-side-count {{
+        float: right;
+        font-family: var(--gl-font-mono);
+        font-size: 0.66rem;
+        color: #8899aa !important;
+        background: rgba(255,255,255,0.04);
+        padding: 1px 7px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.06);
+        letter-spacing: 0.04em;
+    }}
+    /* ---- System health card (sidebar footer) ---- */
+    .gl-syshealth {{
+        margin: 12px -16px -16px -16px;
+        padding: 14px 16px 14px 16px;
+        background: linear-gradient(180deg, rgba(6,182,212,0.05), rgba(10,20,30,0.4));
+        border-top: 1px solid rgba(6,182,212,0.18);
+    }}
+    .gl-syshealth-head {{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }}
+    .gl-syshealth-ring {{
+        width: 48px; height: 48px;
+        flex-shrink: 0;
+    }}
+    .gl-syshealth-labels {{
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+    }}
+    .gl-syshealth-title {{
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #b4ccdf !important;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-family: var(--gl-font-sans);
+    }}
+    .gl-syshealth-value {{
+        font-family: var(--gl-font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #e8f7fc !important;
+        line-height: 1;
+    }}
+    .gl-syshealth-sub {{
+        font-size: 0.66rem;
+        color: #06b6d4 !important;
+        font-family: var(--gl-font-mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 600;
+    }}
+    .gl-syshealth-kpi {{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 3px 0;
+        font-family: var(--gl-font-mono);
+        font-size: 0.68rem;
+        border-top: 1px dotted rgba(255,255,255,0.06);
+    }}
+    .gl-syshealth-kpi:first-of-type {{ border-top: none; }}
+    .gl-syshealth-kpi-k {{ color: #5b7186 !important; letter-spacing: 0.06em; }}
+    .gl-syshealth-kpi-v {{ color: #cce4f1 !important; font-weight: 600; font-variant-numeric: tabular-nums; }}
+    .gl-syshealth-foot {{
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted rgba(255,255,255,0.08);
+        font-size: 0.62rem;
+        color: #5b7186 !important;
+        font-family: var(--gl-font-mono);
+        letter-spacing: 0.04em;
+    }}
+    .gl-syshealth-foot strong {{ color: #b4ccdf !important; font-weight: 600; }}
+    .gl-syshealth-btns {{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        margin-top: 8px;
+    }}
+    .gl-syshealth-btn {{
+        padding: 5px 8px;
+        text-align: center;
+        font-family: var(--gl-font-sans);
+        font-size: 0.72rem;
+        font-weight: 600;
+        border-radius: 6px;
+        color: #cce4f1 !important;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        cursor: pointer;
+        transition: all .2s ease;
+    }}
+    .gl-syshealth-btn:hover {{
+        background: rgba(6,182,212,0.1);
+        border-color: rgba(6,182,212,0.3);
+        color: #e8f7fc !important;
+    }}
+    /* ---- Light-mode system health card (when used in main canvas) ---- */
+    .gl-syshealth.light {{
+        margin: 0 0 14px 0;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, #ffffff 0%, #f0fafe 100%);
+        border: 1px solid var(--gl-border);
+        border-left: 3px solid var(--gl-cyan);
+        border-radius: 12px;
+        box-shadow: var(--gl-shadow-sm);
+    }}
+    .gl-syshealth.light .gl-syshealth-title {{ color: var(--gl-text-3) !important; }}
+    .gl-syshealth.light .gl-syshealth-value {{ color: var(--gl-text) !important; }}
+    .gl-syshealth.light .gl-syshealth-sub {{ color: var(--gl-cyan) !important; }}
+    .gl-syshealth.light .gl-syshealth-kpi {{ border-top: 1px dotted var(--gl-border); }}
+    .gl-syshealth.light .gl-syshealth-kpi-k {{ color: var(--gl-text-3) !important; }}
+    .gl-syshealth.light .gl-syshealth-kpi-v {{ color: var(--gl-text) !important; }}
+    .gl-syshealth.light .gl-syshealth-foot {{ color: var(--gl-text-3) !important; border-top-color: var(--gl-border); }}
+    .gl-syshealth.light .gl-syshealth-foot strong {{ color: var(--gl-text) !important; }}
+    /* ---- Search chip in topbar ---- */
+    .gl-topbar-search {{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        background: var(--gl-subtle);
+        border: 1px solid var(--gl-border);
+        border-radius: 999px;
+        color: var(--gl-text-3);
+        font-size: 0.78rem;
+        font-family: var(--gl-font-mono);
+        margin-right: 10px;
+        min-width: 240px;
+    }}
+    .gl-topbar-search .kbd {{
+        margin-left: auto;
+        padding: 1px 5px;
+        font-size: 0.64rem;
+        background: rgba(255,255,255,0.6);
+        border: 1px solid var(--gl-border);
+        border-radius: 4px;
+        color: var(--gl-text-3);
+    }}
+    /* ---- Dynamic hero orbital ring (SVG globe accent) ---- */
+    .gl-orbit {{
+        position: absolute;
+        top: -50px;
+        right: -40px;
+        width: 280px;
+        height: 280px;
+        pointer-events: none;
+        opacity: 0.75;
+        z-index: 0;
+    }}
+    .gl-orbit circle {{ fill: none; stroke: rgba(37,99,235,0.18); stroke-width: 1; }}
+    .gl-orbit circle.c1 {{ stroke: rgba(37,99,235,0.28); }}
+    .gl-orbit circle.c2 {{ stroke: rgba(124,58,237,0.22); }}
+    .gl-orbit circle.c3 {{ stroke: rgba(6,182,212,0.22); }}
+    .gl-orbit .dot {{ fill: #06b6d4; }}
+    @keyframes gl-orbit-rot {{ to {{ transform: rotate(360deg); }} }}
+    .gl-orbit .spin-fast {{ transform-origin: 140px 140px; animation: gl-orbit-rot 18s linear infinite; }}
+    .gl-orbit .spin-med  {{ transform-origin: 140px 140px; animation: gl-orbit-rot 32s linear infinite reverse; }}
+    .gl-orbit .spin-slow {{ transform-origin: 140px 140px; animation: gl-orbit-rot 56s linear infinite; }}
+    /* ---- Traffic-light signal cards (🟢🟡🔴) ---- */
+    .gl-signal {{
+        position: relative;
+        padding: 18px 22px;
+        border-radius: 14px;
+        border: 1px solid var(--gl-border);
+        background: var(--gl-surface);
+        box-shadow: var(--gl-shadow-sm);
+        overflow: hidden;
+    }}
+    .gl-signal::before {{
+        content: "";
+        position: absolute;
+        top: 0; left: 0;
+        width: 4px; height: 100%;
+    }}
+    .gl-signal.green::before  {{ background: linear-gradient(180deg, #10b981, #06b6d4); }}
+    .gl-signal.amber::before  {{ background: linear-gradient(180deg, #f59e0b, #f43f5e); }}
+    .gl-signal.red::before    {{ background: linear-gradient(180deg, #f43f5e, #ef4444); }}
+    .gl-signal-head {{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }}
+    .gl-signal-light {{
+        width: 14px; height: 14px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }}
+    .gl-signal.green .gl-signal-light {{ background: #10b981; box-shadow: 0 0 12px rgba(16,185,129,0.5); }}
+    .gl-signal.amber .gl-signal-light {{ background: #f59e0b; box-shadow: 0 0 12px rgba(245,158,11,0.5); }}
+    .gl-signal.red   .gl-signal-light {{ background: #f43f5e; box-shadow: 0 0 12px rgba(244,63,94,0.5); }}
+    .gl-signal-title {{
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--gl-text);
+    }}
+    .gl-signal-val {{
+        font-family: var(--gl-font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--gl-text);
+        line-height: 1.1;
+    }}
+    .gl-signal-val.up   {{ color: var(--gl-emerald); }}
+    .gl-signal-val.down {{ color: var(--gl-rose); }}
+    .gl-signal-desc {{
+        font-size: 0.82rem;
+        color: var(--gl-text-2);
+        margin-top: 6px;
+        line-height: 1.55;
+    }}
+    /* ---- Sector colour codes (產業色碼) ---- */
+    .gl-sector {{
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 2px 8px;
+        font-size: 0.7rem;
+        font-family: var(--gl-font-sans);
+        font-weight: 600;
+        border-radius: 5px;
+    }}
+    .gl-sector::before {{
+        content: "";
+        width: 6px; height: 6px;
+        border-radius: 50%;
+    }}
+    .gl-sector[data-s="半導體"]    {{ background: #dbeafe; color: #1e40af; }}
+    .gl-sector[data-s="半導體"]::before {{ background: #2563eb; }}
+    .gl-sector[data-s="電子零組件"]  {{ background: #e0e7ff; color: #3730a3; }}
+    .gl-sector[data-s="電子零組件"]::before {{ background: #4f46e5; }}
+    .gl-sector[data-s="金融"]      {{ background: #dcfce7; color: #166534; }}
+    .gl-sector[data-s="金融"]::before {{ background: #10b981; }}
+    .gl-sector[data-s="生技醫療"]   {{ background: #fae8ff; color: #86198f; }}
+    .gl-sector[data-s="生技醫療"]::before {{ background: #a855f7; }}
+    .gl-sector[data-s="傳產"]      {{ background: #fef3c7; color: #92400e; }}
+    .gl-sector[data-s="傳產"]::before {{ background: #f59e0b; }}
+    .gl-sector[data-s="航運"]      {{ background: #cffafe; color: #155e75; }}
+    .gl-sector[data-s="航運"]::before {{ background: #06b6d4; }}
+    .gl-sector[data-s="通訊網路"]   {{ background: #f3e8ff; color: #6b21a8; }}
+    .gl-sector[data-s="通訊網路"]::before {{ background: #7c3aed; }}
+    .gl-sector[data-s="汽車"]      {{ background: #ffe4e6; color: #9f1239; }}
+    .gl-sector[data-s="汽車"]::before {{ background: #f43f5e; }}
+    /* ---- 財報狗-style subsection tabs (per-page navigation) ---- */
+    .gl-subtabs {{
+        display: flex;
+        gap: 4px;
+        padding: 4px;
+        background: var(--gl-subtle);
+        border: 1px solid var(--gl-border);
+        border-radius: 10px;
+        margin-bottom: 18px;
+        overflow-x: auto;
+    }}
+    /* Streamlit radio rendered as segmented tab strip */
+    div[data-baseweb="radio"][role="radiogroup"] label {{
+        padding: 7px 14px !important;
+        border-radius: 7px !important;
+        background: transparent !important;
+        border: 1px solid transparent !important;
+        cursor: pointer !important;
+        font-family: var(--gl-font-sans) !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        color: var(--gl-text-2) !important;
+        transition: all .2s ease !important;
+    }}
+    div[data-baseweb="radio"][role="radiogroup"] label:hover {{
+        color: var(--gl-text) !important;
+        background: rgba(37,99,235,0.04) !important;
+    }}
+    /* Phase-chip helper */
+    .phase-chip {{
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: var(--gl-surface);
+        border: 1px solid var(--gl-border);
+        text-align: left;
+        box-shadow: var(--gl-shadow-sm);
+    }}
+    .phase-chip.cur {{
+        border-color: rgba(37,99,235,0.35);
+        background: linear-gradient(135deg, #f0f7ff, #f5f0ff);
+        box-shadow: var(--gl-shadow-glow);
+    }}
+    /* Path-card (KPI gateway) base & inv/qnt already covered */
+    .path-card {{
+        position: relative;
+        padding: 20px 22px;
+        border-radius: 14px;
+        background: var(--gl-surface);
+        border: 1px solid var(--gl-border);
+        box-shadow: var(--gl-shadow-sm);
+        overflow: hidden;
+        transition: all .25s ease;
+    }}
+    .path-card::before {{
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: var(--gl-grad-tech);
+    }}
+    .path-card:hover {{
+        border-color: rgba(37,99,235,0.35);
+        box-shadow: var(--gl-shadow-glow);
+        transform: translateY(-2px);
+    }}
+    .path-title {{
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--gl-text);
+        margin-bottom: 10px;
+        letter-spacing: -0.005em;
+    }}
+    .path-desc {{
+        font-size: 0.92rem;
+        color: var(--gl-text-2);
+        line-height: 1.6;
+        margin-bottom: 14px;
+    }}
+    .path-desc strong {{ color: var(--gl-text); }}
+    .path-tags {{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }}
 </style>
     """, unsafe_allow_html=True)
 
@@ -1026,7 +1414,8 @@ def render_horizon_segmented(options: list = None, current: str = "D+20", key_pr
     st.markdown(f'<div class="gl-seg-wrap">{btns}</div>', unsafe_allow_html=True)
 
 
-def render_hero(eyebrow: str, title_html: str, meta_chips: list = None, subtitle: str = ""):
+def render_hero(eyebrow: str, title_html: str, meta_chips: list = None,
+                subtitle: str = "", show_orbit: bool = False):
     """Hero block with gradient title + eyebrow + meta chips + blur orb.
 
     Args:
@@ -1034,6 +1423,7 @@ def render_hero(eyebrow: str, title_html: str, meta_chips: list = None, subtitle
         title_html: Hero title (may include <span class="gl-hero-accent"> for gradient highlight).
         meta_chips: Optional list of (label, variant) tuples.
         subtitle: Short Chinese subtitle under the title.
+        show_orbit: If True, render a decorative rotating orbital ring (right side of hero).
     """
     meta_chips = meta_chips or []
     chip_html = "".join(
@@ -1045,9 +1435,11 @@ def render_hero(eyebrow: str, title_html: str, meta_chips: list = None, subtitle
             f'<div style="margin-top:14px;color:var(--gl-text-2);font-size:0.98rem;max-width:860px;">'
             f'{subtitle}</div>'
         )
+    orbit_html = render_orbital_ring_svg() if show_orbit else ""
     st.markdown(f"""
 <div class="gl-hero">
   <div class="gl-hero-orb"></div>
+  {orbit_html}
   <span class="gl-hero-eyebrow">{eyebrow}</span>
   <div class="gl-hero-title">{title_html}</div>
   {subtitle_html}
@@ -1062,6 +1454,335 @@ def render_live_chip(text: str = "LIVE · 研究快照"):
         f'<span class="gl-live">{text}</span>',
         unsafe_allow_html=True,
     )
+
+
+def _cyan_ring_svg(pct: float, size: int = 48, stroke: int = 5,
+                   color: str = "#06b6d4", track: str = "rgba(255,255,255,0.08)",
+                   label_color: str = "#e8f7fc") -> str:
+    """Return a dark-themed SVG ring (0–100%) suitable for the sidebar."""
+    import math
+    pct = max(0, min(100, pct))
+    r = (size - stroke) / 2
+    c = 2 * math.pi * r
+    dash = c * (pct / 100)
+    cx = cy = size / 2
+    return f"""
+<svg class="gl-syshealth-ring" viewBox="0 0 {size} {size}" width="{size}" height="{size}">
+  <circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{track}" stroke-width="{stroke}"/>
+  <circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{color}"
+          stroke-width="{stroke}" stroke-linecap="round"
+          stroke-dasharray="{dash:.2f} {c - dash:.2f}"
+          transform="rotate(-90 {cx} {cy})"/>
+  <text x="{cx}" y="{cy + 3}" text-anchor="middle"
+        font-family="JetBrains Mono, monospace" font-size="{size * 0.26:.0f}"
+        font-weight="700" fill="{label_color}">{pct:.0f}%</text>
+</svg>
+"""
+
+
+def render_system_health_card(gates_passed: int = 9, total_gates: int = 9,
+                              dataset: str = "2023/03–2025/03",
+                              samples: str = "948,976",
+                              features: str = "91 / 1,623",
+                              dsr: str = "12.12",
+                              last_verified: str = "2026-04-20 14:24",
+                              mode: str = "dark") -> str:
+    """Return the HTML for a 系統健康度 card.
+
+    Args:
+        gates_passed / total_gates: quality-gate pass counts.
+        dataset / samples / features / dsr: the four core KPI values.
+        last_verified: ISO-ish timestamp for the last verification run.
+        mode: "dark" (sidebar footer) or "light" (main-canvas panel).
+    """
+    pct = (gates_passed / total_gates * 100) if total_gates else 0
+    klass = "gl-syshealth light" if mode == "light" else "gl-syshealth"
+    ring = _cyan_ring_svg(
+        pct,
+        size=54,
+        label_color=("#0f172a" if mode == "light" else "#e8f7fc"),
+        track=("#e2e8f0" if mode == "light" else "rgba(255,255,255,0.08)"),
+    )
+    return f"""
+<div class="{klass}">
+  <div class="gl-syshealth-head">
+    {ring}
+    <div class="gl-syshealth-labels">
+      <div class="gl-syshealth-title">系統健康度</div>
+      <div class="gl-syshealth-value">{gates_passed} / {total_gates}</div>
+      <div class="gl-syshealth-sub">品質閘門 PASS</div>
+    </div>
+  </div>
+  <div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">DATASET</span><span class="gl-syshealth-kpi-v">{dataset}</span></div>
+  <div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">SAMPLES</span><span class="gl-syshealth-kpi-v">{samples}</span></div>
+  <div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">FEATURES</span><span class="gl-syshealth-kpi-v">{features}</span></div>
+  <div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">DSR</span><span class="gl-syshealth-kpi-v">{dsr}</span></div>
+  <div class="gl-syshealth-foot">最後驗證時間　<strong>{last_verified}</strong></div>
+  <div class="gl-syshealth-btns">
+    <div class="gl-syshealth-btn">🔄 重整</div>
+    <div class="gl-syshealth-btn">? 手冊</div>
+  </div>
+</div>
+"""
+
+
+def inject_sidebar_brand(product: str = "股票預測系統",
+                         eyebrow: str = "MULTI-FACTOR"):
+    """Inject the 股票預測系統 brand block at the top of the sidebar.
+
+    Renders on every page because app.py's sidebar runs first.
+    """
+    st.sidebar.markdown(
+        f"""
+<div class="gl-brand">
+  <div class="gl-brand-eyebrow">{eyebrow}</div>
+  <div class="gl-brand-title"><span class="gl-brand-dot"></span>{product}</div>
+</div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def inject_sidebar_health(gates_passed: int = 9, total_gates: int = 9,
+                          dataset: str = "2023/03–2025/03",
+                          samples: str = "948,976",
+                          features: str = "91 / 1,623",
+                          dsr: str = "12.12",
+                          last_verified: str = "2026-04-20 14:24"):
+    """Inject the 系統健康度 card at the bottom of the sidebar."""
+    st.sidebar.markdown(
+        render_system_health_card(
+            gates_passed=gates_passed,
+            total_gates=total_gates,
+            dataset=dataset,
+            samples=samples,
+            features=features,
+            dsr=dsr,
+            last_verified=last_verified,
+            mode="dark",
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def render_traffic_signal(color: str, title: str, value: str,
+                          desc: str = "", val_class: str = "") -> str:
+    """Return HTML for a traffic-light signal card (🟢🟡🔴).
+
+    Args:
+        color: "green" | "amber" | "red"
+        title: short title (e.g. "模型判讀")
+        value: main number (e.g. "0.6490")
+        desc: short description line.
+        val_class: optional "up" / "down" to tint the main number.
+    """
+    return f"""
+<div class="gl-signal {color}">
+  <div class="gl-signal-head">
+    <span class="gl-signal-light"></span>
+    <span class="gl-signal-title">{title}</span>
+  </div>
+  <div class="gl-signal-val {val_class}">{value}</div>
+  <div class="gl-signal-desc">{desc}</div>
+</div>
+"""
+
+
+def render_sector_chip(sector: str) -> str:
+    """Return HTML for a sector colour-coded chip."""
+    return f'<span class="gl-sector" data-s="{sector}">{sector}</span>'
+
+
+def render_pillar_radar(values: dict, title: str = "九支柱雷達圖",
+                        reference: dict = None, height: int = 420):
+    """Render a Plotly polar radar of the 9 pillars with glint theme.
+
+    Args:
+        values: dict keyed by pillar code (trend/fund/val/event/risk/chip/ind/txt/sent)
+                to a 0–1 score.
+        title: chart title.
+        reference: optional dict (same shape) rendered as a lighter comparison layer.
+        height: chart height in px.
+
+    Returns the Plotly Figure.
+    """
+    import plotly.graph_objects as go
+    order = ["trend", "fund", "val", "event", "risk", "chip", "ind", "txt", "sent"]
+    labels = {
+        "trend": "技術面",
+        "fund":  "基本面",
+        "val":   "評價面",
+        "event": "事件面",
+        "risk":  "風險面",
+        "chip":  "籌碼面",
+        "ind":   "產業面",
+        "txt":   "文本面",
+        "sent":  "情緒面",
+    }
+    theta = [labels[k] for k in order] + [labels[order[0]]]
+    r_main = [float(values.get(k, 0)) for k in order]
+    r_main.append(r_main[0])
+    fig = go.Figure()
+    if reference is not None:
+        r_ref = [float(reference.get(k, 0)) for k in order]
+        r_ref.append(r_ref[0])
+        fig.add_trace(go.Scatterpolar(
+            r=r_ref, theta=theta,
+            fill="toself",
+            name="Baseline",
+            line=dict(color="rgba(148,163,184,0.55)", width=1.5),
+            fillcolor="rgba(148,163,184,0.12)",
+            hovertemplate="%{theta}: %{r:.3f}<extra>Baseline</extra>",
+        ))
+    fig.add_trace(go.Scatterpolar(
+        r=r_main, theta=theta,
+        fill="toself",
+        name="LOPO Δ",
+        line=dict(color="#2563eb", width=2.2),
+        fillcolor="rgba(37,99,235,0.22)",
+        marker=dict(size=7, color="#7c3aed", line=dict(color="#fff", width=1.2)),
+        hovertemplate="<b>%{theta}</b><br>score: %{r:.3f}<extra></extra>",
+    ))
+    fig.update_layout(
+        title=dict(text=title, x=0.02, y=0.98,
+                   font=dict(family="Inter, 'Microsoft JhengHei'", size=14,
+                             color="#0f172a")),
+        polar=dict(
+            bgcolor="rgba(248,250,252,0.7)",
+            radialaxis=dict(
+                visible=True, range=[0, max(1.0, max(r_main) * 1.15)],
+                showline=False, gridcolor="rgba(37,99,235,0.08)",
+                tickfont=dict(family="JetBrains Mono", size=9, color="#94a3b8"),
+                tickformat=".2f",
+            ),
+            angularaxis=dict(
+                gridcolor="rgba(37,99,235,0.12)",
+                linecolor="rgba(37,99,235,0.18)",
+                tickfont=dict(family="Inter, 'Microsoft JhengHei'", size=11,
+                              color="#475569"),
+            ),
+        ),
+        showlegend=True,
+        legend=dict(orientation="h", y=-0.08, x=0.5, xanchor="center",
+                    font=dict(family="Inter", size=11)),
+        height=height,
+        margin=dict(t=50, b=40, l=40, r=40),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+    )
+    return fig
+
+
+def glint_plotly_layout(title: str = "", height: int = 360) -> dict:
+    """Return a glint-themed Plotly layout dict for any figure.
+
+    Use with ``fig.update_layout(**glint_plotly_layout(title=..., height=...))``
+    to unify chart styling across all pages.
+    """
+    return dict(
+        title=dict(text=title, x=0.02, y=0.97,
+                   font=dict(family="Inter, 'Microsoft JhengHei'", size=14,
+                             color="#0f172a")),
+        font=dict(family="Inter, 'Microsoft JhengHei'", color="#334155", size=12),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(255,255,255,0.6)",
+        height=height,
+        margin=dict(t=46, b=40, l=50, r=28),
+        xaxis=dict(
+            gridcolor="rgba(37,99,235,0.06)",
+            linecolor="rgba(37,99,235,0.15)",
+            tickfont=dict(family="JetBrains Mono", size=10, color="#64748b"),
+        ),
+        yaxis=dict(
+            gridcolor="rgba(37,99,235,0.06)",
+            linecolor="rgba(37,99,235,0.15)",
+            tickfont=dict(family="JetBrains Mono", size=10, color="#64748b"),
+        ),
+        hoverlabel=dict(
+            bgcolor="#0f1a28",
+            bordercolor="rgba(6,182,212,0.4)",
+            font=dict(family="JetBrains Mono", color="#e8f7fc", size=11),
+        ),
+        legend=dict(
+            font=dict(family="Inter", size=11, color="#475569"),
+            bgcolor="rgba(255,255,255,0.6)",
+            bordercolor="rgba(37,99,235,0.15)",
+            borderwidth=1,
+        ),
+    )
+
+
+GLINT_COLORS = {
+    "blue":    "#2563eb",
+    "violet":  "#7c3aed",
+    "cyan":    "#06b6d4",
+    "emerald": "#10b981",
+    "amber":   "#f59e0b",
+    "rose":    "#f43f5e",
+    "indigo":  "#4f46e5",
+    "slate":   "#64748b",
+}
+
+# 9-pillar palette aligned with the .gl-pillar badges
+PILLAR_COLORS = {
+    "trend":  "#2563eb",
+    "fund":   "#10b981",
+    "val":    "#a855f7",
+    "event":  "#f59e0b",
+    "risk":   "#f43f5e",
+    "chip":   "#4f46e5",
+    "ind":    "#06b6d4",
+    "txt":    "#7c3aed",
+    "sent":   "#ec4899",
+}
+
+
+def render_orbital_ring_svg() -> str:
+    """Return a decorative orbital-ring SVG (three concentric orbits + satellite dots)."""
+    return """
+<svg class="gl-orbit" viewBox="0 0 280 280">
+  <g class="spin-slow">
+    <circle class="c1" cx="140" cy="140" r="120"/>
+    <circle class="dot" cx="260" cy="140" r="3"/>
+  </g>
+  <g class="spin-med">
+    <circle class="c2" cx="140" cy="140" r="90"/>
+    <circle class="dot" cx="50" cy="140" r="2.5" fill="#7c3aed"/>
+  </g>
+  <g class="spin-fast">
+    <circle class="c3" cx="140" cy="140" r="60"/>
+    <circle class="dot" cx="200" cy="140" r="2"/>
+  </g>
+  <circle cx="140" cy="140" r="8" fill="url(#orb-grad)"/>
+  <defs>
+    <radialGradient id="orb-grad">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </radialGradient>
+  </defs>
+</svg>
+"""
+
+
+def render_subtabs(options: list, key: str, default_idx: int = 0,
+                   label: str = "子頁切換") -> str:
+    """Render 財報狗-style subsection tabs using st.radio + custom CSS.
+
+    Returns the selected option label. Use this at the top of each page to
+    split content into financial-website-style tabs.
+    """
+    import streamlit as st
+    st.markdown('<div class="gl-subtabs-wrap">', unsafe_allow_html=True)
+    choice = st.radio(
+        label,
+        options,
+        index=default_idx,
+        horizontal=True,
+        key=key,
+        label_visibility="collapsed",
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
+    return choice
 
 
 def inject_advanced_sidebar(report_name: str = "", report: dict = None, current_page: str = ""):

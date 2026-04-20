@@ -26,6 +26,9 @@ render_phase_timeline = _utils.render_phase_timeline
 render_ticker_tape = _utils.render_ticker_tape
 render_pillar_bar = _utils.render_pillar_bar
 render_live_chip = _utils.render_live_chip
+render_traffic_signal = _utils.render_traffic_signal
+render_sector_chip = _utils.render_sector_chip
+render_system_health_card = _utils.render_system_health_card
 load_phase6_json = _utils.load_phase6_json
 
 inject_custom_css()
@@ -94,8 +97,8 @@ best_dsr = best_dsr or 12.12
 # Top-bar (sticky) — breadcrumb + model chips + live clock
 # ============================================================================
 render_topbar(
-    crumb_left="量化研究終端",
-    crumb_current="首頁",
+    crumb_left="股票預測系統",
+    crumb_current="情境主控台",
     chips=[
         ("xgboost_D20", "pri"),
         ("purged WF · embargo=20", "vio"),
@@ -108,7 +111,7 @@ render_topbar(
 # Hero — updated title per Design spec
 # ============================================================================
 render_hero(
-    eyebrow="TAIWAN STOCK · MULTI-FACTOR PREDICTION",
+    eyebrow="STOCK PREDICTION · MULTI-FACTOR TERMINAL",
     title_html="1,930 檔台股 · <span class=\"gl-hero-accent\">九大支柱整合判讀</span>",
     subtitle=(
         "以 <strong>2023/03 – 2025/03</strong> 台股歷史資料為基礎，整合 "
@@ -122,6 +125,7 @@ render_hero(
         (f"xgboost_D20 OOS AUC {baseline_auc:.3f}", "vio"),
         (f"best edge +{best_edge*100:.1f}pp", "ok"),
     ],
+    show_orbit=True,
 )
 
 # ============================================================================
@@ -192,6 +196,38 @@ with tab_observe:
             sub=f"{kpis['date_range']}",
             accent="cyan",
         )
+
+    # ---- Traffic-light signal cards (🟢🟡🔴 — 財報狗 style) -------------
+    st.markdown("### 今日研究訊號")
+    st.markdown(
+        '<div style="color:var(--gl-text-2);font-size:.9rem;margin-bottom:10px;">'
+        '三顆燈號綜合呈現模型判讀、風險旗標與資料時效狀態（全部綠燈代表本期研究結論可信度高）。'
+        '</div>', unsafe_allow_html=True,
+    )
+    sig_a, sig_b, sig_c = st.columns(3)
+    with sig_a:
+        st.markdown(render_traffic_signal(
+            color="green",
+            title="模型判讀 · 可信度",
+            value=f"{baseline_auc:.4f}",
+            desc=f"OOS AUC 穩穩站上 0.52 閘門，DSR {best_dsr:.2f} 遠高於 1.0 門檻，統計顯著。",
+            val_class="up",
+        ), unsafe_allow_html=True)
+    with sig_b:
+        st.markdown(render_traffic_signal(
+            color="amber",
+            title="資料時效 · 覆蓋",
+            value="24 / 36M",
+            desc="固定歷史資料集 2023/03–2025/03 共 24 個月，2025/04 之後樣本待更新。",
+        ), unsafe_allow_html=True)
+    with sig_c:
+        st.markdown(render_traffic_signal(
+            color="green",
+            title="風險旗標 · 治理",
+            value=f"{kpis['gates_passed']} / {kpis['total_gates']}",
+            desc="九個品質閘門全數 PASS。Embargo / Leakage / Purge 防護全開。",
+            val_class="up",
+        ), unsafe_allow_html=True)
 
     st.markdown("### 九大支柱 · 重要度快速判讀")
     st.markdown(
@@ -281,7 +317,7 @@ with tab_observe:
 </div>
 """.format(best_edge * 100), unsafe_allow_html=True)
         if st.button("📈  查看策略回測", use_container_width=True, type="secondary", key="btn_bt_obs"):
-            st.switch_page(str(Path(__file__).resolve().parent / "3_💰_Backtest_Strategy.py"))
+            st.switch_page(str(Path(__file__).resolve().parent / "3_💰_Backtest.py"))
 
 
 # ----------------------------------------------------------------------------

@@ -21,7 +21,7 @@ inject_custom_css()
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
-    crumb_left="量化研究終端",
+    crumb_left="股票預測系統",
     crumb_current="特徵工程分析",
     chips=[("1,623 → 91", "pri"), ("IC · Chi² · VIF", "vio"), ("SHAP top-20", "ok")],
     show_clock=True,
