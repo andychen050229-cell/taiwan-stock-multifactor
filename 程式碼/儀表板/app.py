@@ -21,16 +21,34 @@ def P(name: str) -> str:
     return str(PAGES / name)
 
 # ===== Page Config (MUST be before st.navigation) =====
-# initial_sidebar_state="expanded" is CRITICAL — Streamlit Cloud serves the app
-# via an iframe wrapper at /~/+/ which activates embed-mode. In "auto" default,
-# embed-mode suppresses the sidebar entirely (not even in DOM). "expanded"
-# forces Streamlit to always emit + show the sidebar, which is our design.
+# initial_sidebar_state="expanded" is set, but Streamlit Cloud's /~/+/ embed
+# path suppresses sidebar regardless unless embed_options=show_sidebar_nav is
+# in the URL. We bootstrap that via a tiny client-side redirect (below).
 st.set_page_config(
     page_title="股票預測系統 · Multi-Factor",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# ===== Force sidebar visibility in Streamlit Cloud /~/+/ embed mode =====
+# Without ?embed_options=show_sidebar_nav, Streamlit Cloud's wrapper iframe
+# hides sidebar nav + st.sidebar.markdown content entirely (tested 2026-04-20).
+# This one-shot JS redirect adds the param and reloads the iframe URL.
+st.markdown("""<script>
+(function(){
+  try {
+    var qs = new URLSearchParams(window.location.search);
+    var opts = (qs.get('embed_options') || '').toLowerCase();
+    if (opts.indexOf('show_sidebar_nav') === -1) {
+      var newOpts = opts ? (opts + ',show_sidebar_nav') : 'show_sidebar_nav';
+      qs.set('embed_options', newOpts);
+      var newUrl = window.location.pathname + '?' + qs.toString() + window.location.hash;
+      window.location.replace(newUrl);
+    }
+  } catch(e) { /* noop */ }
+})();
+</script>""", unsafe_allow_html=True)
 
 # ===== Load utils (brand + health injectors) =====
 _utils_spec = importlib.util.spec_from_file_location("dashboard_utils_app", str(HERE / "utils.py"))
