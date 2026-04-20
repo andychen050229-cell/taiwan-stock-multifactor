@@ -21,10 +21,15 @@ def P(name: str) -> str:
     return str(PAGES / name)
 
 # ===== Page Config (MUST be before st.navigation) =====
+# initial_sidebar_state="expanded" is CRITICAL — Streamlit Cloud serves the app
+# via an iframe wrapper at /~/+/ which activates embed-mode. In "auto" default,
+# embed-mode suppresses the sidebar entirely (not even in DOM). "expanded"
+# forces Streamlit to always emit + show the sidebar, which is our design.
 st.set_page_config(
     page_title="股票預測系統 · Multi-Factor",
     page_icon="📈",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 # ===== Load utils (brand + health injectors) =====
