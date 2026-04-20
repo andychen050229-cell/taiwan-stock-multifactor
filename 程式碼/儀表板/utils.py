@@ -703,22 +703,53 @@ def load_governance_json(filename):
 
 @st.cache_data
 def load_feature_store():
-    """Load the feature store parquet file with caching."""
-    base_root = Path(__file__).resolve().parent.parent.parent
-    candidates = [
+    """Load the feature store parquet file with caching.
+
+    Resolution order (first match wins):
+      1. Single-file local dev: outputs/feature_store_final.parquet (272 MB, gitignored)
+      2. Streamlit Cloud: outputs/fs_chunks/fs_YYYY_QN.parquet (9 quarterly chunks, ~35 MB each)
+      3. Legacy fallbacks for older feature_store.parquet and dashboard/data/ copies.
+
+    Cloud deployment cannot host the 272 MB single file (GitHub 100 MB / file hard limit),
+    so we glob the quarterly chunks and concat — identical result, just reassembled at load.
+    """
+    here = Path(__file__).resolve().parent
+    base_root = here.parent.parent  # project root
+
+    # ---- 1. Single-file candidates (local dev) ---------------------
+    single_candidates = [
         base_root / "outputs" / "feature_store_final.parquet",
         Path.cwd() / "outputs" / "feature_store_final.parquet",
-        Path(__file__).resolve().parent.parent / "outputs" / "feature_store_final.parquet",
+        here.parent / "outputs" / "feature_store_final.parquet",
         base_root / "outputs" / "feature_store.parquet",
         Path.cwd() / "outputs" / "feature_store.parquet",
-        Path(__file__).resolve().parent.parent / "outputs" / "feature_store.parquet",
-        Path(__file__).resolve().parent / "data" / "feature_store_final.parquet",
-        Path(__file__).resolve().parent / "data" / "feature_store.parquet",
+        here.parent / "outputs" / "feature_store.parquet",
+        here / "data" / "feature_store_final.parquet",
+        here / "data" / "feature_store.parquet",
     ]
-    for fp in candidates:
+    for fp in single_candidates:
         if fp.exists():
             return pd.read_parquet(fp)
-    st.error("Feature store not found in any expected location (tried feature_store_final.parquet and feature_store.parquet)")
+
+    # ---- 2. Quarterly chunks (Streamlit Cloud) ---------------------
+    chunk_dirs = [
+        base_root / "outputs" / "fs_chunks",
+        Path.cwd() / "outputs" / "fs_chunks",
+        here.parent / "outputs" / "fs_chunks",
+        here / "data" / "fs_chunks",
+    ]
+    for cdir in chunk_dirs:
+        if cdir.exists():
+            parts = sorted(cdir.glob("fs_*.parquet"))
+            if parts:
+                frames = [pd.read_parquet(p) for p in parts]
+                return pd.concat(frames, ignore_index=True)
+
+    st.error(
+        "Feature store not found. Tried single-file (feature_store_final.parquet) "
+        "and chunked layout (outputs/fs_chunks/fs_*.parquet). "
+        "On Streamlit Cloud the chunked layout should be present — check repo state."
+    )
     st.stop()
 
 

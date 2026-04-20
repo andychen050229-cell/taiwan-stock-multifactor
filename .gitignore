@@ -28,14 +28,17 @@ outputs/ohlcv_temp/
 outputs/bs_temp/
 outputs/cf_temp/
 outputs/archive/
-outputs/models/
 outputs/balance_sheet_processed.parquet
-outputs/text_tokens_lite.parquet
 outputs/_temp_*.npz
 outputs/_temp_*.npy
 
-# Phase 5B / 6 runtime tokens (large intermediate files)
+# Exclude archived models but keep active joblib models for Cloud deployment
+outputs/models/archive_*/
+outputs/models/**/archive/
+
+# Phase 5B / 6 runtime tokens (raw — split to tt_chunks/ for Cloud)
 outputs/text_tokens.parquet
+outputs/text_tokens_lite.parquet
 
 # Course materials (large PDFs)
 文件/課程教材/
