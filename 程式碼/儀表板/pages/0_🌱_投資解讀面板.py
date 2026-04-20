@@ -43,12 +43,10 @@ _utils.inject_custom_css()  # Inter + JetBrains Mono + tech-grid background + gl
 # ===== Beginner-panel specific CSS (layered on top of global) =====
 st.markdown("""
 <style>
-
     /* KPI cards — beginner panel: softer, inheriting gl tokens */
     div[data-testid="stMetric"] {
         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     }
-
     /* Stock card with left border indicator */
     .stock-card {
         background: #ffffff;
@@ -68,7 +66,6 @@ st.markdown("""
     .stock-card.bearish {
         border-left-color: #dc2626;
     }
-
     .stock-header {
         display: flex;
         justify-content: space-between;
@@ -87,7 +84,6 @@ st.markdown("""
         font-weight: 600;
         margin-left: 8px;
     }
-
     /* Confidence badge */
     .confidence-badge {
         display: inline-block;
@@ -108,7 +104,6 @@ st.markdown("""
         background: #fecaca;
         color: #7f1d1d;
     }
-
     /* Direction badge */
     .direction-badge {
         display: inline-block;
@@ -129,7 +124,6 @@ st.markdown("""
         background: #fef2f2;
         color: #dc2626;
     }
-
     /* Info panels */
     .info-panel {
         background: #f8fafc;
@@ -140,7 +134,6 @@ st.markdown("""
         font-size: 0.9rem;
         line-height: 1.5;
     }
-
     .warning-panel {
         background: #fef3c7;
         border-left: 4px solid #f59e0b;
@@ -149,7 +142,6 @@ st.markdown("""
         margin: 12px 0;
         font-size: 0.9rem;
     }
-
     .history-disclaimer {
         background: #fef2f2;
         border-left: 4px solid #dc2626;
@@ -160,7 +152,6 @@ st.markdown("""
         color: #7f1d1d;
         font-weight: 500;
     }
-
     /* Metric boxes */
     .metric-box {
         background: linear-gradient(135deg, #f8f9fc 0%, #f0f2f8 100%);
@@ -180,7 +171,6 @@ st.markdown("""
         font-size: 0.7rem;
         color: #6b7280;
     }
-
     /* Section header */
     .section-header {
         border-left: 4px solid #636EFA;
@@ -188,7 +178,6 @@ st.markdown("""
         margin-top: 24px;
         margin-bottom: 16px;
     }
-
     /* Cost result */
     .cost-result {
         background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);

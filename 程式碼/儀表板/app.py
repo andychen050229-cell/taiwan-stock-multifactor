@@ -57,7 +57,6 @@ st.markdown("""<style>
     section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
         background: transparent !important;
     }
-
     /* Nav section headers (group labels like "📖 投資解讀") */
     section[data-testid="stSidebar"] [data-testid="stSidebarNavSeparator"] span {
         color: #8899aa !important;
@@ -66,7 +65,6 @@ st.markdown("""<style>
         text-transform: uppercase;
         letter-spacing: 0.08em;
     }
-
     /* Nav links */
     section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] {
         color: #c8d6e5 !important;
@@ -75,32 +73,27 @@ st.markdown("""<style>
         padding: 8px 12px !important;
         transition: all 0.2s ease;
     }
-
     /* Hover state for nav links */
     section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"]:hover {
         background: rgba(99, 110, 250, 0.15) !important;
         color: #ffffff !important;
     }
-
     /* Active/selected nav link */
     section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-selected="true"] {
         background: rgba(99, 110, 250, 0.25) !important;
         color: #ffffff !important;
         border-left: 3px solid #636EFA;
     }
-
     /* All text in sidebar */
     section[data-testid="stSidebar"] * {
         color: #c8d6e5 !important;
     }
-
     /* Sidebar headings */
     section[data-testid="stSidebar"] h1,
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3 {
         color: #ffffff !important;
     }
-
     /* ── Selectbox dropdown panel (the popover that floats) ── */
     /* Extra specificity for Streamlit Cloud light/dark theme compatibility */
     [data-baseweb="popover"],
@@ -156,7 +149,6 @@ st.markdown("""<style>
         caret-color: transparent !important;
         user-select: none !important;
     }
-
     /* Hide default Streamlit footer and unnecessary UI */
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }

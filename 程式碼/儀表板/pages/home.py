@@ -76,7 +76,6 @@ st.markdown("""
 .path-tags {
     display: flex; flex-wrap: wrap; gap: 6px;
 }
-
 /* Phase chips (timeline) */
 .phase-chip {
     background: var(--gl-surface);

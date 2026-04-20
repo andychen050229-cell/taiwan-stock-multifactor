@@ -93,7 +93,6 @@ def inject_custom_css():
         --gl-shadow-lg:   0 10px 15px rgba(15,23,42,.06), 0 20px 25px rgba(15,23,42,.08);
         --gl-shadow-glow: 0 0 0 1px rgba(37,99,235,.08), 0 8px 30px rgba(37,99,235,.12);
     }}
-
     /* ================================================================= */
     /* 1. Global canvas + tech-grid background                            */
     /* ================================================================= */
@@ -122,7 +121,6 @@ def inject_custom_css():
         z-index: 0;
     }}
     .block-container > * {{ position: relative; z-index: 1; }}
-
     /* ================================================================= */
     /* 2. Typography                                                       */
     /* ================================================================= */
@@ -139,7 +137,6 @@ def inject_custom_css():
         font-family: var(--gl-font-mono) !important;
         font-feature-settings: "tnum" 1, "zero" 1;
     }}
-
     /* Section headers — left accent bar */
     .block-container h2 {{
         position: relative;
@@ -155,7 +152,6 @@ def inject_custom_css():
         background: var(--gl-grad-pri);
         border-radius: 4px;
     }}
-
     /* ================================================================= */
     /* 3. Metric cards (stMetric) — tech-density style                    */
     /* ================================================================= */
@@ -198,7 +194,6 @@ def inject_custom_css():
         font-size: 1.7rem !important;
         font-variant-numeric: tabular-nums;
     }}
-
     /* ================================================================= */
     /* 4. Tables / DataFrames                                              */
     /* ================================================================= */
@@ -220,7 +215,6 @@ def inject_custom_css():
         font-family: var(--gl-font-mono);
         font-size: 0.86rem;
     }}
-
     /* ================================================================= */
     /* 5. Custom components — panels, boxes, chips, badges                */
     /* ================================================================= */
@@ -235,7 +229,6 @@ def inject_custom_css():
     .gl-panel-tint {{
         background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
     }}
-
     /* Insight / status boxes (left accent bar) */
     .insight-box, .gl-box-info {{
         background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
@@ -247,7 +240,6 @@ def inject_custom_css():
         color: #0c4a6e;
     }}
     .insight-box strong, .gl-box-info strong {{ color: #0c4a6e; }}
-
     .warning-box, .gl-box-warn {{
         background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
         border-left: 4px solid var(--gl-amber);
@@ -258,7 +250,6 @@ def inject_custom_css():
         color: #92400e;
     }}
     .warning-box strong, .gl-box-warn strong {{ color: #78350f; }}
-
     .success-box, .gl-box-ok {{
         background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
         border-left: 4px solid var(--gl-emerald);
@@ -269,7 +260,6 @@ def inject_custom_css():
         color: #065f46;
     }}
     .success-box strong, .gl-box-ok strong {{ color: #064e3b; }}
-
     .gl-box-danger {{
         background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
         border-left: 4px solid var(--gl-rose);
@@ -280,7 +270,6 @@ def inject_custom_css():
         color: #9f1239;
     }}
     .gl-box-danger strong {{ color: #881337; }}
-
     /* KPI card (custom, not Streamlit metric) */
     .gl-kpi {{
         background: var(--gl-surface);
@@ -344,7 +333,6 @@ def inject_custom_css():
     .gl-kpi.accent-amber   {{ border-top: 3px solid var(--gl-amber); }}
     .gl-kpi.accent-rose    {{ border-top: 3px solid var(--gl-rose); }}
     .gl-kpi.accent-cyan    {{ border-top: 3px solid var(--gl-cyan); }}
-
     /* Chips / tags */
     .gl-chip {{
         display: inline-flex;
@@ -365,7 +353,6 @@ def inject_custom_css():
     .gl-chip.ok       {{ background: rgba(16,185,129,0.08); color: var(--gl-emerald); border-color: rgba(16,185,129,0.2); }}
     .gl-chip.warn     {{ background: rgba(245,158,11,0.08); color: var(--gl-amber);   border-color: rgba(245,158,11,0.2); }}
     .gl-chip.danger   {{ background: rgba(244,63,94,0.08);  color: var(--gl-rose);    border-color: rgba(244,63,94,0.2); }}
-
     /* Live indicator (pulsing dot) */
     .gl-live {{
         display: inline-flex;
@@ -394,7 +381,6 @@ def inject_custom_css():
         70%  {{ box-shadow: 0 0 0 8px rgba(16,185,129,0);   }}
         100% {{ box-shadow: 0 0 0 0 rgba(16,185,129,0);     }}
     }}
-
     /* Hero banner */
     .gl-hero {{
         position: relative;
@@ -449,7 +435,6 @@ def inject_custom_css():
         line-height: 1.6;
         max-width: 780px;
     }}
-
     /* Pillar badges (9-pillar taxonomy) */
     .gl-pillar {{
         display: inline-flex;
@@ -470,12 +455,10 @@ def inject_custom_css():
     .gl-pillar[data-p="ind"]   {{ background: #cffafe; color: #155e75; }}
     .gl-pillar[data-p="txt"]   {{ background: #f3e8ff; color: #6b21a8; }}
     .gl-pillar[data-p="sent"]  {{ background: #fce7f3; color: #9d174d; }}
-
     .gl-num {{
         font-family: var(--gl-font-mono);
         font-variant-numeric: tabular-nums;
     }}
-
     /* Tabs */
     button[data-baseweb="tab"] {{
         font-family: var(--gl-font-sans) !important;
@@ -488,7 +471,6 @@ def inject_custom_css():
         background: var(--gl-grad-pri) !important;
         height: 3px !important;
     }}
-
     /* Buttons */
     .stButton > button {{
         border-radius: 10px !important;
@@ -507,7 +489,6 @@ def inject_custom_css():
         box-shadow: 0 6px 20px rgba(37,99,235,0.35) !important;
         transform: translateY(-1px);
     }}
-
     /* Footer */
     .page-footer, .gl-footer {{
         text-align: center;
@@ -518,20 +499,16 @@ def inject_custom_css():
         margin-top: 2rem;
         font-family: var(--gl-font-sans);
     }}
-
     hr {{ border-color: var(--gl-border) !important; }}
-
     div[data-testid="stExpander"] {{
         border: 1px solid var(--gl-border) !important;
         border-radius: 10px !important;
         background: var(--gl-surface) !important;
     }}
-
     div[data-baseweb="notification"] {{
         border-radius: 10px !important;
         font-family: var(--gl-font-sans) !important;
     }}
-
     /* Legacy compatibility */
     .nav-link {{
         display: inline-block;
@@ -547,7 +524,6 @@ def inject_custom_css():
     }}
     .nav-link:hover {{ background: rgba(37,99,235,.15); color: #1d4ed8; }}
     .nav-link.active {{ background: var(--gl-blue); color: #fff; }}
-
     .metric-card {{
         background: var(--gl-surface);
         border: 1px solid var(--gl-border);
@@ -561,7 +537,7 @@ def inject_custom_css():
         font-size: 1.8rem; font-weight: 700; color: var(--gl-blue); margin: 8px 0;
     }}
     .metric-card-label {{ font-size: .84rem; color: var(--gl-text-2); font-weight: 600; }}
-    </style>
+</style>
     """, unsafe_allow_html=True)
 
 

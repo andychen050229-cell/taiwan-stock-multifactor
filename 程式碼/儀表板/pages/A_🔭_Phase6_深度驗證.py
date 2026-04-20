@@ -204,7 +204,7 @@ with tab1:
             font-family: var(--gl-font-mono); font-size: 0.86rem;
         }}
         .gl-table tbody tr:hover {{ background: #f8fafc; }}
-        </style>
+</style>
         {html_table}
         """, unsafe_allow_html=True
     )
