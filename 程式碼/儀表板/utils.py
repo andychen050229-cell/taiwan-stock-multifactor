@@ -1327,49 +1327,85 @@ def inject_custom_css():
     /* ================================================================= */
     /*  7. Top navigation pills — CYBERPUNK DARK (match dark sidebar)      */
     /* ================================================================= */
-    /* Design target: 與左側 股票預測系統 sidebar 同血統 —
-       深色漸層、青藍霓虹邊框、等寬字體、淡網格背景、scan-line 輝光。    */
+    /* ARCHITECTURAL NOTE (fix for 看不出任何東西 bug 2026-04-20):
+       st.markdown('<div class="gl-topnav">') is AUTO-CLOSED by Streamlit's
+       markdown sanitizer — the <div> cannot span sibling st.columns/st.page_link
+       calls. So `.gl-topnav [data-testid="stPageLink-NavLink"]` matched NOTHING.
+       Since render_top_nav is the ONLY site that emits st.page_link, we target
+       stPageLink-NavLink globally. Active state uses aria-current="page"
+       (set by Streamlit natively on the current page-link). The .gl-topnav
+       div is kept only as a decorative band above the horizontal blocks. */
+
+    /* Decorative dark band (empty marker div — visually covers nav area via
+       :has() extending into the sibling horizontal blocks) */
     .gl-topnav {{
         position: sticky;
         top: 0;
         z-index: 40;
         background:
-            radial-gradient(140% 90% at 0% 0%, rgba(6,182,212,0.14), transparent 55%),
-            radial-gradient(120% 80% at 100% 100%, rgba(37,99,235,0.12), transparent 60%),
+            radial-gradient(140% 90% at 0% 0%, rgba(6,182,212,0.16), transparent 55%),
+            radial-gradient(120% 80% at 100% 100%, rgba(37,99,235,0.14), transparent 60%),
             linear-gradient(180deg, #0a1420 0%, #101c2d 55%, #0c1725 100%);
-        border: 1px solid rgba(6,182,212,0.22);
-        border-radius: 0 0 14px 14px;
-        padding: 14px 14px 12px 14px;
-        margin: -0.5rem -1rem 22px -1rem;
+        border: 1px solid rgba(6,182,212,0.25);
+        border-bottom: none;
+        border-radius: 14px 14px 0 0;
+        padding: 14px 14px 2px 14px;
+        margin: -0.5rem -1rem 0 -1rem;
         box-shadow:
-            0 10px 28px rgba(2,6,23,0.28),
-            inset 0 1px 0 rgba(6,182,212,0.18),
-            inset 0 -1px 0 rgba(6,182,212,0.08);
+            0 -6px 18px rgba(2,6,23,0.15) inset,
+            inset 0 1px 0 rgba(6,182,212,0.22);
         overflow: hidden;
+        min-height: 28px;
     }}
-    /* Subtle tech-grid backdrop (matches sidebar) */
     .gl-topnav::before {{
         content: "";
         position: absolute;
         inset: 0;
         background-image:
-            linear-gradient(rgba(6,182,212,0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(6,182,212,0.05) 1px, transparent 1px);
+            linear-gradient(rgba(6,182,212,0.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(6,182,212,0.06) 1px, transparent 1px);
         background-size: 28px 28px;
         pointer-events: none;
         opacity: 0.55;
-        mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.35));
-        -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.35));
     }}
-    /* Top scan-line accent */
     .gl-topnav::after {{
         content: "";
         position: absolute;
         top: 0; left: 10%; right: 10%;
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(103,232,249,0.75), rgba(37,99,235,0.55), transparent);
-        box-shadow: 0 0 8px rgba(103,232,249,0.4);
+        background: linear-gradient(90deg, transparent, rgba(103,232,249,0.85), rgba(37,99,235,0.55), transparent);
+        box-shadow: 0 0 8px rgba(103,232,249,0.5);
     }}
+    /* Extend the dark band into the next 2 sibling horizontal blocks using
+       :has() — these are the group-label row and page-link row that Streamlit
+       renders as siblings (NOT children) of the .gl-topnav marker. */
+    div[data-testid="stElementContainer"]:has(.gl-topnav)
+        + div[data-testid="stHorizontalBlock"],
+    div[data-testid="stElementContainer"]:has(.gl-topnav)
+        + div[data-testid="stHorizontalBlock"]
+        + div[data-testid="stHorizontalBlock"] {{
+        background:
+            radial-gradient(120% 80% at 100% 100%, rgba(37,99,235,0.08), transparent 60%),
+            linear-gradient(180deg, #101c2d 0%, #0f1a28 100%) !important;
+        border-left: 1px solid rgba(6,182,212,0.25) !important;
+        border-right: 1px solid rgba(6,182,212,0.25) !important;
+        margin-left: -1rem !important;
+        margin-right: -1rem !important;
+        padding: 0 14px !important;
+        position: relative;
+        z-index: 39;
+    }}
+    /* Close off the bottom of the dark band on the page-link row (2nd block) */
+    div[data-testid="stElementContainer"]:has(.gl-topnav)
+        + div[data-testid="stHorizontalBlock"]
+        + div[data-testid="stHorizontalBlock"] {{
+        border-bottom: 1px solid rgba(6,182,212,0.25) !important;
+        border-radius: 0 0 14px 14px !important;
+        padding-bottom: 14px !important;
+        margin-bottom: 22px !important;
+        box-shadow: 0 10px 28px rgba(2,6,23,0.28);
+    }}
+
     /* Group label — cyan mono eyebrow */
     .gl-topnav-gname {{
         font-family: var(--gl-font-mono);
@@ -1378,9 +1414,9 @@ def inject_custom_css():
         letter-spacing: 0.20em;
         font-weight: 700;
         text-transform: uppercase;
-        padding: 0 6px 8px 10px;
+        padding: 6px 6px 8px 10px;
         position: relative;
-        text-shadow: 0 0 8px rgba(103,232,249,0.35);
+        text-shadow: 0 0 8px rgba(103,232,249,0.4);
     }}
     .gl-topnav-gname::before {{
         content: "";
@@ -1391,122 +1427,113 @@ def inject_custom_css():
         margin-right: 7px;
         background: linear-gradient(180deg, #67e8f9, #2563eb);
         border-radius: 2px;
-        box-shadow: 0 0 6px rgba(103,232,249,0.6);
+        box-shadow: 0 0 6px rgba(103,232,249,0.65);
     }}
-    /* Page-link pills — dark glass on dark nav. Selectors are intentionally
-       broad: Streamlit's page-link DOM has shifted across versions
-       (stPageLink / stPageLink-NavLink / plain <a>), so we target every
-       anchor and button inside .gl-topnav to guarantee contrast works. */
-    .gl-topnav [data-testid="stPageLink-NavLink"],
-    .gl-topnav a[data-testid="stPageLink"],
-    .gl-topnav a[href],
-    .gl-topnav button[kind="pageLink"] {{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
+
+    /* ---- Page-link pills — GLOBAL (drop .gl-topnav prefix) ------------- */
+    /* render_top_nav is the only st.page_link caller, so these are safe
+       globally. Selector list covers Streamlit DOM variations. */
+    a[data-testid="stPageLink-NavLink"],
+    a[data-testid="stPageLink"],
+    div[data-testid="stPageLink"] > a {{
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 7px !important;
         padding: 10px 12px !important;
         border-radius: 10px !important;
-        border: 1px solid rgba(103,232,249,0.22) !important;
-        background: linear-gradient(180deg, rgba(12,27,45,0.72), rgba(8,20,36,0.82)) !important;
+        border: 1px solid rgba(103,232,249,0.28) !important;
+        background: linear-gradient(180deg, rgba(18,35,58,0.92), rgba(10,22,40,0.96)) !important;
         font-family: var(--gl-font-sans) !important;
         font-size: 0.86rem !important;
         font-weight: 700 !important;
-        letter-spacing: 0.04em !important;    /* CJK breathing room — 避免密集 */
-        color: #f1f9ff !important;             /* near-white for max contrast */
+        letter-spacing: 0.04em !important;
+        color: #f1f9ff !important;
         transition: all .22s ease !important;
         box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.06),
-            0 1px 2px rgba(0,0,0,0.32);
-        position: relative;
-        overflow: hidden;
-        white-space: nowrap !important;        /* 禁止分頁名稱奇怪斷行 */
-        text-overflow: ellipsis;
-        min-height: 40px;
+            inset 0 1px 0 rgba(103,232,249,0.14),
+            0 1px 2px rgba(0,0,0,0.35) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        white-space: nowrap !important;
+        text-overflow: ellipsis !important;
+        min-height: 40px !important;
         line-height: 1.2 !important;
         text-decoration: none !important;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        text-shadow: 0 1px 2px rgba(0,0,0,0.55) !important;
     }}
-    /* Override any inner text elements — force bright-on-dark readability.
-       This is the fix for 白字配白底 / 深字配深底: every descendant is forced
-       to inherit the pill color, so no theme stylesheet can shadow it. */
-    .gl-topnav [data-testid="stPageLink-NavLink"] *,
-    .gl-topnav a[data-testid="stPageLink"] *,
-    .gl-topnav a[href] *,
-    .gl-topnav button[kind="pageLink"] *,
-    .gl-topnav [data-testid="stPageLink-NavLink"] p,
-    .gl-topnav a[data-testid="stPageLink"] p,
-    .gl-topnav [data-testid="stPageLink-NavLink"] span,
-    .gl-topnav a[data-testid="stPageLink"] span,
-    .gl-topnav a[href] span,
-    .gl-topnav a[href] p {{
+    /* Force all descendants (p, span, svg text) to inherit bright color */
+    a[data-testid="stPageLink-NavLink"] *,
+    a[data-testid="stPageLink"] *,
+    div[data-testid="stPageLink"] > a *,
+    a[data-testid="stPageLink-NavLink"] p,
+    a[data-testid="stPageLink"] p,
+    a[data-testid="stPageLink-NavLink"] span,
+    a[data-testid="stPageLink"] span {{
         color: inherit !important;
         font-weight: inherit !important;
         font-size: inherit !important;
         letter-spacing: inherit !important;
         margin: 0 !important;
-        text-shadow: inherit !important;
         background: transparent !important;
     }}
-    /* Hover — cyan neon accent */
-    .gl-topnav [data-testid="stPageLink-NavLink"]:hover,
-    .gl-topnav a[data-testid="stPageLink"]:hover,
-    .gl-topnav a[href]:hover,
-    .gl-topnav button[kind="pageLink"]:hover {{
-        border-color: rgba(103,232,249,0.7) !important;
-        background: linear-gradient(180deg, rgba(6,182,212,0.20), rgba(37,99,235,0.14)) !important;
+    /* Hover */
+    a[data-testid="stPageLink-NavLink"]:hover,
+    a[data-testid="stPageLink"]:hover,
+    div[data-testid="stPageLink"] > a:hover {{
+        border-color: rgba(103,232,249,0.8) !important;
+        background: linear-gradient(180deg, rgba(6,182,212,0.24), rgba(37,99,235,0.16)) !important;
         color: #ffffff !important;
-        transform: translateY(-1px);
+        transform: translateY(-1px) !important;
         box-shadow:
-            0 8px 22px rgba(6,182,212,0.34),
-            inset 0 1px 0 rgba(255,255,255,0.12),
-            0 0 0 1px rgba(103,232,249,0.28) !important;
+            0 8px 22px rgba(6,182,212,0.38),
+            inset 0 1px 0 rgba(255,255,255,0.14),
+            0 0 0 1px rgba(103,232,249,0.32) !important;
     }}
-    /* Keyboard focus — match hover visual so Tab users see the target */
-    .gl-topnav [data-testid="stPageLink-NavLink"]:focus-visible,
-    .gl-topnav a[data-testid="stPageLink"]:focus-visible,
-    .gl-topnav a[href]:focus-visible,
-    .gl-topnav button[kind="pageLink"]:focus-visible {{
+    /* Keyboard focus */
+    a[data-testid="stPageLink-NavLink"]:focus-visible,
+    a[data-testid="stPageLink"]:focus-visible,
+    div[data-testid="stPageLink"] > a:focus-visible {{
         outline: 2px solid #67e8f9 !important;
         outline-offset: 2px !important;
     }}
-    /* Active page — bright cyan glow, obvious contrast */
-    .gl-topnav .gl-active [data-testid="stPageLink-NavLink"],
-    .gl-topnav .gl-active a[data-testid="stPageLink"],
-    .gl-topnav .gl-active a[href],
-    .gl-topnav .gl-active button[kind="pageLink"] {{
-        background: linear-gradient(180deg, rgba(103,232,249,0.28), rgba(37,99,235,0.20)) !important;
-        border-color: rgba(103,232,249,0.95) !important;
+    /* Active page — Streamlit natively sets aria-current="page" on the link.
+       This replaces the unreliable .gl-active wrapper (which was auto-closed). */
+    a[data-testid="stPageLink-NavLink"][aria-current="page"],
+    a[data-testid="stPageLink"][aria-current="page"],
+    div[data-testid="stPageLink"] > a[aria-current="page"],
+    /* Defensive fallback: kept in case older Streamlit omits aria-current */
+    .gl-active a[data-testid="stPageLink-NavLink"],
+    .gl-active a[data-testid="stPageLink"] {{
+        background: linear-gradient(180deg, rgba(103,232,249,0.34), rgba(37,99,235,0.22)) !important;
+        border-color: rgba(103,232,249,1) !important;
         color: #ffffff !important;
         box-shadow:
-            0 0 0 1px rgba(103,232,249,0.38),
-            0 6px 22px rgba(6,182,212,0.46),
-            inset 0 1px 0 rgba(255,255,255,0.18) !important;
-        text-shadow: 0 0 10px rgba(103,232,249,0.65), 0 1px 2px rgba(0,0,0,0.5);
+            0 0 0 1px rgba(103,232,249,0.48),
+            0 6px 22px rgba(6,182,212,0.5),
+            inset 0 1px 0 rgba(255,255,255,0.2) !important;
+        text-shadow: 0 0 10px rgba(103,232,249,0.75), 0 1px 2px rgba(0,0,0,0.55) !important;
     }}
-    .gl-topnav .gl-active [data-testid="stPageLink-NavLink"]::before,
-    .gl-topnav .gl-active a[data-testid="stPageLink"]::before,
-    .gl-topnav .gl-active a[href]::before,
-    .gl-topnav .gl-active button[kind="pageLink"]::before {{
+    a[data-testid="stPageLink-NavLink"][aria-current="page"]::before,
+    a[data-testid="stPageLink"][aria-current="page"]::before,
+    div[data-testid="stPageLink"] > a[aria-current="page"]::before {{
         content: "";
         position: absolute;
         left: 0; top: 0; bottom: 0;
         width: 3px;
         background: linear-gradient(180deg, #67e8f9 0%, #2563eb 100%);
         border-radius: 2px 0 0 2px;
-        box-shadow: 0 0 8px rgba(103,232,249,0.75);
+        box-shadow: 0 0 8px rgba(103,232,249,0.8);
     }}
-    /* Animated sweep for active pill (subtle cyber feel) */
-    .gl-topnav .gl-active [data-testid="stPageLink-NavLink"]::after,
-    .gl-topnav .gl-active a[data-testid="stPageLink"]::after,
-    .gl-topnav .gl-active a[href]::after,
-    .gl-topnav .gl-active button[kind="pageLink"]::after {{
+    a[data-testid="stPageLink-NavLink"][aria-current="page"]::after,
+    a[data-testid="stPageLink"][aria-current="page"]::after,
+    div[data-testid="stPageLink"] > a[aria-current="page"]::after {{
         content: "";
         position: absolute;
         top: 0; bottom: 0;
         left: -60%;
         width: 50%;
-        background: linear-gradient(90deg, transparent, rgba(103,232,249,0.22), transparent);
+        background: linear-gradient(90deg, transparent, rgba(103,232,249,0.26), transparent);
         animation: gl-topnav-sweep 3.5s ease-in-out infinite;
         pointer-events: none;
     }}
@@ -1515,15 +1542,13 @@ def inject_custom_css():
         60%  {{ left: 120%; }}
         100% {{ left: 120%; }}
     }}
-    /* Icon tint (emoji or Material glyph preceding the label) */
-    .gl-topnav [data-testid="stPageLink-NavLink"] [data-testid="stIconMaterial"],
-    .gl-topnav a[data-testid="stPageLink"] [data-testid="stIconMaterial"],
-    .gl-topnav a[href] [data-testid="stIconMaterial"],
-    .gl-topnav button[kind="pageLink"] [data-testid="stIconMaterial"] {{
+    /* Icon tint — cyan glow on both emoji + material glyphs */
+    a[data-testid="stPageLink-NavLink"] [data-testid="stIconMaterial"],
+    a[data-testid="stPageLink"] [data-testid="stIconMaterial"] {{
         color: #67e8f9 !important;
-        text-shadow: 0 0 6px rgba(103,232,249,0.45);
+        text-shadow: 0 0 6px rgba(103,232,249,0.5) !important;
     }}
-    /* Group divider — subtle vertical cyan rule */
+    /* Group divider */
     .gl-topnav-sep {{
         width: 1px;
         background: linear-gradient(180deg, transparent, rgba(103,232,249,0.35), transparent);
