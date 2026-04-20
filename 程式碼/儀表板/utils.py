@@ -1249,19 +1249,17 @@ def render_topbar(crumb_left: str = "量化研究終端", crumb_current: str = "
             'String(d.getSeconds()).padStart(2,"0");}'
             't();setInterval(t,1000);})();</script>'
         )
-    st.markdown(f"""
-<div class="gl-topbar">
-  <div class="gl-topbar-l">
-    <span style="color:var(--gl-text-3);font-size:0.85rem;">{crumb_left}</span>
-    <span style="color:var(--gl-text-3);">›</span>
-    <span style="color:var(--gl-text-1);font-weight:600;font-size:0.9rem;">{crumb_current}</span>
-  </div>
-  <div class="gl-topbar-r">
-    {chip_html}
-    {clock_html}
-  </div>
-</div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="gl-topbar">'
+        f'<div class="gl-topbar-l">'
+        f'<span style="color:var(--gl-text-3);font-size:0.85rem;">{crumb_left}</span>'
+        f'<span style="color:var(--gl-text-3);">›</span>'
+        f'<span style="color:var(--gl-text-1);font-weight:600;font-size:0.9rem;">{crumb_current}</span>'
+        f'</div>'
+        f'<div class="gl-topbar-r">{chip_html}{clock_html}</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
 
 
 def render_auc_gauge(val: float, min_v: float = 0.5, max_v: float = 0.7,
@@ -1337,13 +1335,15 @@ def render_pillar_bar(pillar_key: str, label: str, feat_count: int, pct: float,
         sign = "+" if delta_bps >= 0 else ""
         cls = "up" if delta_bps >= 0 else "dn"
         delta_html = f'<span class="gl-pb-delta {cls}">{sign}{delta_bps:.1f}bps</span>'
-    return f"""
-<div class="gl-pb">
-  <span class="gl-pb-pill" data-p="{pillar_key}">{label}</span>
-  <div class="gl-pb-bar-wrap"><div class="gl-pb-bar" data-p="{pillar_key}" style="width:{pct:.1f}%"></div></div>
-  <span class="gl-pb-num">{feat_count}</span>
-  {delta_html}
-</div>"""
+    # Single-line HTML — CommonMark-safe (no blank / whitespace-only lines).
+    return (
+        f'<div class="gl-pb">'
+        f'<span class="gl-pb-pill" data-p="{pillar_key}">{label}</span>'
+        f'<div class="gl-pb-bar-wrap"><div class="gl-pb-bar" data-p="{pillar_key}" style="width:{pct:.1f}%"></div></div>'
+        f'<span class="gl-pb-num">{feat_count}</span>'
+        f'{delta_html}'
+        f'</div>'
+    )
 
 
 def render_phase_timeline(current_phase: int = 6, phases: list = None):
@@ -1436,16 +1436,18 @@ def render_hero(eyebrow: str, title_html: str, meta_chips: list = None,
             f'{subtitle}</div>'
         )
     orbit_html = render_orbital_ring_svg() if show_orbit else ""
-    st.markdown(f"""
-<div class="gl-hero">
-  <div class="gl-hero-orb"></div>
-  {orbit_html}
-  <span class="gl-hero-eyebrow">{eyebrow}</span>
-  <div class="gl-hero-title">{title_html}</div>
-  {subtitle_html}
-  <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;">{chip_html}</div>
-</div>
-    """, unsafe_allow_html=True)
+    # Single-line HTML — CommonMark-safe.
+    st.markdown(
+        f'<div class="gl-hero">'
+        f'<div class="gl-hero-orb"></div>'
+        f'{orbit_html}'
+        f'<span class="gl-hero-eyebrow">{eyebrow}</span>'
+        f'<div class="gl-hero-title">{title_html}</div>'
+        f'{subtitle_html}'
+        f'<div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;">{chip_html}</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
 
 
 def render_live_chip(text: str = "LIVE · 研究快照"):
@@ -1459,25 +1461,30 @@ def render_live_chip(text: str = "LIVE · 研究快照"):
 def _cyan_ring_svg(pct: float, size: int = 48, stroke: int = 5,
                    color: str = "#06b6d4", track: str = "rgba(255,255,255,0.08)",
                    label_color: str = "#e8f7fc") -> str:
-    """Return a dark-themed SVG ring (0–100%) suitable for the sidebar."""
+    """Return a dark-themed SVG ring (0–100%) suitable for the sidebar.
+
+    CRITICAL: returns a single-line SVG with NO newlines so that it can be
+    safely embedded in HTML strings passed to st.markdown without triggering
+    CommonMark's blank-line-terminates-HTML-block rule.
+    """
     import math
     pct = max(0, min(100, pct))
     r = (size - stroke) / 2
     c = 2 * math.pi * r
     dash = c * (pct / 100)
     cx = cy = size / 2
-    return f"""
-<svg class="gl-syshealth-ring" viewBox="0 0 {size} {size}" width="{size}" height="{size}">
-  <circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{track}" stroke-width="{stroke}"/>
-  <circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{color}"
-          stroke-width="{stroke}" stroke-linecap="round"
-          stroke-dasharray="{dash:.2f} {c - dash:.2f}"
-          transform="rotate(-90 {cx} {cy})"/>
-  <text x="{cx}" y="{cy + 3}" text-anchor="middle"
-        font-family="JetBrains Mono, monospace" font-size="{size * 0.26:.0f}"
-        font-weight="700" fill="{label_color}">{pct:.0f}%</text>
-</svg>
-"""
+    return (
+        f'<svg class="gl-syshealth-ring" viewBox="0 0 {size} {size}" width="{size}" height="{size}">'
+        f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{track}" stroke-width="{stroke}"/>'
+        f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{color}" '
+        f'stroke-width="{stroke}" stroke-linecap="round" '
+        f'stroke-dasharray="{dash:.2f} {c - dash:.2f}" '
+        f'transform="rotate(-90 {cx} {cy})"/>'
+        f'<text x="{cx}" y="{cy + 3}" text-anchor="middle" '
+        f'font-family="JetBrains Mono, monospace" font-size="{size * 0.26:.0f}" '
+        f'font-weight="700" fill="{label_color}">{pct:.0f}%</text>'
+        f'</svg>'
+    )
 
 
 def render_system_health_card(gates_passed: int = 9, total_gates: int = 9,
@@ -1503,27 +1510,26 @@ def render_system_health_card(gates_passed: int = 9, total_gates: int = 9,
         label_color=("#0f172a" if mode == "light" else "#e8f7fc"),
         track=("#e2e8f0" if mode == "light" else "rgba(255,255,255,0.08)"),
     )
-    return f"""
-<div class="{klass}">
-  <div class="gl-syshealth-head">
-    {ring}
-    <div class="gl-syshealth-labels">
-      <div class="gl-syshealth-title">系統健康度</div>
-      <div class="gl-syshealth-value">{gates_passed} / {total_gates}</div>
-      <div class="gl-syshealth-sub">品質閘門 PASS</div>
-    </div>
-  </div>
-  <div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">DATASET</span><span class="gl-syshealth-kpi-v">{dataset}</span></div>
-  <div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">SAMPLES</span><span class="gl-syshealth-kpi-v">{samples}</span></div>
-  <div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">FEATURES</span><span class="gl-syshealth-kpi-v">{features}</span></div>
-  <div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">DSR</span><span class="gl-syshealth-kpi-v">{dsr}</span></div>
-  <div class="gl-syshealth-foot">最後驗證時間　<strong>{last_verified}</strong></div>
-  <div class="gl-syshealth-btns">
-    <div class="gl-syshealth-btn">🔄 重整</div>
-    <div class="gl-syshealth-btn">? 手冊</div>
-  </div>
-</div>
-"""
+    # CRITICAL: no blank lines inside HTML — CommonMark terminates HTML blocks on blank lines.
+    return (
+        f'<div class="{klass}">'
+        f'<div class="gl-syshealth-head">{ring}'
+        f'<div class="gl-syshealth-labels">'
+        f'<div class="gl-syshealth-title">系統健康度</div>'
+        f'<div class="gl-syshealth-value">{gates_passed} / {total_gates}</div>'
+        f'<div class="gl-syshealth-sub">品質閘門 PASS</div>'
+        f'</div></div>'
+        f'<div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">DATASET</span><span class="gl-syshealth-kpi-v">{dataset}</span></div>'
+        f'<div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">SAMPLES</span><span class="gl-syshealth-kpi-v">{samples}</span></div>'
+        f'<div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">FEATURES</span><span class="gl-syshealth-kpi-v">{features}</span></div>'
+        f'<div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">DSR</span><span class="gl-syshealth-kpi-v">{dsr}</span></div>'
+        f'<div class="gl-syshealth-foot">最後驗證時間　<strong>{last_verified}</strong></div>'
+        f'<div class="gl-syshealth-btns">'
+        f'<div class="gl-syshealth-btn">🔄 重整</div>'
+        f'<div class="gl-syshealth-btn">? 手冊</div>'
+        f'</div>'
+        f'</div>'
+    )
 
 
 def inject_sidebar_brand(product: str = "股票預測系統",
@@ -1531,14 +1537,15 @@ def inject_sidebar_brand(product: str = "股票預測系統",
     """Inject the 股票預測系統 brand block at the top of the sidebar.
 
     Renders on every page because app.py's sidebar runs first.
+    Single-line HTML — CommonMark-safe.
     """
     st.sidebar.markdown(
-        f"""
-<div class="gl-brand">
-  <div class="gl-brand-eyebrow">{eyebrow}</div>
-  <div class="gl-brand-title"><span class="gl-brand-dot"></span>{product}</div>
-</div>
-        """,
+        (
+            f'<div class="gl-brand">'
+            f'<div class="gl-brand-eyebrow">{eyebrow}</div>'
+            f'<div class="gl-brand-title"><span class="gl-brand-dot"></span>{product}</div>'
+            f'</div>'
+        ),
         unsafe_allow_html=True,
     )
 
@@ -1576,16 +1583,17 @@ def render_traffic_signal(color: str, title: str, value: str,
         desc: short description line.
         val_class: optional "up" / "down" to tint the main number.
     """
-    return f"""
-<div class="gl-signal {color}">
-  <div class="gl-signal-head">
-    <span class="gl-signal-light"></span>
-    <span class="gl-signal-title">{title}</span>
-  </div>
-  <div class="gl-signal-val {val_class}">{value}</div>
-  <div class="gl-signal-desc">{desc}</div>
-</div>
-"""
+    # Single-line HTML — CommonMark-safe (no blank lines).
+    return (
+        f'<div class="gl-signal {color}">'
+        f'<div class="gl-signal-head">'
+        f'<span class="gl-signal-light"></span>'
+        f'<span class="gl-signal-title">{title}</span>'
+        f'</div>'
+        f'<div class="gl-signal-val {val_class}">{value}</div>'
+        f'<div class="gl-signal-desc">{desc}</div>'
+        f'</div>'
+    )
 
 
 def render_sector_chip(sector: str) -> str:
@@ -1738,30 +1746,34 @@ PILLAR_COLORS = {
 
 
 def render_orbital_ring_svg() -> str:
-    """Return a decorative orbital-ring SVG (three concentric orbits + satellite dots)."""
-    return """
-<svg class="gl-orbit" viewBox="0 0 280 280">
-  <g class="spin-slow">
-    <circle class="c1" cx="140" cy="140" r="120"/>
-    <circle class="dot" cx="260" cy="140" r="3"/>
-  </g>
-  <g class="spin-med">
-    <circle class="c2" cx="140" cy="140" r="90"/>
-    <circle class="dot" cx="50" cy="140" r="2.5" fill="#7c3aed"/>
-  </g>
-  <g class="spin-fast">
-    <circle class="c3" cx="140" cy="140" r="60"/>
-    <circle class="dot" cx="200" cy="140" r="2"/>
-  </g>
-  <circle cx="140" cy="140" r="8" fill="url(#orb-grad)"/>
-  <defs>
-    <radialGradient id="orb-grad">
-      <stop offset="0%" stop-color="#06b6d4"/>
-      <stop offset="100%" stop-color="#2563eb"/>
-    </radialGradient>
-  </defs>
-</svg>
-"""
+    """Return a decorative orbital-ring SVG (three concentric orbits + satellite dots).
+
+    CRITICAL: single-line output so it can be embedded in HTML strings passed to
+    st.markdown without triggering CommonMark's blank-line-terminates-HTML-block rule.
+    """
+    return (
+        '<svg class="gl-orbit" viewBox="0 0 280 280">'
+        '<g class="spin-slow">'
+        '<circle class="c1" cx="140" cy="140" r="120"/>'
+        '<circle class="dot" cx="260" cy="140" r="3"/>'
+        '</g>'
+        '<g class="spin-med">'
+        '<circle class="c2" cx="140" cy="140" r="90"/>'
+        '<circle class="dot" cx="50" cy="140" r="2.5" fill="#7c3aed"/>'
+        '</g>'
+        '<g class="spin-fast">'
+        '<circle class="c3" cx="140" cy="140" r="60"/>'
+        '<circle class="dot" cx="200" cy="140" r="2"/>'
+        '</g>'
+        '<circle cx="140" cy="140" r="8" fill="url(#orb-grad)"/>'
+        '<defs>'
+        '<radialGradient id="orb-grad">'
+        '<stop offset="0%" stop-color="#06b6d4"/>'
+        '<stop offset="100%" stop-color="#2563eb"/>'
+        '</radialGradient>'
+        '</defs>'
+        '</svg>'
+    )
 
 
 def render_subtabs(options: list, key: str, default_idx: int = 0,
