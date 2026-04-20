@@ -1,6 +1,16 @@
 """
-股票預測系統 · Multi-Factor Navigation Router
-Streamlit st.navigation API (v1.36+) powered navigation.
+股票預測系統 · Multi-Factor Navigation Router (Option B — Top-Nav Architecture)
+
+2026-04-20 重構：採用 Option B 頂部導覽，與 Streamlit Cloud embed mode
+(`/~/+/`) 完全相容 —— 無論側邊欄是否顯示，頁面都有完整導覽。
+
+設計原則：
+  · 主導覽放在主區頂部（sticky top-nav pills），與 Streamlit Cloud 的
+    iframe wrapper 無關，始終可見。
+  · 側邊欄保留「品牌 + 系統健康度 + 真實 重整/手冊 按鈕」作為輔助，
+    但不依賴它作為唯一導覽入口。
+  · `st.navigation(position="hidden")` 註冊所有頁面但不自動渲染側邊欄導覽，
+    由 `render_top_nav` 自行繪製頂部 pill 式導覽。
 
 ⚠️ Absolute paths required:
    Streamlit Cloud uses `dashboard/app.py` (the shim) as its *main script*;
@@ -21,9 +31,6 @@ def P(name: str) -> str:
     return str(PAGES / name)
 
 # ===== Page Config (MUST be before st.navigation) =====
-# initial_sidebar_state="expanded" is set, but Streamlit Cloud's /~/+/ embed
-# path suppresses sidebar regardless unless embed_options=show_sidebar_nav is
-# in the URL. We bootstrap that via a tiny client-side redirect (below).
 st.set_page_config(
     page_title="股票預測系統 · Multi-Factor",
     page_icon="📈",
@@ -31,34 +38,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ===== Force sidebar visibility in Streamlit Cloud /~/+/ embed mode =====
-# Without ?embed_options=show_sidebar_nav, Streamlit Cloud's wrapper iframe
-# hides sidebar nav + st.sidebar.markdown content entirely (tested 2026-04-20).
-# Script injected via markdown doesn't execute (innerHTML script semantics);
-# use st.components.v1.html which creates a proper iframe that executes JS.
-# The inner iframe targets window.parent (the Streamlit app frame) to reload.
-import streamlit.components.v1 as _components
-_components.html(
-    """<script>
-(function(){
-  try {
-    var parentWin = window.parent;
-    if (!parentWin || !parentWin.location) return;
-    var qs = new URLSearchParams(parentWin.location.search);
-    var opts = (qs.get('embed_options') || '').toLowerCase();
-    if (opts.indexOf('show_sidebar_nav') === -1) {
-      var newOpts = opts ? (opts + ',show_sidebar_nav') : 'show_sidebar_nav';
-      qs.set('embed_options', newOpts);
-      var newUrl = parentWin.location.pathname + '?' + qs.toString() + parentWin.location.hash;
-      parentWin.location.replace(newUrl);
-    }
-  } catch(e) { console.warn('sidebar-nav bootstrap failed', e); }
-})();
-</script>""",
-    height=0,
-)
-
-# ===== Load utils (brand + health injectors) =====
+# ===== Load utils (brand + health injectors + top-nav) =====
 _utils_spec = importlib.util.spec_from_file_location("dashboard_utils_app", str(HERE / "utils.py"))
 _utils = importlib.util.module_from_spec(_utils_spec)
 _utils_spec.loader.exec_module(_utils)
@@ -76,22 +56,26 @@ phase6     = st.Page(P("A_🔭_Phase6_深度驗證.py"),       title="Phase 6 �
 governance = st.Page(P("6_🛡️_Model_Governance.py"),     title="模型治理",      icon="🛡️")
 signal     = st.Page(P("7_📡_Signal_Monitor.py"),        title="信號監控",      icon="📡")
 extended   = st.Page(P("8_🎯_Extended_Analytics.py"),    title="擴充分析",      icon="🧩")
+manual     = st.Page(P("B_📖_使用手冊.py"),              title="使用手冊",      icon="📖")
 
-# ===== Navigation Structure (Claude-Design later-version: 總覽/個股研究/量化引擎/治理監控) =====
-# NOTE: st.navigation() must run BEFORE any st.sidebar.* call — otherwise the
-# sidebar DOM never materialises on Streamlit Cloud (tested 2026-04-20).
-# Visual order (品牌 + 系統健康度 at TOP, nav below) is achieved via CSS flex
-# ordering on [data-testid="stSidebarContent"] children (see CSS block below).
-pg = st.navigation({
+# ===== Navigation Structure =====
+# Groups for TOP-NAV display (manual is registered but excluded — accessed via
+# the dedicated 手冊 sidebar button to reduce top-nav clutter).
+TOP_NAV_GROUPS = {
     "總覽":      [home, interpret],
     "個股研究":  [data, icir, text],
     "量化引擎":  [model, feature, backtest, phase6],
     "治理監控":  [governance, signal, extended],
-})
+}
 
-# ===== Sidebar — Brand + System Health INJECTED AFTER navigation =====
-# Call-order places them below nav in the DOM, but CSS flex `order`
-# re-orders them visually ABOVE the nav list (top-of-sidebar eye-catcher).
+# Register ALL pages (including manual) with st.navigation in hidden mode —
+# the nav doesn't auto-render but st.page_link / st.switch_page still work.
+all_pages_flat = [p for group in TOP_NAV_GROUPS.values() for p in group] + [manual]
+pg = st.navigation(all_pages_flat, position="hidden")
+
+# ===== Sidebar — Brand + System Health + REAL action buttons ================
+# Layout order via CSS flex re-ordering below:
+#   brand (top) → syshealth → action buttons → [empty nav area]
 _utils.inject_sidebar_brand()
 _utils.inject_sidebar_health(
     gates_passed=9,
@@ -102,6 +86,7 @@ _utils.inject_sidebar_health(
     dsr="12.12",
     last_verified="2026-04-20 14:24",
 )
+_utils.inject_sidebar_action_buttons(manual_page=manual)
 
 # ===== Global Dark Sidebar CSS — 股票預測系統 brand ================
 st.markdown("""<style>
@@ -118,23 +103,6 @@ st.markdown("""<style>
         display: flex !important;
         flex-direction: column !important;
     }
-    /* Visual re-ordering: brand + syshealth TOP, nav BOTTOM —
-       DOM order is determined by call-order in app.py (nav first, then injections),
-       but CSS flex `order` overrides this for visual rendering. */
-    section[data-testid="stSidebar"] [data-testid="stSidebarNav"] {
-        order: 10 !important;  /* navigation list: pushed after markdown injections */
-    }
-    /* All markdown injections (brand, syshealth, etc) appear before nav */
-    section[data-testid="stSidebar"] [data-testid="stSidebarContent"] > [data-testid="stElementContainer"] {
-        order: 1 !important;
-    }
-    /* More specific: brand first (order 1), syshealth second (order 2) */
-    section[data-testid="stSidebar"] [data-testid="stSidebarContent"] > [data-testid="stElementContainer"]:has(.gl-brand) {
-        order: 1 !important;
-    }
-    section[data-testid="stSidebar"] [data-testid="stSidebarContent"] > [data-testid="stElementContainer"]:has(.gl-syshealth) {
-        order: 2 !important;
-    }
     /* Subtle tech grid behind sidebar */
     section[data-testid="stSidebar"]::before {
         content: "";
@@ -146,91 +114,6 @@ st.markdown("""<style>
         background-size: 26px 26px;
         pointer-events: none;
         opacity: 0.5;
-    }
-    /* Sidebar group-heading (Claude-design + 財報狗 style — softer for Chinese) */
-    /* Streamlit v1.36+ uses <header data-testid="stNavSectionHeader"> for dict-keyed groups */
-    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] {
-        padding: 18px 14px 8px 14px !important;
-        margin-top: 10px !important;
-        border-top: 1px solid rgba(255,255,255,0.06) !important;
-        position: relative;
-    }
-    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"]:first-of-type {
-        border-top: none !important;
-        margin-top: 2px !important;
-        padding-top: 14px !important;
-    }
-    /* Cyan accent bar before each group title */
-    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"]::before {
-        content: "";
-        position: absolute;
-        left: 14px;
-        top: 22px;
-        width: 3px;
-        height: 10px;
-        border-radius: 2px;
-        background: linear-gradient(180deg, #06b6d4, #2563eb);
-        box-shadow: 0 0 6px rgba(6,182,212,0.5);
-    }
-    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"]:first-of-type::before {
-        top: 18px;
-    }
-    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] span,
-    section[data-testid="stSidebar"] [data-testid="stSidebarNavSeparator"] span {
-        color: #9fb6cc !important;
-        font-size: 0.82rem !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.08em !important;
-        padding-left: 10px !important;
-        font-family: 'Inter', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif !important;
-    }
-    /* Nav list container spacing */
-    section[data-testid="stSidebar"] [data-testid="stSidebarNavItems"] {
-        padding: 2px 8px 6px 8px !important;
-    }
-    /* Nav links — item style */
-    section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] {
-        color: #b4ccdf !important;
-        border-radius: 8px !important;
-        margin: 1px 0 !important;
-        padding: 8px 12px !important;
-        transition: all 0.2s ease;
-        font-weight: 500 !important;
-        font-size: 0.88rem !important;
-        position: relative;
-        border: 1px solid transparent !important;
-    }
-    section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] span {
-        color: #cce4f1 !important;
-        font-family: 'Inter', -apple-system, 'Microsoft JhengHei', sans-serif !important;
-    }
-    section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"]:hover {
-        background: rgba(6,182,212,0.08) !important;
-        border-color: rgba(6,182,212,0.15) !important;
-        color: #e8f7fc !important;
-    }
-    section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"]:hover span {
-        color: #e8f7fc !important;
-    }
-    section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] {
-        background: linear-gradient(90deg, rgba(6,182,212,0.18), rgba(37,99,235,0.08)) !important;
-        border-color: rgba(6,182,212,0.35) !important;
-        color: #e8f7fc !important;
-        box-shadow: inset 3px 0 0 #06b6d4;
-    }
-    section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] span {
-        color: #ffffff !important;
-        font-weight: 600 !important;
-    }
-    section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"]::after {
-        content: "";
-        position: absolute;
-        right: 10px; top: 50%;
-        transform: translateY(-50%);
-        width: 6px; height: 6px;
-        border-radius: 50%;
-        background: #06b6d4;
-        box-shadow: 0 0 8px rgba(6,182,212,0.7);
     }
     /* Default text colour inside sidebar */
     section[data-testid="stSidebar"] p,
@@ -244,60 +127,19 @@ st.markdown("""<style>
     section[data-testid="stSidebar"] h3 {
         color: #e8f7fc !important;
     }
-    /* Selectbox dropdown (popover) — dark mode */
-    [data-baseweb="popover"],
-    [data-baseweb="popover"] > div,
-    [data-baseweb="popover"] [data-baseweb="menu"],
-    [data-baseweb="popover"] ul,
-    div[data-baseweb="popover"] {
-        background: #0f1a28 !important;
-        background-color: #0f1a28 !important;
-        border: 1px solid rgba(6,182,212,0.2) !important;
-        border-radius: 8px !important;
-    }
-    [data-baseweb="popover"] li,
-    [data-baseweb="popover"] [role="option"],
-    div[data-baseweb="popover"] li {
-        color: #cce4f1 !important;
-        background: transparent !important;
-    }
-    [data-baseweb="popover"] li:hover,
-    [data-baseweb="popover"] [role="option"]:hover,
-    div[data-baseweb="popover"] li:hover {
-        background: rgba(6,182,212,0.15) !important;
-        color: #ffffff !important;
-    }
-    [data-baseweb="popover"] li[aria-selected="true"],
-    [data-baseweb="popover"] [role="option"][aria-selected="true"],
-    div[data-baseweb="popover"] li[aria-selected="true"] {
-        background: rgba(6,182,212,0.25) !important;
-        color: #ffffff !important;
-    }
-    /* Selectbox trigger in sidebar (black text for readability) */
-    section[data-testid="stSidebar"] [data-baseweb="select"] {
-        background: rgba(255,255,255,0.85) !important;
-        border: 1px solid rgba(6,182,212,0.25) !important;
-        border-radius: 8px !important;
-    }
-    section[data-testid="stSidebar"] [data-baseweb="select"] *,
-    section[data-testid="stSidebar"] [data-baseweb="select"] span,
-    section[data-testid="stSidebar"] [data-baseweb="select"] div,
-    [data-baseweb="select"] [class*="singleValue"],
-    [data-baseweb="select"] [class*="ValueContainer"] span {
-        color: #0f172a !important;
-    }
-    section[data-testid="stSidebar"] [data-baseweb="select"] svg {
-        fill: #0f172a !important;
-        color: #0f172a !important;
-    }
-    section[data-testid="stSidebar"] [data-baseweb="select"] input {
-        caret-color: transparent !important;
-        user-select: none !important;
+    /* Hide Streamlit's auto-rendered nav when position="hidden" */
+    section[data-testid="stSidebar"] [data-testid="stSidebarNav"] {
+        display: none !important;
     }
     /* Hide default Streamlit menu/footer */
     #MainMenu { visibility: hidden; }
     footer   { visibility: hidden; }
 </style>""", unsafe_allow_html=True)
+
+# ===== TOP-NAV RENDER =====
+# Renders the main horizontal navigation in the main canvas (sticky-top).
+# Always visible regardless of sidebar state — Cloud embed mode safe.
+_utils.render_top_nav(TOP_NAV_GROUPS, active_page_title=getattr(pg, "title", None))
 
 # ===== Run the selected page =====
 pg.run()

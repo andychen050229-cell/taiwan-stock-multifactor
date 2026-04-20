@@ -1297,6 +1297,196 @@ def inject_custom_css():
         flex-wrap: wrap;
         gap: 6px;
     }}
+    /* ================================================================= */
+    /*  7. Top navigation pills (Option B — works in embed mode)           */
+    /* ================================================================= */
+    /* Wraps the rendered st.page_link row + group labels. Cloud embed
+       mode hides the sidebar, so this is the PRIMARY navigation.        */
+    .gl-topnav {{
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.82) 100%);
+        backdrop-filter: saturate(1.2) blur(10px);
+        -webkit-backdrop-filter: saturate(1.2) blur(10px);
+        border-bottom: 1px solid rgba(6,182,212,0.12);
+        padding: 12px 4px 10px 4px;
+        margin: -0.5rem -1rem 18px -1rem;
+        box-shadow: 0 4px 16px rgba(15,23,42,0.04);
+    }}
+    .gl-topnav-gname {{
+        font-family: var(--gl-font-mono);
+        font-size: 0.62rem;
+        color: var(--gl-text-3);
+        letter-spacing: 0.14em;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 0 6px 6px 8px;
+        position: relative;
+    }}
+    .gl-topnav-gname::before {{
+        content: "";
+        display: inline-block;
+        width: 3px;
+        height: 9px;
+        vertical-align: -1px;
+        margin-right: 6px;
+        background: var(--gl-grad-tech);
+        border-radius: 2px;
+        box-shadow: 0 0 4px rgba(6,182,212,0.35);
+    }}
+    /* Style st.page_link pills inside the top-nav wrapper */
+    .gl-topnav [data-testid="stPageLink-NavLink"],
+    .gl-topnav a[data-testid="stPageLink"] {{
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 10px !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--gl-border) !important;
+        background: var(--gl-surface) !important;
+        font-family: var(--gl-font-sans) !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        color: var(--gl-text) !important;
+        transition: all .2s ease !important;
+        box-shadow: 0 1px 2px rgba(15,23,42,0.03);
+        position: relative;
+        overflow: hidden;
+    }}
+    .gl-topnav [data-testid="stPageLink-NavLink"]:hover,
+    .gl-topnav a[data-testid="stPageLink"]:hover {{
+        border-color: rgba(6,182,212,0.45) !important;
+        background: linear-gradient(135deg, #ffffff 0%, #f0fafe 100%) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(6,182,212,0.12), 0 0 0 1px rgba(6,182,212,0.08) !important;
+        color: var(--gl-blue) !important;
+    }}
+    .gl-topnav [data-testid="stPageLink-NavLink"] p,
+    .gl-topnav a[data-testid="stPageLink"] p {{
+        color: inherit !important;
+        font-weight: inherit !important;
+        font-size: inherit !important;
+        margin: 0 !important;
+    }}
+    /* Active page — brighter cyan tint + glow */
+    .gl-topnav .gl-active [data-testid="stPageLink-NavLink"],
+    .gl-topnav .gl-active a[data-testid="stPageLink"] {{
+        background: linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(37,99,235,0.08) 100%) !important;
+        border-color: rgba(6,182,212,0.55) !important;
+        color: var(--gl-blue) !important;
+        box-shadow: 0 4px 14px rgba(6,182,212,0.18), inset 0 0 0 1px rgba(6,182,212,0.18) !important;
+    }}
+    .gl-topnav .gl-active [data-testid="stPageLink-NavLink"]::before,
+    .gl-topnav .gl-active a[data-testid="stPageLink"]::before {{
+        content: "";
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 3px;
+        background: var(--gl-grad-tech);
+        border-radius: 2px 0 0 2px;
+    }}
+    /* Group divider — subtle vertical rule between group columns */
+    .gl-topnav-sep {{
+        width: 1px;
+        background: linear-gradient(180deg, transparent, rgba(6,182,212,0.25), transparent);
+        margin: 0 6px;
+        min-height: 56px;
+    }}
+    /* ================================================================= */
+    /*  8. Fix sidebar expand/collapse Material Symbol icon overlap        */
+    /* ================================================================= */
+    /* When the Material Symbols font fails to load (common on Cloud cold
+       start), the raw text "expand_more" / "expand_less" shows instead of
+       the glyph. Replace with a pure-CSS triangle that rotates on expand. */
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] span[class*="material-symbols"],
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] span[class*="MaterialSymbols"],
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] [data-testid*="ExpandMore"],
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] [data-testid*="ExpandLess"] {{
+        font-size: 0 !important;
+        line-height: 0 !important;
+        width: 16px;
+        height: 16px;
+        position: relative;
+        color: transparent !important;
+        display: inline-block !important;
+    }}
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] span[class*="material-symbols"]::after,
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] span[class*="MaterialSymbols"]::after,
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] [data-testid*="ExpandMore"]::after,
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] [data-testid*="ExpandLess"]::after {{
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 4px 0 4px 6px;
+        border-color: transparent transparent transparent #9fb6cc;
+        transform-origin: 2px 50%;
+        transform: translate(-2px, -50%) rotate(0deg);
+        transition: transform 0.2s ease;
+    }}
+    /* Rotate triangle when expanded */
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"][aria-expanded="true"] span[class*="material-symbols"]::after,
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"][aria-expanded="true"] span[class*="MaterialSymbols"]::after {{
+        transform: translate(-2px, -50%) rotate(90deg);
+    }}
+    /* Same fix for collapsible expanders inside main content */
+    details > summary span[class*="material-symbols"],
+    [data-testid="stExpander"] span[class*="material-symbols"] {{
+        font-size: 0 !important;
+        color: transparent !important;
+        width: 14px;
+        height: 14px;
+        display: inline-block !important;
+        position: relative;
+    }}
+    details > summary span[class*="material-symbols"]::after,
+    [data-testid="stExpander"] span[class*="material-symbols"]::after {{
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 4px 0 4px 6px;
+        border-color: transparent transparent transparent var(--gl-text-2);
+        transform: translate(-2px, -50%) rotate(0deg);
+        transition: transform 0.2s ease;
+    }}
+    details[open] > summary span[class*="material-symbols"]::after,
+    [data-testid="stExpander"][open] summary span[class*="material-symbols"]::after {{
+        transform: translate(-2px, -50%) rotate(90deg);
+    }}
+    /* ================================================================= */
+    /*  9. Sidebar real action buttons (重整 / 手冊) — compact grid       */
+    /* ================================================================= */
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button {{
+        background: rgba(255,255,255,0.03) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        color: #cce4f1 !important;
+        font-family: var(--gl-font-sans) !important;
+        font-size: 0.74rem !important;
+        font-weight: 600 !important;
+        padding: 6px 10px !important;
+        border-radius: 8px !important;
+        min-height: 30px !important;
+        height: 30px !important;
+        transition: all .2s ease !important;
+        box-shadow: none !important;
+    }}
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button:hover {{
+        background: rgba(6,182,212,0.12) !important;
+        border-color: rgba(6,182,212,0.35) !important;
+        color: #e8f7fc !important;
+        transform: translateY(-1px);
+    }}
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button:active {{
+        transform: translateY(0);
+    }}
 </style>
     """, unsafe_allow_html=True)
 
@@ -1600,7 +1790,8 @@ def render_system_health_card(gates_passed: int = 9, total_gates: int = 9,
                               features: str = "91 / 1,623",
                               dsr: str = "12.12",
                               last_verified: str = "2026-04-20 14:24",
-                              mode: str = "dark") -> str:
+                              mode: str = "dark",
+                              show_buttons: bool = False) -> str:
     """Return the HTML for a 系統健康度 card.
 
     Args:
@@ -1608,6 +1799,8 @@ def render_system_health_card(gates_passed: int = 9, total_gates: int = 9,
         dataset / samples / features / dsr: the four core KPI values.
         last_verified: ISO-ish timestamp for the last verification run.
         mode: "dark" (sidebar footer) or "light" (main-canvas panel).
+        show_buttons: legacy fake HTML buttons (default False — real Streamlit
+            buttons are injected separately via `inject_sidebar_action_buttons`).
     """
     pct = (gates_passed / total_gates * 100) if total_gates else 0
     klass = "gl-syshealth light" if mode == "light" else "gl-syshealth"
@@ -1617,6 +1810,14 @@ def render_system_health_card(gates_passed: int = 9, total_gates: int = 9,
         label_color=("#0f172a" if mode == "light" else "#e8f7fc"),
         track=("#e2e8f0" if mode == "light" else "rgba(255,255,255,0.08)"),
     )
+    btns_html = ""
+    if show_buttons:
+        btns_html = (
+            f'<div class="gl-syshealth-btns">'
+            f'<div class="gl-syshealth-btn">🔄 重整</div>'
+            f'<div class="gl-syshealth-btn">? 手冊</div>'
+            f'</div>'
+        )
     # CRITICAL: no blank lines inside HTML — CommonMark terminates HTML blocks on blank lines.
     return (
         f'<div class="{klass}">'
@@ -1631,10 +1832,7 @@ def render_system_health_card(gates_passed: int = 9, total_gates: int = 9,
         f'<div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">FEATURES</span><span class="gl-syshealth-kpi-v">{features}</span></div>'
         f'<div class="gl-syshealth-kpi"><span class="gl-syshealth-kpi-k">DSR</span><span class="gl-syshealth-kpi-v">{dsr}</span></div>'
         f'<div class="gl-syshealth-foot">最後驗證時間　<strong>{last_verified}</strong></div>'
-        f'<div class="gl-syshealth-btns">'
-        f'<div class="gl-syshealth-btn">🔄 重整</div>'
-        f'<div class="gl-syshealth-btn">? 手冊</div>'
-        f'</div>'
+        f'{btns_html}'
         f'</div>'
     )
 
@@ -2079,3 +2277,85 @@ def load_companies():
         st.error("Companies data not found in any expected location")
         st.stop()
     return pd.read_parquet(companies_path)
+
+
+# ============================================================================
+# Top-nav (Option B) — renders 4-group horizontal nav in main canvas
+# Works identically with or without sidebar (embed mode safe)
+# ============================================================================
+def render_top_nav(groups: dict, active_page_title: str = None):
+    """Render sticky top navigation bar with 4 groups × 12 pages.
+
+    Args:
+        groups: ordered dict mapping group label (str) → list of st.Page objects
+        active_page_title: title of currently active page (for active-state styling)
+
+    Rendered HTML tree:
+      .gl-topnav
+        ├─ row 1: 4 columns (proportional widths) — group labels
+        └─ row 2: N equal columns — one st.page_link per page, wrapped in
+                  span.gl-active when matching active_page_title
+    """
+    weights = [len(pages) for pages in groups.values()]
+    total = sum(weights)
+
+    st.markdown('<div class="gl-topnav">', unsafe_allow_html=True)
+
+    # Row 1: group labels with proportional widths
+    label_cols = st.columns(weights, gap="small")
+    for col, gname in zip(label_cols, groups.keys()):
+        with col:
+            st.markdown(
+                f'<div class="gl-topnav-gname">{gname}</div>',
+                unsafe_allow_html=True,
+            )
+
+    # Row 2: one column per page, equal widths — spans align with row 1 groups
+    page_cols = st.columns(total, gap="small")
+    idx = 0
+    for gname, pages in groups.items():
+        for p in pages:
+            with page_cols[idx]:
+                is_active = (active_page_title is not None
+                             and getattr(p, "title", None) == active_page_title)
+                if is_active:
+                    st.markdown('<div class="gl-active">', unsafe_allow_html=True)
+                st.page_link(
+                    p,
+                    label=getattr(p, "title", str(p)),
+                    icon=getattr(p, "icon", None),
+                    use_container_width=True,
+                )
+                if is_active:
+                    st.markdown('</div>', unsafe_allow_html=True)
+            idx += 1
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+def inject_sidebar_action_buttons(manual_page=None, reset_key: str = "_gl_reset",
+                                  manual_key: str = "_gl_manual"):
+    """Render real 重整 + 手冊 buttons in the sidebar (below system-health card).
+
+    Args:
+        manual_page: st.Page object for the 使用手冊 page, or a path string.
+            If None, manual button triggers st.rerun() as a noop fallback.
+        reset_key / manual_key: unique widget keys to avoid collisions.
+    """
+    with st.sidebar:
+        st.markdown('<div class="gl-sidebtn-row">', unsafe_allow_html=True)
+        c1, c2 = st.columns(2, gap="small")
+        with c1:
+            if st.button("🔄 重整", key=reset_key, use_container_width=True,
+                         help="清除快取並重新載入儀表板資料"):
+                st.cache_data.clear()
+                st.rerun()
+        with c2:
+            if st.button("❓ 手冊", key=manual_key, use_container_width=True,
+                         help="查看使用手冊與白話解說"):
+                if manual_page is not None:
+                    try:
+                        st.switch_page(manual_page)
+                    except Exception:
+                        st.toast("找不到手冊頁。")
+        st.markdown('</div>', unsafe_allow_html=True)
