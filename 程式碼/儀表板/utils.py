@@ -881,9 +881,43 @@ def inject_custom_css():
         gap: 10px;
         margin-bottom: 8px;
     }}
+    /* CSS conic-gradient ring (no SVG — avoids Streamlit code-block bug) */
     .gl-syshealth-ring {{
-        width: 48px; height: 48px;
+        --pct: 100;
+        --ring-color: #06b6d4;
+        --ring-track: rgba(255,255,255,0.08);
+        --ring-bg: #0f1a28;
+        --ring-text: #e8f7fc;
+        position: relative;
+        width: 54px; height: 54px;
         flex-shrink: 0;
+        border-radius: 50%;
+        background:
+            conic-gradient(var(--ring-color) calc(var(--pct) * 1%), var(--ring-track) 0);
+        display: grid;
+        place-items: center;
+    }}
+    .gl-syshealth-ring::before {{
+        content: "";
+        position: absolute;
+        inset: 5px;
+        background: var(--ring-bg);
+        border-radius: 50%;
+    }}
+    .gl-syshealth-ring-label {{
+        position: relative;
+        z-index: 1;
+        font-family: 'JetBrains Mono', monospace;
+        font-variant-numeric: tabular-nums;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--ring-text);
+        letter-spacing: 0;
+    }}
+    .gl-syshealth.light .gl-syshealth-ring {{
+        --ring-track: #e2e8f0;
+        --ring-bg: #ffffff;
+        --ring-text: #0f172a;
     }}
     .gl-syshealth-labels {{
         display: flex;
@@ -1461,29 +1495,25 @@ def render_live_chip(text: str = "LIVE · 研究快照"):
 def _cyan_ring_svg(pct: float, size: int = 48, stroke: int = 5,
                    color: str = "#06b6d4", track: str = "rgba(255,255,255,0.08)",
                    label_color: str = "#e8f7fc") -> str:
-    """Return a dark-themed SVG ring (0–100%) suitable for the sidebar.
+    """Return a dark-themed ring (0–100%) using pure CSS conic-gradient.
 
-    CRITICAL: returns a single-line SVG with NO newlines so that it can be
-    safely embedded in HTML strings passed to st.markdown without triggering
-    CommonMark's blank-line-terminates-HTML-block rule.
+    CRITICAL: NO SVG — Streamlit Cloud's markdown renderer treats ``<svg>``
+    followed by nested ``<div>`` children as an indented code block, which
+    causes the inner HTML (e.g. ``.gl-syshealth-labels``) to be escaped and
+    wrapped in a ``stCode`` component. A pure HTML + CSS conic-gradient ring
+    bypasses this issue entirely.
+
+    Function name kept for backward-compat (a few pages may import it). Width,
+    stroke, and colours are passed as CSS custom properties so the single
+    stylesheet rule can handle both dark (sidebar) and light (main) modes.
     """
-    import math
     pct = max(0, min(100, pct))
-    r = (size - stroke) / 2
-    c = 2 * math.pi * r
-    dash = c * (pct / 100)
-    cx = cy = size / 2
+    # Dark mode defaults are in the CSS; only override light mode here.
     return (
-        f'<svg class="gl-syshealth-ring" viewBox="0 0 {size} {size}" width="{size}" height="{size}">'
-        f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{track}" stroke-width="{stroke}"/>'
-        f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{color}" '
-        f'stroke-width="{stroke}" stroke-linecap="round" '
-        f'stroke-dasharray="{dash:.2f} {c - dash:.2f}" '
-        f'transform="rotate(-90 {cx} {cy})"/>'
-        f'<text x="{cx}" y="{cy + 3}" text-anchor="middle" '
-        f'font-family="JetBrains Mono, monospace" font-size="{size * 0.26:.0f}" '
-        f'font-weight="700" fill="{label_color}">{pct:.0f}%</text>'
-        f'</svg>'
+        f'<div class="gl-syshealth-ring" '
+        f'style="--pct:{pct:.0f}; --ring-color:{color};">'
+        f'<span class="gl-syshealth-ring-label">{pct:.0f}%</span>'
+        f'</div>'
     )
 
 

@@ -79,16 +79,25 @@ st.markdown("""<style>
         pointer-events: none;
         opacity: 0.5;
     }
-    /* Sidebar group-heading (財報狗 style, uppercase-spaced) */
-    section[data-testid="stSidebar"] [data-testid="stSidebarNavSeparator"] span,
-    section[data-testid="stSidebar"] span.st-emotion-cache-1wmy9hl,
-    section[data-testid="stSidebar"] [data-testid="stSidebarNavItems"] > div > span {
+    /* Sidebar group-heading (財報狗 style — dense, spaced, tech-y) */
+    /* Streamlit v1.36+ uses <header data-testid="stNavSectionHeader"> for dict-keyed groups */
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] {
+        padding: 14px 14px 6px 14px !important;
+        margin-top: 6px !important;
+        border-top: 1px solid rgba(255,255,255,0.05) !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"]:first-of-type {
+        border-top: none !important;
+        margin-top: 0 !important;
+        padding-top: 10px !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stNavSectionHeader"] span,
+    section[data-testid="stSidebar"] [data-testid="stSidebarNavSeparator"] span {
         color: #5b7186 !important;
-        font-size: 0.62rem !important;
+        font-size: 0.72rem !important;
         font-weight: 700 !important;
-        text-transform: uppercase;
-        letter-spacing: 0.18em;
-        padding-left: 6px;
+        letter-spacing: 0.2em !important;
+        font-family: 'Inter', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif !important;
     }
     /* Nav list container spacing */
     section[data-testid="stSidebar"] [data-testid="stSidebarNavItems"] {
