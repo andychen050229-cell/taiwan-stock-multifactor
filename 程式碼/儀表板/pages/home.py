@@ -709,7 +709,7 @@ with tab_workstation:
     <div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:800;color:#67e8f9;
                   line-height:1;letter-spacing:-0.02em;">{baseline_auc:.3f}</div>
-      <div style="font-size:0.82rem;color:#94a3b8;margin-top:6px;">OOS AUC · 預測正確率</div>
+      <div style="font-size:0.82rem;color:#b4ccdf;margin-top:6px;">OOS AUC · 預測正確率</div>
       <div style="font-size:0.76rem;color:#cbd5e1;margin-top:4px;opacity:0.9;">
         ≈ 比亂猜好 <strong style="color:#a7f3d0;">{_auc_edge:.1f}%</strong> · 超過 0.52 閘門
       </div>
@@ -717,7 +717,7 @@ with tab_workstation:
     <div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:800;color:#a7f3d0;
                   line-height:1;letter-spacing:-0.02em;">{best_dsr:.2f}</div>
-      <div style="font-size:0.82rem;color:#94a3b8;margin-top:6px;">DSR · 膨脹調整後夏普</div>
+      <div style="font-size:0.82rem;color:#b4ccdf;margin-top:6px;">DSR · 膨脹調整後夏普</div>
       <div style="font-size:0.76rem;color:#cbd5e1;margin-top:4px;opacity:0.9;">
         遠高於 <strong>1.0</strong> 有效門檻 · 非靠運氣
       </div>
@@ -725,7 +725,7 @@ with tab_workstation:
     <div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:800;color:#fde68a;
                   line-height:1;letter-spacing:-0.02em;">+{best_edge*100:.1f}pp</div>
-      <div style="font-size:0.82rem;color:#94a3b8;margin-top:6px;">Best Edge · 最佳邊際</div>
+      <div style="font-size:0.82rem;color:#b4ccdf;margin-top:6px;">Best Edge · 最佳邊際</div>
       <div style="font-size:0.76rem;color:#cbd5e1;margin-top:4px;opacity:0.9;">
         Top decile vs bottom · D+20 threshold sweep
       </div>
@@ -936,7 +936,7 @@ with tab_workstation:
         ))
         fig.add_annotation(
             x=i, y=-0.55, text=phase, showarrow=False,
-            font=dict(family="JetBrains Mono, monospace", size=9, color="#94a3b8"),
+            font=dict(family="JetBrains Mono, monospace", size=9, color="#b4ccdf"),
         )
 
     # v11 §4b — arrow connector paints cyan-translucent on dark panel.

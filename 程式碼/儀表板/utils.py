@@ -4715,6 +4715,95 @@ div[data-testid="stDataFrameResizable"] {
     color: #8397ac;
     border-top: 1px solid rgba(103,232,249,0.10);
 }
+
+/* =========================================================================
+   v11.4 §A — Legacy light-theme hero/chip override (20-person-team audit)
+   The base `.gl-hero`, `.gl-chip-explain` and `.gl-chip` classes were
+   designed for the original glint-LIGHT canvas (white hero surface, dark
+   text). When pages 0 & 8 embed them on dark-terminal pages they appear
+   as bright white blocks ripping a hole through the dark theme. This
+   override layer repaints them as glint-dark terminal heroes so every
+   hero in the app looks consistent.
+   ========================================================================= */
+.gl-hero {
+    background:
+        radial-gradient(ellipse at 10% 10%, rgba(103,232,249,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse at 90% 90%, rgba(167,139,250,0.08) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(15,23,37,0.94) 0%, rgba(8,16,32,0.98) 100%) !important;
+    border: 1px solid rgba(103,232,249,0.22) !important;
+    box-shadow: 0 0 0 1px rgba(103,232,249,0.08),
+                0 8px 30px rgba(2,6,23,0.45) !important;
+    color: #cfe2ee !important;
+}
+.gl-hero::before {
+    background: radial-gradient(circle, rgba(103,232,249,0.12), transparent 70%) !important;
+}
+.gl-hero-orb {
+    background: radial-gradient(circle, rgba(167,139,250,0.12), transparent 70%) !important;
+}
+.gl-hero-eyebrow {
+    background: rgba(103,232,249,0.10) !important;
+    color: #67e8f9 !important;
+    border: 1px solid rgba(103,232,249,0.30) !important;
+}
+.gl-hero-title {
+    background: linear-gradient(135deg, #E8F7FC 0%, #67e8f9 55%, #a78bfa 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+.gl-hero-subtitle {
+    color: #cfe2ee !important;
+}
+.gl-hero-subtitle strong {
+    color: #E8F7FC !important;
+}
+.gl-hero-accent {
+    background: linear-gradient(135deg, #67e8f9 0%, #a78bfa 55%, #6ee7b7 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+/* chip-explain grid items (Pages 0 & 8 hero cards) */
+.gl-chip-explain .item {
+    background: rgba(10,20,32,0.72) !important;
+    border: 1px solid rgba(103,232,249,0.18) !important;
+    border-left: 3px solid #67e8f9 !important;
+}
+.gl-chip-explain .item:hover {
+    border-left-color: #a78bfa !important;
+    box-shadow: 0 0 0 1px rgba(167,139,250,0.22),
+                0 8px 22px rgba(2,6,23,0.45) !important;
+}
+.gl-chip-explain .item .head { color: #67e8f9 !important; }
+.gl-chip-explain .item .desc { color: #cfe2ee !important; }
+.gl-chip-explain .item.vio              { border-left-color: #a78bfa !important; }
+.gl-chip-explain .item.vio .head        { color: #c4b5fd !important; }
+.gl-chip-explain .item.ok               { border-left-color: #6ee7b7 !important; }
+.gl-chip-explain .item.ok  .head        { color: #6ee7b7 !important; }
+.gl-chip-explain .item.warn             { border-left-color: #fde68a !important; }
+.gl-chip-explain .item.warn .head       { color: #fde68a !important; }
+/* Generic .gl-chip pill — terminal dark base */
+.gl-chip {
+    background: rgba(10,20,32,0.68) !important;
+    color: #cfe2ee !important;
+    border: 1px solid rgba(103,232,249,0.22) !important;
+}
+.gl-chip.primary { background: rgba(103,232,249,0.10) !important; color: #67e8f9 !important; border-color: rgba(103,232,249,0.35) !important; }
+.gl-chip.violet  { background: rgba(167,139,250,0.10) !important; color: #c4b5fd !important; border-color: rgba(167,139,250,0.35) !important; }
+.gl-chip.ok      { background: rgba(16,185,129,0.12) !important; color: #6ee7b7 !important; border-color: rgba(16,185,129,0.38) !important; }
+.gl-chip.warn    { background: rgba(245,158,11,0.12) !important; color: #fde68a !important; border-color: rgba(245,158,11,0.38) !important; }
+.gl-chip.danger  { background: rgba(244,63,94,0.12) !important; color: #fda4af !important; border-color: rgba(244,63,94,0.38) !important; }
+/* 9-pillar badges — dark terminal variant */
+.gl-pillar[data-p="trend"] { background: rgba(37,99,235,0.14)  !important; color: #93c5fd !important; }
+.gl-pillar[data-p="fund"]  { background: rgba(16,185,129,0.14) !important; color: #6ee7b7 !important; }
+.gl-pillar[data-p="val"]   { background: rgba(217,70,239,0.14) !important; color: #f0abfc !important; }
+.gl-pillar[data-p="event"] { background: rgba(245,158,11,0.14) !important; color: #fde68a !important; }
+.gl-pillar[data-p="risk"]  { background: rgba(244,63,94,0.14)  !important; color: #fda4af !important; }
+.gl-pillar[data-p="chip"]  { background: rgba(99,102,241,0.14) !important; color: #a5b4fc !important; }
+.gl-pillar[data-p="ind"]   { background: rgba(6,182,212,0.14)  !important; color: #67e8f9 !important; }
+.gl-pillar[data-p="txt"]   { background: rgba(167,139,250,0.14) !important; color: #c4b5fd !important; }
+.gl-pillar[data-p="sent"]  { background: rgba(236,72,153,0.14) !important; color: #f9a8d4 !important; }
 </style>
 """
 
