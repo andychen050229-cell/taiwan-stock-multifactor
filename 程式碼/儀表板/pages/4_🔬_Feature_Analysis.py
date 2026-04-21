@@ -125,7 +125,7 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
 
     st.markdown(f"""
     <div class="insight-box">
-    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 篩選標準 | Criteria：</strong><br>
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 篩選標準 | Criteria：</strong><br>
     <span style="display:inline-block;width:18px;height:18px;border-radius:4px;background:rgba(34,211,238,0.15);color:#22d3ee;text-align:center;font-size:11px;font-weight:700;line-height:18px;">1</span> Mutual Information：與標籤的非線性關聯程度（保留前 60%，約 26 個）<br>
     <span style="display:inline-block;width:18px;height:18px;border-radius:4px;background:rgba(34,211,238,0.15);color:#22d3ee;text-align:center;font-size:11px;font-weight:700;line-height:18px;">2</span> VIF：去除多重共線性（VIF > 10 剔除）<br>
     <span style="display:inline-block;width:18px;height:18px;border-radius:4px;background:rgba(34,211,238,0.15);color:#22d3ee;text-align:center;font-size:11px;font-weight:700;line-height:18px;">3</span> 穩定性：跨 Fold Jaccard 相似度 > 0.3
@@ -327,7 +327,7 @@ try:
 
         st.markdown(f"""
         <div class="insight-box">
-        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 跨折穩定性 | Cross-Fold Stability：</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 跨折穩定性 | Cross-Fold Stability：</strong><br>
         特徵篩選的穩定性直接影響模型的 generalization 能力。<br>
         Jaccard 相似度 ≥ 0.3 表示核心特徵在不同訓練折次間保持一致性。
         </div>
@@ -375,7 +375,7 @@ try:
                 color="Horizon",
                 orientation="h",
                 barmode="group",
-                color_discrete_map={"D+1": "#f43f5e", "D+5": "#f59e0b", "D+20": "#10b981"},
+                color_discrete_map={"D+1": "#f43f5e", "D+5": "#a78bfa", "D+20": "#10b981"},
             )
             fig_imp.update_layout(**glint_plotly_layout(
                 title=f"{engine_choice.upper()} — 各天期 Top-10 特徵",
@@ -391,7 +391,7 @@ try:
 
             st.markdown(f"""
             <div class="insight-box">
-            <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("lightbulb", 15, "#fbbf24")} 跨天期特徵差異 | Cross-Horizon Pattern：</strong><br>
+            <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("lightbulb", 15, "#c4b5fd")} 跨天期特徵差異 | Cross-Horizon Pattern：</strong><br>
             短期（D+1）主要依賴技術面動能指標，中長期（D+20）則更重視基本面與估值因子。<br>
             這反映了「頻率結構」——不同天期的驅動因子本質完全不同，短期是噪音，長期是訊號。
             </div>
@@ -428,7 +428,7 @@ try:
                 fig_j = go.Figure(data=[go.Bar(
                     x=[f"Fold {i} vs {i+1}" for i in range(len(jaccards))],
                     y=jaccards,
-                    marker_color=["#10b981" if j > 0.8 else "#f59e0b" if j > 0.5 else "#f43f5e" for j in jaccards],
+                    marker_color=["#10b981" if j > 0.8 else "#a78bfa" if j > 0.5 else "#f43f5e" for j in jaccards],
                     text=[f"{j:.3f}" for j in jaccards],
                     textposition="outside",
                     textfont=dict(family="JetBrains Mono, monospace", size=11),
@@ -444,9 +444,9 @@ try:
                 fig_j.add_hline(y=0.8, line_dash="dash", line_color="#10b981",
                                 annotation_text="優秀 Excellent (0.8)",
                                 annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#10b981"))
-                fig_j.add_hline(y=0.5, line_dash="dash", line_color="#f59e0b",
+                fig_j.add_hline(y=0.5, line_dash="dash", line_color="#a78bfa",
                                 annotation_text="及格 Fair (0.5)",
-                                annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#fde68a"))
+                                annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#ddd6fe"))
                 st.plotly_chart(fig_j, use_container_width=True)
 
         with col_s2:
@@ -612,7 +612,7 @@ try:
                 fig_q.add_trace(go.Bar(
                     x=[f"Q{k}" for k in q_keys],
                     y=q_vals,
-                    marker_color=["#f43f5e", "#f59e0b", "#2563eb", "#7c3aed", "#10b981"][:len(q_keys)],
+                    marker_color=["#f43f5e", "#a78bfa", "#2563eb", "#7c3aed", "#10b981"][:len(q_keys)],
                     text=[f"{v:+.2f}%" for v in q_vals],
                     textposition="outside",
                     textfont=dict(family="JetBrains Mono, monospace", size=11),
@@ -641,7 +641,7 @@ try:
 
         st.markdown(f"""
         <div class="insight-box">
-        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 解讀 | Interpretation：</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 解讀 | Interpretation：</strong><br>
         理想情況下，報酬應從 Q1 到 Q5 單調遞增（或 Q5 明顯優於 Q1）。<br>
         若不存在單調性，表示模型訊號不夠清晰，或包含噪音。
         </div>

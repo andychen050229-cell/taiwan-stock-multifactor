@@ -260,9 +260,9 @@ if dsr_data:
         ))
         fig_dsr.add_hline(
             y=dsr_data.get("revised_expected_max_sharpe", 0),
-            line_dash="dash", line_color="#f59e0b", line_width=2,
+            line_dash="dash", line_color="#a78bfa", line_width=2,
             annotation_text=f"E[max(SR)] = {dsr_data.get('revised_expected_max_sharpe', 0):.4f}",
-            annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#fde68a"),
+            annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#ddd6fe"),
         )
         fig_dsr.update_layout(**glint_plotly_layout(
             title="各策略觀察 Sharpe vs DSR 門檻",
@@ -276,7 +276,7 @@ if dsr_data:
         # v11 §4a — migrated inline pastel div → shared `.gl-box-warn` dark card.
         st.markdown(f"""
         <div class="gl-box-warn">
-        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} DSR 解讀：</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} DSR 解讀：</strong><br>
         當嘗試 N 種策略時，E[max(SR)] 代表「僅靠運氣」可能達到的最大夏普比率。<br>
         個別策略的 Sharpe 若低於此門檻，可能只是多重測試的偽陽性結果。<br><br>
         <strong>但</strong>：以「單一最佳策略」角度（N=1），ensemble_D5 的 DSR 通過（p=1.0），表明其 Sharpe 不可能僅靠運氣。
@@ -435,7 +435,7 @@ if card_files:
         # Radar chart comparison
         categories = ["AUC", "ICIR", "Sharpe", "勝率"]
         fig_radar = go.Figure()
-        colors = ["#2563eb", "#7c3aed", "#10b981", "#f59e0b"]
+        colors = ["#2563eb", "#7c3aed", "#10b981", "#a78bfa"]
         for i, row in df_comp.iterrows():
             # Normalize values for radar
             vals = [

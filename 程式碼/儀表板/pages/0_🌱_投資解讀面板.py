@@ -87,7 +87,7 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(0,0,0,0.45), inset 0 1px 0 rgba(103,232,249,0.12);
     }
     .stock-card.bullish { border-left-color: #10b981; }
-    .stock-card.neutral { border-left-color: #f59e0b; }
+    .stock-card.neutral { border-left-color: #a78bfa; }
     .stock-card.bearish { border-left-color: #f43f5e; }
     .stock-header {
         display: flex;
@@ -122,7 +122,7 @@ st.markdown("""
         border: 1px solid transparent;
     }
     .confidence-high { background: rgba(37,99,235,0.18); color: #93c5fd; border-color: rgba(37,99,235,0.38); }
-    .confidence-medium { background: rgba(245,158,11,0.18); color: #fde68a; border-color: rgba(245,158,11,0.38); }
+    .confidence-medium { background: rgba(167,139,250,0.18); color: #ddd6fe; border-color: rgba(167,139,250,0.38); }
     .confidence-low { background: rgba(244,63,94,0.18); color: #fecaca; border-color: rgba(244,63,94,0.38); }
     /* Direction badge */
     .direction-badge {
@@ -136,7 +136,7 @@ st.markdown("""
         border: 1px solid transparent;
     }
     .direction-bullish { background: rgba(16,185,129,0.18); color: #6ee7b7; border-color: rgba(16,185,129,0.40); }
-    .direction-neutral { background: rgba(245,158,11,0.18); color: #fde68a; border-color: rgba(245,158,11,0.38); }
+    .direction-neutral { background: rgba(167,139,250,0.18); color: #ddd6fe; border-color: rgba(167,139,250,0.38); }
     .direction-bearish { background: rgba(244,63,94,0.18); color: #fecaca; border-color: rgba(244,63,94,0.40); }
     /* Info panels */
     .info-panel {
@@ -153,14 +153,14 @@ st.markdown("""
     }
     .warning-panel {
         background: linear-gradient(180deg, rgba(37,25,12,0.92) 0%, rgba(20,14,5,0.95) 100%);
-        border-left: 4px solid #f59e0b;
-        border: 1px solid rgba(245,158,11,0.32);
+        border-left: 4px solid #a78bfa;
+        border: 1px solid rgba(167,139,250,0.32);
         border-left-width: 4px;
         border-radius: 8px;
         padding: 12px 16px;
         margin: 12px 0;
         font-size: 0.9rem;
-        color: #fde68a;
+        color: #ddd6fe;
         line-height: 1.65;
     }
     .history-disclaimer {
@@ -681,7 +681,7 @@ try:
     # Historical context disclaimer — dark-themed Glint note (replaces warning-panel)
     st.markdown(
         '<div class="insight-box" style="margin:6px 0 14px 0;">'
-        '<strong style="color:#fbbf24;">📋 面板說明</strong><br>'
+        '<strong style="color:#c4b5fd;">📋 面板說明</strong><br>'
         '本頁面呈現的是固定歷史資料期間內的模型判讀結果，用於展示研究能力與方法論，非即時投資建議。'
         '歷史判讀不構成未來預測，過去績效不代表未來報酬。'
         '</div>',
@@ -752,7 +752,7 @@ try:
             alert_icon = "🔴"
         elif alert_level == "elevated":
             alert_bg = "#fffbeb"
-            alert_border = "#f59e0b"
+            alert_border = "#a78bfa"
             alert_icon = "🟡"
         else:
             alert_bg = "#ecfdf5"
@@ -962,7 +962,7 @@ try:
                     x=price_hist["trade_date"],
                     y=price_hist["ma20"],
                     mode="lines",
-                    line=dict(color="#f59e0b", width=1.5, dash="dash"),
+                    line=dict(color="#a78bfa", width=1.5, dash="dash"),
                     name="MA20",
                     hovertemplate="MA20: $%{y:.2f}<extra></extra>",
                 ), row=1, col=1)
@@ -1107,8 +1107,8 @@ try:
             with st.expander("⚠️ 風險提示"):
                 # Risk level badge
                 risk_lvl = fund.get("risk_level", "中等")
-                risk_colors = {"低": "#059669", "中等": "#f59e0b", "高": "#dc2626"}
-                risk_color = risk_colors.get(risk_lvl, "#f59e0b")
+                risk_colors = {"低": "#059669", "中等": "#a78bfa", "高": "#dc2626"}
+                risk_color = risk_colors.get(risk_lvl, "#a78bfa")
                 st.markdown(f"""
 <div style="display:inline-block; padding:6px 16px; border-radius:20px;
      background:{risk_color}22; color:{risk_color}; font-weight:700; font-size:0.9rem;
@@ -1473,7 +1473,7 @@ try:
         ))
         fig_vol.add_hline(y=vol_mean, line_dash="dash", line_color="#059669",
                           annotation_text=f"歷史均值 ({vol_mean:.2f})", line_width=1)
-        fig_vol.add_hline(y=vol_p75, line_dash="dot", line_color="#f59e0b",
+        fig_vol.add_hline(y=vol_p75, line_dash="dot", line_color="#a78bfa",
                           annotation_text=f"P75 警戒線 ({vol_p75:.2f})", line_width=1)
         fig_vol.add_hline(y=vol_p90, line_dash="dash", line_color="#dc2626",
                           annotation_text=f"P90 高波動 ({vol_p90:.2f})", line_width=1)

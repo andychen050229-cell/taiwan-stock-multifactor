@@ -177,7 +177,7 @@ try:
         glint_heading("grid", "ICIR 全景視圖", "ICIR Overview", tone="blue")
 
         fig_main = go.Figure()
-        for h, color in [("D+1", "#f43f5e"), ("D+5", "#f59e0b"), ("D+20", "#10b981")]:
+        for h, color in [("D+1", "#f43f5e"), ("D+5", "#a78bfa"), ("D+20", "#10b981")]:
             subset = df_icir[df_icir["Horizon"] == h]
             fig_main.add_trace(go.Bar(
                 name=h,
@@ -397,7 +397,7 @@ try:
                         "axis": {"range": [0, 1.5]},
                         "steps": [
                             {"range": [0, 0.3], "color": "#fef2f2"},
-                            {"range": [0.3, 0.5], "color": "#fef3c7"},
+                            {"range": [0.3, 0.5], "color": "#ede9fe"},
                             {"range": [0.5, 1.0], "color": "#ecfdf5"},
                             {"range": [1.0, 1.5], "color": "#d1fae5"},
                         ],

@@ -220,7 +220,7 @@ try:
 
         st.markdown(f"""
         <div class="insight-box">
-        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} PIT（Point-in-Time）合規：</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} PIT（Point-in-Time）合規：</strong><br>
         所有財報數據嚴格按照台灣 IFRS 法定申報期限進行延遲對齊，確保模型訓練時不會使用到「當時尚未公開」的財報資料。<br>
         例如：Q1 財報在 5/15 之後才可使用，即使實際公布日期更早。
         </div>
@@ -253,7 +253,7 @@ try:
         fig = go.Figure()
         colors_train = ["#1E3A8A", "#1D4ED8", "#2563EB", "#3B82F6"]   # deep blue scale
         colors_test  = ["#064E3B", "#065F46", "#047857", "#10B981"]   # emerald scale
-        embargo_color = "rgba(245,158,11,0.35)"                       # amber — embargo strip
+        embargo_color = "rgba(167,139,250,0.35)"                       # amber — embargo strip
 
         for fold in folds:
             fid = fold["fold_id"]
@@ -425,9 +425,9 @@ try:
             _glow = "rgba(16,185,129,0.45)"
             _label_color = "#d1fae5"
         elif pass_rate >= 0.8:
-            _fill = "linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)"
-            _glow = "rgba(245,158,11,0.45)"
-            _label_color = "#fef3c7"
+            _fill = "linear-gradient(90deg, #a78bfa 0%, #c4b5fd 100%)"
+            _glow = "rgba(167,139,250,0.45)"
+            _label_color = "#ede9fe"
         else:
             _fill = "linear-gradient(90deg, #f43f5e 0%, #fb7185 100%)"
             _glow = "rgba(244,63,94,0.45)"
@@ -457,8 +457,8 @@ try:
         </div>
         """, unsafe_allow_html=True)
 
-        # v11 §5 — Glint dark terminal gauge (was: raw #059669/#f59e0b/#dc2626
-        # bar + light #fee2e2/#fef3c7/#ecfdf5 step bands on white canvas).
+        # v11 §5 — Glint dark terminal gauge (was: raw #059669/#a78bfa/#dc2626
+        # bar + light #fee2e2/#ede9fe/#ecfdf5 step bands on white canvas).
         if n_pass == n_total:
             _gauge_tone = "emerald"
         elif n_pass >= n_total * 0.8:
@@ -470,7 +470,7 @@ try:
         # so the threshold arcs are visible instead of white wedges).
         _gauge_style["steps"] = [
             {"range": [0, n_total * 0.5], "color": "rgba(244,63,94,0.28)"},
-            {"range": [n_total * 0.5, n_total * 0.8], "color": "rgba(245,158,11,0.28)"},
+            {"range": [n_total * 0.5, n_total * 0.8], "color": "rgba(167,139,250,0.28)"},
             {"range": [n_total * 0.8, n_total], "color": "rgba(16,185,129,0.28)"},
         ]
         _gauge_style["threshold"] = {
@@ -594,7 +594,7 @@ $$
 
     st.markdown(f"""
     <div class="insight-box">
-    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 閾值設計原則 | Threshold Design Rationale：</strong><br>
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 閾值設計原則 | Threshold Design Rationale：</strong><br>
     • 閾值按天期遞增，反映較長持有期間內的自然價格變異程度<br>
     • FLAT 類別設計為「中間帶」，代表市場無明確方向——這是最難預測的類別<br>
     • 閾值的選擇參考台股歷史波動率中位數，確保各類別有足夠樣本<br>

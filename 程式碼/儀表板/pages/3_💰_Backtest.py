@@ -206,7 +206,7 @@ try:
     with r2:
         fig_sr = go.Figure()
         sharpes = [r["Sharpe"] for r in rows]
-        colors_sr = ["#059669" if s > 0.5 else ("#f59e0b" if s > 0 else "#dc2626") for s in sharpes]
+        colors_sr = ["#059669" if s > 0.5 else ("#a78bfa" if s > 0 else "#dc2626") for s in sharpes]
         fig_sr.add_trace(go.Bar(
             x=engines,
             y=sharpes,
@@ -283,9 +283,9 @@ try:
     ))
     fig_scatter.update_layout(yaxis_tickformat=".1%", xaxis_tickformat=".1%", hovermode="closest")
     fig_scatter.add_hline(y=0, line_color="rgba(103,232,249,0.45)", line_dash="dash")
-    fig_scatter.add_vline(x=0.15, line_color="#f59e0b", line_dash="dash",
+    fig_scatter.add_vline(x=0.15, line_color="#a78bfa", line_dash="dash",
                           annotation_text="典型回撤 Typical DD",
-                          annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#fde68a"))
+                          annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#ddd6fe"))
     st.plotly_chart(fig_scatter, use_container_width=True)
     render_chart_note(
         "左上象限＝風險低、報酬高。Ensemble（綠）相對 LightGBM（藍）與 XGBoost（紫）通常位於較佳象限，基準（灰）落於右下提供對照。",
@@ -466,7 +466,7 @@ $$
                 marker=dict(
                     size=16,
                     color=df_to["Horizon"],
-                    colorscale=[[0, "#f43f5e"], [0.5, "#f59e0b"], [1, "#10b981"]],
+                    colorscale=[[0, "#f43f5e"], [0.5, "#a78bfa"], [1, "#10b981"]],
                     showscale=True,
                     colorbar=dict(
                         title=dict(text="Horizon", font=dict(family="JetBrains Mono, monospace", size=11, color="#8397AC")),
@@ -501,7 +501,7 @@ $$
                 marker=dict(
                     size=16,
                     color=df_to["Horizon"],
-                    colorscale=[[0, "#f43f5e"], [0.5, "#f59e0b"], [1, "#10b981"]],
+                    colorscale=[[0, "#f43f5e"], [0.5, "#a78bfa"], [1, "#10b981"]],
                     showscale=True,
                     colorbar=dict(
                         title=dict(text="Horizon", font=dict(family="JetBrains Mono, monospace", size=11, color="#8397AC")),

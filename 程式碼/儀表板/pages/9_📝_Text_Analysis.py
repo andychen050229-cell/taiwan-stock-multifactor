@@ -121,7 +121,7 @@ if kw_path.exists():
             bg = "rgba(16,185,129,0.08)"
         elif r["lift"] >= lift_q33:
             color = "var(--gl-amber)"
-            bg = "rgba(245,158,11,0.08)"
+            bg = "rgba(167,139,250,0.08)"
         else:
             color = "var(--gl-rose)"
             bg = "rgba(244,63,94,0.07)"

@@ -252,33 +252,37 @@ with tab_observe:
     _tp_zh = _PILLAR_ZH.get(_tp_key, _tp_key)
     _tp_bps = (top_pillar["delta_auc"] * 10000) if top_pillar else 24.0
 
-    # v11 §4a — Today's Key Finding card: dark-glint amber terminal.
+    # v11 §4a — Today's Key Finding card: dark-glint terminal.
+    # v11.5.11 — accent retoned from amber to cool violet so the banner
+    # no longer clashes with the dark cockpit palette.  Semantic role
+    # ("research insight · attention-worthy") is preserved via the same
+    # border-left/shadow pattern, only the hue shifted warm → cool.
     st.markdown(f"""
 <div style="background:linear-gradient(180deg,rgba(15,23,37,0.95) 0%,rgba(10,20,32,0.95) 100%);
-            border:1px solid rgba(245,158,11,0.45);
-            border-left:3px solid #f59e0b;
+            border:1px solid rgba(167,139,250,0.45);
+            border-left:3px solid #a78bfa;
             border-radius:12px;
             padding:18px 22px;
             margin:14px 0 18px;
-            box-shadow:0 4px 18px rgba(2,6,23,0.38), inset 0 1px 0 rgba(245,158,11,0.14);">
-  <div style="font-family:'JetBrains Mono',monospace;font-size:0.70rem;color:#fbbf24;
+            box-shadow:0 4px 18px rgba(2,6,23,0.38), inset 0 1px 0 rgba(167,139,250,0.14);">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.70rem;color:#c4b5fd;
               letter-spacing:0.18em;font-weight:800;text-transform:uppercase;margin-bottom:8px;
-              text-shadow:0 0 10px rgba(245,158,11,0.40);
+              text-shadow:0 0 10px rgba(167,139,250,0.40);
               display:flex;align-items:center;gap:8px;">
-    {glint_icon("pin", 14, "#fbbf24")}
+    {glint_icon("pin", 14, "#c4b5fd")}
     <span>TODAY'S KEY FINDING · 今日研究重點 &nbsp;·&nbsp; 判讀日 {_h20_date} (D+20 月度)</span>
   </div>
   <div style="font-size:1.04rem;line-height:1.85;color:#e0f2fe;">
-    ① <strong style="color:#fef3c7;">模型最看好</strong> → <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#fbbf24;">{_top1_id} {_top1_name}</span>
+    ① <strong style="color:#ede9fe;">模型最看好</strong> → <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#c4b5fd;">{_top1_id} {_top1_name}</span>
     <span style="color:#b4ccdf;font-size:0.88rem;">（{_top1_ind}）</span>
     <span style="color:#34d399;font-weight:600;">歷史同情境 +{_top1_ret*100:.1f}%</span> &nbsp;·&nbsp;
-    ② <strong style="color:#fef3c7;">最強因子支柱</strong> → <span style="font-weight:700;color:#fbbf24;">{_tp_zh}</span>
+    ② <strong style="color:#ede9fe;">最強因子支柱</strong> → <span style="font-weight:700;color:#c4b5fd;">{_tp_zh}</span>
     <span style="font-family:'JetBrains Mono',monospace;color:#34d399;">(+{_tp_bps:.1f} bps AUC)</span> &nbsp;·&nbsp;
-    ③ <strong style="color:#fef3c7;">整體可信度</strong> → AUC {baseline_auc:.3f}、DSR {best_dsr:.2f}、{kpis['gates_passed']}/{kpis['total_gates']} gates {'✓' if kpis['all_pass'] else '⚠'}
+    ③ <strong style="color:#ede9fe;">整體可信度</strong> → AUC {baseline_auc:.3f}、DSR {best_dsr:.2f}、{kpis['gates_passed']}/{kpis['total_gates']} gates {'✓' if kpis['all_pass'] else '⚠'}
   </div>
-  <div style="font-size:0.82rem;color:#fbbf24;margin-top:10px;opacity:0.88;
+  <div style="font-size:0.82rem;color:#c4b5fd;margin-top:10px;opacity:0.88;
               display:flex;align-items:center;gap:8px;">
-    {glint_icon("lightbulb", 14, "#fbbf24")}
+    {glint_icon("lightbulb", 14, "#c4b5fd")}
     <span>這三個數字是今天系統「最值得你關注的研究結論」。下方卡片逐一展開細節。</span>
   </div>
 </div>
@@ -761,7 +765,7 @@ with tab_workstation:
       </div>
     </div>
     <div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:800;color:#fde68a;
+      <div style="font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:800;color:#ddd6fe;
                   line-height:1;letter-spacing:-0.02em;">+{best_edge*100:.1f}pp</div>
       <div style="font-size:0.82rem;color:#b4ccdf;margin-top:6px;">Best Edge · 最佳邊際</div>
       <div style="font-size:0.76rem;color:#cbd5e1;margin-top:4px;opacity:0.9;">
@@ -776,7 +780,7 @@ with tab_workstation:
     <span><strong style="color:#f1f5f9;">一句話解讀</strong>：這三個數字就是「這套系統值不值得看」的三把尺 ——
     <span style="color:#a7f3d0;">準不準</span>、
     <span style="color:#67e8f9;">穩不穩</span>、
-    <span style="color:#fde68a;">賺不賺</span>。全部通過研究門檻。</span>
+    <span style="color:#ddd6fe;">賺不賺</span>。全部通過研究門檻。</span>
   </div>
 </div>
 """, unsafe_allow_html=True)

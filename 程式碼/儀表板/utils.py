@@ -35,14 +35,19 @@ THEME = {
     "violet":          "#7c3aed",
     "cyan":            "#06b6d4",
     "emerald":         "#10b981",
-    "amber":           "#f59e0b",
+    # v11.5.11 — "amber" role retired from warm amber to cool violet-400
+    # so the dark cockpit palette stays unified.  The key name is kept for
+    # backwards compatibility with every tone="amber" caller across pages.
+    "amber":           "#a78bfa",
     "rose":            "#f43f5e",
     "indigo":          "#4f46e5",
     # gradients
     "grad_primary":    "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)",
     "grad_tech":       "linear-gradient(135deg, #06b6d4 0%, #2563eb 50%, #7c3aed 100%)",
     "grad_success":    "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
-    "grad_warm":       "linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%)",
+    # v11.5.11 — "grad_warm" repurposed to a cool violet→rose duo so it
+    # still reads "attention" but no longer clashes with the dark panels.
+    "grad_warm":       "linear-gradient(135deg, #a78bfa 0%, #f43f5e 100%)",
 }
 
 
@@ -352,7 +357,7 @@ def inject_custom_css():
         background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
     }}
     /* v11 §4a — Insight / status callout boxes repainted as Glint dark
-       terminal cards. Previous pastel backgrounds (#eff6ff / #fef3c7 /
+       terminal cards. Previous pastel backgrounds (#eff6ff / #ede9fe /
        #ecfdf5 / #fff1f2) rendered as washed-out islands on the mostly
        dark canvas and caused the "yellow-on-yellow invisible text" bug
        when a nested strong inherited the light tone. Dark-bg + kind-
@@ -371,16 +376,16 @@ def inject_custom_css():
     .insight-box strong, .gl-box-info strong {{ color: #e0f9ff; font-weight: 700; }}
     .warning-box, .gl-box-warn {{
         background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(10,20,32,0.92) 100%);
-        border: 1px solid rgba(245,158,11,0.40);
-        border-left: 3px solid #f59e0b;
+        border: 1px solid rgba(167,139,250,0.40);
+        border-left: 3px solid #a78bfa;
         border-radius: 10px;
         padding: 14px 18px;
         margin: 12px 0;
         font-size: 0.9rem;
-        color: #fde68a;
-        box-shadow: 0 2px 10px rgba(2,6,23,0.28), inset 0 1px 0 rgba(245,158,11,0.10);
+        color: #ddd6fe;
+        box-shadow: 0 2px 10px rgba(2,6,23,0.28), inset 0 1px 0 rgba(167,139,250,0.10);
     }}
-    .warning-box strong, .gl-box-warn strong {{ color: #fef3c7; font-weight: 700; }}
+    .warning-box strong, .gl-box-warn strong {{ color: #ede9fe; font-weight: 700; }}
     .success-box, .gl-box-ok {{
         background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(10,20,32,0.92) 100%);
         border: 1px solid rgba(16,185,129,0.40);
@@ -559,7 +564,7 @@ def inject_custom_css():
     .gl-trust-violet  {{ border-color: rgba(124,58,237,0.25);  background: rgba(124,58,237,0.05); }}
     .gl-trust-cyan    {{ border-color: rgba(6,182,212,0.25);   background: rgba(6,182,212,0.05); }}
     .gl-trust-emerald {{ border-color: rgba(16,185,129,0.25);  background: rgba(16,185,129,0.05); }}
-    .gl-trust-amber   {{ border-color: rgba(245,158,11,0.25);  background: rgba(245,158,11,0.05); }}
+    .gl-trust-amber   {{ border-color: rgba(167,139,250,0.25);  background: rgba(167,139,250,0.05); }}
     .gl-trust-rose    {{ border-color: rgba(244,63,94,0.25);   background: rgba(244,63,94,0.05); }}
     /* KPI card (custom, not Streamlit metric) */
     .gl-kpi {{
@@ -642,7 +647,7 @@ def inject_custom_css():
     .gl-chip.primary  {{ background: rgba(37,99,235,0.08);  color: var(--gl-blue);    border-color: rgba(37,99,235,0.2); }}
     .gl-chip.violet   {{ background: rgba(124,58,237,0.08); color: var(--gl-violet);  border-color: rgba(124,58,237,0.2); }}
     .gl-chip.ok       {{ background: rgba(16,185,129,0.08); color: var(--gl-emerald); border-color: rgba(16,185,129,0.2); }}
-    .gl-chip.warn     {{ background: rgba(245,158,11,0.08); color: var(--gl-amber);   border-color: rgba(245,158,11,0.2); }}
+    .gl-chip.warn     {{ background: rgba(167,139,250,0.08); color: var(--gl-amber);   border-color: rgba(167,139,250,0.2); }}
     .gl-chip.danger   {{ background: rgba(244,63,94,0.08);  color: var(--gl-rose);    border-color: rgba(244,63,94,0.2); }}
     /* Live indicator (pulsing dot) */
     .gl-live {{
@@ -755,7 +760,7 @@ def inject_custom_css():
     .gl-pillar[data-p="trend"] {{ background: #dbeafe; color: #1e40af; }}
     .gl-pillar[data-p="fund"]  {{ background: #dcfce7; color: #166534; }}
     .gl-pillar[data-p="val"]   {{ background: #fae8ff; color: #86198f; }}
-    .gl-pillar[data-p="event"] {{ background: #fef3c7; color: #92400e; }}
+    .gl-pillar[data-p="event"] {{ background: #ede9fe; color: #92400e; }}
     .gl-pillar[data-p="risk"]  {{ background: #ffe4e6; color: #9f1239; }}
     .gl-pillar[data-p="chip"]  {{ background: #e0e7ff; color: #3730a3; }}
     .gl-pillar[data-p="ind"]   {{ background: #cffafe; color: #155e75; }}
@@ -1002,7 +1007,7 @@ def inject_custom_css():
     .gl-pb-pill[data-p="trend"] {{ background: #dbeafe; color: #1e40af; }}
     .gl-pb-pill[data-p="fund"]  {{ background: #dcfce7; color: #166534; }}
     .gl-pb-pill[data-p="val"]   {{ background: #fae8ff; color: #86198f; }}
-    .gl-pb-pill[data-p="event"] {{ background: #fef3c7; color: #92400e; }}
+    .gl-pb-pill[data-p="event"] {{ background: #ede9fe; color: #92400e; }}
     .gl-pb-pill[data-p="risk"]  {{ background: #ffe4e6; color: #9f1239; }}
     .gl-pb-pill[data-p="chip"]  {{ background: #e0e7ff; color: #3730a3; }}
     .gl-pb-pill[data-p="ind"]   {{ background: #cffafe; color: #155e75; }}
@@ -1028,7 +1033,7 @@ def inject_custom_css():
     .gl-pb-bar[data-p="trend"] {{ background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%); box-shadow: 0 0 8px rgba(59,130,246,0.3); }}
     .gl-pb-bar[data-p="fund"]  {{ background: linear-gradient(90deg, #10b981 0%, #34d399 100%); box-shadow: 0 0 8px rgba(16,185,129,0.3); }}
     .gl-pb-bar[data-p="val"]   {{ background: linear-gradient(90deg, #a855f7 0%, #c084fc 100%); box-shadow: 0 0 8px rgba(168,85,247,0.3); }}
-    .gl-pb-bar[data-p="event"] {{ background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%); box-shadow: 0 0 8px rgba(245,158,11,0.3); }}
+    .gl-pb-bar[data-p="event"] {{ background: linear-gradient(90deg, #14b8a6 0%, #5eead4 100%); box-shadow: 0 0 8px rgba(20,184,166,0.3); }}
     .gl-pb-bar[data-p="risk"]  {{ background: linear-gradient(90deg, #f43f5e 0%, #fb7185 100%); box-shadow: 0 0 8px rgba(244,63,94,0.3); }}
     .gl-pb-bar[data-p="chip"]  {{ background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%); box-shadow: 0 0 8px rgba(99,102,241,0.3); }}
     .gl-pb-bar[data-p="ind"]   {{ background: linear-gradient(90deg, #06b6d4 0%, #22d3ee 100%); box-shadow: 0 0 8px rgba(6,182,212,0.3); }}
@@ -1133,7 +1138,7 @@ def inject_custom_css():
     }}
     /* ---- Path card variants (inv / qnt from Design) ---- */
     .path-card.path-inv {{ background: linear-gradient(135deg, #fff 0%, #fffbeb 100%); }}
-    .path-card.path-inv::before {{ background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%) !important; }}
+    .path-card.path-inv::before {{ background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%) !important; }}
     .path-card.path-qnt {{ background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%); }}
     /* ---- Compact stock table ---- */
     .gl-stk-tbl {{
@@ -1504,7 +1509,7 @@ def inject_custom_css():
         width: 4px; height: 100%;
     }}
     .gl-signal.green::before  {{ background: linear-gradient(180deg, #10b981, #06b6d4); }}
-    .gl-signal.amber::before  {{ background: linear-gradient(180deg, #f59e0b, #f43f5e); }}
+    .gl-signal.amber::before  {{ background: linear-gradient(180deg, #a78bfa, #f43f5e); }}
     .gl-signal.red::before    {{ background: linear-gradient(180deg, #f43f5e, #ef4444); }}
     .gl-signal-head {{
         display: flex;
@@ -1518,7 +1523,7 @@ def inject_custom_css():
         flex-shrink: 0;
     }}
     .gl-signal.green .gl-signal-light {{ background: #10b981; box-shadow: 0 0 12px rgba(16,185,129,0.5); }}
-    .gl-signal.amber .gl-signal-light {{ background: #f59e0b; box-shadow: 0 0 12px rgba(245,158,11,0.5); }}
+    .gl-signal.amber .gl-signal-light {{ background: #a78bfa; box-shadow: 0 0 12px rgba(167,139,250,0.5); }}
     .gl-signal.red   .gl-signal-light {{ background: #f43f5e; box-shadow: 0 0 12px rgba(244,63,94,0.5); }}
     .gl-signal-title {{
         font-size: 0.92rem;
@@ -1565,8 +1570,8 @@ def inject_custom_css():
     .gl-sector[data-s="金融"]::before {{ background: #10b981; }}
     .gl-sector[data-s="生技醫療"]   {{ background: #fae8ff; color: #86198f; }}
     .gl-sector[data-s="生技醫療"]::before {{ background: #a855f7; }}
-    .gl-sector[data-s="傳產"]      {{ background: #fef3c7; color: #92400e; }}
-    .gl-sector[data-s="傳產"]::before {{ background: #f59e0b; }}
+    .gl-sector[data-s="傳產"]      {{ background: #ede9fe; color: #92400e; }}
+    .gl-sector[data-s="傳產"]::before {{ background: #a78bfa; }}
     .gl-sector[data-s="航運"]      {{ background: #cffafe; color: #155e75; }}
     .gl-sector[data-s="航運"]::before {{ background: #06b6d4; }}
     .gl-sector[data-s="通訊網路"]   {{ background: #f3e8ff; color: #6b21a8; }}
@@ -2146,8 +2151,8 @@ def inject_custom_css():
         animation: gl-util-pulse 1.6s ease-in-out infinite;
     }}
     .gl-util-snapshot {{
-        background: #f59e0b;
-        box-shadow: 0 0 6px rgba(245,158,11,0.55);
+        background: #a78bfa;
+        box-shadow: 0 0 6px rgba(167,139,250,0.55);
     }}
     @keyframes gl-util-pulse {{
         0%,100% {{ opacity: 1; }}
@@ -2168,9 +2173,9 @@ def inject_custom_css():
         border: 1px solid rgba(16,185,129,0.45);
     }}
     .gl-util-chip.warn {{
-        background: rgba(245,158,11,0.16);
-        color: #f59e0b;
-        border: 1px solid rgba(245,158,11,0.45);
+        background: rgba(167,139,250,0.16);
+        color: #a78bfa;
+        border: 1px solid rgba(167,139,250,0.45);
     }}
 
     /* Primary nav — 4 large group pills (aria-current styles still apply) */
@@ -3531,7 +3536,7 @@ def render_read_guide(body: str, title: str = "如何閱讀這張圖",
     tones = {
         "info":   ("#0ea5e9", "#e0f2fe", "#075985"),
         "ok":     ("#10b981", "#ecfdf5", "#065f46"),
-        "warn":   ("#f59e0b", "#fffbeb", "#92400e"),
+        "warn":   ("#a78bfa", "#fffbeb", "#92400e"),
         "violet": ("#7c3aed", "#f5f3ff", "#5b21b6"),
     }
     border, bg, text = tones.get(tone, tones["info"])
@@ -3584,7 +3589,7 @@ def render_chart_headline(conclusion: str, detail: str = "",
         "blue":    "#2563eb",
         "violet":  "#7c3aed",
         "emerald": "#10b981",
-        "amber":   "#f59e0b",
+        "amber":   "#a78bfa",
         "rose":    "#f43f5e",
     }
     accent = tones.get(tone, tones["blue"])
@@ -3857,7 +3862,7 @@ GLINT_DARK_COLORWAY = [
     "#67e8f9",  # cyan-bright — primary line
     "#7c3aed",  # violet — secondary
     "#10b981",  # emerald — positive
-    "#f59e0b",  # amber — caution
+    "#a78bfa",  # amber — caution
     "#f43f5e",  # rose — negative
     "#2563eb",  # blue — tertiary
     "#a78bfa",  # violet-light — fallback
@@ -3921,7 +3926,7 @@ def glint_plotly_layout(title: str = "", height: int = 360,
         legend_border = "rgba(37,99,235,0.18)"
         paper_bg = "rgba(0,0,0,0)"
         plot_bg = "rgba(255,255,255,0)"
-        colorway = ["#2563eb", "#7c3aed", "#06b6d4", "#10b981", "#f59e0b", "#f43f5e", "#4f46e5", "#ec4899"]
+        colorway = ["#2563eb", "#7c3aed", "#06b6d4", "#10b981", "#a78bfa", "#f43f5e", "#4f46e5", "#ec4899"]
 
     title_obj = dict(
         text=f"<b>{title}</b>" + (f"<br><span style='font-size:11px;color:{subtitle_color};font-weight:400;'>{subtitle}</span>" if subtitle else ""),
@@ -4058,12 +4063,12 @@ _GL_DARK_BAR_ACCENTS = {
     "blue":    "#2563eb",
     "violet":  "#a78bfa",
     "emerald": "#10b981",
-    "amber":   "#f59e0b",
+    "amber":   "#a78bfa",
     "rose":    "#f43f5e",
     "slate":   "#475569",
     "info":    "#67e8f9",   # alias of cyan
     "ok":      "#10b981",   # alias of emerald
-    "warn":    "#f59e0b",   # alias of amber
+    "warn":    "#a78bfa",   # alias of amber
     "danger":  "#f43f5e",   # alias of rose
 }
 
@@ -4137,7 +4142,7 @@ GLINT_SIGNAL_SEMANTIC_COLORS = {
     "strong_long":  "#67e8f9",   # cyan-bright
     "long":         "#2563eb",   # blue
     "neutral":      "#5B7186",   # muted slate
-    "short":        "#f59e0b",   # amber
+    "short":        "#f472b6",   # rose — bearish soft negative (cool-shifted from legacy amber)
     "strong_short": "#f43f5e",   # rose
     # zh aliases the existing pages use freely
     "偏多": "#2563eb",
@@ -4145,12 +4150,12 @@ GLINT_SIGNAL_SEMANTIC_COLORS = {
     "強烈看多": "#67e8f9",
     "中性": "#5B7186",
     "觀望": "#5B7186",
-    "看空": "#f59e0b",
+    "看空": "#f472b6",
     "強烈看空": "#f43f5e",
 }
 
 # 5-pillar colorway for feature-pillar / category donuts (v9 §8.5).
-GLINT_CATEGORY_COLORWAY = ["#67e8f9", "#a78bfa", "#10b981", "#f59e0b", "#f43f5e", "#2563eb"]
+GLINT_CATEGORY_COLORWAY = ["#67e8f9", "#a78bfa", "#10b981", "#a78bfa", "#f43f5e", "#2563eb"]
 
 
 def glint_dark_legend(orientation: str = "h", position: str = "bottom") -> dict:
@@ -5020,10 +5025,10 @@ section[data-testid="stSidebar"] div[data-testid="stTextInput"] input:focus {
    ========================================================================= */
 div[data-baseweb="notification"] {
     background: linear-gradient(180deg, rgba(15,23,37,0.95) 0%, rgba(10,20,32,0.95) 100%) !important;
-    border: 1px solid rgba(245,158,11,0.45) !important;
-    border-left: 3px solid #f59e0b !important;
+    border: 1px solid rgba(167,139,250,0.45) !important;
+    border-left: 3px solid #a78bfa !important;
     border-radius: 10px !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.28), inset 0 1px 0 rgba(245,158,11,0.10) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.28), inset 0 1px 0 rgba(167,139,250,0.10) !important;
     font-family: var(--gl-font-sans, 'Inter', sans-serif) !important;
 }
 div[data-baseweb="notification"],
@@ -5031,13 +5036,13 @@ div[data-baseweb="notification"] > div,
 div[data-baseweb="notification"] p,
 div[data-baseweb="notification"] span,
 div[data-baseweb="notification"] a {
-    color: #fde68a !important;
+    color: #ddd6fe !important;
     font-weight: 500 !important;
 }
 div[data-baseweb="notification"] svg,
 div[data-baseweb="notification"] [data-testid="stIcon"] {
-    color: #f59e0b !important;
-    fill: #f59e0b !important;
+    color: #a78bfa !important;
+    fill: #a78bfa !important;
 }
 /* Kind-specific accents — Streamlit tags the notification div with kind="*" */
 div[data-baseweb="notification"][kind="info"],
@@ -5174,7 +5179,7 @@ div[data-testid="stDataFrameResizable"] {
     font-weight: 600;
 }
 .gl-term-table tbody td.gl-term-accent-amber {
-    color: #fbbf24;
+    color: #c4b5fd;
     font-weight: 600;
 }
 .gl-term-table tbody td.gl-term-accent-rose {
@@ -5276,8 +5281,8 @@ div[data-testid="stDataFrameResizable"] {
 .gl-chip-explain .item.vio .head        { color: #c4b5fd !important; }
 .gl-chip-explain .item.ok               { border-left-color: #6ee7b7 !important; }
 .gl-chip-explain .item.ok  .head        { color: #6ee7b7 !important; }
-.gl-chip-explain .item.warn             { border-left-color: #fde68a !important; }
-.gl-chip-explain .item.warn .head       { color: #fde68a !important; }
+.gl-chip-explain .item.warn             { border-left-color: #ddd6fe !important; }
+.gl-chip-explain .item.warn .head       { color: #ddd6fe !important; }
 /* Generic .gl-chip pill — terminal dark base */
 .gl-chip {
     background: rgba(10,20,32,0.68) !important;
@@ -5287,13 +5292,13 @@ div[data-testid="stDataFrameResizable"] {
 .gl-chip.primary { background: rgba(103,232,249,0.10) !important; color: #67e8f9 !important; border-color: rgba(103,232,249,0.35) !important; }
 .gl-chip.violet  { background: rgba(167,139,250,0.10) !important; color: #c4b5fd !important; border-color: rgba(167,139,250,0.35) !important; }
 .gl-chip.ok      { background: rgba(16,185,129,0.12) !important; color: #6ee7b7 !important; border-color: rgba(16,185,129,0.38) !important; }
-.gl-chip.warn    { background: rgba(245,158,11,0.12) !important; color: #fde68a !important; border-color: rgba(245,158,11,0.38) !important; }
+.gl-chip.warn    { background: rgba(167,139,250,0.12) !important; color: #ddd6fe !important; border-color: rgba(167,139,250,0.38) !important; }
 .gl-chip.danger  { background: rgba(244,63,94,0.12) !important; color: #fda4af !important; border-color: rgba(244,63,94,0.38) !important; }
 /* 9-pillar badges — dark terminal variant */
 .gl-pillar[data-p="trend"] { background: rgba(37,99,235,0.14)  !important; color: #93c5fd !important; }
 .gl-pillar[data-p="fund"]  { background: rgba(16,185,129,0.14) !important; color: #6ee7b7 !important; }
 .gl-pillar[data-p="val"]   { background: rgba(217,70,239,0.14) !important; color: #f0abfc !important; }
-.gl-pillar[data-p="event"] { background: rgba(245,158,11,0.14) !important; color: #fde68a !important; }
+.gl-pillar[data-p="event"] { background: rgba(167,139,250,0.14) !important; color: #ddd6fe !important; }
 .gl-pillar[data-p="risk"]  { background: rgba(244,63,94,0.14)  !important; color: #fda4af !important; }
 .gl-pillar[data-p="chip"]  { background: rgba(99,102,241,0.14) !important; color: #a5b4fc !important; }
 .gl-pillar[data-p="ind"]   { background: rgba(6,182,212,0.14)  !important; color: #67e8f9 !important; }
@@ -5385,7 +5390,7 @@ div[data-testid="stDataFrameResizable"] {
 [data-testid="stMain"] .gl-pb-pill[data-p="trend"] { background: rgba(37,99,235,0.14)  !important; color: #93c5fd !important; }
 [data-testid="stMain"] .gl-pb-pill[data-p="fund"]  { background: rgba(16,185,129,0.14) !important; color: #6ee7b7 !important; }
 [data-testid="stMain"] .gl-pb-pill[data-p="val"]   { background: rgba(217,70,239,0.14) !important; color: #f0abfc !important; }
-[data-testid="stMain"] .gl-pb-pill[data-p="event"] { background: rgba(245,158,11,0.14) !important; color: #fde68a !important; }
+[data-testid="stMain"] .gl-pb-pill[data-p="event"] { background: rgba(167,139,250,0.14) !important; color: #ddd6fe !important; }
 [data-testid="stMain"] .gl-pb-pill[data-p="risk"]  { background: rgba(244,63,94,0.14)  !important; color: #fda4af !important; }
 [data-testid="stMain"] .gl-pb-pill[data-p="chip"]  { background: rgba(99,102,241,0.14) !important; color: #a5b4fc !important; }
 [data-testid="stMain"] .gl-pb-pill[data-p="ind"]   { background: rgba(6,182,212,0.14)  !important; color: #67e8f9 !important; }
@@ -5396,7 +5401,7 @@ div[data-testid="stDataFrameResizable"] {
 [data-testid="stMain"] .gl-sector[data-s="電子零組件"]  { background: rgba(99,102,241,0.14) !important; color: #a5b4fc !important; }
 [data-testid="stMain"] .gl-sector[data-s="金融"]      { background: rgba(16,185,129,0.14) !important; color: #6ee7b7 !important; }
 [data-testid="stMain"] .gl-sector[data-s="生技醫療"]   { background: rgba(217,70,239,0.14) !important; color: #f0abfc !important; }
-[data-testid="stMain"] .gl-sector[data-s="傳產"]      { background: rgba(245,158,11,0.14) !important; color: #fde68a !important; }
+[data-testid="stMain"] .gl-sector[data-s="傳產"]      { background: rgba(167,139,250,0.14) !important; color: #ddd6fe !important; }
 [data-testid="stMain"] .gl-sector[data-s="航運"]      { background: rgba(6,182,212,0.14)  !important; color: #67e8f9 !important; }
 [data-testid="stMain"] .gl-sector[data-s="通訊網路"]   { background: rgba(167,139,250,0.14) !important; color: #c4b5fd !important; }
 [data-testid="stMain"] .gl-sector[data-s="汽車"]      { background: rgba(244,63,94,0.14)  !important; color: #fda4af !important; }
@@ -5608,7 +5613,7 @@ div.block-container {
 [data-testid="stMain"] div[style*="#fffbeb"] strong,
 [data-testid="stMain"] div[style*="#FFFBEB"] strong,
 [data-testid="stMain"] div[style*="rgb(255, 251, 235)"] strong,
-[data-testid="stMain"] div[style*="rgb(255,251,235)"] strong { color: #fde68a !important; }
+[data-testid="stMain"] div[style*="rgb(255,251,235)"] strong { color: #ddd6fe !important; }
 [data-testid="stMain"] div[style*="#ecfdf5"] strong,
 [data-testid="stMain"] div[style*="#ECFDF5"] strong,
 [data-testid="stMain"] div[style*="rgb(236, 253, 245)"] strong,
@@ -5635,8 +5640,8 @@ div.block-container {
 }
 [data-testid="stMain"] .insight-box strong,
 [data-testid="stMain"] .tip-box strong { color: #67e8f9 !important; }
-[data-testid="stMain"] .warning-box    { border-left: 4px solid #f59e0b !important; }
-[data-testid="stMain"] .warning-box strong { color: #fde68a !important; }
+[data-testid="stMain"] .warning-box    { border-left: 4px solid #a78bfa !important; }
+[data-testid="stMain"] .warning-box strong { color: #ddd6fe !important; }
 </style>
 """
 
@@ -6243,9 +6248,9 @@ GLINT_SEQUENTIAL_COOL = [
 ]
 GLINT_SEQUENTIAL_WARM = [
     [0.00, "#fffbeb"],
-    [0.25, "#fde68a"],
-    [0.50, "#f59e0b"],
-    [0.75, "#ea580c"],
+    [0.25, "#ddd6fe"],
+    [0.50, "#a78bfa"],
+    [0.75, "#6d28d9"],
     [1.00, "#7c2d12"],
 ]
 
@@ -6278,7 +6283,7 @@ GLINT_COLORS = {
     "violet":  "#7c3aed",
     "cyan":    "#06b6d4",
     "emerald": "#10b981",
-    "amber":   "#f59e0b",
+    "amber":   "#a78bfa",
     "rose":    "#f43f5e",
     "indigo":  "#4f46e5",
     "slate":   "#64748b",
@@ -6302,7 +6307,7 @@ def glint_styler_cmap(kind: str = "diverging"):
         "diverging": ["#9f1239", "#f43f5e", "#fda4af", "#f8fafc",
                       "#7dd3fc", "#06b6d4", "#065f46"],
         "cool":      ["#f0f9ff", "#bae6fd", "#06b6d4", "#2563eb", "#1e3a8a"],
-        "warm":      ["#fffbeb", "#fde68a", "#f59e0b", "#ea580c", "#7c2d12"],
+        "warm":      ["#fffbeb", "#ddd6fe", "#a78bfa", "#6d28d9", "#7c2d12"],
     }
     colors = palettes.get(kind, palettes["diverging"])
     return LinearSegmentedColormap.from_list(f"glint_{kind}", colors)
@@ -6318,7 +6323,7 @@ def render_degraded_banner(title: str, reason: str, available: str = "",
     """
     import streamlit as _st
     tone_map = {
-        "warn":  ("⚠️", "amber",   "#f59e0b"),
+        "warn":  ("⚠️", "amber",   "#a78bfa"),
         "info":  ("ℹ️",  "blue",    "#2563eb"),
         "error": ("⛔", "rose",    "#f43f5e"),
     }
@@ -6345,7 +6350,7 @@ def render_chart_note(text: str, tone: str = "insight") -> None:
     import streamlit as _st
     tone_map = {
         "insight": ("#67E8F9", "rgba(103,232,249,0.08)", "#B4CCDF"),
-        "caveat":  ("#F59E0B", "rgba(245,158,11,0.10)",  "#FDE68A"),
+        "caveat":  ("#A78BFA", "rgba(167,139,250,0.10)",  "#DDD6FE"),
         "risk":    ("#F43F5E", "rgba(244,63,94,0.10)",   "#FECDD3"),
     }
     color, bg, text_color = tone_map.get(tone, tone_map["insight"])
@@ -6369,8 +6374,8 @@ _GL_TERMINAL_TONES = {
     "ok":     {"accent": "#10B981", "bg": "rgba(16,185,129,0.08)",
                "border": "rgba(16,185,129,0.30)", "text": "#D1FAE5",
                "label": "OK",     "glyph": "✓"},
-    "warn":   {"accent": "#F59E0B", "bg": "rgba(245,158,11,0.08)",
-               "border": "rgba(245,158,11,0.32)", "text": "#FDE68A",
+    "warn":   {"accent": "#A78BFA", "bg": "rgba(167,139,250,0.08)",
+               "border": "rgba(167,139,250,0.32)", "text": "#DDD6FE",
                "label": "WARN",   "glyph": "▲"},
     "danger": {"accent": "#F43F5E", "bg": "rgba(244,63,94,0.10)",
                "border": "rgba(244,63,94,0.34)", "text": "#FECDD3",
@@ -6745,7 +6750,7 @@ def glint_icon_box(name: str, tone: str = "cyan", size: int = 56) -> str:
         "emerald": ("#34D399", "rgba(52,211,153,0.18)",  "rgba(52,211,153,0.35)"),
         "violet":  ("#A78BFA", "rgba(167,139,250,0.18)", "rgba(167,139,250,0.35)"),
         "blue":    ("#60A5FA", "rgba(96,165,250,0.18)",  "rgba(96,165,250,0.35)"),
-        "amber":   ("#FBBF24", "rgba(251,191,36,0.18)",  "rgba(251,191,36,0.35)"),
+        "amber":   ("#C4B5FD", "rgba(196,181,253,0.18)",  "rgba(196,181,253,0.35)"),
         "rose":    ("#FB7185", "rgba(251,113,133,0.18)", "rgba(251,113,133,0.35)"),
     }
     accent, bg, border = tone_map.get(tone, tone_map["cyan"])
@@ -6780,7 +6785,7 @@ def render_terminal_hero(eyebrow: str, title: str, briefing: str = "",
         "blue":    ("#60A5FA", "rgba(96,165,250,0.32)"),
         "violet":  ("#A78BFA", "rgba(167,139,250,0.32)"),
         "emerald": ("#34D399", "rgba(52,211,153,0.32)"),
-        "amber":   ("#FBBF24", "rgba(251,191,36,0.32)"),
+        "amber":   ("#C4B5FD", "rgba(196,181,253,0.32)"),
         "rose":    ("#FB7185", "rgba(251,113,133,0.32)"),
     }
     accent, border = tone_map.get(tone, tone_map["cyan"])
@@ -7078,7 +7083,7 @@ PILLAR_COLORS = {
     "trend":  "#2563eb",
     "fund":   "#10b981",
     "val":    "#a855f7",
-    "event":  "#f59e0b",
+    "event":  "#a78bfa",
     "risk":   "#f43f5e",
     "chip":   "#4f46e5",
     "ind":    "#06b6d4",

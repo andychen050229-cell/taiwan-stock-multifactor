@@ -246,9 +246,9 @@ st.markdown("""
     box-shadow: 0 0 0 1px rgba(16,185,129,0.08) inset;
 }
 .mn-callout.warn {
-    border: 1px solid rgba(245,158,11,0.30);
-    border-left: 3px solid #f59e0b;
-    box-shadow: 0 0 0 1px rgba(245,158,11,0.08) inset;
+    border: 1px solid rgba(167,139,250,0.30);
+    border-left: 3px solid #a78bfa;
+    box-shadow: 0 0 0 1px rgba(167,139,250,0.08) inset;
 }
 .mn-callout.info {
     border: 1px solid rgba(103,232,249,0.28);
@@ -441,7 +441,7 @@ st.markdown(f"""
   <div class="mn-flow-step-desc">技術細節。回測成果、特徵重要度、訊號穩定度等。<strong>分析師進階用</strong>。</div>
 </div>
 <div class="mn-flow-step" data-num="4">
-  <div class="mn-flow-step-title" style="display:flex;align-items:center;gap:8px;"><span style="color:#fbbf24;">{glint_icon("target", 18, "#fbbf24")}</span>治理監控</div>
+  <div class="mn-flow-step-title" style="display:flex;align-items:center;gap:8px;"><span style="color:#c4b5fd;">{glint_icon("target", 18, "#c4b5fd")}</span>治理監控</div>
   <div class="mn-flow-step-desc">模型是否還可信？Model Card、資料漂移警示、品質閘門狀態。<strong>透明度保證</strong>。</div>
 </div>
 </div>

@@ -178,7 +178,7 @@ if drift_data:
         fig = go.Figure()
         names = [d["feature"] for d in top_drifted]
         psi_vals = [d["psi"] for d in top_drifted]
-        colors = ["#ef4444" if psi > 0.2 else ("#f59e0b" if psi > 0.1 else "#22c55e") for psi in psi_vals]
+        colors = ["#ef4444" if psi > 0.2 else ("#a78bfa" if psi > 0.1 else "#22c55e") for psi in psi_vals]
 
         fig.add_trace(go.Bar(
             x=names, y=psi_vals,
@@ -260,8 +260,8 @@ if drift_data:
                 z=[psi_values],
                 x=feat_names,
                 y=["PSI"],
-                colorscale=[[0, "#22c55e"], [0.1/max(max(psi_values, default=1), 0.01), "#fef3c7"],
-                            [0.2/max(max(psi_values, default=1), 0.01), "#f59e0b"], [1, "#ef4444"]],
+                colorscale=[[0, "#22c55e"], [0.1/max(max(psi_values, default=1), 0.01), "#ede9fe"],
+                            [0.2/max(max(psi_values, default=1), 0.01), "#a78bfa"], [1, "#ef4444"]],
                 hovertemplate="<b>%{x}</b><br>PSI: %{z:.4f}<extra></extra>",
             ))
             _layout = glint_plotly_layout(
@@ -344,7 +344,7 @@ if decay_data:
             strat_names.append(name)
             icir_vals.append(abs(vals.get("icir", 0)))
             stab = vals.get("stability", "weak")
-            color = "#22c55e" if stab == "strong" else ("#f59e0b" if stab == "moderate" else "#ef4444")
+            color = "#22c55e" if stab == "strong" else ("#a78bfa" if stab == "moderate" else "#ef4444")
             colors.append(color)
 
         fig = go.Figure()

@@ -213,18 +213,18 @@ with col_g3:
 st.markdown("""
 <div style="
     background: linear-gradient(180deg, rgba(37,25,12,0.92) 0%, rgba(22,14,5,0.96) 100%);
-    border: 1px solid rgba(245,158,11,0.32);
-    border-left: 4px solid #f59e0b;
+    border: 1px solid rgba(167,139,250,0.32);
+    border-left: 4px solid #a78bfa;
     border-radius: 10px;
     padding: 14px 18px;
     margin: 14px 0 18px 0;
     font-size: 0.88rem;
-    color: #fde68a;
+    color: #ddd6fe;
     line-height: 1.65;
 ">
-    <strong style="display:inline-flex;align-items:center;gap:6px;">""" + glint_icon("lightbulb", 15, "#fbbf24") + """ 小提醒</strong>：下方三個分頁對應上面三個白話問題，
+    <strong style="display:inline-flex;align-items:center;gap:6px;">""" + glint_icon("lightbulb", 15, "#c4b5fd") + """ 小提醒</strong>：下方三個分頁對應上面三個白話問題，
     每個分頁都附「方法論」說明與圖表，<br>
-    不理解技術細節也能從 <strong style="color:#fef3c7;">「關鍵洞察」區塊</strong> 看到重點結論。
+    不理解技術細節也能從 <strong style="color:#ede9fe;">「關鍵洞察」區塊</strong> 看到重點結論。
 </div>
 """, unsafe_allow_html=True)
 
@@ -385,7 +385,7 @@ with tab1:
     second = ranking[1]
     st.markdown(f"""
     <div class="success-box">
-    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 關鍵洞察</strong>：<strong>{top['zh']}</strong> 是最不可或缺的支柱
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 關鍵洞察</strong>：<strong>{top['zh']}</strong> 是最不可或缺的支柱
     （ΔAUC = <span class="gl-mono">+{top['delta_auc']*10000:.1f} bps</span>，
     ΔAUC_up = <span class="gl-mono">+{top['delta_auc_up']*10000:.1f} bps</span>），
     其次是 <strong>{second['zh']}</strong>（<span class="gl-mono">+{second['delta_auc']*10000:.1f} bps</span>）。
@@ -418,7 +418,7 @@ with tab1:
             <div><strong style="color: #67e8f9;">中文名稱</strong>:白話說明(技術面/風險面/基本面...)</div>
             <div><strong style="color: #a78bfa;">特徵數</strong>:這個面向用了幾個資料欄位</div>
             <div><strong style="color: #6ee7b7;">ΔAUC (bps)</strong>:拿掉這面向後,模型整體準度掉多少(越大越不可少)</div>
-            <div><strong style="color: #fde68a;">ΔAUC_up (bps)</strong>:對「會漲」這件事的判斷力掉多少</div>
+            <div><strong style="color: #ddd6fe;">ΔAUC_up (bps)</strong>:對「會漲」這件事的判斷力掉多少</div>
             <div><strong style="color: #fda4af;">ΔIC_up</strong>:預測機率與實際表現的相關性變化</div>
         </div>
         <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(103,232,249,0.22); font-size: 0.82rem; color: #b4ccdf;">
@@ -552,8 +552,8 @@ with tab2:
         y=sweep["call_rate"] * 100,
         mode="lines+markers",
         name="Call Rate (%)",
-        line=dict(color="#f59e0b", width=3, dash="dot"),
-        marker=dict(size=8, color="#f59e0b"),
+        line=dict(color="#a78bfa", width=3, dash="dot"),
+        marker=dict(size=8, color="#a78bfa"),
         yaxis="y2",
         hovertemplate="t=%{x:.2f}<br>Call %{y:.2f}%<extra></extra>",
     ))
@@ -567,9 +567,9 @@ with tab2:
     )
     _lay["yaxis"]["tickfont"] = dict(family="JetBrains Mono", color="#2563eb", size=10)
     fig.update_layout(**_lay,
-        yaxis2=dict(title=dict(text="Call Rate (%)", font=dict(family="JetBrains Mono", size=10, color="#f59e0b")),
+        yaxis2=dict(title=dict(text="Call Rate (%)", font=dict(family="JetBrains Mono", size=10, color="#a78bfa")),
                     overlaying="y", side="right",
-                    tickfont=dict(family="JetBrains Mono", color="#f59e0b", size=10),
+                    tickfont=dict(family="JetBrains Mono", color="#a78bfa", size=10),
                     gridcolor="rgba(0,0,0,0)"),
         hovermode="x unified",
     )
@@ -599,7 +599,7 @@ with tab2:
 
     st.markdown(f"""
     <div class="success-box">
-    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 關鍵洞察</strong>：Edge 幾乎**單調遞增**至 <span class="gl-mono">t=0.50</span>
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 關鍵洞察</strong>：Edge 幾乎**單調遞增**至 <span class="gl-mono">t=0.50</span>
     達到 <strong>+{sweep['edge'].max()*100:.2f}pp</strong>（命中率 {sweep.loc[sweep['edge'].idxmax(), 'hit_rate']:.1%} vs 基準 {base_rate:.1%}），
     但出手率降至 <span class="gl-mono">{sweep.loc[sweep['edge'].idxmax(), 'call_rate']:.2%}</span>（極端稀少）。
     <strong>實務建議使用 t=0.40</strong>（保守型）：edge +3.14pp，call 8.83%，兼顧統計顯著性與交易頻率。
@@ -714,7 +714,7 @@ with tab3:
             name="Hit Rate When Called (%)",
             marker=dict(
                 color=called["hit_rate_when_called"] * 100,
-                colorscale=[[0, "#f43f5e"], [0.5, "#f59e0b"], [1, "#10b981"]],
+                colorscale=[[0, "#f43f5e"], [0.5, "#a78bfa"], [1, "#10b981"]],
                 showscale=False,
             ),
             yaxis="y2",
@@ -739,7 +739,7 @@ with tab3:
 
     st.markdown(f"""
     <div class="success-box">
-    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 關鍵洞察</strong>：模型在 <strong>2024-10 ~ 2025-01</strong> 這段 AI 族群行情期間
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 關鍵洞察</strong>：模型在 <strong>2024-10 ~ 2025-01</strong> 這段 AI 族群行情期間
     **明顯提升平均機率**（突破 t=0.35 門檻），並累積大部分出手；2025-01 命中率達
     <span class="gl-mono">81.8%</span>（11 次出手對中 9 次）。
     2024-06 ~ 2024-09 期間模型正確判斷**風險較高不出手**。
@@ -771,8 +771,8 @@ with tab3:
             <div><strong style="color: #6ee7b7;">實際上漲天數</strong>:真實結果,該月漲了幾天</div>
             <div><strong style="color: #a78bfa;">出手次數</strong>:模型認為會漲(機率≥門檻)的天數</div>
             <div><strong style="color: #6ee7b7;">命中次數</strong>:出手後實際真的漲了幾次</div>
-            <div><strong style="color: #fde68a;">平均上漲機率</strong>:該月模型平均預測有多看好</div>
-            <div><strong style="color: #fde68a;">當月上漲率</strong>:實際上漲天數 / 總交易日</div>
+            <div><strong style="color: #ddd6fe;">平均上漲機率</strong>:該月模型平均預測有多看好</div>
+            <div><strong style="color: #ddd6fe;">當月上漲率</strong>:實際上漲天數 / 總交易日</div>
             <div><strong style="color: #fda4af;">出手率</strong>:模型出手次數 / 總交易日</div>
             <div><strong style="color: #6ee7b7;">出手命中率</strong>:命中次數 / 出手次數(越高越準)</div>
         </div>
