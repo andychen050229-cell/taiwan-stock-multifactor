@@ -45,6 +45,11 @@ render_pillar_radar = _utils.render_pillar_radar
 render_sector_chip = _utils.render_sector_chip
 render_subtabs = _utils.render_subtabs
 load_phase6_json = _utils.load_phase6_json
+render_terminal_hero = _utils.render_terminal_hero
+render_trust_strip = _utils.render_trust_strip
+PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
+PAGE_TITLES = _utils.PAGE_TITLES
+PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
@@ -627,23 +632,45 @@ st.sidebar.divider()
 
 # ===== Main Content =====
 try:
-    # Historical context disclaimer
-    st.markdown("""
-    <div class="warning-panel">
-        <strong>📋 面板說明</strong><br>
-        本頁面呈現的是固定歷史資料期間內的模型判讀結果，用於展示研究能力與方法論，非即時投資建議。
-        歷史判讀不構成未來預測，過去績效不代表未來報酬。
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown(f"# 🌱 投資解讀面板 — D+{horizon} 判讀結果")
-
-    # Get recommendations
+    # Get recommendations first so we can surface the snapshot date in the hero
     recs, rec_date = get_recommendations(fs, companies, horizon=horizon, n_top=n_display, recommendations=recommendations)
 
-    if rec_date:
-        st.caption(f"快照日期：{rec_date.strftime('%Y-%m-%d')}（歷史基準日）")
-    else:
+    # --- Glint terminal-hero (parity with other panels: page 5 / 9 / A / ...) ---
+    _hero_eyebrow = f"{PAGE_EYEBROWS['interpret']} · D+{horizon}"
+    _hero_title   = f"{PAGE_TITLES['interpret']} — D+{horizon} 判讀結果"
+    _hero_brief   = PAGE_BRIEFINGS["interpret"]
+    _snapshot_str = rec_date.strftime("%Y-%m-%d") if rec_date else "N/A"
+
+    render_terminal_hero(
+        eyebrow=_hero_eyebrow,
+        title=_hero_title,
+        briefing=_hero_brief,
+        chips=[
+            ("HISTORICAL SNAPSHOT", "pri"),
+            ("BACKTEST WINDOW", "2023/03 – 2025/03", "vio"),
+            (f"D+{horizon}", "ok"),
+            ("NON-ADVISORY", "warn"),
+        ],
+        tone="emerald",
+    )
+    render_trust_strip([
+        ("快照日期",      _snapshot_str,                        "cyan"),
+        ("判讀地平線",    f"D+{horizon}",                       "violet"),
+        ("Top N",        str(n_display),                        "emerald"),
+        ("資料視窗",      "2023/03 – 2025/03",                   "amber"),
+    ])
+
+    # Historical context disclaimer — dark-themed Glint note (replaces warning-panel)
+    st.markdown(
+        '<div class="insight-box" style="margin:6px 0 14px 0;">'
+        '<strong style="color:#fbbf24;">📋 面板說明</strong><br>'
+        '本頁面呈現的是固定歷史資料期間內的模型判讀結果，用於展示研究能力與方法論，非即時投資建議。'
+        '歷史判讀不構成未來預測，過去績效不代表未來報酬。'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    if not rec_date:
         st.warning("目前沒有可用的判讀資料")
         st.stop()
 
