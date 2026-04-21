@@ -27,6 +27,7 @@ render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
 
 inject_custom_css()
+_utils.inject_v9_chart_css()  # v9 §9 · donut chip legend + composition strip
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
@@ -287,27 +288,31 @@ try:
 
         cat_counts = {k: len(v) for k, v in categories.items() if v}
 
-        # Pie chart of feature distribution
-        fig_pie = go.Figure(data=[go.Pie(
-            labels=[f"{cat_labels.get(k,k)} ({v})" for k, v in cat_counts.items()],
-            values=list(cat_counts.values()),
-            hole=0.42,
-            marker_colors=["#2563eb", "#10b981", "#7c3aed", "#f59e0b", "#f43f5e"],
-            textinfo="label+percent",
-            textfont=dict(family="JetBrains Mono, monospace", size=11),
-            hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Percentage: %{percent}<extra></extra>"
-        )])
-        fig_pie.update_layout(**glint_plotly_layout(
-            title="特徵五支柱分佈",
-            subtitle="Feature Pillar Distribution",
-            height=400,
-            show_grid=False,
-        ))
-        fig_pie.update_layout(showlegend=False)
+        # v9 §8.4 — 5-pillar donut via canonical render_signal_donut helper.
+        # Tones follow v9 category colorway (cyan/blue/violet/emerald/amber/rose).
+        pillar_tone_map = {
+            "Technical":   "cyan",
+            "Fundamental": "blue",
+            "Valuation":   "violet",
+            "Event":       "amber",
+            "Risk":        "rose",
+        }
+        pillar_labels = [cat_labels.get(k, k) for k in cat_counts.keys()]
+        pillar_values = list(cat_counts.values())
+        pillar_tones  = [pillar_tone_map.get(k, "cyan") for k in cat_counts.keys()]
 
         col_pie, col_list = st.columns([2, 3])
         with col_pie:
-            st.plotly_chart(fig_pie, use_container_width=True)
+            _utils.render_signal_donut(
+                labels=pillar_labels,
+                values=pillar_values,
+                title="特徵五支柱分佈",
+                subtitle="Feature Pillar Distribution",
+                center_metric_label="Selected",
+                tones=pillar_tones,
+                height=360,
+                key="feature_pillar_donut",
+            )
         with col_list:
             for cat, feats in categories.items():
                 if feats:

@@ -39,6 +39,7 @@ _spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_pat
 _utils = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_utils)
 _utils.inject_custom_css()  # Inter + JetBrains Mono + tech-grid background + gl-* vars
+_utils.inject_v9_chart_css()  # v9 §9 · donut chip legend + composition strip styles
 render_topbar = _utils.render_topbar
 render_pillar_radar = _utils.render_pillar_radar
 render_sector_chip = _utils.render_sector_chip
@@ -1193,15 +1194,19 @@ try:
 
     with col_breakdown:
         st.markdown("**成本分解**")
-        fig_cost = go.Figure(data=[go.Pie(
+        # v9 §8.4 — glint-style cost donut (replaces bright blue/violet/pink pie).
+        # Three semantic tones: cyan (buy fee), blue (sell fee), violet (tax).
+        _utils.render_signal_donut(
             labels=["買進手續費", "賣出手續費", "證交稅"],
-            values=[buy_fee, sell_fee, sell_tax],
-            marker_colors=["#3b82f6", "#8b5cf6", "#ec4899"],
-            textinfo="label+value",
-            textfont_size=11,
-        )])
-        fig_cost.update_layout(height=250, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig_cost, use_container_width=True)
+            values=[float(buy_fee), float(sell_fee), float(sell_tax)],
+            title="成本分解",
+            subtitle="Cost Breakdown",
+            center_metric=f"${(buy_fee+sell_fee+sell_tax):,.0f}",
+            center_metric_label="Total",
+            tones=["cyan", "blue", "violet"],
+            height=260,
+            key=f"cost_donut_{_utils.safe_html(str(calc_shares))}",
+        )
 
     with col_breakeven:
         st.markdown("**損益平衡**")
@@ -1224,23 +1229,34 @@ try:
         dist_col1, dist_col2 = st.columns([1, 1])
 
         with dist_col1:
-            fig_pie = go.Figure(data=[go.Pie(
+            # v9 §8.3 — signal composition strip first (left→right reading order,
+            # semantically ordered 偏多 → 中性 → 觀望), followed by the glint-style
+            # donut with a center N-metric. This replaces the bright green/amber/red
+            # pie that failed the v9 "all charts must speak Glint" rule.
+            _utils.render_market_composition_strip(
+                segments=[
+                    ("偏多", int(up_count),   "blue"),
+                    ("中性", int(flat_count), "slate"),
+                    ("觀望", int(down_count), "amber"),
+                ],
+                title=f"D+{horizon} · 市場訊號比例",
+                key=f"mkt_strip_D{horizon}",
+            )
+            _utils.render_signal_donut(
                 labels=["偏多", "中性", "觀望"],
                 values=[int(up_count), int(flat_count), int(down_count)],
-                marker_colors=["#059669", "#f59e0b", "#dc2626"],
-                hole=0.45,
-                textinfo="label+percent+value",
-                textfont_size=12,
-                insidetextorientation="radial",
-            )])
-            fig_pie.update_layout(
-                title=dict(text=f"D+{horizon} 全市場訊號分佈（{total_stocks:,} 支）", font=dict(size=14)),
-                height=400,
-                margin=dict(l=10, r=10, t=60, b=30),
-                legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5),
-                showlegend=True,
+                title=f"D+{horizon} 全市場訊號分佈",
+                subtitle="Market Signal Mix",
+                center_metric=f"N={total_stocks:,}",
+                center_metric_label="Total Stocks",
+                tones=["blue", "slate", "amber"],
+                height=340,
+                key=f"mkt_donut_D{horizon}",
+                verdict=(
+                    f"模型判讀：{int(up_count):,} 檔偏多 · "
+                    f"{int(flat_count):,} 檔中性 · {int(down_count):,} 檔觀望。"
+                ),
             )
-            st.plotly_chart(fig_pie, use_container_width=True)
 
         with dist_col2:
             # Show return stats from pre-computed market distribution
@@ -1252,36 +1268,36 @@ try:
                 p10 = dist_ret_stats.get("p10", 0)
                 p90 = dist_ret_stats.get("p90", 0)
 
-                fig_bar = go.Figure()
+                # v9 §8.5 — grouped percentile bar: single primary tone (cyan)
+                # with amber only highlighting the distribution tails. No more
+                # red/green/blue/orange rainbow.
                 categories = ["P10（悲觀）", "中位數", "平均值", "P90（樂觀）"]
                 bar_values = [p10 * 100, median_ret * 100, mean_ret * 100, p90 * 100]
-                colors = ["#dc2626", "#f59e0b", "#2563eb", "#059669"]
+                bar_tones  = ["amber", "cyan", "blue", "cyan"]  # tails amber, center cyan/blue
 
-                fig_bar.add_trace(go.Bar(
-                    x=categories, y=bar_values,
-                    marker_color=colors,
-                    text=[f"{v:+.1f}%" for v in bar_values],
-                    textposition="outside",
-                    textfont=dict(size=13, color="#1a1f36"),
-                    hovertemplate="%{x}: %{y:.2f}%<extra></extra>",
-                ))
-                fig_bar.add_hline(y=0, line_dash="dash", line_color="#9ca3af", line_width=1)
+                fig_bar = go.Figure()
+                for cat, val, tone in zip(categories, bar_values, bar_tones):
+                    fig_bar.add_trace(go.Bar(
+                        x=[cat], y=[val],
+                        marker=_utils.glint_dark_bar_style(tone=tone, opacity=0.88),
+                        text=[f"{val:+.1f}%"],
+                        textposition="outside",
+                        textfont=dict(family="JetBrains Mono, monospace", size=11, color="#E8F7FC"),
+                        hovertemplate="%{x}: %{y:.2f}%<extra></extra>",
+                        showlegend=False,
+                    ))
+                fig_bar.add_hline(y=0, line_dash="dash",
+                                  line_color="rgba(103,232,249,0.28)", line_width=1)
                 fig_bar.update_layout(
-                    title=dict(text=f"D+{horizon} 全市場報酬分佈統計",
-                               font=dict(family="Inter, 'Noto Sans TC', sans-serif", size=14, color="#1e293b")),
-                    yaxis_title=dict(text="報酬率 (%)",
-                                     font=dict(family="Inter, 'Noto Sans TC', sans-serif", size=12, color="#8397AC")),
-                    height=400,
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor="rgba(0,0,0,0)",
-                    font=dict(family="Inter, 'Noto Sans TC', sans-serif", color="#B4CCDF", size=11),
-                    margin=dict(l=20, r=20, t=60, b=30),
-                    showlegend=False,
+                    **_utils.glint_dark_layout(
+                        title=f"D+{horizon} 全市場報酬分佈統計",
+                        subtitle="Return Percentiles (%)",
+                        height=360,
+                        show_grid=True,
+                        ylabel="報酬率 (%)",
+                    ),
                 )
-                fig_bar.update_xaxes(showgrid=False,
-                                     tickfont=dict(family="Inter, 'Noto Sans TC', sans-serif", size=11, color="#8397AC"))
-                fig_bar.update_yaxes(showgrid=True, gridcolor="rgba(103,232,249,0.08)",
-                                     tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#8397AC"))
+                fig_bar.update_layout(showlegend=False)
                 st.plotly_chart(fig_bar, use_container_width=True)
                 st.caption(f"📊 全市場中位數報酬 {median_ret:+.1%}，標準差 {std_ret:.1%}。上方展示的判讀股為模型篩選的少數偏多標的。")
             else:
