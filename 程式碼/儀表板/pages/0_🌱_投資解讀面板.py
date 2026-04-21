@@ -54,7 +54,7 @@ glint_icon = _utils.glint_icon
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
-    crumb_left="台股多因子研究終端",
+    crumb_left="多因子股票分析系統",
     crumb_current="投資觀察",
     chips=[
         ("歷史判讀", "pri"),

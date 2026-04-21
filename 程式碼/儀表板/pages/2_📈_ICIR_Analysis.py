@@ -33,7 +33,7 @@ inject_custom_css()
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
-    crumb_left="台股多因子研究終端",
+    crumb_left="多因子股票分析系統",
     crumb_current="ICIR 訊號穩定性",
     chips=[("Rank IC · 24 months", "pri"), ("purged WF · 4-fold", "vio"), ("IC > 0.015", "ok")],
     show_clock=True,

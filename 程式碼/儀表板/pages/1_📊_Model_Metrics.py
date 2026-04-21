@@ -37,7 +37,7 @@ inject_custom_css()
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ------------------
 render_topbar(
-    crumb_left="台股多因子研究終端",
+    crumb_left="多因子股票分析系統",
     crumb_current="模型績效分析",
     chips=[
         ("Purged WF · 4-Fold", "pri"),

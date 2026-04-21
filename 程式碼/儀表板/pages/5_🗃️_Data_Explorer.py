@@ -37,7 +37,7 @@ _utils.inject_v10_dark_widgets_css()
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
-    crumb_left="台股多因子研究終端",
+    crumb_left="多因子股票分析系統",
     crumb_current="資料探索",
     chips=[("948,976 rows", "pri"), ("FinMind + 選用資料集", "vio"), ("9 pillars", "default")],
     show_clock=True,
@@ -534,7 +534,7 @@ try:
     glint_heading("cpu", "系統架構 | System Architecture", tone="violet")
 
     st.code("""
-台股多因子研究終端 | Taiwan Multi-Factor Research Terminal
+多因子股票分析系統 | Taiwan Multi-Factor Research Terminal
 ├── run_phase1.py                  # Phase 1: 資料擷取 → Feature Store
 ├── run_phase2.py                  # Phase 2: 模型訓練 → 策略回測
 ├── dashboard/

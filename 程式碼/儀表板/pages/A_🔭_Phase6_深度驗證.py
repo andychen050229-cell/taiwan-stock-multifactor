@@ -35,7 +35,7 @@ inject_custom_css()
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
-    crumb_left="台股多因子研究終端",
+    crumb_left="多因子股票分析系統",
     crumb_current="驗證壓測",
     chips=[("LOPO ablation", "pri"), ("threshold sweep", "vio"), ("2454 deep-case", "ok")],
     show_clock=True,

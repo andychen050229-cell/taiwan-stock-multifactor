@@ -152,7 +152,7 @@ best_dsr = best_dsr or 12.12
 # Top-bar (sticky) — breadcrumb + model chips + live clock
 # ============================================================================
 render_topbar(
-    crumb_left="台股多因子研究終端",
+    crumb_left="多因子股票分析系統",
     crumb_current="情境主控",
     chips=[
         ("xgboost_D20", "pri"),

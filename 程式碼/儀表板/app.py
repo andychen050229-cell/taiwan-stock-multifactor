@@ -1,5 +1,5 @@
 """
-台股多因子研究終端 · Multi-Factor Navigation Router (Option B — Top-Nav Architecture)
+多因子股票分析系統 · Multi-Factor Navigation Router (Option B — Top-Nav Architecture)
 
 2026-04-20 重構：採用 Option B 頂部導覽，與 Streamlit Cloud embed mode
 (`/~/+/`) 完全相容 —— 無論側邊欄是否顯示，頁面都有完整導覽。
@@ -32,7 +32,7 @@ def P(name: str) -> str:
 
 # ===== Page Config (MUST be before st.navigation) =====
 st.set_page_config(
-    page_title="台股多因子研究終端 · Multi-Factor",
+    page_title="多因子股票分析系統 · Multi-Factor",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -93,10 +93,10 @@ _utils.inject_sidebar_health(
 )
 _utils.inject_sidebar_action_buttons(manual_page=manual)
 
-# ===== Global Dark Sidebar CSS — 台股多因子研究終端 brand ================
+# ===== Global Dark Sidebar CSS — 多因子股票分析系統 brand ================
 st.markdown("""<style>
     /* ================================================================= */
-    /*  Dark "tech-data" sidebar — 台股多因子研究終端 brand              */
+    /*  Dark "tech-data" sidebar — 多因子股票分析系統 brand              */
     /* ================================================================= */
     section[data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0a1420 0%, #121c2b 55%, #0f1a28 100%) !important;

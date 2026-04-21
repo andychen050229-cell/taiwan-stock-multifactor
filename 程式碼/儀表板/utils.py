@@ -1182,7 +1182,7 @@ def inject_custom_css():
     @media (max-width: 1200px) {{ .gl-grid-6 {{ grid-template-columns: repeat(3, 1fr); }} }}
     @media (max-width: 900px) {{ .gl-grid-3 {{ grid-template-columns: 1fr; }} .gl-grid-6 {{ grid-template-columns: repeat(2, 1fr); }} }}
     /* ================================================================= */
-    /* 6. 台股多因子研究終端 — sidebar brand + system health card       */
+    /* 6. 多因子股票分析系統 — sidebar brand + system health card       */
     /* ================================================================= */
     /* Brand block at the top of the dark sidebar — softer, tech-luxe */
     .gl-brand {{
@@ -2379,17 +2379,23 @@ def inject_custom_css():
         0%, 100% {{ opacity: 0.35; box-shadow: 0 0 0 0 rgba(103,232,249,0); }}
         50%      {{ opacity: 1.00; box-shadow: 0 0 6px 1px rgba(103,232,249,0.65); }}
     }}
+    /* v11.5.8 — shine-sweep travelling across the button face */
+    @keyframes gl-sidebtn-shimmer {{
+        0%   {{ background-position: -160% 0; }}
+        55%  {{ background-position:  160% 0; }}
+        100% {{ background-position:  160% 0; }}
+    }}
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button {{
         position: relative !important;
         background: linear-gradient(180deg, rgba(14,23,38,0.88), rgba(8,14,24,0.92)) !important;
         border: 1px solid rgba(255,255,255,0.10) !important;
         color: #cfe2ee !important;
         font-family: var(--gl-font-mono, 'JetBrains Mono', ui-monospace, monospace) !important;
-        font-size: 0.66rem !important;
+        font-size: 0.58rem !important;              /* v11.5.8 · smaller so MANUAL never wraps */
         font-weight: 700 !important;
-        letter-spacing: 0.08em !important;
+        letter-spacing: 0.06em !important;          /* v11.5.8 · tighter tracking */
         text-transform: uppercase !important;
-        padding: 4px 8px !important;
+        padding: 4px 6px 4px 14px !important;       /* v11.5.8 · extra left pad for dot */
         border-radius: 7px !important;
         min-height: 28px !important;
         height: 28px !important;
@@ -2404,7 +2410,7 @@ def inject_custom_css():
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button::before {{
         content: "";
         position: absolute;
-        left: 7px;
+        left: 6px;
         top: 50%;
         transform: translateY(-50%);
         width: 4px;
@@ -2413,12 +2419,46 @@ def inject_custom_css():
         background: #67e8f9;
         animation: gl-sidebtn-dot-blink 2.4s ease-in-out infinite;
         pointer-events: none;
+        z-index: 2;
+    }}
+    /* v11.5.8 — travelling shimmer sweep (the "shiny" effect like
+       screenshot 2). Low-opacity diagonal gradient animated across the
+       full button face. Uses mix-blend-mode: screen so it brightens
+       the label text and icon without washing out the background. */
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button::after {{
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 7px;
+        background:
+            linear-gradient(115deg,
+                transparent 0%,
+                transparent 38%,
+                rgba(255,255,255,0.22) 46%,
+                rgba(167,243,208,0.38) 50%,
+                rgba(103,232,249,0.32) 54%,
+                transparent 62%,
+                transparent 100%);
+        background-size: 220% 100%;
+        background-repeat: no-repeat;
+        background-position: -160% 0;
+        animation: gl-sidebtn-shimmer 3.8s ease-in-out infinite;
+        pointer-events: none;
+        mix-blend-mode: screen;
+        opacity: 0.90;
+        z-index: 1;
+    }}
+    /* Keep the label/icon above the shimmer overlay */
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button > div,
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button > * {{
+        position: relative !important;
+        z-index: 3 !important;
     }}
     /* tighten the Material icon + label so MANUAL fits in one line */
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button [data-testid="stIconMaterial"],
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button span[class*="material-symbols"] {{
-        font-size: 14px !important;
-        margin-right: 4px !important;
+        font-size: 13px !important;                 /* v11.5.8 · 14 → 13 */
+        margin-right: 3px !important;
     }}
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button:hover {{
         background: linear-gradient(180deg, rgba(6,182,212,0.14), rgba(6,182,212,0.06)) !important;
@@ -2434,6 +2474,10 @@ def inject_custom_css():
         background: #a7f3d0;
         box-shadow: 0 0 8px 1px rgba(167,243,208,0.8);
         animation: none !important;
+        opacity: 1;
+    }}
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button:hover::after {{
+        animation-duration: 1.6s;  /* shimmer speeds up on hover */
         opacity: 1;
     }}
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button:active {{
@@ -2622,7 +2666,25 @@ def inject_custom_css():
     }}
     /* ================================================================= */
     /* 13. v8 Terminal hero (render_terminal_hero)                        */
+    /*     v11.5.8 · breathing-light border animation (cyan, same rhythm  */
+    /*     as the brand-dot .gl-brand-dot next to the product title)      */
     /* ================================================================= */
+    @keyframes gl-thero-breathe {{
+        0%, 100% {{
+            border-color: rgba(103,232,249,0.22);
+            box-shadow:
+                0 0 0 0 rgba(103,232,249,0),
+                0 0 14px 0 rgba(103,232,249,0.08),
+                inset 0 1px 0 rgba(103,232,249,0.04);
+        }}
+        50% {{
+            border-color: rgba(103,232,249,0.68);
+            box-shadow:
+                0 0 0 1px rgba(103,232,249,0.18),
+                0 0 28px 0 rgba(103,232,249,0.30),
+                inset 0 1px 0 rgba(103,232,249,0.16);
+        }}
+    }}
     .gl-thero {{
         position: relative;
         background: linear-gradient(180deg, #0F1725 0%, #0A1420 100%);
@@ -2632,6 +2694,7 @@ def inject_custom_css():
         margin: 8px 0 22px;
         color: var(--gl-fg-primary, #E8F7FC);
         overflow: hidden;
+        animation: gl-thero-breathe 3.6s ease-in-out infinite;
     }}
     .gl-thero::before {{
         content: "";
@@ -3334,7 +3397,7 @@ def render_live_chip(text: str = "LIVE · 研究快照"):
 def render_page_footer(page_name_en: str,
                        limits_note: str = "",
                        product: str = "量化分析工作台",
-                       system: str = "台股多因子研究終端") -> None:
+                       system: str = "多因子股票分析系統") -> None:
     """Unified bottom-of-page footer block (per v3 audit §27, §28).
 
     Three fixed rows, in this exact visual order:
@@ -3535,10 +3598,10 @@ def render_system_health_card(gates_passed: int = 9, total_gates: int = 9,
     )
 
 
-def inject_sidebar_brand(product: str = "台股多因子研究終端",
+def inject_sidebar_brand(product: str = "多因子股票分析系統",
                          eyebrow: str = "MULTI-FACTOR RESEARCH TERMINAL",
                          subtitle: str = "三引擎整合｜九支柱快照｜Phase 3 治理"):
-    """Inject the 台股多因子研究終端 brand block at the top of the sidebar.
+    """Inject the 多因子股票分析系統 brand block at the top of the sidebar.
 
     Three-layer layout (per v3 audit §17, v10 §5 copy refresh):
       · eyebrow (mono, cyan, uppercased) — product category
@@ -3548,7 +3611,7 @@ def inject_sidebar_brand(product: str = "台股多因子研究終端",
     v10 §5 copy rewrite: the old subtitle "台灣股市 × 三引擎集成 × Phase 3 治理"
     read like an engineering tag rather than a product name. Per audit it must
     move to the subtitle layer in 管顧 style, and the brand lead-line upgrades
-    from "股票預測系統" → "台股多因子研究終端" for consistency with the
+    from "股票預測系統" → "多因子股票分析系統" for consistency with the
     terminal-grade product positioning.
 
     Renders on every page because app.py's sidebar runs first.
@@ -4567,40 +4630,59 @@ div[data-baseweb="popover"] [data-baseweb="menu"] li[aria-selected="true"] > * {
             drop-shadow(0 0 18px rgba(139,92,246,0.70));
     }
 }
+/* v11.5.8 — wrap the entire slider as a standalone framed cartridge.
+   The whole stSlider element becomes a unified module (label + track +
+   thumb + min/max labels inside one dark violet panel with cyan frame),
+   instead of the rail floating over a bare sidebar background. */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] {
-    padding: 6px 2px 4px 2px !important;
+    position: relative !important;
+    padding: 10px 14px 10px 14px !important;
+    margin: 6px 0 !important;
+    background:
+        linear-gradient(180deg, rgba(14,8,28,0.85), rgba(8,4,18,0.92)) !important;
+    border: 1px solid rgba(139,92,246,0.28) !important;
+    border-radius: 10px !important;
+    box-shadow:
+        0 0 12px rgba(103,232,249,0.10),
+        inset 0 1px 0 rgba(167,139,250,0.18),
+        inset 0 0 0 1px rgba(103,232,249,0.06) !important;
+}
+/* Corner bracket notches on the cartridge frame */
+section[data-testid="stSidebar"] div[data-testid="stSlider"]::before,
+section[data-testid="stSidebar"] div[data-testid="stSlider"]::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-color: rgba(103,232,249,0.55);
+    pointer-events: none;
+}
+section[data-testid="stSidebar"] div[data-testid="stSlider"]::before {
+    top: 4px; left: 4px;
+    border-top: 1px solid; border-left: 1px solid;
+    border-top-left-radius: 3px;
+}
+section[data-testid="stSidebar"] div[data-testid="stSlider"]::after {
+    bottom: 4px; right: 4px;
+    border-bottom: 1px solid; border-right: 1px solid;
+    border-bottom-right-radius: 3px;
 }
 section[data-testid="stSidebar"] div[data-testid="stSlider"] label,
 section[data-testid="stSidebar"] div[data-testid="stSlider"] label p {
     color: #cbe9f2 !important;
     font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
-    font-size: 0.70rem !important;
+    font-size: 0.68rem !important;
     font-weight: 700 !important;
-    letter-spacing: 0.18em !important;
+    letter-spacing: 0.14em !important;
     text-transform: uppercase !important;
+    margin-bottom: 4px !important;
 }
-/* Slider container — add faint vertical tick wash behind the track */
+/* Slider track container — tick wash removed in v11.5.8 per request */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] {
     position: relative !important;
-    padding-top: 10px !important;
+    padding-top: 12px !important;
     padding-bottom: 4px !important;
-}
-section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"]::before {
-    content: "";
-    position: absolute;
-    left: 10px; right: 10px;
-    top: 50%;
-    height: 12px;
-    transform: translateY(-50%);
-    background-image:
-        linear-gradient(90deg,
-            rgba(167,139,250,0.24) 0 1px,
-            transparent 1px 10%);
-    background-size: 10% 100%;
-    background-repeat: repeat-x;
-    pointer-events: none;
-    opacity: 0.70;
-    z-index: 0;
+    background: transparent !important;
 }
 /* Track (unfilled portion) — deep violet-black void with hairline */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] div[role="progressbar"],
