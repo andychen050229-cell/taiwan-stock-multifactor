@@ -5067,13 +5067,24 @@ div.block-container {
 /* --- H. Inline-style alert callouts (page 0_投資解讀面板) --------------- */
 /* Page 0 sets alert_bg = #ecfdf5 | #fffbeb | #fef2f2 via inline styles.
    Catch them via attribute-substring selectors so the call site stays
-   untouched and future pastels fall under the same treatment.           */
+   untouched and future pastels fall under the same treatment.
+
+   Browsers serialize `#ecfdf5` to `rgb(236, 253, 245)` in the style
+   attribute, so we need BOTH the hex form (source) AND the rgb form
+   (serialized) — with and without spaces because serialization rules
+   differ across engines.                                              */
 [data-testid="stMain"] div[style*="#ecfdf5"],
 [data-testid="stMain"] div[style*="#fffbeb"],
 [data-testid="stMain"] div[style*="#fef2f2"],
 [data-testid="stMain"] div[style*="#ECFDF5"],
 [data-testid="stMain"] div[style*="#FFFBEB"],
-[data-testid="stMain"] div[style*="#FEF2F2"] {
+[data-testid="stMain"] div[style*="#FEF2F2"],
+[data-testid="stMain"] div[style*="rgb(236, 253, 245)"],
+[data-testid="stMain"] div[style*="rgb(255, 251, 235)"],
+[data-testid="stMain"] div[style*="rgb(254, 242, 242)"],
+[data-testid="stMain"] div[style*="rgb(236,253,245)"],
+[data-testid="stMain"] div[style*="rgb(255,251,235)"],
+[data-testid="stMain"] div[style*="rgb(254,242,242)"] {
     background: linear-gradient(135deg, rgba(15,23,37,0.92) 0%, rgba(10,20,32,0.86) 100%) !important;
     color: #E8F7FC !important;
 }
@@ -5082,7 +5093,13 @@ div.block-container {
 [data-testid="stMain"] div[style*="#fef2f2"] *,
 [data-testid="stMain"] div[style*="#ECFDF5"] *,
 [data-testid="stMain"] div[style*="#FFFBEB"] *,
-[data-testid="stMain"] div[style*="#FEF2F2"] * {
+[data-testid="stMain"] div[style*="#FEF2F2"] *,
+[data-testid="stMain"] div[style*="rgb(236, 253, 245)"] *,
+[data-testid="stMain"] div[style*="rgb(255, 251, 235)"] *,
+[data-testid="stMain"] div[style*="rgb(254, 242, 242)"] *,
+[data-testid="stMain"] div[style*="rgb(236,253,245)"] *,
+[data-testid="stMain"] div[style*="rgb(255,251,235)"] *,
+[data-testid="stMain"] div[style*="rgb(254,242,242)"] * {
     color: #E8F7FC !important;
 }
 /* Preserve colour coding on the border-left stripe: high = rose,
@@ -5090,11 +5107,17 @@ div.block-container {
    on interior spans (if any) already override, so just ensure the
    banner header text is readable.                                     */
 [data-testid="stMain"] div[style*="#fef2f2"] strong,
-[data-testid="stMain"] div[style*="#FEF2F2"] strong { color: #fda4af !important; }
+[data-testid="stMain"] div[style*="#FEF2F2"] strong,
+[data-testid="stMain"] div[style*="rgb(254, 242, 242)"] strong,
+[data-testid="stMain"] div[style*="rgb(254,242,242)"] strong { color: #fda4af !important; }
 [data-testid="stMain"] div[style*="#fffbeb"] strong,
-[data-testid="stMain"] div[style*="#FFFBEB"] strong { color: #fde68a !important; }
+[data-testid="stMain"] div[style*="#FFFBEB"] strong,
+[data-testid="stMain"] div[style*="rgb(255, 251, 235)"] strong,
+[data-testid="stMain"] div[style*="rgb(255,251,235)"] strong { color: #fde68a !important; }
 [data-testid="stMain"] div[style*="#ecfdf5"] strong,
-[data-testid="stMain"] div[style*="#ECFDF5"] strong { color: #6ee7b7 !important; }
+[data-testid="stMain"] div[style*="#ECFDF5"] strong,
+[data-testid="stMain"] div[style*="rgb(236, 253, 245)"] strong,
+[data-testid="stMain"] div[style*="rgb(236,253,245)"] strong { color: #6ee7b7 !important; }
 
 /* --- I. Generic .insight-box / .warning-box / .tip-box pastels --------- */
 /* Some pages wrap commentary in these classes with near-white or pastel
