@@ -1892,8 +1892,8 @@ def inject_custom_css():
        ============================================================ */
     [data-testid="stVerticalBlock"]:has(> div > .gl-utilbar-marker) {{
         margin: 6px -1rem 0 -1rem;
-        padding: 6px 14px;
-        min-height: 44px;
+        padding: 10px 14px;
+        min-height: 56px;
         background:
             linear-gradient(180deg, #050b15 0%, #081020 55%, #060d1a 100%);
         border: 1px solid rgba(6,182,212,0.35);
@@ -1901,6 +1901,7 @@ def inject_custom_css():
         border-radius: 14px 14px 0 0;
         font-family: var(--gl-font-mono);
         font-size: 0.70rem;
+        line-height: 1.75;
         letter-spacing: 0.04em;
         color: #b4ccdf;
         box-shadow: inset 0 1px 0 rgba(103,232,249,0.18);
@@ -1926,11 +1927,12 @@ def inject_custom_css():
         padding: 0 !important;
     }}
     /* LEFT / RIGHT inline HTML wrappers
-       v11 §1 — prevent right-side truncation:
-       · flex-wrap: nowrap + overflow-x: auto so chips always render in a
+       v11.1 §1 — prevent BOTH horizontal AND vertical truncation:
+       · flex-wrap: nowrap + overflow-x: clip so chips always render in a
          single row and the last chip never gets clipped at viewport edge
-       · tighter font-size + padding so Model/Gates/PASS/DSR fit at 1280px
-       · hide scrollbar visually (clean terminal look) but preserve scroll */
+       · overflow-y: visible so descenders/ascenders aren't top/bottom-cut
+         when the shell is 56px (previously 44 clipped text vertically)
+       · tighter font-size + padding so Model/Gates/PASS/DSR fit at 1280px */
     .gl-util-left {{
         display: inline-flex;
         flex-wrap: nowrap;
@@ -1939,11 +1941,10 @@ def inject_custom_css():
         min-width: 0;
         max-width: 100%;
         width: 100%;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scrollbar-width: none;
+        overflow-x: clip;
+        overflow-y: visible;
+        line-height: 1.75;
     }}
-    .gl-util-left::-webkit-scrollbar {{ display: none; }}
     .gl-util-right {{
         display: inline-flex;
         flex-wrap: nowrap;
@@ -1953,22 +1954,22 @@ def inject_custom_css():
         min-width: 0;
         max-width: 100%;
         width: 100%;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scrollbar-width: none;
+        overflow-x: clip;
+        overflow-y: visible;
+        line-height: 1.75;
     }}
-    .gl-util-right::-webkit-scrollbar {{ display: none; }}
     .gl-util-seg {{
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        padding: 2px 10px;
+        padding: 4px 10px;
         border-right: 1px solid rgba(6,182,212,0.18);
         white-space: nowrap;
         flex-shrink: 0;
+        line-height: 1.6;
     }}
     .gl-util-left .gl-util-seg:last-child {{ border-right: none; }}
-    .gl-util-right .gl-util-seg {{ border-right: none; padding: 2px 4px; }}
+    .gl-util-right .gl-util-seg {{ border-right: none; padding: 4px 6px; }}
     /* v11 §1 — shrink LEFT seg padding further and the RIGHT monospace chip
        font so the full right triplet (Model · Gates N/N PASS · DSR) fits
        even at 1280px viewport without clipping. */
