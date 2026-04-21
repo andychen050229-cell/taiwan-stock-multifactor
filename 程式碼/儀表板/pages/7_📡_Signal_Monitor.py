@@ -25,6 +25,8 @@ PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
 render_section_title = _utils.render_section_title
+glint_icon = _utils.glint_icon
+glint_heading = _utils.glint_heading
 
 inject_custom_css()
 
@@ -109,7 +111,15 @@ if not drift_data and not decay_data:
 
 # --- Sidebar ---
 with st.sidebar:
-    st.markdown("### 📡 訊號監控")
+    st.markdown(
+        f"""<div style="display:flex;align-items:center;gap:10px;margin:0 0 10px 0;padding:10px 12px;
+        background:linear-gradient(135deg,rgba(34,211,238,0.14),rgba(16,185,129,0.08));
+        border:1px solid rgba(34,211,238,0.34);border-radius:8px;">
+        <span style="color:#67e8f9;">{glint_icon('radar', 18, '#67e8f9')}</span>
+        <span style="color:#e2e8f0;font-weight:700;letter-spacing:0.05em;font-size:0.95rem;">訊號監控</span>
+        </div>""",
+        unsafe_allow_html=True,
+    )
     if decay_data:
         st.markdown(f"**分析日期**: {decay_data.get('analysis_date', '—')[:10]}")
         st.markdown(f"**再訓練建議**: {decay_data.get('recommended_retrain_cycle', '—')}")
@@ -399,18 +409,32 @@ if decay_data:
         st.markdown("#### 訊號半衰期分析 | Signal Half-Life")
 
         hl_rows = []
+        _trend_map = {
+            "improving": ("trending-up", "#10b981"),
+            "decaying":  ("activity",    "#f43f5e"),
+            "stable":    ("line-chart",  "#22d3ee"),
+        }
         for name, vals in half_life.items():
             hl = vals.get("half_life_months")
             note = vals.get("note", "—")
             trend = vals.get("trend_direction", "unknown")
-            trend_icon = {"improving": "📈", "decaying": "📉", "stable": "➡️"}.get(trend, "❓")
+            _ic_name, _ic_color = _trend_map.get(trend, ("target", "#94a3b8"))
+            trend_svg = glint_icon(_ic_name, 14, _ic_color)
             slope = vals.get("monthly_slope", 0)
             n_months = vals.get("n_months_analyzed", 0)
 
             if hl:
-                st.markdown(f"- {trend_icon} **{name}**: 半衰期 ≈ **{hl} 個月** — {note}")
+                st.markdown(
+                    f"<div style='display:flex;align-items:center;gap:8px;margin:4px 0;'>{trend_svg}"
+                    f"<span><strong>{name}</strong>：半衰期 ≈ <strong>{hl} 個月</strong> — {note}</span></div>",
+                    unsafe_allow_html=True,
+                )
             else:
-                st.markdown(f"- {trend_icon} **{name}**: {note}")
+                st.markdown(
+                    f"<div style='display:flex;align-items:center;gap:8px;margin:4px 0;'>{trend_svg}"
+                    f"<span><strong>{name}</strong>：{note}</span></div>",
+                    unsafe_allow_html=True,
+                )
 
             hl_rows.append({
                 "天期": name, "趨勢": trend,
@@ -439,9 +463,9 @@ if decay_data:
             st.plotly_chart(fig_hl, use_container_width=True)
 
         # v11 §4a — migrated inline pastel div → shared `.gl-box-ok` dark card.
-        st.markdown("""
+        st.markdown(f"""
         <div class="gl-box-ok">
-        <strong>📌 半衰期解讀：</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#10b981")} 半衰期解讀：</strong><br>
         D+5 與 D+20 的訊號均呈<strong>持續改善</strong>趨勢（正斜率），表示模型的預測能力在研究期間內尚未出現衰減。<br>
         建議再訓練週期：<strong>3-6 個月</strong>。
         </div>
@@ -450,7 +474,7 @@ if decay_data:
     # Alpha decay from Phase 2
     alpha_decay = decay_data.get("alpha_decay_from_p2", {})
     if alpha_decay:
-        with st.expander("📊 Phase 2 Alpha Decay 結果"):
+        with st.expander("Phase 2 Alpha Decay 結果", icon=":material/bar_chart:"):
             rows = []
             for name, vals in alpha_decay.items():
                 rows.append({

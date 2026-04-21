@@ -26,6 +26,8 @@ PAGE_TITLES = _utils.PAGE_TITLES
 PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
+glint_icon = _utils.glint_icon
+glint_heading = _utils.glint_heading
 
 inject_custom_css()
 
@@ -95,7 +97,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-with st.expander("ℹ️ 如何閱讀本頁?", expanded=False):
+with st.expander("如何閱讀本頁?", expanded=False, icon=":material/info:"):
     st.markdown("""
 - **IC**（Information Coefficient）衡量模型預測排序與實際報酬排序的相關性。
 - **ICIR** = IC 的平均值 / IC 的標準差，類似「訊號的夏普比率」。
@@ -103,9 +105,10 @@ with st.expander("ℹ️ 如何閱讀本頁?", expanded=False):
 - **D+20** 的 ICIR 通常優於 D+1，因為短期價格雜訊較大。
 """)
 
-st.markdown("""
+st.markdown(f"""
 <div class="insight-box">
-<strong>❓ 什麼是 ICIR | What is ICIR？</strong><br><br>
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-violet);">
+  {glint_icon("book-open", 15)} 什麼是 ICIR | What is ICIR？</strong><br><br>
 ICIR 本質上是 IC 的 t-statistic。<br>
 |ICIR| > 0.5 為良好訊號，> 1.0 為優秀。<br><br>
 即使 IC 不高，只要足夠穩定，ICIR 也可以很高——這正是長期超額收益的基礎。
@@ -134,7 +137,7 @@ try:
         df_icir = pd.DataFrame(icir_rows)
 
         # KPI Row
-        st.markdown("### 🎯 關鍵績效指標 | Key Metrics")
+        glint_heading("target", "關鍵績效指標", "Key Metrics", tone="cyan")
         best_icir_row = max(icir_rows, key=lambda x: x["ICIR"])
         d20_rows = [r for r in icir_rows if "D+20" in r["Horizon"]]
         best_d20 = max(d20_rows, key=lambda x: x["ICIR"]) if d20_rows else None
@@ -171,7 +174,7 @@ try:
         st.divider()
 
         # ===== ICIR 全景視圖 =====
-        st.subheader("📊 ICIR 全景視圖 | ICIR Overview")
+        glint_heading("grid", "ICIR 全景視圖", "ICIR Overview", tone="blue")
 
         fig_main = go.Figure()
         for h, color in [("D+1", "#f43f5e"), ("D+5", "#f59e0b"), ("D+20", "#10b981")]:
@@ -217,7 +220,7 @@ try:
 
         # ===== IC Distribution Histograms =====
         st.divider()
-        st.subheader("📈 IC 分布直方圖 | IC Distribution")
+        glint_heading("bar-chart", "IC 分布直方圖", "IC Distribution", tone="violet")
         st.caption("Daily Rank IC 分佈特徵 — 評估訊號的穩定性與偏度")
 
         st.warning("⚠️ 以下圖表使用模擬數據（np.random）作為示意，非正式回測輸出。正式 IC/ICIR 數據請參考 Phase 2 報告。")
@@ -348,7 +351,7 @@ try:
         col1, col2 = st.columns(2)
 
         with col1:
-            st.subheader("🎯 頻率結構分析 | Frequency Structure")
+            glint_heading("layers", "頻率結構分析", "Frequency Structure", tone="emerald")
             freq_data = pd.DataFrame({
                 "天期 | Horizon": ["D+1", "D+5", "D+20"],
                 "Rank IC 範圍": ["-0.006 ~ -0.001", "+0.008 ~ +0.025", "+0.013 ~ +0.015"],
@@ -359,9 +362,10 @@ try:
             })
             st.dataframe(freq_data, use_container_width=True, hide_index=True)
 
-            st.markdown("""
+            st.markdown(f"""
             <div class="success-box">
-            <strong>✅ 核心結論 | Key Finding（2026-04-19 嚴格 PIT 版）：</strong><br><br>
+            <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-emerald);">
+              {glint_icon("target", 15)} 核心結論 | Key Finding（2026-04-19 嚴格 PIT 版）：</strong><br><br>
             月度頻率 <strong>D+20</strong> 是唯一 Rank IC 穩定為正的地平線
             （<span class="gl-mono">+0.013 ~ +0.015</span>），ICIR 雖因 std 較大而接近 0，
             但 AUC_macro 達 <span class="gl-mono">0.649</span>、
@@ -372,7 +376,7 @@ try:
             """, unsafe_allow_html=True)
 
         with col2:
-            st.subheader("📐 D+20 IC 關鍵統計 | D+20 Stats")
+            glint_heading("radar", "D+20 IC 關鍵統計", "D+20 Stats", tone="cyan", level=4)
             if d20_rows:
                 for row in d20_rows:
                     st.metric(
@@ -406,7 +410,7 @@ try:
 
         # ===== IC Time Series Charts =====
         st.divider()
-        st.subheader("📊 IC 時間序列圖表 | IC Time Series")
+        glint_heading("line-chart", "IC 時間序列圖表", "IC Time Series", tone="cyan")
 
         # Cloud shim chdir-safe: walk up 4 levels first (pages → 儀表板 → 程式碼 → project_root)
         _fig_here = Path(__file__).resolve()
@@ -426,14 +430,15 @@ try:
             # Display each chart full-width inside an expander for clarity
             for chart in ic_charts:
                 label = chart.stem.replace("ic_timeseries_", "IC: ").replace("_", " ")
-                with st.expander(f"📈 {label}", expanded=False):
+                with st.expander(f"{label}", expanded=False, icon=":material/trending_up:"):
                     st.image(str(chart), use_container_width=True)
         else:
-            st.info("💡 IC 時間序列圖表尚未生成。請執行 run_phase2.py 產生。")
+            st.info("IC 時間序列圖表尚未生成。請執行 run_phase2.py 產生。",
+                    icon=":material/lightbulb:")
 
         # ===== Phase 3 Signal Stability Integration =====
         st.divider()
-        st.subheader("🛡️ Phase 3 訊號穩定性評估 | Signal Stability Assessment")
+        glint_heading("target", "Phase 3 訊號穩定性評估", "Signal Stability Assessment", tone="emerald")
         st.caption("Phase 3 治理模組自動評估的訊號品質等級")
 
         try:
@@ -483,12 +488,24 @@ try:
 
                     # Half-life summary
                     if _hl_data:
+                        _trend_icons = {
+                            "improving": ("trending-up", "var(--gl-emerald)"),
+                            "decaying":  ("activity",    "var(--gl-rose)"),
+                            "stable":    ("line-chart",  "var(--gl-cyan)"),
+                        }
                         for h_name, h_vals in _hl_data.items():
                             trend = h_vals.get("trend_direction", "unknown")
                             slope = h_vals.get("monthly_slope", 0)
                             note = h_vals.get("note", "")
-                            icon = {"improving": "📈", "decaying": "📉", "stable": "➡️"}.get(trend, "❓")
-                            st.markdown(f"{icon} **{h_name}**: 月斜率 = {slope:+.4f} — {note}")
+                            _ico, _col = _trend_icons.get(trend, ("radar", "var(--gl-text-3)"))
+                            st.markdown(
+                                f'<div style="display:flex;align-items:center;gap:8px;'
+                                f'margin:4px 0;color:var(--gl-text-2);">'
+                                f'<span style="color:{_col};">{glint_icon(_ico, 16)}</span>'
+                                f'<span><strong style="color:var(--gl-text);">{h_name}</strong>：'
+                                f'月斜率 = {slope:+.4f} — {note}</span></div>',
+                                unsafe_allow_html=True,
+                            )
         except Exception:
             pass  # Phase 3 data is optional
 
@@ -496,7 +513,7 @@ try:
         st.divider()
         alpha_decay = results.get("alpha_decay", {})
         if alpha_decay:
-            st.subheader("📉 Alpha 衰減分析 | Alpha Decay")
+            glint_heading("activity", "Alpha 衰減分析", "Alpha Decay", tone="amber")
             st.caption("↓ Alpha 衰減分析：隨著預測天數拉長，模型的預測力如何變化。曲線越平緩代表訊號越持久。")
             st.caption("使用 D+5 模型的預測分數，檢測其對不同 horizon 報酬的預測力衰減")
 

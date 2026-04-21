@@ -24,6 +24,8 @@ PAGE_TITLES = _utils.PAGE_TITLES
 PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
+glint_icon = _utils.glint_icon
+glint_heading = _utils.glint_heading
 
 inject_custom_css()
 
@@ -126,7 +128,7 @@ try:
         # Find best strategy
         best_strategy = max([r for r in rows if r["Engine"] != "BENCHMARK"], key=lambda x: x["Sharpe"], default={})
 
-        st.markdown("### 🏆 最優策略快照 | Best Strategy Snapshot")
+        glint_heading("award", "最優策略快照", "Best Strategy Snapshot", tone="amber")
         if best_strategy:
             kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
             with kpi_col1:
@@ -157,8 +159,8 @@ try:
         st.divider()
 
         # ===== Performance Table =====
-        st.subheader(f"📊 績效對標表 | Performance Table (D+{horizon} - {cost_model.upper()})")
-        st.caption("📌 說明：基準（Benchmark）為等權計算，非市值加權基準。各成本情境費率詳見下方成本模型公式。")
+        glint_heading("grid", f"績效對標表 (D+{horizon} - {cost_model.upper()})", "Performance Table", tone="blue")
+        st.caption("說明：基準（Benchmark）為等權計算，非市值加權基準。各成本情境費率詳見下方成本模型公式。")
 
         df_display = df.copy()
         for col in ["Ann. Return", "MDD", "Win Rate", "Daily Cost", "Avg Turnover"]:
@@ -172,7 +174,7 @@ try:
 
     # ===== Return & Sharpe Side-by-Side =====
     st.divider()
-    st.subheader("📈 報酬與夏普比率 | Return & Sharpe")
+    glint_heading("trending-up", "報酬與夏普比率", "Return & Sharpe", tone="emerald")
 
     r1, r2 = st.columns(2)
 
@@ -231,7 +233,7 @@ try:
 
     # ===== Risk-Return Scatter Plot =====
     st.divider()
-    st.subheader("📊 風險-報酬散點圖 | Risk-Return Scatter")
+    glint_heading("scatter", "風險-報酬散點圖", "Risk-Return Scatter", tone="cyan")
     st.caption("x 軸：最大回撤（風險） | y 軸：年化報酬 | 泡泡大小：夏普比率")
 
     scatter_data = []
@@ -292,11 +294,12 @@ try:
 
     # ===== Cost Impact (Waterfall) =====
     st.divider()
-    st.subheader("💰 交易成本影響分析 | Cost Impact Analysis")
+    glint_heading("activity", "交易成本影響分析", "Cost Impact Analysis", tone="amber")
     st.caption("↓ 換手率越高，交易成本侵蝕越大。D+1 策略因每日換手而在扣除成本後通常不可行。")
-    st.markdown("""
+    st.markdown(f"""
     <div class="insight-box">
-    <strong>💡 為什麼成本模型很重要 | Why Cost Matters？</strong><br><br>
+    <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-amber);">
+      {glint_icon("lightbulb", 15)} 為什麼成本模型很重要 | Why Cost Matters？</strong><br><br>
     同一策略在不同成本假設下，年化報酬可能差距 3–5%。<br>
     D+1 策略因換手率高達 64–68%，在任何成本情境下幾乎都不可行。<br>
     D+20 策略即使在保守成本下仍有正 alpha。
@@ -304,7 +307,8 @@ try:
     """, unsafe_allow_html=True)
 
     # ===== Cost Model Formulas =====
-    with st.expander("📐 成本模型公式詳解 | Cost Model Formulas", expanded=False):
+    with st.expander("成本模型公式詳解 | Cost Model Formulas", expanded=False,
+                     icon=":material/calculate:"):
         st.markdown("""
 **交易成本計算公式 | Transaction Cost Formula：**
 
@@ -353,9 +357,10 @@ $$
         })
         st.dataframe(cost_table, use_container_width=True, hide_index=True)
 
-        st.markdown("""
+        st.markdown(f"""
         <div class="insight-box">
-        <strong>📌 備註 | Notes：</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+          {glint_icon("pin", 15)} 備註 | Notes：</strong><br>
         • 台灣證券交易手續費法定上限 0.1425%，多數券商提供電子下單折扣（通常 2.8 折 ~ 6 折）<br>
         • 證交稅 0.3% 僅於賣出時收取（當沖減半為 0.15%，本系統非當沖策略故不適用）<br>
         • 滑價（Slippage）模擬實際成交價與理論價的偏差，流動性越低滑價越大<br>
@@ -399,7 +404,7 @@ $$
         st.plotly_chart(fig_cost, use_container_width=True)
 
         # Cost sensitivity analysis
-        st.caption("📊 成本敏感度分析 | Cost Sensitivity")
+        st.caption("成本敏感度分析 | Cost Sensitivity")
         best_strategy_data = [r for r in cost_rows if r["Engine"] in [best_strategy.get("Engine", "")]]
         if best_strategy_data:
             fig_cost_sens = go.Figure()
@@ -529,7 +534,7 @@ except Exception as e:
 # ===== Backtest Charts =====
 try:
     st.divider()
-    st.subheader("📊 回測圖表 | Backtest Charts")
+    glint_heading("line-chart", "回測圖表", "Backtest Charts", tone="cyan")
 
     fig_dir = Path(__file__).parent.parent.parent / "outputs" / "figures"
     c1, c2 = st.columns(2)
@@ -558,7 +563,7 @@ try:
     bootstrap_data = results.get("bootstrap_ci", {})
     if bootstrap_data:
         st.divider()
-        st.subheader("🎲 Bootstrap 信賴區間 | Bootstrap CI")
+        glint_heading("radar", "Bootstrap 信賴區間", "Bootstrap CI", tone="violet")
         st.caption("1,000 次 Bootstrap 重抽樣估算的報酬率與 Sharpe 信賴區間 | 95% Confidence Intervals")
 
         ci_rows = []
@@ -577,7 +582,7 @@ try:
     dd_data = results.get("drawdown_analysis", {})
     if dd_data:
         st.divider()
-        st.subheader("📉 條件回撤分析 | Conditional Drawdown Analysis")
+        glint_heading("activity", "條件回撤分析", "Conditional Drawdown Analysis", tone="rose")
         st.caption("評估極端損失情境 | Extreme Loss Scenarios")
 
         dd_rows = []
@@ -600,10 +605,11 @@ try:
     perm_tests = stat_val.get("permutation_tests", {})
     if perm_tests:
         st.divider()
-        st.subheader("🧪 統計顯著性驗證 | Statistical Significance Tests")
-        st.markdown("""
+        glint_heading("microscope", "統計顯著性驗證", "Statistical Significance Tests", tone="violet")
+        st.markdown(f"""
         <div class="gl-box-info">
-        <strong>❓ 什麼是 Permutation Test？</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-violet);">
+          {glint_icon("book-open", 15)} 什麼是 Permutation Test？</strong><br>
         隨機打亂標籤 1,000 次，計算每次「偽模型」的 AUC。<br>
         若真實模型的 AUC 遠超所有偽模型（p < 0.01），證明模型的預測能力並非偶然——具有統計顯著性。
         </div>

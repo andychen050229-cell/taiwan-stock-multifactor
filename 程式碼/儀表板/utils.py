@@ -6023,6 +6023,251 @@ def render_decision_card(verdict: str, reason: str = "", tone: str = "info",
     _st.markdown(html, unsafe_allow_html=True)
 
 
+# --- v11.5.5 Glint SVG icon library ------------------------------------
+# Lucide-inspired line icons (1.5px stroke, currentColor) used to replace the
+# kawaii emoji palette (🌱📈📊🔬📅📌🌟💡🎯📖🏆) dashboard-wide. These render
+# crisply on dark Glint backgrounds, inherit text color via `currentColor`, and
+# keep the futuristic/data-terminal feel consistent with render_terminal_hero.
+GLINT_ICON_SVG = {
+    # Navigation / actions
+    "refresh-cw": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 3v5h-5"/>'
+        '<path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 21v-5h5"/></svg>'
+    ),
+    "book-open": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/>'
+        '<path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>'
+    ),
+    # Data / analytics
+    "line-chart": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/>'
+        '<circle cx="7" cy="14" r="1.2" fill="currentColor"/>'
+        '<circle cx="11" cy="10" r="1.2" fill="currentColor"/>'
+        '<circle cx="15" cy="14" r="1.2" fill="currentColor"/>'
+        '<circle cx="20" cy="8" r="1.2" fill="currentColor"/></svg>'
+    ),
+    "bar-chart": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M3 21h18"/><rect x="5" y="11" width="3" height="9" rx="0.5"/>'
+        '<rect x="10.5" y="6" width="3" height="14" rx="0.5"/>'
+        '<rect x="16" y="14" width="3" height="6" rx="0.5"/></svg>'
+    ),
+    "trending-up": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>'
+    ),
+    "scatter": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M3 3v18h18"/>'
+        '<circle cx="7" cy="15" r="1.5" fill="currentColor"/>'
+        '<circle cx="11" cy="11" r="1.5" fill="currentColor"/>'
+        '<circle cx="14" cy="16" r="1.5" fill="currentColor"/>'
+        '<circle cx="17" cy="8" r="1.5" fill="currentColor"/>'
+        '<circle cx="20" cy="13" r="1.5" fill="currentColor"/></svg>'
+    ),
+    # Research / science
+    "microscope": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M6 18h8"/><path d="M3 22h18"/>'
+        '<path d="M14 22a7 7 0 0 0 0-14"/>'
+        '<path d="M9 14h2"/><path d="M8 10l3-3 4 4-3 3z"/>'
+        '<path d="M13 7l3-3"/></svg>'
+    ),
+    "target": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/>'
+        '<circle cx="12" cy="12" r="2" fill="currentColor"/></svg>'
+    ),
+    "radar": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<circle cx="12" cy="12" r="10" opacity="0.35"/>'
+        '<circle cx="12" cy="12" r="6" opacity="0.55"/>'
+        '<circle cx="12" cy="12" r="2" fill="currentColor"/>'
+        '<path d="M12 12L20 6"/></svg>'
+    ),
+    # Insight / meta
+    "lightbulb": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M9 18h6"/><path d="M10 22h4"/>'
+        '<path d="M12 2a7 7 0 0 0-4 12.7c.7.6 1 1.5 1 2.3v1h6v-1c0-.8.3-1.7 1-2.3A7 7 0 0 0 12 2z"/></svg>'
+    ),
+    "pin": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M12 17v5"/><path d="M9 10.76V6a3 3 0 0 1 6 0v4.76"/>'
+        '<path d="M7 13a5 5 0 0 1 5-3 5 5 0 0 1 5 3l-2 4H9z"/></svg>'
+    ),
+    "sparkle": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z"/>'
+        '<path d="M19 3v3"/><path d="M17.5 4.5h3"/></svg>'
+    ),
+    "award": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<circle cx="12" cy="9" r="6"/>'
+        '<path d="M8.5 13.5L7 22l5-3 5 3-1.5-8.5"/></svg>'
+    ),
+    # Time / schedule
+    "calendar": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<rect x="3" y="5" width="18" height="16" rx="2"/>'
+        '<path d="M3 10h18"/><path d="M8 3v4"/><path d="M16 3v4"/>'
+        '<circle cx="8" cy="15" r="0.8" fill="currentColor"/>'
+        '<circle cx="12" cy="15" r="0.8" fill="currentColor"/>'
+        '<circle cx="16" cy="15" r="0.8" fill="currentColor"/></svg>'
+    ),
+    "clock": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>'
+    ),
+    # Taxonomy
+    "layers": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M12 3L3 8l9 5 9-5z"/><path d="M3 13l9 5 9-5"/>'
+        '<path d="M3 18l9 5 9-5"/></svg>'
+    ),
+    "cpu": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<rect x="4" y="4" width="16" height="16" rx="2"/>'
+        '<rect x="9" y="9" width="6" height="6" rx="1"/>'
+        '<path d="M9 2v2"/><path d="M15 2v2"/>'
+        '<path d="M9 20v2"/><path d="M15 20v2"/>'
+        '<path d="M20 9h2"/><path d="M20 15h2"/>'
+        '<path d="M2 9h2"/><path d="M2 15h2"/></svg>'
+    ),
+    "activity": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M3 12h4l3-8 4 16 3-8h4"/></svg>'
+    ),
+    "grid": (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+        '<rect x="3" y="3" width="7" height="7" rx="1"/>'
+        '<rect x="14" y="3" width="7" height="7" rx="1"/>'
+        '<rect x="3" y="14" width="7" height="7" rx="1"/>'
+        '<rect x="14" y="14" width="7" height="7" rx="1"/></svg>'
+    ),
+}
+
+
+def glint_icon(name: str, size: int = 18, color: str | None = None) -> str:
+    """Return an inline SVG icon string sized and tinted for Glint UI.
+
+    Usage (inside ``st.markdown(..., unsafe_allow_html=True)``)::
+
+        f'<span>{glint_icon("line-chart", 20, "var(--gl-cyan)")}</span>'
+
+    The returned SVG inherits ``currentColor`` when ``color`` is None, so
+    wrap it in an element whose ``color`` you already control.
+    """
+    svg = GLINT_ICON_SVG.get(name)
+    if not svg:
+        return ""
+    style = (
+        f'width:{size}px;height:{size}px;display:inline-block;'
+        f'vertical-align:-{max(2, size // 8)}px;flex-shrink:0;'
+    )
+    if color:
+        style += f'color:{color};'
+    # Inject style onto the root <svg> tag
+    return svg.replace("<svg ", f'<svg style="{style}" ', 1)
+
+
+def glint_heading(icon: str, title: str, sub: str = "", tone: str = "cyan",
+                  level: int = 3) -> None:
+    """Render a tech-styled section heading: Glint SVG icon + title (+ mono sub).
+
+    Drop-in replacement for ``st.markdown("### 🎯 title | Sub")``. Uses
+    inline SVG icons from ``GLINT_ICON_SVG`` so nothing reads as kawaii.
+
+    Args:
+        icon: key into ``GLINT_ICON_SVG`` (e.g. "target", "bar-chart").
+        title: primary (Chinese) heading text.
+        sub: optional mono English gloss rendered after a ``|`` separator.
+        tone: accent color key — cyan / emerald / blue / violet / amber / rose.
+        level: HTML heading level (2/3/4). Default 3.
+    """
+    tone_color_map = {
+        "cyan":    "var(--gl-cyan)",
+        "emerald": "var(--gl-emerald)",
+        "blue":    "var(--gl-blue)",
+        "violet":  "var(--gl-violet)",
+        "amber":   "var(--gl-amber)",
+        "rose":    "var(--gl-rose)",
+    }
+    accent = tone_color_map.get(tone, tone_color_map["cyan"])
+    icon_html = glint_icon(icon, 22)
+    safe_title = safe_html(title)
+    sub_html = ""
+    if sub:
+        safe_sub = safe_html(sub)
+        sub_html = (
+            f'<span style="color:var(--gl-text-3);'
+            f'font-family:\'JetBrains Mono\',monospace;font-size:0.85rem;'
+            f'font-weight:600;margin-left:10px;letter-spacing:0.02em;">'
+            f'| {safe_sub}</span>'
+        )
+    tag = f"h{max(2, min(4, level))}"
+    st.markdown(
+        f'<{tag} style="display:flex;align-items:center;gap:10px;'
+        f'margin:24px 0 6px;color:var(--gl-text);">'
+        f'<span style="color:{accent};display:inline-flex;align-items:center;">'
+        f'{icon_html}</span>'
+        f'<span>{safe_title}{sub_html}</span>'
+        f'</{tag}>',
+        unsafe_allow_html=True,
+    )
+
+
+def glint_icon_box(name: str, tone: str = "cyan", size: int = 56) -> str:
+    """Return a 56-px rounded-square icon frame (for hero/action cards).
+
+    Replaces the legacy ``font-size:2.4rem`` giant-emoji pattern with a
+    glowing glyph tile that matches the dark terminal aesthetic.
+    """
+    tone_map = {
+        "cyan":    ("#67E8F9", "rgba(103,232,249,0.18)", "rgba(103,232,249,0.35)"),
+        "emerald": ("#34D399", "rgba(52,211,153,0.18)",  "rgba(52,211,153,0.35)"),
+        "violet":  ("#A78BFA", "rgba(167,139,250,0.18)", "rgba(167,139,250,0.35)"),
+        "blue":    ("#60A5FA", "rgba(96,165,250,0.18)",  "rgba(96,165,250,0.35)"),
+        "amber":   ("#FBBF24", "rgba(251,191,36,0.18)",  "rgba(251,191,36,0.35)"),
+        "rose":    ("#FB7185", "rgba(251,113,133,0.18)", "rgba(251,113,133,0.35)"),
+    }
+    accent, bg, border = tone_map.get(tone, tone_map["cyan"])
+    icon_html = glint_icon(name, size=int(size * 0.48), color=accent)
+    return (
+        f'<div style="width:{size}px;height:{size}px;border-radius:14px;'
+        f'display:inline-flex;align-items:center;justify-content:center;'
+        f'background:linear-gradient(135deg,{bg} 0%,rgba(8,15,28,0.55) 100%);'
+        f'border:1px solid {border};'
+        f'box-shadow:inset 0 1px 0 rgba(255,255,255,0.06),'
+        f'0 6px 18px rgba(2,6,23,0.38),0 0 24px {bg};'
+        f'margin-bottom:12px;">'
+        f'{icon_html}'
+        f'</div>'
+    )
+
+
 # --- v8 §12 / §19.5 Terminal hero ---------------------------------------
 def render_terminal_hero(eyebrow: str, title: str, briefing: str = "",
                          chips: list | None = None, verdict: str = "",
@@ -6918,20 +7163,23 @@ def inject_sidebar_action_buttons(manual_page=None, reset_key: str = "_gl_reset"
         st.markdown('<div class="gl-sidebtn-row">', unsafe_allow_html=True)
         c1, c2 = st.columns(2, gap="small")
         with c1:
-            if st.button("🔄 重整", key=reset_key, use_container_width=True,
+            # v11.5.5 — Material Symbol icons replace kawaii 🔄/❓ emoji.
+            if st.button("RELOAD", key=reset_key, use_container_width=True,
+                         icon=":material/refresh:",
                          help="清除快取並重新載入儀表板資料"):
                 st.cache_data.clear()
                 # Give users visible feedback — otherwise "nothing happens" UX
-                st.toast("✅ 快取已清除 · 重新載入中…", icon="🔄")
+                st.toast("快取已清除 · 重新載入中", icon=":material/check_circle:")
                 st.rerun()
         with c2:
-            if st.button("❓ 手冊", key=manual_key, use_container_width=True,
+            if st.button("MANUAL", key=manual_key, use_container_width=True,
+                         icon=":material/menu_book:",
                          help="查看使用手冊與白話解說"):
                 if manual_page is not None:
                     try:
                         st.switch_page(manual_page)
                     except Exception:
-                        st.toast("找不到手冊頁。", icon="⚠️")
+                        st.toast("找不到手冊頁。", icon=":material/error:")
                 else:
-                    st.toast("手冊頁未註冊。", icon="⚠️")
+                    st.toast("手冊頁未註冊。", icon=":material/error:")
         st.markdown('</div>', unsafe_allow_html=True)

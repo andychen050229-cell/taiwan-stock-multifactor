@@ -28,6 +28,8 @@ glint_plotly_layout = _utils.glint_plotly_layout
 glint_heatmap_colorscale = _utils.glint_heatmap_colorscale
 glint_colorbar = _utils.glint_colorbar
 GLINT_SEQUENTIAL_COOL = _utils.GLINT_SEQUENTIAL_COOL
+glint_icon = _utils.glint_icon
+glint_heading = _utils.glint_heading
 
 inject_custom_css()
 
@@ -111,7 +113,7 @@ with col_g1:
         <div style="
             display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
         ">
-            <span style="font-size: 1.5rem;">🔬</span>
+            <span style="color:#67e8f9;display:inline-flex;">""" + glint_icon("microscope", 22, "#67e8f9") + """</span>
             <span style="
                 font-family: 'JetBrains Mono', monospace;
                 font-size: 0.7rem; font-weight: 700; color: #67e8f9;
@@ -148,7 +150,7 @@ with col_g2:
         <div style="
             display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
         ">
-            <span style="font-size: 1.5rem;">🎯</span>
+            <span style="color:#a78bfa;display:inline-flex;">""" + glint_icon("target", 22, "#a78bfa") + """</span>
             <span style="
                 font-family: 'JetBrains Mono', monospace;
                 font-size: 0.7rem; font-weight: 700; color: #a78bfa;
@@ -185,7 +187,7 @@ with col_g3:
         <div style="
             display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
         ">
-            <span style="font-size: 1.5rem;">📈</span>
+            <span style="color:#6ee7b7;display:inline-flex;">""" + glint_icon("trending-up", 22, "#6ee7b7") + """</span>
             <span style="
                 font-family: 'JetBrains Mono', monospace;
                 font-size: 0.7rem; font-weight: 700; color: #6ee7b7;
@@ -220,8 +222,8 @@ st.markdown("""
     color: #fde68a;
     line-height: 1.65;
 ">
-    <strong>💡 小提醒</strong>:下方三個分頁(🔬/🎯/📈)對應上面三個白話問題,
-    每個分頁都附「方法論」說明與圖表,<br>
+    <strong style="display:inline-flex;align-items:center;gap:6px;">""" + glint_icon("lightbulb", 15, "#fbbf24") + """ 小提醒</strong>：下方三個分頁對應上面三個白話問題，
+    每個分頁都附「方法論」說明與圖表，<br>
     不理解技術細節也能從 <strong style="color:#fef3c7;">「關鍵洞察」區塊</strong> 看到重點結論。
 </div>
 """, unsafe_allow_html=True)
@@ -258,9 +260,9 @@ if missing:
 # Tab layout
 # ============================================================================
 tab1, tab2, tab3 = st.tabs([
-    "🔬 §1. LOPO 支柱貢獻",
-    "🎯 §2. 閾值敏感度",
-    "📈 §3. 2454 個股深度案例",
+    "§1. LOPO 支柱貢獻",
+    "§2. 閾值敏感度",
+    "§3. 2454 個股深度案例",
 ])
 
 # ============================================================================
@@ -345,7 +347,7 @@ with tab1:
     # PNG (static) — keep for fidelity with paper/report
     png = fig_dir / "lopo_pillar_contribution_D20.png"
     if png.exists():
-        with st.expander("📸 靜態 PNG（論文/報告用）", expanded=False):
+        with st.expander("靜態 PNG（論文/報告用）", expanded=False, icon=":material/photo_library:"):
             st.image(str(png), use_container_width=True)
 
     # Interactive bar chart
@@ -383,7 +385,7 @@ with tab1:
     second = ranking[1]
     st.markdown(f"""
     <div class="success-box">
-    <strong>📌 關鍵洞察</strong>：<strong>{top['zh']}</strong> 是最不可或缺的支柱
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 關鍵洞察</strong>：<strong>{top['zh']}</strong> 是最不可或缺的支柱
     （ΔAUC = <span class="gl-mono">+{top['delta_auc']*10000:.1f} bps</span>，
     ΔAUC_up = <span class="gl-mono">+{top['delta_auc_up']*10000:.1f} bps</span>），
     其次是 <strong>{second['zh']}</strong>（<span class="gl-mono">+{second['delta_auc']*10000:.1f} bps</span>）。
@@ -465,7 +467,7 @@ with tab1:
     )
 
     # Pillar feature-count breakdown
-    with st.expander("📊 各支柱特徵數分布", expanded=False):
+    with st.expander("各支柱特徵數分布", expanded=False, icon=":material/bar_chart:"):
         df_counts = pd.DataFrame([
             {"pillar": p, "n_features": n} for p, n in pillar_counts.items()
         ]).sort_values("n_features", ascending=False)
@@ -531,7 +533,7 @@ with tab2:
 
     png = fig_dir / "threshold_sweep_xgb_D20.png"
     if png.exists():
-        with st.expander("📸 靜態 PNG（論文/報告用）", expanded=False):
+        with st.expander("靜態 PNG（論文/報告用）", expanded=False, icon=":material/photo_library:"):
             st.image(str(png), use_container_width=True)
 
     # Interactive dual-axis chart
@@ -597,7 +599,7 @@ with tab2:
 
     st.markdown(f"""
     <div class="success-box">
-    <strong>📌 關鍵洞察</strong>：Edge 幾乎**單調遞增**至 <span class="gl-mono">t=0.50</span>
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 關鍵洞察</strong>：Edge 幾乎**單調遞增**至 <span class="gl-mono">t=0.50</span>
     達到 <strong>+{sweep['edge'].max()*100:.2f}pp</strong>（命中率 {sweep.loc[sweep['edge'].idxmax(), 'hit_rate']:.1%} vs 基準 {base_rate:.1%}），
     但出手率降至 <span class="gl-mono">{sweep.loc[sweep['edge'].idxmax(), 'call_rate']:.2%}</span>（極端稀少）。
     <strong>實務建議使用 t=0.40</strong>（保守型）：edge +3.14pp，call 8.83%，兼顧統計顯著性與交易頻率。
@@ -637,7 +639,7 @@ with tab2:
     best = topk.iloc[0]
     st.markdown(f"""
     <div class="gl-box-info">
-    <strong>📌 最強訊號 Top 0.1%</strong>（n={int(best['n_picks'])} 筆最有把握的預測）
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#22d3ee")} 最強訊號 Top 0.1%</strong>（n={int(best['n_picks'])} 筆最有把握的預測）
     命中率 <strong>{best['hit_rate']:.2%}</strong>，相對基準 <strong>+{best['edge']*100:.2f}pp edge</strong>。
     精度曲線隨 Top-K 擴大而單調下降，證明模型**機率校準合理、排序可信**。
     </div>
@@ -683,7 +685,7 @@ with tab3:
 
     png = fig_dir / "single_stock_2454_mediatek.png"
     if png.exists():
-        with st.expander("📸 靜態 PNG（論文/報告用）", expanded=False):
+        with st.expander("靜態 PNG（論文/報告用）", expanded=False, icon=":material/photo_library:"):
             st.image(str(png), use_container_width=True)
 
     # Monthly chart — dual axis: avg_up_prob + hit_rate_when_called
@@ -735,9 +737,9 @@ with tab3:
     fig_m.update_layout(legend=dict(x=0.02, y=0.98, bgcolor="rgba(255,255,255,0.9)", bordercolor="rgba(37,99,235,0.18)"))
     st.plotly_chart(fig_m, use_container_width=True)
 
-    st.markdown("""
+    st.markdown(f"""
     <div class="success-box">
-    <strong>📌 關鍵洞察</strong>：模型在 <strong>2024-10 ~ 2025-01</strong> 這段 AI 族群行情期間
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 關鍵洞察</strong>：模型在 <strong>2024-10 ~ 2025-01</strong> 這段 AI 族群行情期間
     **明顯提升平均機率**（突破 t=0.35 門檻），並累積大部分出手；2025-01 命中率達
     <span class="gl-mono">81.8%</span>（11 次出手對中 9 次）。
     2024-06 ~ 2024-09 期間模型正確判斷**風險較高不出手**。

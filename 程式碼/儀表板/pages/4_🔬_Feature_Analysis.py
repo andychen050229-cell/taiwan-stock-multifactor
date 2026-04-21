@@ -25,6 +25,8 @@ PAGE_TITLES = _utils.PAGE_TITLES
 PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
+glint_icon = _utils.glint_icon
+glint_heading = _utils.glint_heading
 
 inject_custom_css()
 _utils.inject_v9_chart_css()  # v9 §9 · donut chip legend + composition strip
@@ -121,12 +123,12 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
             delta="跨 Fold 一致性"
         )
 
-    st.markdown("""
+    st.markdown(f"""
     <div class="insight-box">
-    <strong>📌 篩選標準 | Criteria：</strong><br>
-    1️⃣ Mutual Information：與標籤的非線性關聯程度（保留前 60%，約 26 個）<br>
-    2️⃣ VIF：去除多重共線性（VIF > 10 剔除）<br>
-    3️⃣ 穩定性：跨 Fold Jaccard 相似度 > 0.3
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 篩選標準 | Criteria：</strong><br>
+    <span style="display:inline-block;width:18px;height:18px;border-radius:4px;background:rgba(34,211,238,0.15);color:#22d3ee;text-align:center;font-size:11px;font-weight:700;line-height:18px;">1</span> Mutual Information：與標籤的非線性關聯程度（保留前 60%，約 26 個）<br>
+    <span style="display:inline-block;width:18px;height:18px;border-radius:4px;background:rgba(34,211,238,0.15);color:#22d3ee;text-align:center;font-size:11px;font-weight:700;line-height:18px;">2</span> VIF：去除多重共線性（VIF > 10 剔除）<br>
+    <span style="display:inline-block;width:18px;height:18px;border-radius:4px;background:rgba(34,211,238,0.15);color:#22d3ee;text-align:center;font-size:11px;font-weight:700;line-height:18px;">3</span> 穩定性：跨 Fold Jaccard 相似度 > 0.3
     </div>
     """, unsafe_allow_html=True)
 
@@ -137,7 +139,7 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
         ⚠️ <strong>版本說明</strong>：此為 <strong>Phase 1 初版</strong>的 43 候選特徵（僅趨勢 / 基本面 / 估值 / 事件 / 風險 5 個支柱）。
         生產版本已升級為 <strong>Phase 5B 九支柱架構 1,623 → 91 特徵</strong>（新增 chip 籌碼、ind 產業、
         <span class="gl-pillar" data-p="txt">txt</span> 文本、<span class="gl-pillar" data-p="sent">sent</span> 情緒 4 個支柱）。
-        保留此表作為歷史演進的追蹤文件。最新因子統計請見下方「因子支柱分布」區塊與 🔭 驗證壓測 頁面。
+        保留此表作為歷史演進的追蹤文件。最新因子統計請見下方「因子支柱分布」區塊與「驗證壓測」頁面。
         </div>
         """, unsafe_allow_html=True)
         st.markdown("以下為 Phase 1 初版五支柱的全部 43 個候選特徵，標註各階段篩選結果：")
@@ -218,15 +220,15 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
 
         st.markdown(f"""
         <div class="insight-box">
-        <strong>📊 Phase 1 初版篩選統計摘要：</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("bar-chart", 15, "#22d3ee")} Phase 1 初版篩選統計摘要：</strong><br>
         • 候選特徵總數：<strong>43</strong> 個（五支柱初版）<br>
         • MI 篩選通過：<strong>{n_mi_pass}</strong> 個（淘汰 {n_mi_fail} 個，門檻：MI percentile ≥ 60%）<br>
         • VIF 去共線性：再淘汰 <strong>{n_vif_fail}</strong> 個（門檻：VIF &lt; 10）<br>
         • 最終入選：<strong>{n_final}</strong> 個特徵用於模型訓練<br>
         • 淘汰主因：MI 不足（{n_mi_fail} 個）&gt; VIF 共線性（{n_vif_fail} 個）<br>
         <hr style="margin:8px 0; border:none; border-top:1px dashed #cbd5e1;">
-        📦 <strong>最新生產版本（Phase 5B）</strong>：<strong>1,623 → 91</strong> 特徵（9 支柱）·
-        IC prescreen → Chi²/MI → VIF 三階段 · 詳見 🔭 驗證壓測 頁面的 LOPO 支柱貢獻排序。
+        <span style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("layers", 15, "#10b981")} <strong>最新生產版本（Phase 5B）</strong></span>：<strong>1,623 → 91</strong> 特徵（9 支柱）·
+        IC prescreen → Chi²/MI → VIF 三階段 · 詳見驗證壓測頁面的 LOPO 支柱貢獻排序。
         </div>
         """, unsafe_allow_html=True)
 
@@ -323,9 +325,9 @@ try:
                     st.markdown(feat_str)
                     st.markdown("")
 
-        st.markdown("""
+        st.markdown(f"""
         <div class="insight-box">
-        <strong>📌 跨折穩定性 | Cross-Fold Stability：</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 跨折穩定性 | Cross-Fold Stability：</strong><br>
         特徵篩選的穩定性直接影響模型的 generalization 能力。<br>
         Jaccard 相似度 ≥ 0.3 表示核心特徵在不同訓練折次間保持一致性。
         </div>
@@ -333,7 +335,7 @@ try:
 
     # ===== Cross-Horizon Feature Importance =====
     st.divider()
-    st.subheader("📊 跨天期特徵重要度 | Cross-Horizon Feature Importance")
+    glint_heading("bar-chart", "跨天期特徵重要度 | Cross-Horizon Feature Importance", tone="cyan")
     st.caption("比較不同預測天期下特徵的重要性排序 | Feature Importance Ranking by Horizon")
 
     all_imp = {}
@@ -387,16 +389,16 @@ try:
             )
             st.plotly_chart(fig_imp, use_container_width=True)
 
-            st.markdown("""
+            st.markdown(f"""
             <div class="insight-box">
-            <strong>💡 跨天期特徵差異 | Cross-Horizon Pattern：</strong><br>
+            <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("lightbulb", 15, "#fbbf24")} 跨天期特徵差異 | Cross-Horizon Pattern：</strong><br>
             短期（D+1）主要依賴技術面動能指標，中長期（D+20）則更重視基本面與估值因子。<br>
             這反映了「頻率結構」——不同天期的驅動因子本質完全不同，短期是噪音，長期是訊號。
             </div>
             """, unsafe_allow_html=True)
 
             # Diverging bar chart showing difference between horizons
-            st.caption("🔀 天期間特徵重要度差異 | Importance Divergence")
+            st.caption("天期間特徵重要度差異 | Importance Divergence")
             d1_features = set(top_per_h[top_per_h["Horizon"] == "D+1"]["Feature"])
             d20_features = set(top_per_h[top_per_h["Horizon"] == "D+20"]["Feature"])
             unique_d1 = d1_features - d20_features
@@ -407,7 +409,7 @@ try:
 
     # ===== VIF Analysis & Stability =====
     st.divider()
-    st.subheader("📈 跨 Fold 穩定性與多重共線性 | Stability & Multicollinearity")
+    glint_heading("trending-up", "跨 Fold 穩定性與多重共線性 | Stability & Multicollinearity", tone="cyan")
 
     if stability:
         col_s1, col_s2 = st.columns(2)
@@ -530,7 +532,7 @@ try:
         if relevant:
             for chart in relevant:
                 engine_name = "LightGBM" if "lightgbm" in chart.name else "XGBoost"
-                with st.expander(f"📊 {engine_name} — D+{horizon_sel} SHAP Summary", expanded=True):
+                with st.expander(f"{engine_name} — D+{horizon_sel} SHAP Summary", expanded=True, icon=":material/bar_chart:"):
                     # Crop the matplotlib title area (top ~120px) to prevent text overlap
                     # Title is already displayed as the expander heading
                     try:
@@ -544,13 +546,13 @@ try:
         else:
             st.info(f"D+{horizon_sel} 的 SHAP 圖表尚未生成")
     else:
-        st.info("💡 SHAP 圖表尚未生成。請執行 run_phase2.py 產生。")
+        st.info("SHAP 圖表尚未生成。請執行 run_phase2.py 產生。", icon=":material/lightbulb:")
 except Exception as e:
     st.warning(f"SHAP 分析無法載入：{str(e)}")
 
 # ===== Quintile Analysis =====
 st.divider()
-st.subheader("📊 Quintile 因子分組分析 | Quintile Analysis")
+glint_heading("bar-chart", "Quintile 因子分組分析 | Quintile Analysis", tone="cyan")
 st.caption("↓ 將股票按模型預測分數分為 5 組，若報酬呈單調遞增（Q1 最低、Q5 最高），代表模型有效排序能力。")
 st.caption("將股票按預測分數分為五組，檢驗報酬的單調性 | Test monotonicity of returns across quintiles")
 
@@ -637,9 +639,9 @@ try:
 
             st.markdown("")  # spacing between strategies
 
-        st.markdown("""
+        st.markdown(f"""
         <div class="insight-box">
-        <strong>📌 解讀 | Interpretation：</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} 解讀 | Interpretation：</strong><br>
         理想情況下，報酬應從 Q1 到 Q5 單調遞增（或 Q5 明顯優於 Q1）。<br>
         若不存在單調性，表示模型訊號不夠清晰，或包含噪音。
         </div>

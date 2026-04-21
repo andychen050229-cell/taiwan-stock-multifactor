@@ -24,6 +24,8 @@ PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
 render_section_title = _utils.render_section_title
+glint_icon = _utils.glint_icon
+glint_heading = _utils.glint_heading
 
 inject_custom_css()
 
@@ -121,7 +123,15 @@ if not p3_report:
 
 # --- Sidebar ---
 with st.sidebar:
-    st.markdown("### 🛡️ 模型治理")
+    st.markdown(
+        f"""<div style="display:flex;align-items:center;gap:10px;margin:0 0 10px 0;padding:10px 12px;
+        background:linear-gradient(135deg,rgba(139,92,246,0.14),rgba(34,211,238,0.08));
+        border:1px solid rgba(139,92,246,0.34);border-radius:8px;">
+        <span style="color:#c4b5fd;">{glint_icon('radar', 18, '#c4b5fd')}</span>
+        <span style="color:#e2e8f0;font-weight:700;letter-spacing:0.05em;font-size:0.95rem;">模型治理</span>
+        </div>""",
+        unsafe_allow_html=True,
+    )
     st.markdown(f"**報告時間**: {p3_report.get('timestamp', '—')[:16]}")
     st.markdown(f"**整體狀態**: {p3_report.get('overall_status', '—')}")
     gates = p3_report.get("quality_gates", {})
@@ -264,9 +274,9 @@ if dsr_data:
         st.plotly_chart(fig_dsr, use_container_width=True)
 
         # v11 §4a — migrated inline pastel div → shared `.gl-box-warn` dark card.
-        st.markdown("""
+        st.markdown(f"""
         <div class="gl-box-warn">
-        <strong>📌 DSR 解讀：</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#fbbf24")} DSR 解讀：</strong><br>
         當嘗試 N 種策略時，E[max(SR)] 代表「僅靠運氣」可能達到的最大夏普比率。<br>
         個別策略的 Sharpe 若低於此門檻，可能只是多重測試的偽陽性結果。<br><br>
         <strong>但</strong>：以「單一最佳策略」角度（N=1），ensemble_D5 的 DSR 通過（p=1.0），表明其 Sharpe 不可能僅靠運氣。
@@ -382,12 +392,18 @@ if card_files:
             st.markdown(f"- {lim}")
 
     # Full JSON
-    with st.expander("📄 完整 Model Card JSON"):
+    with st.expander("完整 Model Card JSON", icon=":material/description:"):
         st.json(card)
 
     # ===== Model Card Comparison View =====
     if len(card_files) >= 2:
-        st.markdown("#### 📊 模型效能橫向比較 | Cross-Model Comparison")
+        st.markdown(
+            f"""<h4 style='display:flex;align-items:center;gap:10px;margin:16px 0 12px 0;'>
+            <span style='color:#22d3ee;'>{glint_icon('bar-chart', 18, '#22d3ee')}</span>
+            <span>模型效能橫向比較 | Cross-Model Comparison</span>
+            </h4>""",
+            unsafe_allow_html=True,
+        )
 
         comp_rows = []
         for cf in card_files:
@@ -569,7 +585,7 @@ st.markdown(f"""
     line-height: 1.85;
     box-shadow: inset 0 1px 0 rgba(103,232,249,0.10);
 ">
-    <strong style="color: #67e8f9; font-size: 1.02rem; letter-spacing: 0.04em;">📌 一句話總結</strong><br>
+    <strong style="color: #67e8f9; font-size: 1.02rem; letter-spacing: 0.04em; display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#67e8f9")} 一句話總結</strong><br>
     本模型通過 <strong style="color:#E8F7FC;">{n_pass}/{n_total}</strong> 項品質閘門檢查、
     DSR 判定為 <strong style="color:#E8F7FC;">{dsr_data.get("final_verdict", "—") if dsr_data else "—"}</strong>、
     資料漂移為 <strong style="color:#E8F7FC;">{_drift_severity}</strong>,

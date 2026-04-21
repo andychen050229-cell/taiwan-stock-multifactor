@@ -30,6 +30,8 @@ render_traffic_signal = _utils.render_traffic_signal
 render_sector_chip = _utils.render_sector_chip
 render_system_health_card = _utils.render_system_health_card
 load_phase6_json = _utils.load_phase6_json
+glint_icon = _utils.glint_icon
+glint_icon_box = _utils.glint_icon_box
 
 inject_custom_css()
 
@@ -209,11 +211,11 @@ render_ticker_tape([
 
 
 # ============================================================================
-# MODE TABS — 🌱 投資觀察  /  ⚙️ 研究工作站
+# MODE TABS — 投資觀察  /  研究工作站  (v11.5.5 emoji-free, tech-terminal feel)
 # ============================================================================
 tab_observe, tab_workstation = st.tabs([
-    "🌱　投資觀察",
-    "⚙️　研究工作站",
+    "◆　投資觀察",
+    "◆　研究工作站",
 ])
 
 
@@ -222,10 +224,12 @@ tab_observe, tab_workstation = st.tabs([
 # ----------------------------------------------------------------------------
 with tab_observe:
     st.markdown(
-        '<div class="gl-box-info" style="margin-top:6px;">'
-        '<strong>📋 此模式重點</strong>：本觀察台將嚴謹的量化研究翻譯成可理解的決策資訊 ─ '
-        '哪個產業看好、這檔股票基本面如何、進場成本多少才划算、有哪些風險須注意。'
-        '</div>', unsafe_allow_html=True,
+        f'<div class="gl-box-info" style="margin-top:6px;">'
+        f'<span style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">'
+        f'{glint_icon("grid", 15)}<strong>此模式重點</strong></span>：'
+        f'本觀察台將嚴謹的量化研究翻譯成可理解的決策資訊 ─ '
+        f'哪個產業看好、這檔股票基本面如何、進場成本多少才划算、有哪些風險須注意。'
+        f'</div>', unsafe_allow_html=True,
     )
 
     # ====================================================================
@@ -259,8 +263,10 @@ with tab_observe:
             box-shadow:0 4px 18px rgba(2,6,23,0.38), inset 0 1px 0 rgba(245,158,11,0.14);">
   <div style="font-family:'JetBrains Mono',monospace;font-size:0.70rem;color:#fbbf24;
               letter-spacing:0.18em;font-weight:800;text-transform:uppercase;margin-bottom:8px;
-              text-shadow:0 0 10px rgba(245,158,11,0.40);">
-    📌 TODAY'S KEY FINDING · 今日研究重點 &nbsp;·&nbsp; 判讀日 {_h20_date} (D+20 月度)
+              text-shadow:0 0 10px rgba(245,158,11,0.40);
+              display:flex;align-items:center;gap:8px;">
+    {glint_icon("pin", 14, "#fbbf24")}
+    <span>TODAY'S KEY FINDING · 今日研究重點 &nbsp;·&nbsp; 判讀日 {_h20_date} (D+20 月度)</span>
   </div>
   <div style="font-size:1.04rem;line-height:1.85;color:#e0f2fe;">
     ① <strong style="color:#fef3c7;">模型最看好</strong> → <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#fbbf24;">{_top1_id} {_top1_name}</span>
@@ -270,8 +276,10 @@ with tab_observe:
     <span style="font-family:'JetBrains Mono',monospace;color:#34d399;">(+{_tp_bps:.1f} bps AUC)</span> &nbsp;·&nbsp;
     ③ <strong style="color:#fef3c7;">整體可信度</strong> → AUC {baseline_auc:.3f}、DSR {best_dsr:.2f}、{kpis['gates_passed']}/{kpis['total_gates']} gates {'✓' if kpis['all_pass'] else '⚠'}
   </div>
-  <div style="font-size:0.82rem;color:#fbbf24;margin-top:10px;opacity:0.88;">
-    💡 這三個數字是今天系統「最值得你關注的研究結論」。下方卡片逐一展開細節。
+  <div style="font-size:0.82rem;color:#fbbf24;margin-top:10px;opacity:0.88;
+              display:flex;align-items:center;gap:8px;">
+    {glint_icon("lightbulb", 14, "#fbbf24")}
+    <span>這三個數字是今天系統「最值得你關注的研究結論」。下方卡片逐一展開細節。</span>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -353,9 +361,15 @@ with tab_observe:
         ), unsafe_allow_html=True)
 
     # ====================================================================
-    # 🌟 Top 5 推薦股票預覽 (D+20 月度) — concrete tickers, scannable
+    # Top 5 推薦股票預覽 (D+20 月度) — concrete tickers, scannable
     # ====================================================================
-    st.markdown("### 🌟 Top 5 · D+20 月度推薦預覽")
+    st.markdown(
+        f'<h3 style="display:flex;align-items:center;gap:10px;margin:24px 0 6px;'
+        f'color:var(--gl-text);">'
+        f'<span style="color:var(--gl-cyan);">{glint_icon("sparkle", 22)}</span>'
+        f'<span>Top 5 · D+20 月度推薦預覽</span></h3>',
+        unsafe_allow_html=True,
+    )
     st.markdown(
         '<div style="color:var(--gl-text-2);font-size:.92rem;margin-bottom:12px;">'
         f'以下是模型在判讀日 <strong>{_h20_date}</strong> 產出的前五名。<br>'
@@ -419,14 +433,16 @@ with tab_observe:
 
         # Note below the 5 cards — v11 §4a dark-glint callout.
         st.markdown(
-            '<div style="background:linear-gradient(180deg,rgba(15,23,37,0.92),rgba(10,20,32,0.92));'
-            'border:1px solid rgba(103,232,249,0.24);border-left:3px solid #67e8f9;'
-            'border-radius:10px;padding:10px 14px;margin-top:12px;'
-            'font-size:0.82rem;color:#cfe2ee;line-height:1.6;'
-            'box-shadow:0 2px 10px rgba(2,6,23,0.26);">'
-            '📌 <strong style="color:#e0f9ff;">注意</strong>：這是「歷史同情境下的 20 日後平均報酬」，非未來預測。'
-            '推薦是模型排序（ranking），目的是協助研究者聚焦前 5% 標的，不構成投資建議。'
-            '</div>', unsafe_allow_html=True,
+            f'<div style="background:linear-gradient(180deg,rgba(15,23,37,0.92),rgba(10,20,32,0.92));'
+            f'border:1px solid rgba(103,232,249,0.24);border-left:3px solid #67e8f9;'
+            f'border-radius:10px;padding:10px 14px;margin-top:12px;'
+            f'font-size:0.82rem;color:#cfe2ee;line-height:1.6;'
+            f'box-shadow:0 2px 10px rgba(2,6,23,0.26);'
+            f'display:flex;align-items:flex-start;gap:8px;">'
+            f'<span style="color:#67e8f9;flex-shrink:0;margin-top:2px;">{glint_icon("pin", 15)}</span>'
+            f'<span><strong style="color:#e0f9ff;">注意</strong>：這是「歷史同情境下的 20 日後平均報酬」，非未來預測。'
+            f'推薦是模型排序（ranking），目的是協助研究者聚焦前 5% 標的，不構成投資建議。</span>'
+            f'</div>', unsafe_allow_html=True,
         )
     else:
         st.info("目前沒有可用的推薦資料。請嘗試重新整理，或查看「投資觀察」。")
@@ -485,7 +501,13 @@ with tab_observe:
 </div>
 """, unsafe_allow_html=True)
 
-    st.markdown("### 🗓 短週期同步 · D+5 週度 / D+1 日度")
+    st.markdown(
+        f'<h3 style="display:flex;align-items:center;gap:10px;margin:24px 0 6px;'
+        f'color:var(--gl-text);">'
+        f'<span style="color:var(--gl-cyan);">{glint_icon("calendar", 22)}</span>'
+        f'<span>短週期同步 · D+5 週度 / D+1 日度</span></h3>',
+        unsafe_allow_html=True,
+    )
     st.markdown(
         '<div style="color:var(--gl-text-2);font-size:.9rem;margin-bottom:10px;">'
         '主打月度（D+20，上方）是最穩定的預測；週度與日度僅供研究者交叉驗證方向，'
@@ -562,9 +584,9 @@ with tab_observe:
     st.markdown("### 繼續深入")
     col_a, col_b = st.columns(2)
     with col_a:
-        st.markdown("""
+        st.markdown(f"""
 <div class="path-card path-inv">
-    <div style="font-size:2.4rem;margin-bottom:10px;">🌱</div>
+    {glint_icon_box("radar", "emerald", 54)}
     <div class="path-title">個股觀察卡</div>
     <div class="path-desc">
         每一檔推薦股票皆附「四件事白話說」：近期走勢、基本面輪廓、進場成本、風險提示。
@@ -578,17 +600,18 @@ with tab_observe:
     </div>
 </div>
 """, unsafe_allow_html=True)
-        if st.button("🌱  進入投資觀察", use_container_width=True, type="primary", key="btn_obs"):
+        if st.button("進入投資觀察", use_container_width=True, type="primary",
+                     key="btn_obs", icon=":material/target:"):
             st.switch_page(str(Path(__file__).resolve().parent / "0_🌱_投資解讀面板.py"))
 
     with col_b:
-        st.markdown("""
+        st.markdown(f"""
 <div class="path-card">
-    <div style="font-size:2.4rem;margin-bottom:10px;">📈</div>
+    {glint_icon_box("line-chart", "cyan", 54)}
     <div class="path-title">整體策略表現</div>
     <div class="path-desc">
         看三種成本情境下的累積報酬曲線、最大回撤、勝率、盈虧比。
-        D+20 月度是唯一全情境正報酬的地平線，邊際達 +{:.1f}pp。
+        D+20 月度是唯一全情境正報酬的地平線，邊際達 +{best_edge*100:.1f}pp。
     </div>
     <div class="path-tags">
         <span class="gl-chip primary">standard 0.58%</span>
@@ -596,14 +619,21 @@ with tab_observe:
         <span class="gl-chip warn">conservative 0.73%</span>
     </div>
 </div>
-""".format(best_edge * 100), unsafe_allow_html=True)
-        if st.button("📈  查看策略回測", use_container_width=True, type="secondary", key="btn_bt_obs"):
+""", unsafe_allow_html=True)
+        if st.button("查看策略回測", use_container_width=True, type="secondary",
+                     key="btn_bt_obs", icon=":material/show_chart:"):
             st.switch_page(str(Path(__file__).resolve().parent / "3_💰_Backtest.py"))
 
     # ====================================================================
-    # 📖 如何閱讀這個系統 (Reading Guide) — 3 paths by time budget
+    # 如何閱讀這個系統 (Reading Guide) — 3 paths by time budget
     # ====================================================================
-    st.markdown("### 📖 如何閱讀這個系統")
+    st.markdown(
+        f'<h3 style="display:flex;align-items:center;gap:10px;margin:24px 0 6px;'
+        f'color:var(--gl-text);">'
+        f'<span style="color:var(--gl-violet);">{glint_icon("book-open", 22)}</span>'
+        f'<span>如何閱讀這個系統</span></h3>',
+        unsafe_allow_html=True,
+    )
     st.markdown(
         '<div style="color:var(--gl-text-2);font-size:.9rem;margin-bottom:12px;">'
         '依你有多少時間選擇路線。建議新手從「1 分鐘速讀」開始，再視情況深入。'
@@ -615,7 +645,7 @@ with tab_observe:
     # left rail + uppercase mono header but body text is now on dark bg so
     # nothing reads as washed-out islands against the rest of the dashboard.
     with rg1:
-        st.markdown("""
+        st.markdown(f"""
 <div style="background:linear-gradient(180deg,rgba(15,23,37,0.92) 0%,rgba(10,20,32,0.92) 100%);
             border:1px solid rgba(16,185,129,0.38);
             border-left:3px solid #10b981;
@@ -624,8 +654,10 @@ with tab_observe:
   <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#34d399;
               letter-spacing:0.18em;font-weight:800;margin-bottom:4px;
               text-shadow:0 0 8px rgba(16,185,129,0.35);">PATH A · BEGINNER</div>
-  <div style="font-size:1.05rem;font-weight:700;color:#d1fae5;margin-bottom:8px;">
-    🕐 1 分鐘速讀
+  <div style="font-size:1.05rem;font-weight:700;color:#d1fae5;margin-bottom:8px;
+              display:flex;align-items:center;gap:8px;">
+    <span style="color:#34d399;">{glint_icon("clock", 18)}</span>
+    <span>1 分鐘速讀</span>
   </div>
   <div style="font-size:0.9rem;color:#a7f3d0;line-height:1.72;">
     · 看上方<strong style="color:#ecfdf5;">今日重點</strong>三行<br>
@@ -638,7 +670,7 @@ with tab_observe:
 """, unsafe_allow_html=True)
 
     with rg2:
-        st.markdown("""
+        st.markdown(f"""
 <div style="background:linear-gradient(180deg,rgba(15,23,37,0.92) 0%,rgba(10,20,32,0.92) 100%);
             border:1px solid rgba(37,99,235,0.38);
             border-left:3px solid #2563eb;
@@ -647,11 +679,13 @@ with tab_observe:
   <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#60a5fa;
               letter-spacing:0.18em;font-weight:800;margin-bottom:4px;
               text-shadow:0 0 8px rgba(37,99,235,0.35);">PATH B · INVESTOR</div>
-  <div style="font-size:1.05rem;font-weight:700;color:#dbeafe;margin-bottom:8px;">
-    📊 5 分鐘細看
+  <div style="font-size:1.05rem;font-weight:700;color:#dbeafe;margin-bottom:8px;
+              display:flex;align-items:center;gap:8px;">
+    <span style="color:#60a5fa;">{glint_icon("bar-chart", 18)}</span>
+    <span>5 分鐘細看</span>
   </div>
   <div style="font-size:0.9rem;color:#bfdbfe;line-height:1.72;">
-    · 進入 <strong style="color:#e0ecfe;">🌱 投資觀察</strong><br>
+    · 進入 <strong style="color:#e0ecfe;">投資觀察</strong>面板<br>
     · 逐一展開推薦股票的<strong style="color:#e0ecfe;">四件事</strong>解讀<br>
     · 用成本<strong style="color:#e0ecfe;">試算機</strong>估算折價空間<br>
     <br>
@@ -661,7 +695,7 @@ with tab_observe:
 """, unsafe_allow_html=True)
 
     with rg3:
-        st.markdown("""
+        st.markdown(f"""
 <div style="background:linear-gradient(180deg,rgba(15,23,37,0.92) 0%,rgba(10,20,32,0.92) 100%);
             border:1px solid rgba(124,58,237,0.38);
             border-left:3px solid #7c3aed;
@@ -670,11 +704,13 @@ with tab_observe:
   <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#a78bfa;
               letter-spacing:0.18em;font-weight:800;margin-bottom:4px;
               text-shadow:0 0 8px rgba(124,58,237,0.35);">PATH C · RESEARCHER</div>
-  <div style="font-size:1.05rem;font-weight:700;color:#ede9fe;margin-bottom:8px;">
-    🔬 深入研究
+  <div style="font-size:1.05rem;font-weight:700;color:#ede9fe;margin-bottom:8px;
+              display:flex;align-items:center;gap:8px;">
+    <span style="color:#a78bfa;">{glint_icon("microscope", 18)}</span>
+    <span>深入研究</span>
   </div>
   <div style="font-size:0.9rem;color:#ddd6fe;line-height:1.72;">
-    · 切到 <strong style="color:#f1edfd;">⚙️ 研究工作站</strong> tab<br>
+    · 切到 <strong style="color:#f1edfd;">研究工作站</strong> tab<br>
     · 看完整的 <strong style="color:#f1edfd;">AUC/DSR/ICIR</strong> + LOPO<br>
     · 再到治理監控確認模型健康度<br>
     <br>
@@ -702,8 +738,10 @@ with tab_workstation:
             color:#f1f5f9;
             box-shadow:0 6px 22px rgba(2,6,23,0.18);">
   <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#67e8f9;
-              letter-spacing:0.16em;font-weight:700;text-transform:uppercase;margin-bottom:10px;">
-    ⚡ PERFORMANCE HEADLINE &nbsp;·&nbsp; xgboost_D20 &nbsp;·&nbsp; Purged Walk-Forward 4-Fold
+              letter-spacing:0.16em;font-weight:700;text-transform:uppercase;margin-bottom:10px;
+              display:flex;align-items:center;gap:8px;">
+    <span style="color:#67e8f9;">{glint_icon("activity", 14)}</span>
+    <span>PERFORMANCE HEADLINE &nbsp;·&nbsp; xgboost_D20 &nbsp;·&nbsp; Purged Walk-Forward 4-Fold</span>
   </div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:end;">
     <div>
@@ -732,11 +770,13 @@ with tab_workstation:
     </div>
   </div>
   <div style="font-size:0.82rem;color:#cbd5e1;margin-top:14px;padding-top:12px;
-              border-top:1px solid rgba(148,163,184,0.16);line-height:1.7;">
-    📖 <strong style="color:#f1f5f9;">一句話解讀</strong>：這三個數字就是「這套系統值不值得看」的三把尺 ——
+              border-top:1px solid rgba(148,163,184,0.16);line-height:1.7;
+              display:flex;align-items:flex-start;gap:8px;">
+    <span style="color:#67e8f9;flex-shrink:0;margin-top:2px;">{glint_icon("book-open", 15)}</span>
+    <span><strong style="color:#f1f5f9;">一句話解讀</strong>：這三個數字就是「這套系統值不值得看」的三把尺 ——
     <span style="color:#a7f3d0;">準不準</span>、
     <span style="color:#67e8f9;">穩不穩</span>、
-    <span style="color:#fde68a;">賺不賺</span>。全部通過研究門檻。
+    <span style="color:#fde68a;">賺不賺</span>。全部通過研究門檻。</span>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -789,12 +829,18 @@ with tab_workstation:
     _ts_display = _ts[:19].replace("T", " ") if _ts else "2026-04-20 03:20"
     st.markdown(f"""
 <div class="gl-box-info" style="margin-top:16px;">
-<strong>📅 資料時效</strong>：本平台為<strong>固定歷史資料集（{kpis['date_range']}）</strong>下的
+<span style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+  {glint_icon("calendar", 16)}<strong>資料時效</strong>
+</span>：本平台為<strong>固定歷史資料集（{kpis['date_range']}）</strong>下的
 互動式分析與研究展示系統，非即時市場監控。支援回看不同日期與預測週期的模型判讀與策略表現。<br>
-<span style="font-size:.82rem; color:var(--gl-text-3);">
-🕐 最新報告時間 <span class="gl-mono">{_ts_display}</span>
-&nbsp;·&nbsp; 🔬 研究模式 <span class="gl-mono">Historical Interactive Snapshot</span>
-&nbsp;·&nbsp; 📦 Phase 1-6 Complete
+<span style="font-size:.82rem; color:var(--gl-text-3);display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px;">
+  <span style="display:inline-flex;align-items:center;gap:4px;">{glint_icon("clock", 13)} 最新報告時間</span>
+  <span class="gl-mono">{_ts_display}</span>
+  <span>·</span>
+  <span style="display:inline-flex;align-items:center;gap:4px;">{glint_icon("microscope", 13)} 研究模式</span>
+  <span class="gl-mono">Historical Interactive Snapshot</span>
+  <span>·</span>
+  <span style="display:inline-flex;align-items:center;gap:4px;">{glint_icon("layers", 13)} Phase 1-6 Complete</span>
 </span>
 </div>
 """, unsafe_allow_html=True)
@@ -803,9 +849,9 @@ with tab_workstation:
     st.markdown("### 研究面板入口")
     col_l, col_r = st.columns(2)
     with col_l:
-        st.markdown("""
+        st.markdown(f"""
 <div class="path-card path-qnt">
-    <div style="font-size:2.4rem;margin-bottom:10px;">📊</div>
+    {glint_icon_box("bar-chart", "blue", 54)}
     <div class="path-title">模型績效 · 驗證</div>
     <div class="path-desc">
         AUC · F1 · ICIR 全貌，含 Purged Walk-Forward 4-Fold 穩定性、
@@ -819,13 +865,14 @@ with tab_workstation:
     </div>
 </div>
 """, unsafe_allow_html=True)
-        if st.button("📊  進入模型績效面板", use_container_width=True, type="primary", key="btn_metrics"):
+        if st.button("進入模型績效面板", use_container_width=True, type="primary",
+                     key="btn_metrics", icon=":material/bar_chart:"):
             st.switch_page(str(Path(__file__).resolve().parent / "1_📊_Model_Metrics.py"))
 
     with col_r:
-        st.markdown("""
+        st.markdown(f"""
 <div class="path-card path-qnt">
-    <div style="font-size:2.4rem;margin-bottom:10px;">🔬</div>
+    {glint_icon_box("microscope", "violet", 54)}
     <div class="path-title">特徵 · 文本 · Phase 6</div>
     <div class="path-desc">
         九支柱分布、SHAP Top-20、三階段 funnel、文本情緒雲、
@@ -839,7 +886,8 @@ with tab_workstation:
     </div>
 </div>
 """, unsafe_allow_html=True)
-        if st.button("🔬  進入特徵分析面板", use_container_width=True, type="secondary", key="btn_feat"):
+        if st.button("進入特徵分析面板", use_container_width=True, type="secondary",
+                     key="btn_feat", icon=":material/biotech:"):
             st.switch_page(str(Path(__file__).resolve().parent / "4_🔬_Feature_Analysis.py"))
 
     # ---- 六階段 Phase Timeline -------------------------------------------
@@ -852,10 +900,14 @@ with tab_workstation:
     m1, m2, m3 = st.columns(3)
 
     with m1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="gl-panel">
             <div style="font-size:0.72rem; color:var(--gl-text-3); font-weight:600; letter-spacing:.06em; text-transform:uppercase;">FEATURE</div>
-            <div style="font-size:1.1rem; font-weight:700; color:var(--gl-text); margin-top:6px;">🎯 九支柱因子工程</div>
+            <div style="font-size:1.1rem; font-weight:700; color:var(--gl-text); margin-top:6px;
+                        display:flex;align-items:center;gap:8px;">
+              <span style="color:var(--gl-cyan);">{glint_icon("target", 18)}</span>
+              <span>九支柱因子工程</span>
+            </div>
             <div style="font-size:.9rem; color:var(--gl-text-2); line-height:1.6; margin-top:10px;">
                 <span class="gl-pillar" data-p="trend">trend</span>
                 <span class="gl-pillar" data-p="fund">fund</span>
@@ -874,10 +926,14 @@ with tab_workstation:
         """, unsafe_allow_html=True)
 
     with m2:
-        st.markdown("""
+        st.markdown(f"""
         <div class="gl-panel">
             <div style="font-size:0.72rem; color:var(--gl-text-3); font-weight:600; letter-spacing:.06em; text-transform:uppercase;">VALIDATION</div>
-            <div style="font-size:1.1rem; font-weight:700; color:var(--gl-text); margin-top:6px;">✅ 嚴謹的時序交叉驗證</div>
+            <div style="font-size:1.1rem; font-weight:700; color:var(--gl-text); margin-top:6px;
+                        display:flex;align-items:center;gap:8px;">
+              <span style="color:var(--gl-emerald);">{glint_icon("target", 18)}</span>
+              <span>嚴謹的時序交叉驗證</span>
+            </div>
             <div style="font-size:.9rem; color:var(--gl-text-2); line-height:1.6; margin-top:10px;">
                 <strong>Purged Walk-Forward CV</strong>（4 折），
                 Expanding Window 配合 <strong>20 日 Embargo</strong> 杜絕前瞻偏差。<br><br>
@@ -891,10 +947,14 @@ with tab_workstation:
         """, unsafe_allow_html=True)
 
     with m3:
-        st.markdown("""
+        st.markdown(f"""
         <div class="gl-panel">
             <div style="font-size:0.72rem; color:var(--gl-text-3); font-weight:600; letter-spacing:.06em; text-transform:uppercase;">MODEL</div>
-            <div style="font-size:1.1rem; font-weight:700; color:var(--gl-text); margin-top:6px;">⚡ 雙引擎 + 成本回測</div>
+            <div style="font-size:1.1rem; font-weight:700; color:var(--gl-text); margin-top:6px;
+                        display:flex;align-items:center;gap:8px;">
+              <span style="color:var(--gl-amber);">{glint_icon("cpu", 18)}</span>
+              <span>雙引擎 + 成本回測</span>
+            </div>
             <div style="font-size:.9rem; color:var(--gl-text-2); line-height:1.6; margin-top:10px;">
                 <strong>LightGBM + XGBoost</strong> 雙引擎加上等權 Ensemble，三地平線覆蓋短中長週期。<br><br>
                 <span class="gl-chip">D+1 日度</span>

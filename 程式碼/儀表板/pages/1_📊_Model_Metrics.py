@@ -30,6 +30,8 @@ PAGE_TITLES = _utils.PAGE_TITLES
 PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
+glint_icon = _utils.glint_icon
+glint_heading = _utils.glint_heading
 
 inject_custom_css()
 
@@ -135,7 +137,7 @@ try:
             default={}
         )
 
-        st.markdown("### 🎯 關鍵績效指標 | Key Performance Indicators")
+        glint_heading("target", "關鍵績效指標", "Key Performance Indicators", tone="cyan")
 
         kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
         with kpi_col1:
@@ -192,7 +194,7 @@ except Exception as e:
 
 # ===== Model Comparison Radar Chart =====
 try:
-    st.subheader("📊 引擎對標分析 | Engine Comparison")
+    glint_heading("bar-chart", "引擎對標分析", "Engine Comparison", tone="blue")
     st.caption("↓ 雷達圖越大代表該引擎在該維度表現越好。AUC 高 + LogLoss 低 = 最理想。")
     st.caption("LightGBM vs XGBoost | 跨多維度性能指標的側面對比")
 
@@ -245,7 +247,7 @@ except Exception as e:
 
 # ===== AUC Comparison =====
 st.divider()
-st.subheader(f"📈 AUC-ROC 比較 | AUC Comparison (D+{horizon})")
+glint_heading("trending-up", f"AUC-ROC 比較 (D+{horizon})", "AUC Comparison", tone="cyan")
 
 try:
     rows = []
@@ -320,12 +322,14 @@ try:
             "<b>所以呢：</b>ENSEMBLE 只有在 AUC 穩定高於 0.52 時才值得部署。D+20 最可靠,D+1/D+5 波動大,僅作參考。"
         )
 
-        st.markdown("""
+        st.markdown(f"""
         <div class="insight-box">
-        <strong>💡 洞察 | Insight：</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+          {glint_icon("lightbulb", 15)} 洞察 | Insight：</strong><br>
         AUC > 0.52 表示模型優於隨機預測，超越品質門檻。<br>
         ENSEMBLE 通常結合個別模型優勢，實現更穩定的預測。<br><br>
-        <strong>✅ 應用建議：</strong><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-emerald);">
+          {glint_icon("target", 15)} 應用建議：</strong><br>
         在 <strong>月度頻率（D+20）</strong> 策略部署；D+1/D+5 訊號品質不足，不推薦實盤使用。
         </div>
         """, unsafe_allow_html=True)
@@ -334,11 +338,12 @@ except Exception as e:
 
 # ===== Per-Class AUC =====
 st.divider()
-st.subheader(f"🎯 分類別 AUC 分析 | Per-Class AUC (D+{horizon})")
+glint_heading("target", f"分類別 AUC 分析 (D+{horizon})", "Per-Class AUC", tone="cyan")
 st.caption("↓ 三類（DOWN/FLAT/UP）的個別 AUC，觀察模型在哪個方向的判斷更有信心。")
-st.markdown("""
+st.markdown(f"""
 <div class="insight-box">
-<strong>❓ 為什麼看 Per-Class AUC | Why Per-Class AUC？</strong><br>
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-violet);">
+  {glint_icon("book-open", 15)} 為什麼看 Per-Class AUC | Why Per-Class AUC？</strong><br>
 三分類問題中，整體 AUC 可能掩蓋個別類別的弱點。<br>
 Per-Class AUC 分別衡量模型對 DOWN / FLAT / UP 的區辨能力，幫助識別特定類別的模型弱點。
 </div>
@@ -398,7 +403,7 @@ try:
             )
 
         # Heatmap option
-        st.caption("📊 熱力圖視圖 | Heatmap View")
+        st.caption("熱力圖視圖 | Heatmap View")
         heatmap_data = df_pc.pivot_table(
             index="Engine",
             columns="Fold",
@@ -429,10 +434,11 @@ except Exception as e:
 
 # ===== Fold Stability =====
 st.divider()
-st.subheader(f"📉 Fold 穩定性趨勢 | Fold Stability (D+{horizon})")
-st.markdown("""
+glint_heading("activity", f"Fold 穩定性趨勢 (D+{horizon})", "Fold Stability", tone="amber")
+st.markdown(f"""
 <div class="insight-box">
-<strong>📌 穩定性指標 | Stability Indicator：</strong><br>
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+  {glint_icon("pin", 15)} 穩定性指標 | Stability Indicator：</strong><br>
 不同 Fold 間的性能波動越小，代表模型越穩健。<br>
 持續跌破品質門檻的模型可能存在資料或特徵洩漏。
 </div>
@@ -503,7 +509,7 @@ try:
     ]
 
     if available_engines:
-        st.caption("📊 並排比較 | Side-by-Side Comparison")
+        st.caption("並排比較 | Side-by-Side Comparison")
 
         if len(available_engines) >= 2:
             # Dual engine comparison
@@ -550,10 +556,11 @@ except Exception as e:
 
 # ===== Calibration (ECE) Analysis =====
 st.divider()
-st.subheader(f"🎯 校準分析 | Calibration Analysis (D+{horizon})")
-st.markdown("""
+glint_heading("target", f"校準分析 (D+{horizon})", "Calibration Analysis", tone="emerald")
+st.markdown(f"""
 <div class="insight-box">
-<strong>❓ 什麼是校準（Calibration）？</strong><br>
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-emerald);">
+  {glint_icon("book-open", 15)} 什麼是校準（Calibration）？</strong><br>
 校準衡量模型輸出的機率是否與實際頻率一致。<br>
 例如模型預測某股票有 70% 機率上漲，則在所有被預測 70% 的股票中，應約有 70% 確實上漲。<br>
 <strong>ECE（Expected Calibration Error）</strong>越低代表校準越好。<br>
@@ -638,7 +645,8 @@ try:
 
             st.markdown(f"""
             <div class="insight-box">
-            <strong>💡 洞察 | Insight：</strong>
+            <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+              {glint_icon("lightbulb", 15)} 洞察 | Insight：</strong>
             Isotonic Regression 校準使 D+{horizon} 的 ECE 平均降低約 <strong>74–80%</strong>，顯著提升機率輸出的可靠性。<br>
             校準後 ECE 均低於 0.02，達到高品質校準水準。
             </div>
@@ -650,10 +658,11 @@ except Exception as e:
 
 # ===== Confusion Matrices =====
 st.divider()
-st.subheader(f"🔢 混淆矩陣 | Confusion Matrices (D+{horizon})")
-st.markdown("""
+glint_heading("grid", f"混淆矩陣 (D+{horizon})", "Confusion Matrices", tone="violet")
+st.markdown(f"""
 <div class="insight-box">
-<strong>❓ 什麼是混淆矩陣？</strong><br>
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-violet);">
+  {glint_icon("book-open", 15)} 什麼是混淆矩陣？</strong><br>
 混淆矩陣展示模型對 DOWN / FLAT / UP 三個類別的實際分類結果。<br>
 對角線上的值代表正確分類，非對角線代表錯誤分類。<br>
 可以從中觀察模型是否偏向預測特定類別。
@@ -684,9 +693,10 @@ try:
             else:
                 st.info(f"{engine.upper()} 混淆矩陣不存在")
 
-    st.markdown("""
+    st.markdown(f"""
     <div class="insight-box">
-    <strong>💡 解讀建議 | Reading Guide：</strong><br>
+    <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+      {glint_icon("lightbulb", 15)} 解讀建議 | Reading Guide：</strong><br>
     觀察對角線佔比——若 FLAT 類被大量預測，可能反映市場中性偏好。<br>
     DOWN 與 UP 的混淆程度直接影響策略方向判斷的準確性。
     </div>
@@ -696,10 +706,11 @@ except Exception as e:
 
 # ===== Hyperparameter Optimization Results =====
 st.divider()
-st.subheader(f"⚙️ 超參數最佳化結果 | Hyperparameter Optimization (D+{horizon})")
-st.markdown("""
+glint_heading("cpu", f"超參數最佳化結果 (D+{horizon})", "Hyperparameter Optimization", tone="violet")
+st.markdown(f"""
 <div class="insight-box">
-<strong>❓ 超參數搜尋流程</strong><br>
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-violet);">
+  {glint_icon("book-open", 15)} 超參數搜尋流程</strong><br>
 本系統使用 <strong>Optuna（TPE Sampler）</strong> 對每個 Horizon × Engine 組合進行 <strong>50 輪</strong>貝葉斯超參數搜尋，目標函數為 Walk-Forward CV 平均 AUC。<br>
 搜尋空間涵蓋學習率、樹深度、正則化強度等核心參數。
 </div>
@@ -756,7 +767,8 @@ try:
 
         st.markdown(f"""
         <div class="insight-box">
-        <strong>💡 洞察 | Insight：</strong>
+        <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+          {glint_icon("lightbulb", 15)} 洞察 | Insight：</strong>
         Optuna 搜尋結果顯示 D+{horizon} 模型傾向使用較低學習率搭配較多棵樹，並透過正則化（reg_alpha / reg_lambda）控制過擬合。<br>
         兩引擎的最佳參數差異反映其架構特性。
         </div>
@@ -768,7 +780,7 @@ except Exception as e:
 
 # ===== Static Figures: Fold Stability & Model Comparison =====
 st.divider()
-st.subheader("📊 綜合比較圖表 | Overview Charts")
+glint_heading("grid", "綜合比較圖表", "Overview Charts", tone="blue")
 
 try:
     _ov_here = Path(__file__).resolve()

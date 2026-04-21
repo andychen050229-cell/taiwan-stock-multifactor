@@ -25,6 +25,8 @@ glint_plotly_layout = _utils.glint_plotly_layout
 glint_heatmap_colorscale = _utils.glint_heatmap_colorscale
 glint_colorbar = _utils.glint_colorbar
 render_section_title = _utils.render_section_title
+glint_icon = _utils.glint_icon
+glint_heading = _utils.glint_heading
 
 inject_custom_css()
 
@@ -144,7 +146,7 @@ if cs:
     # Static PNG fallback
     png = fig_dir / "phase3_cost_sensitivity_heatmap.png"
     if png.exists():
-        with st.expander("📸 靜態 PNG（matplotlib 全指標版）", expanded=False):
+        with st.expander("靜態 PNG（matplotlib 全指標版）", expanded=False, icon=":material/photo_library:"):
             st.image(str(png), use_container_width=True)
 
 # ----- B. Cross-Horizon -----
@@ -207,7 +209,7 @@ if ch:
 
     png = fig_dir / "phase3_cross_horizon_heatmap.png"
     if png.exists():
-        with st.expander("📸 完整三指標熱圖（AUC/IC/Sharpe）", expanded=False):
+        with st.expander("完整三指標熱圖（AUC/IC/Sharpe）", expanded=False, icon=":material/photo_library:"):
             st.image(str(png), use_container_width=True)
 
 # ----- C. Pillar Contribution -----
@@ -263,7 +265,7 @@ if pc:
 
     png = fig_dir / "phase3_pillar_contribution.png"
     if png.exists():
-        with st.expander("📸 分模型支柱明細（堆疊長條）", expanded=False):
+        with st.expander("分模型支柱明細（堆疊長條）", expanded=False, icon=":material/photo_library:"):
             st.image(str(png), use_container_width=True)
 
 # ----- D. Case Study -----
@@ -327,7 +329,7 @@ if cs_d:
 
     png = fig_dir / "phase3_case_study.png"
     if png.exists():
-        with st.expander("📸 四股合併圖（每日 up_prob vs 實現標籤）", expanded=False):
+        with st.expander("四股合併圖（每日 up_prob vs 實現標籤）", expanded=False, icon=":material/photo_library:"):
             st.image(str(png), use_container_width=True)
 
 # ----- Phase 6 Cross-link -----
@@ -337,8 +339,9 @@ st.markdown("""
     <div style="display:flex; justify-content:space-between; align-items:center; gap:20px;">
         <div>
             <div style="font-size:0.72rem; color:var(--gl-text-3); font-weight:600; letter-spacing:.06em; text-transform:uppercase;">VALIDATION LAB</div>
-            <div style="font-size:1.15rem; font-weight:700; color:var(--gl-text); margin-top:4px;">
-                🔭 驗證壓測
+            <div style="font-size:1.15rem; font-weight:700; color:var(--gl-text); margin-top:4px; display:flex;align-items:center;gap:8px;">
+                <span style="color:#c4b5fd;">""" + glint_icon("radar", 18, "#c4b5fd") + """</span>
+                <span>驗證壓測</span>
             </div>
             <div style="font-size:.88rem; color:var(--gl-text-2); margin-top:6px;">
                 延伸分析回答「有多大貢獻」，驗證壓測回答「<strong>拿掉會掉多少</strong>」——
@@ -354,7 +357,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-if st.button("🔭  前往 驗證壓測", use_container_width=True, type="primary"):
+if st.button("前往驗證壓測", use_container_width=True, type="primary", icon=":material/radar:"):
     st.switch_page(str(Path(__file__).resolve().parent / "A_🔭_Phase6_深度驗證.py"))
 
 # ----- Footer -----

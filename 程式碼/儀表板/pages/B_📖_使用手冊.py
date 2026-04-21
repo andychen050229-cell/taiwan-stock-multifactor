@@ -23,6 +23,7 @@ _spec.loader.exec_module(_utils)
 inject_custom_css = _utils.inject_custom_css
 render_hero = _utils.render_hero
 render_topbar = _utils.render_topbar
+glint_icon = _utils.glint_icon
 
 inject_custom_css()
 
@@ -425,22 +426,22 @@ st.markdown(f"""
 # ============================================================================
 st.markdown("## 4. 怎麼逛這個網站？4 步驟建議路線")
 
-st.markdown("""
+st.markdown(f"""
 <div class="mn-flow">
 <div class="mn-flow-step" data-num="1">
-  <div class="mn-flow-step-title">🧭 情境主控</div>
+  <div class="mn-flow-step-title" style="display:flex;align-items:center;gap:8px;"><span style="color:#22d3ee;">{glint_icon("grid", 18, "#22d3ee")}</span>情境主控</div>
   <div class="mn-flow-step-desc">首頁。看今天的<strong>系統總體健康度</strong>、9 大面向誰最強、熱門股票快照。</div>
 </div>
 <div class="mn-flow-step" data-num="2">
-  <div class="mn-flow-step-title">🌱 投資觀察</div>
+  <div class="mn-flow-step-title" style="display:flex;align-items:center;gap:8px;"><span style="color:#10b981;">{glint_icon("radar", 18, "#10b981")}</span>投資觀察</div>
   <div class="mn-flow-step-desc">白話版的「今天值得關注什麼」。推薦清單 + 為什麼推 + 注意事項。<strong>一般使用者從這裡</strong>。</div>
 </div>
 <div class="mn-flow-step" data-num="3">
-  <div class="mn-flow-step-title">🔬 研究工作站</div>
+  <div class="mn-flow-step-title" style="display:flex;align-items:center;gap:8px;"><span style="color:#8b5cf6;">{glint_icon("microscope", 18, "#8b5cf6")}</span>研究工作站</div>
   <div class="mn-flow-step-desc">技術細節。回測成果、特徵重要度、訊號穩定度等。<strong>分析師進階用</strong>。</div>
 </div>
 <div class="mn-flow-step" data-num="4">
-  <div class="mn-flow-step-title">🛡️ 治理監控</div>
+  <div class="mn-flow-step-title" style="display:flex;align-items:center;gap:8px;"><span style="color:#fbbf24;">{glint_icon("target", 18, "#fbbf24")}</span>治理監控</div>
   <div class="mn-flow-step-desc">模型是否還可信？Model Card、資料漂移警示、品質閘門狀態。<strong>透明度保證</strong>。</div>
 </div>
 </div>
@@ -558,10 +559,10 @@ st.markdown(f"""
 </table>
 """, unsafe_allow_html=True)
 
-st.markdown("""
+st.markdown(f"""
 <div class="mn-callout info" style="margin-top:22px;">
-<strong>📖 看完這一頁，你已經比 95% 使用者更懂這系統。</strong><br>
-接下來建議先到 <strong>🌱 投資觀察</strong> 看白話版推薦，再回 <strong>🧭 情境主控</strong> 看整體總覽。
-任何時候想回來複習術語，從側邊欄的 <strong>❓ 手冊</strong> 按鈕一鍵回到這頁。
+<strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("book-open", 15, "#22d3ee")} 看完這一頁，你已經比 95% 使用者更懂這系統。</strong><br>
+接下來建議先到 <strong>投資觀察</strong> 看白話版推薦，再回 <strong>情境主控</strong> 看整體總覽。
+任何時候想回來複習術語，從側邊欄的 <strong>MANUAL</strong> 按鈕一鍵回到這頁。
 </div>
 """, unsafe_allow_html=True)

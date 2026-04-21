@@ -50,6 +50,7 @@ render_trust_strip = _utils.render_trust_strip
 PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
 PAGE_TITLES = _utils.PAGE_TITLES
 PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
+glint_icon = _utils.glint_icon
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
@@ -596,7 +597,13 @@ st.markdown("""<style>
 </style>""", unsafe_allow_html=True)
 
 # ===== Sidebar =====
-st.sidebar.markdown("### 🌱 投資解讀面板")
+st.sidebar.markdown(
+    f'<div style="display:flex;align-items:center;gap:8px;font-size:1.05rem;'
+    f'font-weight:700;color:var(--gl-text);margin:4px 0 2px;">'
+    f'<span style="color:var(--gl-emerald);">{glint_icon("radar", 20)}</span>'
+    f'<span>投資解讀面板</span></div>',
+    unsafe_allow_html=True,
+)
 st.sidebar.caption("固定歷史資料期間的模型判讀展示")
 st.sidebar.divider()
 
@@ -606,13 +613,13 @@ HORIZON_LABELS = {
     20: "D+20（約一個月 ≈ 20 交易日）",
 }
 horizon = st.sidebar.selectbox(
-    "📅 預測週期",
+    "預測週期",
     options=[20, 5, 1],
     format_func=lambda x: HORIZON_LABELS[x],
     index=0,
 )
 
-n_display = st.sidebar.slider("📊 顯示判讀數量", 3, 10, 5)
+n_display = st.sidebar.slider("顯示判讀數量", 3, 10, 5)
 
 st.sidebar.divider()
 st.sidebar.markdown("""
@@ -751,7 +758,13 @@ try:
         """, unsafe_allow_html=True)
 
     # ===== Market Overview =====
-    st.markdown("### 📊 本期市場概況")
+    st.markdown(
+        f'<h3 style="display:flex;align-items:center;gap:10px;margin:24px 0 6px;'
+        f'color:var(--gl-text);">'
+        f'<span style="color:var(--gl-cyan);">{glint_icon("bar-chart", 22)}</span>'
+        f'<span>本期市場概況</span></h3>',
+        unsafe_allow_html=True,
+    )
 
     label_col = f"label_{horizon}"
     ret_col = f"fwd_ret_{horizon}"
@@ -827,7 +840,7 @@ try:
                 st.metric("全市場中位數報酬", "—")
     else:
         # No full market data — show simplified overview
-        st.caption(f"📌 以下展示模型篩選的前 {len(recs)} 檔判讀結果。完整市場分佈資料將在下次部署後更新。")
+        st.caption(f"以下展示模型篩選的前 {len(recs)} 檔判讀結果。完整市場分佈資料將在下次部署後更新。")
         k1, k2 = st.columns(2)
         with k1:
             st.metric("判讀股數量", f"{len(recs)}")
@@ -840,7 +853,13 @@ try:
     st.divider()
 
     # ===== Stock Cards with 5-Layer Architecture =====
-    st.markdown(f"### 📌 判讀結果 Top {len(recs)}")
+    st.markdown(
+        f'<h3 style="display:flex;align-items:center;gap:10px;margin:24px 0 6px;'
+        f'color:var(--gl-text);">'
+        f'<span style="color:var(--gl-emerald);">{glint_icon("pin", 22)}</span>'
+        f'<span>判讀結果 Top {len(recs)}</span></h3>',
+        unsafe_allow_html=True,
+    )
     st.caption("以下為按歷史觀察報酬排序的模型判讀結果（事後回顧，非即時預測）。展開各層瞭解詳細資訊。")
 
     for idx, (_, stock) in enumerate(recs.iterrows()):
@@ -998,7 +1017,7 @@ try:
                 st.caption(" · ".join(snap_parts))
 
             # ===== LAYER 3: Why This Interpretation (Expandable) =====
-            with st.expander("📖 判讀原因", expanded=True):
+            with st.expander("判讀原因", expanded=True, icon=":material/menu_book:"):
                 st.markdown("**模型觀察到的特徵訊號：**")
 
                 reasons = []
@@ -1087,10 +1106,10 @@ try:
                     else:
                         st.caption("目前無特別顯著的風險訊號，但仍需持續關注市場變化。")
 
-                st.caption("💡 以上風險分析基於歷史數據，僅供研究參考，不構成投資建議。")
+                st.caption("以上風險分析基於歷史數據，僅供研究參考，不構成投資建議。")
 
             # ===== LAYER 5: Historical Observation =====
-            with st.expander("📊 歷史觀察值"):
+            with st.expander("歷史觀察值", icon=":material/bar_chart:"):
                 st.markdown("""<div class="history-disclaimer">
 ⚠️ 以下為歷史觀察值，非當時可見資訊，不構成即時預測承諾。
 此為模型在歷史資料上的判讀結果，用於展示研究能力，不代表未來表現。
@@ -1118,14 +1137,20 @@ try:
                 fy = fund.get("fiscal_year")
                 fq = fund.get("fiscal_quarter")
                 if fy is not None and pd.notna(fy) and fq is not None and pd.notna(fq):
-                    st.caption(f"📅 財報基準：{int(fy)} 年 Q{int(fq)}")
+                    st.caption(f"財報基準：{int(fy)} 年 Q{int(fq)}")
 
         if idx < len(recs) - 1:
             st.divider()
 
     # ===== Comparison Table =====
     st.divider()
-    st.markdown("### 📊 多週期判讀對比")
+    st.markdown(
+        f'<h3 style="display:flex;align-items:center;gap:10px;margin:24px 0 6px;'
+        f'color:var(--gl-text);">'
+        f'<span style="color:var(--gl-violet);">{glint_icon("layers", 22)}</span>'
+        f'<span>多週期判讀對比</span></h3>',
+        unsafe_allow_html=True,
+    )
     st.caption("D+1、D+5 與 D+20 三個時間維度的判讀結果對比，協助觀察短中長期趨勢是否一致。")
 
     comp_col1, comp_col2, comp_col3 = st.columns(3)
@@ -1292,13 +1317,19 @@ try:
 
 需漲幅：{breakeven_pct:+.2f}%
 
-💡 至少需漲到 ${breakeven_price:.2f} 才能回本。
-        """)
+至少需漲到 ${breakeven_price:.2f} 才能回本。
+        """, icon=":material/lightbulb:")
 
     # ===== Market Distribution =====
     if has_full_market and total_stocks > 0:
         st.divider()
-        st.markdown("### 📈 全市場訊號分佈")
+        st.markdown(
+            f'<h3 style="display:flex;align-items:center;gap:10px;margin:24px 0 6px;'
+            f'color:var(--gl-text);">'
+            f'<span style="color:var(--gl-cyan);">{glint_icon("trending-up", 22)}</span>'
+            f'<span>全市場訊號分佈</span></h3>',
+            unsafe_allow_html=True,
+        )
         st.caption(f"基於 {total_stocks:,} 支股票的模型判讀結果，非僅限上方展示的 Top {len(recs)} 支。")
 
         dist_col1, dist_col2 = st.columns([1, 1])
@@ -1374,7 +1405,7 @@ try:
                 )
                 fig_bar.update_layout(showlegend=False)
                 st.plotly_chart(fig_bar, use_container_width=True)
-                st.caption(f"📊 全市場中位數報酬 {median_ret:+.1%}，標準差 {std_ret:.1%}。上方展示的判讀股為模型篩選的少數偏多標的。")
+                st.caption(f"全市場中位數報酬 {median_ret:+.1%}，標準差 {std_ret:.1%}。上方展示的判讀股為模型篩選的少數偏多標的。")
             else:
                 st.info("無充足的報酬分佈資料")
 
@@ -1384,7 +1415,13 @@ try:
 
     if vol_trend and len(vol_trend) > 5:
         st.divider()
-        st.markdown("### 🌡️ 市場波動度趨勢（近 20 日）")
+        st.markdown(
+            f'<h3 style="display:flex;align-items:center;gap:10px;margin:24px 0 6px;'
+            f'color:var(--gl-text);">'
+            f'<span style="color:var(--gl-amber);">{glint_icon("activity", 22)}</span>'
+            f'<span>市場波動度趨勢（近 20 日）</span></h3>',
+            unsafe_allow_html=True,
+        )
         st.caption("波動度指標反映市場的不確定性程度。當波動度升高時，模型預測的不確定性也隨之增加。")
 
         vol_dates = [v["date"] for v in vol_trend]
@@ -1428,20 +1465,26 @@ try:
         # Explanatory note
         high_vol_pct = baselines.get("high_vol_days_pct", 0)
         st.caption(
-            f"💡 歷史上約有 {high_vol_pct:.0%} 的交易日處於高波動環境。\n"
+            f"歷史上約有 {high_vol_pct:.0%} 的交易日處於高波動環境。\n"
             f"當波動度突破 P90 線（{vol_p90:.2f}）時，建議降低持倉信心、擴大停損幅度。\n"
             f"OOD 分析顯示 D+5 策略在不同波動環境下穩定性最佳。"
         )
 
     # ===== Investment Education =====
     st.divider()
-    st.markdown("### 📚 研究方法論")
+    st.markdown(
+        f'<h3 style="display:flex;align-items:center;gap:10px;margin:24px 0 6px;'
+        f'color:var(--gl-text);">'
+        f'<span style="color:var(--gl-violet);">{glint_icon("book-open", 22)}</span>'
+        f'<span>研究方法論</span></h3>',
+        unsafe_allow_html=True,
+    )
 
     tip1, tip2, tip3 = st.columns(3)
 
     with tip1:
         st.markdown("""
-**🔬 多因子模型**
+**多因子模型**
 
 本研究使用多個特徵因子：
 
@@ -1455,7 +1498,7 @@ try:
 
     with tip2:
         st.markdown("""
-**⚠️ 重要限制**
+**重要限制**
 
 - 歷史不代表未來
 - 模型會犯錯
@@ -1468,7 +1511,7 @@ try:
 
     with tip3:
         st.markdown("""
-**🛡️ 風險管理建議**
+**風險管理建議**
 
 - 分散配置，不集中押注
 - 設定停損點（如 -10%）
