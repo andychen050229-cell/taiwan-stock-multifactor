@@ -32,7 +32,7 @@ def P(name: str) -> str:
 
 # ===== Page Config (MUST be before st.navigation) =====
 st.set_page_config(
-    page_title="股票預測系統 · Multi-Factor",
+    page_title="台股多因子研究終端 · Multi-Factor",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -140,6 +140,12 @@ st.markdown("""<style>
     #MainMenu { visibility: hidden; }
     footer   { visibility: hidden; }
 </style>""", unsafe_allow_html=True)
+
+# v10 §7 · §8 · §13.3 — Consolidated dark widget override layer
+# Repaints sidebar selectbox (D+20/D+5/D+1), slider, expander summary,
+# radio labels, download buttons, and tabs so every interactive block has
+# readable base-state text (fixes the v10 screenshot-3/4 black-on-black bugs).
+_utils.inject_v10_dark_widgets_css()
 
 # ===== TOP-NAV RENDER (v4 audit §5 — 3-layer: Utility Bar + Primary + Secondary) =====
 # Always visible regardless of sidebar state — Cloud embed mode safe.

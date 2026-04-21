@@ -849,37 +849,57 @@ def inject_custom_css():
     /* Design-system extensions — ported from Claude Design bundle       */
     /* ================================================================= */
     /* ---- Sticky topbar (breadcrumb + model chips + live clock) ---- */
+    /* v10 §12.2 — meta strip repainted as a dark-terminal sibling to the
+       utility bar. Previously this was a light glass panel which felt like
+       a separate widget; now it extends the shell's dark palette so the
+       utility bar + primary nav + secondary nav + meta strip read as one
+       stacked instrument header. */
     .gl-topbar {{
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 10px 18px;
-        background: rgba(255,255,255,.72);
-        border: 1px solid var(--gl-border);
-        border-radius: 12px;
+        padding: 8px 16px;
+        background: linear-gradient(180deg, rgba(10,20,32,0.88) 0%, rgba(8,16,32,0.88) 100%);
+        border: 1px solid rgba(103,232,249,0.22);
+        border-radius: 10px;
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        margin-bottom: 14px;
-        box-shadow: var(--gl-shadow-sm);
-        font-size: 0.82rem;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.22), inset 0 1px 0 rgba(103,232,249,0.10);
+        font-size: 0.80rem;
+        font-family: var(--gl-font-mono);
     }}
     .gl-topbar-l {{
         display: flex;
         align-items: center;
         gap: 10px;
-        color: var(--gl-text-2);
+        color: #8397ac;
+        letter-spacing: 0.04em;
     }}
-    .gl-topbar-l .gl-slash {{ color: var(--gl-text-3); }}
-    .gl-topbar-l .gl-crumb-cur {{ color: var(--gl-text); font-weight: 600; }}
+    /* Overlay the inline color specified by render_topbar — v10 §12.2
+       wants muted breadcrumb root and bright current-page crumb. */
+    .gl-topbar-l span:first-child {{ color: #8397ac !important; }}
+    .gl-topbar-l span:nth-child(2) {{ color: #5B7186 !important; }}
+    .gl-topbar-l span:last-child {{ color: #E8F7FC !important; font-weight: 700 !important; }}
+    .gl-topbar-l .gl-slash {{ color: #5B7186; }}
+    .gl-topbar-l .gl-crumb-cur {{ color: #E8F7FC; font-weight: 700; }}
     .gl-topbar-r {{
         display: flex;
         align-items: center;
         gap: 8px;
         font-family: var(--gl-font-mono);
-        font-size: 0.72rem;
-        color: var(--gl-text-3);
+        font-size: 0.70rem;
+        color: #8397ac;
     }}
     .gl-topbar-r .gl-sep {{ opacity: .4; }}
+    /* Meta-strip clock — mono tabular, cyan, subtle */
+    .gl-topbar-r #gl-clock {{
+        background: rgba(6,10,18,0.65) !important;
+        color: #67e8f9 !important;
+        border: 1px solid rgba(103,232,249,0.28) !important;
+        font-family: var(--gl-font-mono) !important;
+        letter-spacing: 0.04em !important;
+    }}
     .gl-topbar-clock {{
         font-family: var(--gl-font-mono);
         font-variant-numeric: tabular-nums;
@@ -1831,21 +1851,23 @@ def inject_custom_css():
     [data-testid="stAppViewContainer"] [data-testid="stMain"] .block-container {{
         padding-top: max(12px, env(safe-area-inset-top, 12px)) !important;
     }}
-    [data-testid="stVerticalBlock"]:has(> div > .gl-utilbar),
-    [data-testid="stVerticalBlock"]:has(> .gl-utilbar) {{
+    [data-testid="stVerticalBlock"]:has(> div > .gl-utilbar-marker),
+    [data-testid="stVerticalBlock"]:has(> .gl-utilbar-marker) {{
         overflow: visible !important;
     }}
 
-    /* Utility bar — terminal-style metadata strip (pure HTML, no links) */
-    .gl-utilbar {{
-        display: flex;
-        flex-wrap: nowrap;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 8px 14px;
-        margin: 6px -1rem 0 -1rem;  /* v9 §4 · was -0.5rem; was clipping on tall viewports */
-        min-height: 44px;            /* v9 §4 · fixed height so bar never collapses */
+    /* ============================================================
+       v10 §6 — Utility Bar shell (columns-backed, functional Search)
+       The render function now emits a marker div + a 3-column
+       stHorizontalBlock; the outer VerticalBlock is promoted to the
+       sticky terminal-style shell via :has() so the visual contract
+       from v8/v9 is preserved but the CENTER zone becomes a real
+       Streamlit selectbox for ticker search.
+       ============================================================ */
+    [data-testid="stVerticalBlock"]:has(> div > .gl-utilbar-marker) {{
+        margin: 6px -1rem 0 -1rem;
+        padding: 6px 14px;
+        min-height: 44px;
         background:
             linear-gradient(180deg, #050b15 0%, #081020 55%, #060d1a 100%);
         border: 1px solid rgba(6,182,212,0.35);
@@ -1859,27 +1881,32 @@ def inject_custom_css():
         position: sticky;
         top: 0;
         z-index: 41;
-        overflow: visible;           /* v9 §4 · never clip chip content vertically */
+        overflow: visible;
     }}
-    /* v8 §8.3 — three-zone grid (LEFT / CENTER / RIGHT) */
-    .gl-utilbar {{
-        display: grid !important;
-        grid-template-columns: minmax(0,1fr) minmax(260px, 420px) minmax(0,1fr);
-        column-gap: 14px;
-        align-items: center;
+    /* Marker is 0-height — it only exists to anchor the :has() selector */
+    .gl-utilbar-marker {{ display: none !important; }}
+    /* Horizontal columns row inside the bar shell — align vertically, no gap bleed */
+    [data-testid="stVerticalBlock"]:has(> div > .gl-utilbar-marker)
+        > div[data-testid="stHorizontalBlock"] {{
+        align-items: center !important;
+        gap: 14px !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }}
+    /* Each column: no vertical padding so the bar stays 44px */
+    [data-testid="stVerticalBlock"]:has(> div > .gl-utilbar-marker)
+        > div[data-testid="stHorizontalBlock"]
+        > div[data-testid="column"] {{
+        padding: 0 !important;
+    }}
+    /* LEFT / RIGHT inline HTML wrappers */
     .gl-util-left {{
         display: inline-flex;
         flex-wrap: wrap;
         align-items: center;
         justify-content: flex-start;
         min-width: 0;
-    }}
-    .gl-util-center {{
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 0;
+        width: 100%;
     }}
     .gl-util-right {{
         display: inline-flex;
@@ -1888,6 +1915,7 @@ def inject_custom_css():
         justify-content: flex-end;
         gap: 8px;
         min-width: 0;
+        width: 100%;
     }}
     .gl-util-seg {{
         display: inline-flex;
@@ -1899,54 +1927,99 @@ def inject_custom_css():
     }}
     .gl-util-left .gl-util-seg:last-child {{ border-right: none; }}
     .gl-util-right .gl-util-seg {{ border-right: none; padding: 2px 6px; }}
-    /* v8 §8.3 — CENTER zone command-palette search placeholder (visual only) */
-    .gl-util-search {{
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 4px 10px 4px 12px;
-        width: 100%;
-        background: rgba(103,232,249,0.06);
-        border: 1px solid rgba(103,232,249,0.28);
-        border-radius: 7px;
-        font-family: var(--gl-font-mono);
-        font-size: 0.68rem;
-        color: #8397ac;
-        letter-spacing: 0.04em;
-        min-width: 220px;
-        transition: all .2s ease;
+
+    /* ============================================================
+       v10 §6 — Functional Search widget paint (selectbox as terminal input)
+       Scope: only the selectbox inside the .gl-util-search-slot column.
+       ============================================================ */
+    /* Target the element-container that holds the search marker */
+    div[data-testid="stElementContainer"]:has(> div > .gl-util-search-slot) {{
+        margin: 0 !important;
+        padding: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
     }}
-    @media (max-width: 900px) {{
-        .gl-utilbar {{ grid-template-columns: 1fr; row-gap: 6px; }}
-        .gl-util-left, .gl-util-right {{ justify-content: flex-start !important; }}
+    .gl-util-search-slot {{ display: none !important; }}
+    /* The selectbox lives in the SAME column, as a SIBLING after the marker.
+       Use :has(~ ...) to promote the column to a search-palette shell. */
+    div[data-testid="column"]:has(> div > div > .gl-util-search-slot) {{
+        position: relative;
     }}
-    .gl-util-search:hover {{
-        background: rgba(103,232,249,0.10);
-        border-color: rgba(103,232,249,0.50);
-        color: #b4ccdf;
+    div[data-testid="column"]:has(> div > div > .gl-util-search-slot)
+        div[data-testid="stSelectbox"] {{
+        margin: 0 !important;
+        padding: 0 !important;
     }}
-    .gl-util-search-icon {{
-        display: inline-flex;
-        color: #67e8f9;
-        opacity: 0.85;
+    div[data-testid="column"]:has(> div > div > .gl-util-search-slot)
+        div[data-testid="stSelectbox"] > div {{
+        margin: 0 !important;
+        padding: 0 !important;
     }}
-    .gl-util-search-text {{
-        flex: 1 1 auto;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    /* The actual select control — BaseWeb wraps it in a nested div[data-baseweb] */
+    div[data-testid="column"]:has(> div > div > .gl-util-search-slot)
+        div[data-baseweb="select"] > div {{
+        background: rgba(103,232,249,0.06) !important;
+        border: 1px solid rgba(103,232,249,0.32) !important;
+        border-radius: 7px !important;
+        min-height: 32px !important;
+        height: 32px !important;
+        font-family: var(--gl-font-mono) !important;
+        font-size: 0.72rem !important;
+        letter-spacing: 0.04em !important;
+        color: #b4ccdf !important;
+        transition: all 0.18s ease !important;
+        box-shadow: none !important;
     }}
-    .gl-util-kbd {{
-        display: inline-block;
-        padding: 1px 6px;
-        font-family: var(--gl-font-mono);
-        font-size: 0.62rem;
-        font-weight: 700;
-        color: #67e8f9;
-        background: rgba(6,10,18,0.85);
-        border: 1px solid rgba(103,232,249,0.32);
-        border-radius: 3px;
-        margin-left: auto;
+    div[data-testid="column"]:has(> div > div > .gl-util-search-slot)
+        div[data-baseweb="select"] > div:hover {{
+        background: rgba(103,232,249,0.10) !important;
+        border-color: rgba(103,232,249,0.55) !important;
+    }}
+    div[data-testid="column"]:has(> div > div > .gl-util-search-slot)
+        div[data-baseweb="select"] > div:focus-within {{
+        border-color: rgba(103,232,249,0.75) !important;
+        box-shadow: 0 0 0 3px rgba(103,232,249,0.18) !important;
+    }}
+    /* Value text */
+    div[data-testid="column"]:has(> div > div > .gl-util-search-slot)
+        div[data-baseweb="select"] [data-baseweb="tag"],
+    div[data-testid="column"]:has(> div > div > .gl-util-search-slot)
+        div[data-baseweb="select"] input,
+    div[data-testid="column"]:has(> div > div > .gl-util-search-slot)
+        div[data-baseweb="select"] span {{
+        color: #e8f7fc !important;
+        font-family: var(--gl-font-mono) !important;
+    }}
+    /* Placeholder look when sentinel is active */
+    div[data-testid="column"]:has(> div > div > .gl-util-search-slot)
+        div[data-baseweb="select"] span[aria-live] {{
+        color: #8397ac !important;
+    }}
+    /* Caret */
+    div[data-testid="column"]:has(> div > div > .gl-util-search-slot)
+        div[data-baseweb="select"] svg {{
+        color: #67e8f9 !important;
+    }}
+    /* The popup/dropdown panel — BaseWeb portals this to body, so scope
+       by a unique class the widget exposes. Target generic popover menus
+       whose option text starts with the sentinel or a digit (ticker). */
+    div[data-baseweb="popover"] ul[role="listbox"] {{
+        background: #07101c !important;
+        border: 1px solid rgba(6,182,212,0.32) !important;
+        border-radius: 7px !important;
+        box-shadow: 0 8px 26px rgba(0,0,0,0.55) !important;
+    }}
+    div[data-baseweb="popover"] ul[role="listbox"] li {{
+        color: #cbd8e3 !important;
+        font-family: var(--gl-font-mono) !important;
+        font-size: 0.72rem !important;
+        letter-spacing: 0.04em !important;
+        padding: 7px 12px !important;
+    }}
+    div[data-baseweb="popover"] ul[role="listbox"] li:hover,
+    div[data-baseweb="popover"] ul[role="listbox"] li[aria-selected="true"] {{
+        background: rgba(103,232,249,0.12) !important;
+        color: #e8f7fc !important;
     }}
     .gl-util-k {{
         color: #67e8f9;
@@ -3148,7 +3221,7 @@ def render_live_chip(text: str = "LIVE · 研究快照"):
 def render_page_footer(page_name_en: str,
                        limits_note: str = "",
                        product: str = "量化分析工作台",
-                       system: str = "台灣股市多因子預測系統") -> None:
+                       system: str = "台股多因子研究終端") -> None:
     """Unified bottom-of-page footer block (per v3 audit §27, §28).
 
     Three fixed rows, in this exact visual order:
@@ -3349,15 +3422,21 @@ def render_system_health_card(gates_passed: int = 9, total_gates: int = 9,
     )
 
 
-def inject_sidebar_brand(product: str = "股票預測系統",
-                         eyebrow: str = "MULTI-FACTOR ALPHA",
-                         subtitle: str = "台灣股市 × 三引擎集成 × Phase 3 治理"):
-    """Inject the 股票預測系統 brand block at the top of the sidebar.
+def inject_sidebar_brand(product: str = "台股多因子研究終端",
+                         eyebrow: str = "MULTI-FACTOR RESEARCH TERMINAL",
+                         subtitle: str = "三引擎整合｜九支柱快照｜Phase 3 治理"):
+    """Inject the 台股多因子研究終端 brand block at the top of the sidebar.
 
-    Three-layer layout (per v3 audit §17):
+    Three-layer layout (per v3 audit §17, v10 §5 copy refresh):
       · eyebrow (mono, cyan, uppercased) — product category
       · main title (sans, bold, pulsing cyan dot) — product name
       · subtitle (sans, slate, 1-line tagline) — what this product does
+
+    v10 §5 copy rewrite: the old subtitle "台灣股市 × 三引擎集成 × Phase 3 治理"
+    read like an engineering tag rather than a product name. Per audit it must
+    move to the subtitle layer in 管顧 style, and the brand lead-line upgrades
+    from "股票預測系統" → "台股多因子研究終端" for consistency with the
+    terminal-grade product positioning.
 
     Renders on every page because app.py's sidebar runs first.
     Single-line HTML — CommonMark-safe.
@@ -4143,6 +4222,250 @@ def inject_v9_chart_css():
     ``render_signal_donut`` or ``render_market_composition_strip``.
     """
     st.markdown(_GLINT_V9_CHART_CSS, unsafe_allow_html=True)
+
+
+# ============================================================================
+# v10 §7 · §8 · §13.3 — Consolidated dark widget override layer
+# Single source of truth for: sidebar select, sidebar slider, expander base
+# state, radio labels, tabs, download buttons. Fixes the black-on-black
+# readability bugs flagged in v10 screenshots 3 & 4.
+# ============================================================================
+_GLINT_V10_DARK_WIDGETS_CSS = """
+<style>
+/* =========================================================================
+   v10 §7 — Base-state readability fixes (non-hover legibility)
+   Applied GLOBALLY (main canvas + sidebar). Makes sure every interactive
+   block has either:
+     · dark bg + light text    OR
+     · light bg + dark text
+   Never dark bg + dark text.
+   ========================================================================= */
+/* --- Expander summary: always dark-bg + light-text in dark context ------ */
+section[data-testid="stSidebar"] details summary,
+section[data-testid="stSidebar"] details summary span,
+section[data-testid="stSidebar"] details summary p,
+section[data-testid="stSidebar"] details summary div {
+    color: #d6e6f0 !important;
+    font-weight: 600 !important;
+}
+section[data-testid="stSidebar"] details {
+    background: rgba(10,20,32,0.55) !important;
+    border: 1px solid rgba(103,232,249,0.20) !important;
+    border-radius: 10px !important;
+}
+section[data-testid="stSidebar"] details[open] {
+    background: rgba(10,20,32,0.72) !important;
+    border-color: rgba(103,232,249,0.36) !important;
+}
+section[data-testid="stSidebar"] details summary:hover {
+    background: rgba(103,232,249,0.08) !important;
+}
+/* --- Radio labels (light canvas): dark-text on light-bg --------------- */
+div[data-testid="stRadio"] label {
+    color: #1a1f36 !important;
+    font-weight: 500 !important;
+}
+div[data-testid="stRadio"] label[data-baseweb] > div:first-child {
+    border-color: #94a3b8 !important;
+}
+/* --- Radio inside sidebar (dark canvas): light-text ------------------- */
+section[data-testid="stSidebar"] div[data-testid="stRadio"] label,
+section[data-testid="stSidebar"] div[data-testid="stRadio"] label p,
+section[data-testid="stSidebar"] div[data-testid="stRadio"] label span {
+    color: #d6e6f0 !important;
+}
+/* --- Download buttons: always readable in base state ----------------- */
+.stDownloadButton > button,
+.stDownloadButton > button p,
+.stDownloadButton > button span {
+    color: #0f172a !important;
+    background: #ffffff !important;
+}
+section[data-testid="stSidebar"] .stDownloadButton > button,
+section[data-testid="stSidebar"] .stDownloadButton > button p,
+section[data-testid="stSidebar"] .stDownloadButton > button span {
+    background: rgba(10,20,32,0.55) !important;
+    color: #d6e6f0 !important;
+    border: 1px solid rgba(103,232,249,0.28) !important;
+}
+section[data-testid="stSidebar"] .stDownloadButton > button:hover {
+    background: rgba(103,232,249,0.14) !important;
+    border-color: rgba(103,232,249,0.55) !important;
+    color: #e8f7fc !important;
+}
+
+/* =========================================================================
+   v10 §8.2 — Sidebar Selectbox: terminal-grade dark readable control
+   The D+20/D+5/D+1 horizon selector lives in the sidebar. This block
+   repaints it (and any other sidebar selectbox) as a terminal-style
+   control with subtle cyan border, mono value text, and a glowing focus
+   state. Dropdown panel inherits the same dark palette.
+   ========================================================================= */
+section[data-testid="stSidebar"] div[data-testid="stSelectbox"] label,
+section[data-testid="stSidebar"] div[data-testid="stSelectbox"] label p {
+    color: #cbe9f2 !important;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
+    font-size: 0.70rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+    background: rgba(10,20,32,0.78) !important;
+    border: 1px solid rgba(103,232,249,0.32) !important;
+    border-radius: 9px !important;
+    min-height: 40px !important;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
+    color: #e8f7fc !important;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.10) !important;
+    transition: all 0.18s ease !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div:hover {
+    background: rgba(10,20,32,0.90) !important;
+    border-color: rgba(103,232,249,0.55) !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div:focus-within {
+    border-color: rgba(103,232,249,0.80) !important;
+    box-shadow: 0 0 0 3px rgba(103,232,249,0.18) !important;
+}
+/* Value text colour */
+section[data-testid="stSidebar"] div[data-baseweb="select"] [data-baseweb="tag"],
+section[data-testid="stSidebar"] div[data-baseweb="select"] input,
+section[data-testid="stSidebar"] div[data-baseweb="select"] span {
+    color: #e8f7fc !important;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
+    font-size: 0.84rem !important;
+    letter-spacing: 0.06em !important;
+    font-weight: 700 !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+    color: #67e8f9 !important;
+}
+
+/* =========================================================================
+   v10 §8.3 — Sidebar Slider: terminal range control
+   Track = deep navy, active fill = cyan gradient, thumb = glowing cyan node,
+   value bubble = mono tech chip. Scoped to sidebar so main-canvas sliders
+   (if any) stay on the light theme.
+   ========================================================================= */
+section[data-testid="stSidebar"] div[data-testid="stSlider"] label,
+section[data-testid="stSidebar"] div[data-testid="stSlider"] label p {
+    color: #cbe9f2 !important;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
+    font-size: 0.70rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+}
+/* Track (unfilled portion) */
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] div[role="progressbar"],
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] > div > div:first-child {
+    background: rgba(10,20,32,0.85) !important;
+    box-shadow: inset 0 0 0 1px rgba(103,232,249,0.22) !important;
+    height: 5px !important;
+    border-radius: 3px !important;
+}
+/* Active fill portion */
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] div[role="slider"] ~ div,
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] > div > div:nth-child(2) {
+    background: linear-gradient(90deg, #2563eb 0%, #67e8f9 100%) !important;
+    box-shadow: 0 0 10px rgba(103,232,249,0.35) !important;
+    height: 5px !important;
+    border-radius: 3px !important;
+}
+/* Thumb */
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[role="slider"] {
+    background: #67e8f9 !important;
+    border: 2px solid #0a1420 !important;
+    box-shadow:
+        0 0 0 2px rgba(103,232,249,0.45),
+        0 0 14px rgba(103,232,249,0.55) !important;
+    width: 16px !important;
+    height: 16px !important;
+    border-radius: 50% !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[role="slider"]:hover,
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[role="slider"]:focus {
+    transform: scale(1.15);
+    box-shadow:
+        0 0 0 3px rgba(103,232,249,0.55),
+        0 0 20px rgba(103,232,249,0.70) !important;
+}
+/* Value bubble above thumb */
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] [role="slider"] + div {
+    background: rgba(10,20,32,0.92) !important;
+    color: #67e8f9 !important;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(103,232,249,0.45) !important;
+    border-radius: 5px !important;
+    padding: 2px 8px !important;
+    letter-spacing: 0.06em !important;
+}
+/* Min/Max end-labels */
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-testid="stTickBar"],
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-testid="stTickBar"] div {
+    color: #8397ac !important;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0.08em !important;
+}
+
+/* =========================================================================
+   v10 §11 — Tabs: dark base state in sidebar; light-canvas readable in main
+   ========================================================================= */
+section[data-testid="stSidebar"] div[data-baseweb="tab-list"] button[role="tab"],
+section[data-testid="stSidebar"] div[data-baseweb="tab-list"] button[role="tab"] p {
+    color: #b4ccdf !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="tab-list"] button[role="tab"][aria-selected="true"],
+section[data-testid="stSidebar"] div[data-baseweb="tab-list"] button[role="tab"][aria-selected="true"] p {
+    color: #67e8f9 !important;
+    font-weight: 700 !important;
+}
+
+/* =========================================================================
+   v10 §7 — Number-input + text-input base state fixes (readable in sidebar)
+   ========================================================================= */
+section[data-testid="stSidebar"] div[data-testid="stNumberInput"] input,
+section[data-testid="stSidebar"] div[data-testid="stTextInput"] input {
+    background: rgba(10,20,32,0.78) !important;
+    color: #e8f7fc !important;
+    border: 1px solid rgba(103,232,249,0.32) !important;
+    border-radius: 9px !important;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stNumberInput"] input:focus,
+section[data-testid="stSidebar"] div[data-testid="stTextInput"] input:focus {
+    border-color: rgba(103,232,249,0.80) !important;
+    box-shadow: 0 0 0 3px rgba(103,232,249,0.18) !important;
+}
+</style>
+"""
+
+
+def inject_v10_dark_widgets_css():
+    """Inject the v10 consolidated dark-widget override layer.
+
+    This single CSS block repaints every widget that appears in a dark
+    context (sidebar by default, plus the utility-bar Search) so they
+    satisfy the v10 §7 readability rule:
+
+        Interactive blocks must have dark-bg + light-text OR light-bg +
+        dark-text. Never dark-bg + dark-text at base state.
+
+    Included overrides:
+      · v10 §7  — Expander summary, radio labels, download buttons, tabs
+      · v10 §8.2 — Sidebar Selectbox (D+20/D+5/D+1) as terminal control
+      · v10 §8.3 — Sidebar Slider as terminal range control (track/thumb/value)
+      · v10 §13.3 — Consolidated override layer so patches don't scatter
+
+    Call near the top of every page, right after ``inject_custom_css()``.
+    Safe to call multiple times (Streamlit dedupes identical writes).
+    """
+    st.markdown(_GLINT_V10_DARK_WIDGETS_CSS, unsafe_allow_html=True)
 
 
 # --- v7 §18.2 Schema-safe helpers ----------------------------------------
@@ -5519,6 +5842,113 @@ def load_companies():
 
 
 # ============================================================================
+# v10 §6 — Functional Search (command-palette in utility bar center)
+# ============================================================================
+# Session-state keys used for the shell-level ticker search. Keeping them
+# namespaced (`_gl_*`) avoids collisions with analyst-page local widget keys.
+_GL_SEARCH_SELECT_KEY = "_gl_util_search"       # selectbox value
+_GL_SEARCH_LAST_KEY = "_gl_util_search_last"    # last-processed selection
+_GL_SEARCH_TARGET_KEY = "target_ticker"         # consumed by page 0
+_GL_SEARCH_ROUTE_PAGE = "pages/0_🌱_投資解讀面板.py"
+
+
+@st.cache_data(show_spinner=False)
+def _build_ticker_search_options():
+    """Return a (labels, ticker_map) pair for the Search selectbox.
+
+    labels: list of "{ticker} · {short_name} · {company_name}" strings
+    ticker_map: dict label → ticker id string
+
+    Cached across reruns; companies.parquet never changes at runtime.
+    """
+    try:
+        df = load_companies().copy()
+    except Exception:
+        return [], {}
+    # Normalise columns
+    tid_col = "company_id" if "company_id" in df.columns else df.columns[0]
+    short_col = "short_name" if "short_name" in df.columns else None
+    name_col = "company_name" if "company_name" in df.columns else None
+
+    labels = []
+    ticker_map = {}
+    for _, row in df.iterrows():
+        tid = str(row[tid_col]).strip()
+        if not tid:
+            continue
+        short = str(row[short_col]).strip() if short_col else ""
+        full = str(row[name_col]).strip() if name_col else ""
+        parts = [tid]
+        if short:
+            parts.append(short)
+        if full and full != short:
+            parts.append(full)
+        label = " · ".join(parts)
+        labels.append(label)
+        ticker_map[label] = tid
+    return labels, ticker_map
+
+
+def _handle_gl_search_change():
+    """Selectbox on_change callback — routes to the investment page if a real
+    ticker was picked (i.e. not the sentinel / placeholder option).
+
+    Uses a "last-processed" sentinel so navigating *back* to the nav bar after
+    the jump doesn't re-trigger the switch on every rerun.
+    """
+    picked = st.session_state.get(_GL_SEARCH_SELECT_KEY)
+    if not picked:
+        return
+    # Sentinel placeholder — never route on this.
+    if picked.startswith("—"):
+        return
+    # De-dupe against the last routed value.
+    last = st.session_state.get(_GL_SEARCH_LAST_KEY)
+    if picked == last:
+        return
+    st.session_state[_GL_SEARCH_LAST_KEY] = picked
+    # Resolve label → ticker id.
+    _, tmap = _build_ticker_search_options()
+    tid = tmap.get(picked)
+    if not tid:
+        return
+    st.session_state[_GL_SEARCH_TARGET_KEY] = tid
+    # Reset the select so the same option can be re-picked on return.
+    st.session_state[_GL_SEARCH_SELECT_KEY] = "— 搜尋個股代號、公司名 —"
+    try:
+        st.switch_page(_GL_SEARCH_ROUTE_PAGE)
+    except Exception:
+        # switch_page can raise RerunException mid-page; that's the intended signal.
+        pass
+
+
+def _render_gl_search_widget():
+    """Render the Streamlit selectbox inside the utility-bar CENTER zone.
+
+    Called from `render_utility_bar()` between the LEFT and RIGHT HTML blocks.
+    Visual alignment is done via scoped CSS that targets this widget inside a
+    `.gl-util-search-slot` marker div.
+    """
+    labels, _ = _build_ticker_search_options()
+    sentinel = "— 搜尋個股代號、公司名 —"
+    options = [sentinel] + labels
+    # Ensure the session-state key exists before widget instantiation, so the
+    # callback can reset it safely without triggering "modified after widget".
+    if _GL_SEARCH_SELECT_KEY not in st.session_state:
+        st.session_state[_GL_SEARCH_SELECT_KEY] = sentinel
+    # Marker div — CSS `:has()` styles the container as a dark search-input.
+    st.markdown('<div class="gl-util-search-slot"></div>', unsafe_allow_html=True)
+    st.selectbox(
+        label="ticker search",
+        options=options,
+        key=_GL_SEARCH_SELECT_KEY,
+        on_change=_handle_gl_search_change,
+        label_visibility="collapsed",
+        help="輸入個股代號（如 2330）或公司名（如 台積電），選取後自動跳至投資觀察頁",
+    )
+
+
+# ============================================================================
 # Top-nav (Option B) — renders 4-group horizontal nav in main canvas
 # Works identically with or without sidebar (embed mode safe)
 # ============================================================================
@@ -5527,11 +5957,16 @@ def render_utility_bar(info: dict | None = None):
 
     Three-zone grid:
       LEFT   — LIVE/SNAPSHOT status dot + Dataset window (system state)
-      CENTER — command-palette placeholder "Search pages, metrics, tickers"
+      CENTER — functional Search (selectbox routing to 投資觀察 page) [v10 §6]
       RIGHT  — up to 3 key runtime chips: Model · Gates · DSR
 
     "Verified" timestamp is tucked into the LEFT zone after the Dataset chip
     so the CENTER search stays visually dominant (spec §8.3 "Search 居中").
+
+    v10 §6 refit: the CENTER zone is now a real Streamlit `selectbox` widget
+    powered by companies.parquet. Users type ticker (2330) or name (台積電);
+    on selection we set `st.session_state["target_ticker"]` and switch to the
+    investment-reading page which filters its card list to that ticker.
 
     Args:
         info: optional overrides. Keys: status, dataset, model, dsr,
@@ -5547,7 +5982,6 @@ def render_utility_bar(info: dict | None = None):
     gates_passed = safe_html(info.get("gates_passed", 9))
     gates_total = safe_html(info.get("gates_total", 9))
     last_verified = safe_html(info.get("last_verified", "2026-04-20 14:24"))
-    search_hint = safe_html(info.get("search_hint", "Search pages, metrics, tickers"))
     snapshot_tone = "live" if str(info.get("status", "SNAPSHOT")).upper() == "LIVE" else "snapshot"
 
     # --- LEFT zone: live dot + dataset window + last verified (§8.3 LEFT) ---
@@ -5558,21 +5992,6 @@ def render_utility_bar(info: dict | None = None):
         f'<span class="gl-util-k">Verified</span><span class="gl-util-v">{last_verified}</span>',
     ]
     left_html = ''.join(f'<span class="gl-util-seg">{p}</span>' for p in left_parts)
-
-    # --- CENTER zone: command-palette search placeholder (§8.3 CENTER) ----
-    center_html = (
-        '<span class="gl-util-search" role="search" aria-label="search placeholder">'
-        '<span class="gl-util-search-icon" aria-hidden="true">'
-        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
-        'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'
-        '<circle cx="11" cy="11" r="7"/>'
-        '<line x1="21" y1="21" x2="16.65" y2="16.65"/>'
-        '</svg>'
-        '</span>'
-        f'<span class="gl-util-search-text">{search_hint}</span>'
-        '<span class="gl-util-kbd">/</span>'
-        '</span>'
-    )
 
     # --- RIGHT zone: max 3 runtime chips — Model · Gates · DSR (§8.3 RIGHT) ---
     # PASS / FAIL gate chip tone follows gates_passed vs gates_total.
@@ -5593,14 +6012,22 @@ def render_utility_bar(info: dict | None = None):
     ]
     right_html = ''.join(f'<span class="gl-util-seg">{p}</span>' for p in right_parts)
 
-    st.markdown(
-        '<div class="gl-utilbar">'
-        f'<span class="gl-util-left">{left_html}</span>'
-        f'<span class="gl-util-center">{center_html}</span>'
-        f'<span class="gl-util-right">{right_html}</span>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    # v10 §6 — 3-zone layout via st.columns. Wrapping marker div lets the
+    # outer CSS `:has()` selector paint this block as the sticky terminal bar.
+    st.markdown('<div class="gl-utilbar-marker" aria-hidden="true"></div>', unsafe_allow_html=True)
+    c_left, c_center, c_right = st.columns([2.4, 1.9, 2.4], gap="small")
+    with c_left:
+        st.markdown(
+            f'<span class="gl-util-left">{left_html}</span>',
+            unsafe_allow_html=True,
+        )
+    with c_center:
+        _render_gl_search_widget()
+    with c_right:
+        st.markdown(
+            f'<span class="gl-util-right">{right_html}</span>',
+            unsafe_allow_html=True,
+        )
 
 
 # ============================================================================

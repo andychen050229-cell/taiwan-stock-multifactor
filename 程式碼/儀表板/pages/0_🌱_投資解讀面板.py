@@ -48,7 +48,7 @@ load_phase6_json = _utils.load_phase6_json
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
-    crumb_left="股票預測系統",
+    crumb_left="台股多因子研究終端",
     crumb_current="投資觀察",
     chips=[
         ("歷史判讀", "pri"),
@@ -643,6 +643,47 @@ try:
     if recs.empty:
         st.info(f"在 D+{horizon} 週期的判讀中，目前沒有偏多訊號。")
         st.stop()
+
+    # ===== v10 §6 — Shell Search target-ticker lock =========================
+    # When the user searches for a ticker in the utility bar, we route here
+    # with `st.session_state["target_ticker"]` set. Filter the card list to
+    # that ticker when present; otherwise surface a clear empty state and
+    # offer a one-click return to the full snapshot.
+    _target_tid = str(st.session_state.get("target_ticker", "")).strip()
+    if _target_tid:
+        _match = recs[recs["company_id"].astype(str) == _target_tid].copy()
+        _short = ""
+        try:
+            _ci = companies[companies["company_id"].astype(str) == _target_tid]
+            if not _ci.empty:
+                _short = str(_ci.iloc[0].get("short_name") or _ci.iloc[0].get("company_name") or "")
+        except Exception:
+            _short = ""
+        _chip_label = f"{_target_tid} · {_short}" if _short else _target_tid
+        _bg = "rgba(103,232,249,0.08)"
+        _border = "rgba(103,232,249,0.45)"
+        st.markdown(
+            f'<div style="background:{_bg};border:1px solid {_border};'
+            f'border-radius:10px;padding:10px 14px;margin:8px 0 12px 0;'
+            f'display:flex;align-items:center;gap:10px;font-family:\'JetBrains Mono\', monospace;'
+            f'font-size:0.82rem;color:#cbe9f2;">'
+            f'<span style="color:#67e8f9;font-weight:700;letter-spacing:0.12em;'
+            f'text-transform:uppercase;font-size:0.70rem;">LOCKED ·</span>'
+            f'<span style="color:#e8f7fc;font-weight:700;">{_chip_label}</span>'
+            f'<span style="color:#8397ac;">目前已鎖定此檔個股的判讀卡片</span>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+        if not _match.empty:
+            recs = _match
+        else:
+            st.warning(
+                f"本期 D+{horizon} 判讀 Top {n_display} 並未涵蓋 {_chip_label}。"
+                f"該股可能未進入本期的偏多名單，或資料欄位未對齊。請切換 horizon 或解除鎖定後回到完整清單。"
+            )
+        if st.button("清除鎖定，回到完整清單", key="_gl_clear_target_ticker"):
+            st.session_state.pop("target_ticker", None)
+            st.rerun()
 
     # ===== Market Environment Alert =====
     mkt_env = recommendations.get("market_environment", {}) if recommendations else {}

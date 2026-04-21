@@ -31,7 +31,7 @@ _utils.inject_v9_chart_css()  # v9 §9 · donut chip legend + composition strip
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
-    crumb_left="股票預測系統",
+    crumb_left="台股多因子研究終端",
     crumb_current="因子工程",
     chips=[("1,623 → 91", "pri"), ("IC · Chi² · VIF", "vio"), ("SHAP top-20", "ok")],
     show_clock=True,

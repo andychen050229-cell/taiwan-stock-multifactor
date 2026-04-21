@@ -265,7 +265,7 @@ st.markdown("""
 # Topbar
 # ============================================================================
 render_topbar(
-    crumb_left="股票預測系統",
+    crumb_left="台股多因子研究終端",
     crumb_current="使用手冊",
     chips=[("READ ME FIRST", "pri"), ("白話版", "vio"), ("5 分鐘讀完", "ok")],
     show_clock=True,

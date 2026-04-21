@@ -31,7 +31,7 @@ inject_custom_css()
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
-    crumb_left="股票預測系統",
+    crumb_left="台股多因子研究終端",
     crumb_current="ICIR 訊號穩定性",
     chips=[("Rank IC · 24 months", "pri"), ("purged WF · 4-fold", "vio"), ("IC > 0.015", "ok")],
     show_clock=True,
@@ -226,20 +226,21 @@ try:
             d1_ic = np.random.normal(-0.001, 0.025, 200)  # Noisy
             d20_ic = np.random.normal(0.008, 0.012, 200)  # Clean
 
+            # v10 §10.1 · histograms go through glint_dark_hist_style — no
+            # free-hex marker_color, so the two overlays share the canonical
+            # dark terminal palette (secondary violet vs primary cyan).
             fig_dist = go.Figure()
             fig_dist.add_trace(go.Histogram(
                 x=d1_ic,
                 name="D+1 IC",
                 nbinsx=30,
-                marker_color="#f43f5e",
-                opacity=0.65
+                marker=_utils.glint_dark_hist_style("secondary", opacity=0.60),
             ))
             fig_dist.add_trace(go.Histogram(
                 x=d20_ic,
                 name="D+20 IC",
                 nbinsx=30,
-                marker_color="#10b981",
-                opacity=0.65
+                marker=_utils.glint_dark_hist_style("primary", opacity=0.60),
             ))
             fig_dist.update_layout(**glint_plotly_layout(
                 title="短期 vs 長期 IC 分布",
@@ -248,7 +249,8 @@ try:
                 xlabel="Daily Rank IC",
                 ylabel="頻次 Frequency",
             ))
-            fig_dist.update_layout(barmode="overlay")
+            fig_dist.update_layout(barmode="overlay",
+                                   legend=_utils.glint_dark_legend("h", "bottom"))
             st.plotly_chart(fig_dist, use_container_width=True)
 
         with dist_col2:

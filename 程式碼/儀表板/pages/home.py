@@ -150,7 +150,7 @@ best_dsr = best_dsr or 12.12
 # Top-bar (sticky) — breadcrumb + model chips + live clock
 # ============================================================================
 render_topbar(
-    crumb_left="股票預測系統",
+    crumb_left="台股多因子研究終端",
     crumb_current="情境主控",
     chips=[
         ("xgboost_D20", "pri"),
@@ -906,7 +906,7 @@ with tab_workstation:
             mode='markers+text',
             marker=dict(size=22, color=color, line=dict(width=2, color="white")),
             text=stage, textposition="top center",
-            textfont=dict(family="Inter, sans-serif", size=11, color="#0f172a"),
+            textfont=dict(family="Inter, sans-serif", size=11, color="#E8F7FC"),
             hoverinfo='text',
             hovertext=f"{stage} ({phase})",
             showlegend=False

@@ -35,7 +35,7 @@ inject_custom_css()
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ------------------
 render_topbar(
-    crumb_left="股票預測系統",
+    crumb_left="台股多因子研究終端",
     crumb_current="模型績效分析",
     chips=[
         ("Purged WF · 4-Fold", "pri"),
@@ -296,7 +296,7 @@ try:
                 marker_color=colors.get(r["Engine"], "#06b6d4"),
                 text=[f"{r['AUC']:.4f}"],
                 textposition="outside",
-                textfont=dict(family="JetBrains Mono", size=11, color="#0f172a"),
+                textfont=dict(family="JetBrains Mono", size=11, color="#E8F7FC"),
                 showlegend=False,
                 hovertemplate=f"<b>{r['Engine']}</b><br>AUC: {r['AUC']:.4f}<extra></extra>"
             ))
@@ -373,7 +373,7 @@ try:
                 marker_color=color,
                 text=avg_by_eng.values.round(4),
                 textposition="outside",
-                textfont=dict(family="JetBrains Mono", size=10, color="#0f172a"),
+                textfont=dict(family="JetBrains Mono", size=10, color="#E8F7FC"),
             ))
 
         fig.update_layout(**glint_plotly_layout(

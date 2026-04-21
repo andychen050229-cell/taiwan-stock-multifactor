@@ -32,7 +32,7 @@ inject_custom_css()
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
-    crumb_left="股票預測系統",
+    crumb_left="台股多因子研究終端",
     crumb_current="資料探索",
     chips=[("948,976 rows", "pri"), ("FinMind + 選用資料集", "vio"), ("9 pillars", "default")],
     show_clock=True,
@@ -458,7 +458,7 @@ try:
     st.subheader("🏗️ 系統架構 | System Architecture")
 
     st.code("""
-台灣股市多因子預測系統 | Taiwan Multi-Factor Stock Prediction System
+台股多因子研究終端 | Taiwan Multi-Factor Research Terminal
 ├── run_phase1.py                  # Phase 1: 資料擷取 → Feature Store
 ├── run_phase2.py                  # Phase 2: 模型訓練 → 策略回測
 ├── dashboard/

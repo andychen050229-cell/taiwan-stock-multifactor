@@ -29,7 +29,7 @@ inject_custom_css()
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
-    crumb_left="股票預測系統",
+    crumb_left="台股多因子研究終端",
     crumb_current="延伸分析",
     chips=[("cost sensitivity", "pri"), ("cross-horizon", "vio"), ("case study", "ok")],
     show_clock=True,
@@ -232,7 +232,7 @@ if pc:
                 y=df_avg["AvgContribution"],
                 text=df_avg["Pct"],
                 textposition="outside",
-                textfont=dict(family="JetBrains Mono", size=11, color="#0f172a"),
+                textfont=dict(family="JetBrains Mono", size=11, color="#E8F7FC"),
                 marker=dict(
                     color=colors,
                     line=dict(color="rgba(37,99,235,0.15)", width=1),
@@ -300,7 +300,7 @@ if cs_d:
         y=df_cs["邊際優勢"],
         text=[f"{v:+.2%}" for v in df_cs["邊際優勢"]],
         textposition="outside",
-        textfont=dict(family="JetBrains Mono", size=11, color="#0f172a"),
+        textfont=dict(family="JetBrains Mono", size=11, color="#E8F7FC"),
         marker=dict(
             color=["#10b981" if v > 0 else "#f43f5e" for v in df_cs["邊際優勢"]],
             line=dict(color="rgba(37,99,235,0.15)", width=1),

@@ -27,7 +27,7 @@ inject_custom_css()
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
-    crumb_left="股票預測系統",
+    crumb_left="台股多因子研究終端",
     crumb_current="文本情緒分析",
     chips=[("jieba + SnowNLP", "pri"), ("500 keywords", "vio"), ("phase 5B", "ok")],
     show_clock=True,
