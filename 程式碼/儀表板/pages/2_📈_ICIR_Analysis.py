@@ -20,7 +20,10 @@ load_report = _utils.load_report
 glint_plotly_layout = _utils.glint_plotly_layout
 glint_styler_cmap = _utils.glint_styler_cmap
 render_chart_note = _utils.render_chart_note
-render_page_heading = _utils.render_page_heading
+render_terminal_hero = _utils.render_terminal_hero
+PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
+PAGE_TITLES = _utils.PAGE_TITLES
+PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
 
@@ -42,11 +45,15 @@ except Exception as e:
     st.error(f"無法載入報告：{str(e)}")
     st.stop()
 
-render_page_heading(
-    icon="📈",
-    title_zh="訊號穩定",
-    title_en="Signal Stability",
-    command_line="以 Rank IC / std 拆解預測訊號的穩定度。|ICIR| > 0.5 視為可用，> 1.0 為優秀。D+20 月頻表現最佳。",
+# v8 §12 · §20.3 — Dark terminal hero driven by centralised copy maps
+render_terminal_hero(
+    eyebrow=PAGE_EYEBROWS["icir"],
+    title=PAGE_TITLES["icir"],
+    briefing=PAGE_BRIEFINGS["icir"],
+    chips=[
+        ("ICIR usable", "> 0.5", "info"),
+        ("ICIR excellent", "> 1.0", "ok"),
+    ],
     tone="violet",
 )
 render_trust_strip([

@@ -18,7 +18,10 @@ inject_advanced_sidebar = _utils.inject_advanced_sidebar
 load_report = _utils.load_report
 glint_plotly_layout = _utils.glint_plotly_layout
 render_chart_note = _utils.render_chart_note
-render_page_heading = _utils.render_page_heading
+render_terminal_hero = _utils.render_terminal_hero
+PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
+PAGE_TITLES = _utils.PAGE_TITLES
+PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
 
@@ -41,11 +44,15 @@ except Exception as e:
     st.error(f"無法載入報告：{str(e)}")
     st.stop()
 
-render_page_heading(
-    icon="💰",
-    title_zh="策略回測分析",
-    title_en="Strategy Backtest",
-    command_line="在三種成本情境下檢驗各引擎 × 天期的年化報酬、Sharpe、最大回撤；D+20 月頻為推薦配置。",
+# v8 §12 · §20.5 — Dark terminal hero driven by centralised copy maps
+render_terminal_hero(
+    eyebrow=PAGE_EYEBROWS["backtest"],
+    title=PAGE_TITLES["backtest"],
+    briefing=PAGE_BRIEFINGS["backtest"],
+    chips=[
+        ("Recommended", "D+20 monthly", "ok"),
+        ("Cost scenarios", "3", "info"),
+    ],
     tone="emerald",
 )
 render_trust_strip([

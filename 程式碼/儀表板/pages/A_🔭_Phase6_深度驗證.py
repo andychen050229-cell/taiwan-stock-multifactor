@@ -42,11 +42,16 @@ render_topbar(
 # ============================================================================
 # Hero — v4 §6.3 Validation Lab spec
 # ============================================================================
-_utils.render_page_heading(
-    icon="🔭",
-    title_zh="驗證壓力測試",
-    title_en="Validation Lab",
-    command_line="LOPO 支柱拔測 · 閾值敏感度 · 2454 實證個案｜所有分析基於 xgboost_D20 OOF 預測（404,724 筆 OOS）。",
+# v8 §12 · §20.7 — Dark terminal hero driven by centralised copy maps
+_utils.render_terminal_hero(
+    eyebrow=_utils.PAGE_EYEBROWS["phase6"],
+    title=_utils.PAGE_TITLES["phase6"],
+    briefing=_utils.PAGE_BRIEFINGS["phase6"],
+    chips=[
+        ("Model", "xgboost_D20", "info"),
+        ("OOS", "404,724", "info"),
+        ("Stress tests", "3", "ok"),
+    ],
     tone="violet",
 )
 

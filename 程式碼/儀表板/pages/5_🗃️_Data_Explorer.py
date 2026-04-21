@@ -21,7 +21,10 @@ load_companies = _utils.load_companies
 glint_plotly_layout = _utils.glint_plotly_layout
 glint_dark_tooltip = _utils.glint_dark_tooltip
 render_chart_note = _utils.render_chart_note
-render_page_heading = _utils.render_page_heading
+render_terminal_hero = _utils.render_terminal_hero
+PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
+PAGE_TITLES = _utils.PAGE_TITLES
+PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
 
@@ -43,11 +46,15 @@ except Exception as e:
     st.error(f"無法載入報告：{str(e)}")
     st.stop()
 
-render_page_heading(
-    icon="🗃️",
-    title_zh="資料探索",
-    title_en="Data Foundation",
-    command_line="資料基礎設施總覽：Feature Store 覆蓋率、Walk-Forward CV 架構、Quality Gates 驗證狀態。",
+# v8 §12 · §20.2 — Dark terminal hero driven by centralised copy maps
+render_terminal_hero(
+    eyebrow=PAGE_EYEBROWS["data"],
+    title=PAGE_TITLES["data"],
+    briefing=PAGE_BRIEFINGS["data"],
+    chips=[
+        ("Dataset", "2023/03 – 2025/03", "info"),
+        ("Gates", "9 / 9 PASS", "ok"),
+    ],
     tone="blue",
 )
 render_trust_strip([

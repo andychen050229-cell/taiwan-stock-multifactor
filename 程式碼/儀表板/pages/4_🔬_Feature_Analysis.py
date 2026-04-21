@@ -19,7 +19,10 @@ load_report = _utils.load_report
 glint_plotly_layout = _utils.glint_plotly_layout
 GLINT_SEQUENTIAL_WARM = _utils.GLINT_SEQUENTIAL_WARM
 render_chart_note = _utils.render_chart_note
-render_page_heading = _utils.render_page_heading
+render_terminal_hero = _utils.render_terminal_hero
+PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
+PAGE_TITLES = _utils.PAGE_TITLES
+PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
 
@@ -44,11 +47,16 @@ except Exception as e:
 _n_final = len(results.get("feature_selection", {}).get("selected", []))
 _n_candidates = results.get("feature_selection", {}).get("n_candidates", 59)
 
-render_page_heading(
-    icon="🔬",
-    title_zh="因子工程",
-    title_en="Factor Engineering",
-    command_line=f"三階段因子篩選（MI → VIF → Cross-fold 穩定性）：候選 {_n_candidates} 個 → 最終 {_n_final} 個因子入模。",
+# v8 §12 · §20.6 — Dark terminal hero · dynamic funnel numbers as chips
+render_terminal_hero(
+    eyebrow=PAGE_EYEBROWS["feature"],
+    title=PAGE_TITLES["feature"],
+    briefing=PAGE_BRIEFINGS["feature"],
+    chips=[
+        ("Candidates", f"{_n_candidates}", "info"),
+        ("Selected", f"{_n_final}", "ok"),
+        ("Stage", "MI → VIF → Jaccard", "info"),
+    ],
     tone="cyan",
 )
 render_trust_strip([

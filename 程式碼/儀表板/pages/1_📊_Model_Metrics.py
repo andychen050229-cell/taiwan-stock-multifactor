@@ -24,7 +24,10 @@ glint_colorbar = _utils.glint_colorbar
 GLINT_SEQUENTIAL_COOL = _utils.GLINT_SEQUENTIAL_COOL
 glint_styler_cmap = _utils.glint_styler_cmap
 render_chart_note = _utils.render_chart_note
-render_page_heading = _utils.render_page_heading
+render_terminal_hero = _utils.render_terminal_hero
+PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
+PAGE_TITLES = _utils.PAGE_TITLES
+PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
 
@@ -50,11 +53,15 @@ except Exception as e:
     st.error(f"無法載入報告：{str(e)}")
     st.stop()
 
-render_page_heading(
-    icon="📊",
-    title_zh="模型指標分析",
-    title_en="Model Metrics",
-    command_line="驗證各 Fold 的 AUC / LogLoss，對比 LightGBM × XGBoost × Ensemble 三引擎。AUC > 0.52 為最低門檻。",
+# v8 §12 · §20.4 — Dark terminal hero driven by centralised copy maps
+render_terminal_hero(
+    eyebrow=PAGE_EYEBROWS["model"],
+    title=PAGE_TITLES["model"],
+    briefing=PAGE_BRIEFINGS["model"],
+    chips=[
+        ("AUC threshold", "> 0.52", "info"),
+        ("CV", "Purged WF · 4-fold", "info"),
+    ],
     tone="blue",
 )
 render_trust_strip([

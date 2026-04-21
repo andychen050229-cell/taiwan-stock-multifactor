@@ -17,7 +17,10 @@ glint_plotly_layout = _utils.glint_plotly_layout
 glint_styler_cmap = _utils.glint_styler_cmap
 render_chart_note = _utils.render_chart_note
 render_degraded_banner = _utils.render_degraded_banner
-render_page_heading = _utils.render_page_heading
+render_terminal_hero = _utils.render_terminal_hero
+PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
+PAGE_TITLES = _utils.PAGE_TITLES
+PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
 
@@ -31,11 +34,16 @@ render_topbar(
     show_clock=True,
 )
 
-render_page_heading(
-    icon="🛡️",
-    title_zh="模型治理報告",
-    title_en="Model Governance",
-    command_line="Phase 3 自動治理：9 項品質閘門、DSR 多重檢定、Model Card、效能基線——所有證據一頁覽清。",
+# v8 §12 · §20.8 — Dark terminal hero driven by centralised copy maps
+render_terminal_hero(
+    eyebrow=PAGE_EYEBROWS["governance"],
+    title=PAGE_TITLES["governance"],
+    briefing=PAGE_BRIEFINGS["governance"],
+    chips=[
+        ("Phase", "3 · Governance", "info"),
+        ("DSR", "12.12 · PASS", "ok"),
+        ("Gates", "9 / 9 PASS", "ok"),
+    ],
     tone="violet",
 )
 render_trust_strip([

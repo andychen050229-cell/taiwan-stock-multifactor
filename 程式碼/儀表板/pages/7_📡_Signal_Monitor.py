@@ -18,7 +18,10 @@ glint_plotly_layout = _utils.glint_plotly_layout
 glint_heatmap_colorscale = _utils.glint_heatmap_colorscale
 glint_colorbar = _utils.glint_colorbar
 render_degraded_banner = _utils.render_degraded_banner
-render_page_heading = _utils.render_page_heading
+render_terminal_hero = _utils.render_terminal_hero
+PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
+PAGE_TITLES = _utils.PAGE_TITLES
+PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
 
@@ -32,11 +35,16 @@ render_topbar(
     show_clock=True,
 )
 
-render_page_heading(
-    icon="📡",
-    title_zh="訊號監控",
-    title_en="Signal Monitor",
-    command_line="追蹤資料漂移 × 訊號衰減，PSI / KS / 半衰期三路夾擊——即時提醒何時該重新訓練。",
+# v8 §12 · §20.9 — Dark terminal hero driven by centralised copy maps
+render_terminal_hero(
+    eyebrow=PAGE_EYEBROWS["signal"],
+    title=PAGE_TITLES["signal"],
+    briefing=PAGE_BRIEFINGS["signal"],
+    chips=[
+        ("Phase", "3 · Monitor", "info"),
+        ("Drift", "PSI · KS", "info"),
+        ("Embargo", "20 交易日", "warn"),
+    ],
     tone="cyan",
 )
 render_trust_strip([
