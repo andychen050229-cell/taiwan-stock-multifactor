@@ -7524,9 +7524,12 @@ def render_utility_bar(info: dict | None = None):
     # v10 §6 — 3-zone layout via st.columns. Wrapping marker div lets the
     # outer CSS `:has()` selector paint this block as the sticky terminal bar.
     st.markdown('<div class="gl-utilbar-marker" aria-hidden="true"></div>', unsafe_allow_html=True)
-    # v11 §1 — ratio shifted to give RIGHT chips (Model + Gates + DSR) extra
-    # room; previously [2.4, 1.9, 2.4] clipped the last chip at <1400px.
-    c_left, c_center, c_right = st.columns([2.3, 1.7, 2.8], gap="small")
+    # v11.5.9 — Left zone widened so the full `Verified 2026-04-20 HH:MM`
+    # stamp no longer truncates mid-digit, and the CENTER search pill is
+    # pushed a little to the right for better visual balance under the
+    # 四分頁 primary nav.  Right zone loses the delta to compensate;
+    # Model + Gates + DSR still fit comfortably at >=1280px canvas width.
+    c_left, c_center, c_right = st.columns([2.8, 1.6, 2.4], gap="small")
     with c_left:
         st.markdown(
             f'<span class="gl-util-left">{left_html}</span>',
