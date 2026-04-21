@@ -2683,6 +2683,94 @@ def inject_custom_css():
         border-radius: 3px;
         flex: 0 0 auto;
     }}
+
+    /* ============================================================ */
+    /* v8 §15.10 · Governance 3×3 Gate Matrix                        */
+    /* Dark cards · 3px left colour bar · mono GATE NN eyebrow       */
+    /* PASS/FAIL chip top-right · Chinese label + key underneath      */
+    /* title attribute surfaces technical detail on hover            */
+    /* ============================================================ */
+    .gl-gate-matrix {{
+        display: grid;
+        grid-template-columns: repeat(var(--gate-cols, 3), 1fr);
+        gap: 10px;
+        margin: 10px 0 18px;
+    }}
+    @media (max-width: 900px) {{
+        .gl-gate-matrix {{ grid-template-columns: 1fr; }}
+    }}
+    .gl-gate-cell {{
+        position: relative;
+        background: linear-gradient(180deg, #111B2B 0%, #0F1725 100%);
+        border: 1px solid rgba(103,232,249,0.14);
+        border-left: 3px solid var(--gate-accent, #67e8f9);
+        border-radius: 8px;
+        padding: 10px 14px 10px 16px;
+        overflow: hidden;
+        transition: all .2s ease;
+    }}
+    .gl-gate-cell:hover {{
+        border-color: rgba(103,232,249,0.32);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(6,10,18,0.35);
+    }}
+    .gl-gate-cell.gl-gate-danger {{
+        background: linear-gradient(180deg, #1a0f14 0%, #15151f 100%);
+        border-color: rgba(244,63,94,0.18);
+    }}
+    .gl-gate-cell.gl-gate-danger:hover {{
+        border-color: rgba(244,63,94,0.45);
+    }}
+    .gl-gate-head {{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+    }}
+    .gl-gate-eyebrow {{
+        font-family: var(--gl-font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: #8397ac;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }}
+    .gl-gate-chip {{
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.60rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+    }}
+    .gl-gate-ok .gl-gate-chip {{
+        color: #10b981;
+        background: rgba(16,185,129,0.12);
+        border: 1px solid rgba(16,185,129,0.45);
+    }}
+    .gl-gate-danger .gl-gate-chip {{
+        color: #f43f5e;
+        background: rgba(244,63,94,0.12);
+        border: 1px solid rgba(244,63,94,0.45);
+    }}
+    .gl-gate-label {{
+        font-family: var(--gl-font-sans);
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: #E8F7FC;
+        line-height: 1.35;
+        margin-top: 2px;
+    }}
+    .gl-gate-key {{
+        margin-top: 4px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.62rem;
+        color: #5B7186;
+        letter-spacing: 0.04em;
+    }}
 </style>
     """, unsafe_allow_html=True)
 
@@ -4402,6 +4490,97 @@ def render_terminal_error_state(title: str, reason: str = "",
         f'</div>'
     )
     _st.markdown(html, unsafe_allow_html=True)
+
+
+# --- v8 §15.10 · Governance 3×3 Gate Matrix --------------------------------
+# Technical descriptions surfaced on hover for each gate (kept alongside the
+# zh label dict so page code only has to import one helper).
+GATE_TECH_DESCRIPTIONS = {
+    "models_available":
+        "模型 artefact 已於 MLflow Registry 註冊並可由 predict pipeline 載入。",
+    "model_cards_generated":
+        "Model Card 完整輸出 (訓練資料 window / hyperparam / feature list / AUC by fold)。",
+    "drift_analysis_complete":
+        "PSI / KS 分析對所有特徵完成計算，閾值 PSI < 0.2 無嚴重漂移。",
+    "signal_decay_assessed":
+        "訊號衰減測試通過：IC 在 T+1 / T+5 / T+20 皆維持正值與單調性。",
+    "baseline_established":
+        "Benchmark baseline (equal-weight + industry-neutral) 已記錄並成為未來迴歸比較基線。",
+    "prediction_pipeline_valid":
+        "Predict pipeline 端到端通過 unit tests，欄位 schema / dtype / 無 NaN 均通過。",
+    "dsr_revalidated":
+        "Deflated Sharpe Ratio 重新驗證通過顯著性 (p < 0.05)，排除多重測試偏差。",
+    "no_severe_drift":
+        "所有特徵的 PSI 皆 < 0.25；前 10% 重要特徵的 PSI 皆 < 0.15。",
+    "governance_data_ready":
+        "Gate report / DSR report / drift report 已寫入 governance 資料夾且可被前端載入。",
+}
+
+
+def render_gate_matrix(gates: dict, gate_names_zh: dict | None = None,
+                       gate_tech: dict | None = None,
+                       cols: int = 3) -> None:
+    """Render the v8 §15.10 governance 3×3 gate matrix.
+
+    Each cell: dark card (``--gl-bg-card``), 3px left colour bar (emerald for
+    PASS, rose for FAIL), ``GATE NN`` mono eyebrow + PASS/FAIL chip top,
+    Chinese label body, technical detail surfaced via ``title`` tooltip.
+
+    Args:
+        gates: ``{gate_key: bool_pass_status}`` (ordered dict — keys determine
+            cell order 01..NN).
+        gate_names_zh: optional key→中文 label map. Defaults to the known
+            9-gate vocabulary.
+        gate_tech: optional key→hover description map. Defaults to
+            ``GATE_TECH_DESCRIPTIONS``.
+        cols: number of columns (default 3 → 3×3 when 9 gates present).
+    """
+    import streamlit as _st
+    if not gates:
+        _st.caption("— gate report unavailable —")
+        return
+    gate_names_zh = gate_names_zh or {}
+    gate_tech = gate_tech or GATE_TECH_DESCRIPTIONS
+    check_svg = (
+        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="3" stroke-linecap="round" '
+        'stroke-linejoin="round" aria-hidden="true">'
+        '<polyline points="20 6 9 17 4 12"/></svg>'
+    )
+    cross_svg = (
+        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" '
+        'stroke="currentColor" stroke-width="3" stroke-linecap="round" '
+        'stroke-linejoin="round" aria-hidden="true">'
+        '<line x1="18" y1="6" x2="6" y2="18"/>'
+        '<line x1="6" y1="6" x2="18" y2="18"/></svg>'
+    )
+    cells = []
+    for idx, (gate_key, passed) in enumerate(gates.items(), start=1):
+        label = safe_html(gate_names_zh.get(gate_key, gate_key))
+        passed = bool(passed)
+        accent = "#10b981" if passed else "#f43f5e"
+        status_label = "PASS" if passed else "FAIL"
+        status_cls = "ok" if passed else "danger"
+        glyph = check_svg if passed else cross_svg
+        tech = safe_html(gate_tech.get(gate_key, ""))
+        tech_attr = f' title="{tech}"' if tech else ""
+        cells.append(
+            f'<div class="gl-gate-cell gl-gate-{status_cls}"{tech_attr} '
+            f'style="--gate-accent:{accent};">'
+            f'<div class="gl-gate-head">'
+            f'<span class="gl-gate-eyebrow">GATE {idx:02d}</span>'
+            f'<span class="gl-gate-chip">{glyph}<span>{status_label}</span></span>'
+            f'</div>'
+            f'<div class="gl-gate-label">{label}</div>'
+            f'<div class="gl-gate-key">{safe_html(gate_key)}</div>'
+            f'</div>'
+        )
+    _st.markdown(
+        f'<div class="gl-gate-matrix" style="--gate-cols:{cols};">'
+        + "".join(cells)
+        + '</div>',
+        unsafe_allow_html=True,
+    )
 
 
 # 9-pillar palette aligned with the .gl-pillar badges

@@ -149,38 +149,11 @@ gate_names_zh = {
     "governance_data_ready": "治理資料就緒",
 }
 
-# ---- Design-ported gates grid (9-up, colored left-accent bars) --------
+# ---- v8 §15.10 · 3×3 Gate Matrix (dark tokens + SVG glyphs + hover tech) ----
 n_pass = sum(1 for v in gates.values() if v)
 n_total = len(gates)
-
-gate_cards_html = []
-for gate_key, passed in gates.items():
-    label = gate_names_zh.get(gate_key, gate_key)
-    icon = "✅" if passed else "❌"
-    accent = "var(--gl-emerald)" if passed else "var(--gl-rose)"
-    status_txt = "PASS" if passed else "FAIL"
-    status_cls = "ok" if passed else "danger"
-    gate_cards_html.append(f"""
-      <div style="background:var(--gl-surface);border:1px solid var(--gl-border);
-                  border-radius:10px;padding:14px 16px 14px 18px;position:relative;overflow:hidden;">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:{accent};"></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div style="font-size:0.72rem;color:var(--gl-text-3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;">
-            GATE {list(gates.keys()).index(gate_key)+1:02d}
-          </div>
-          <span class="gl-chip {status_cls}" style="font-size:0.66rem;">{status_txt}</span>
-        </div>
-        <div style="font-weight:600;font-size:0.95rem;color:var(--gl-text);margin-top:4px;">
-          {icon} {label}
-        </div>
-      </div>
-    """)
-
-st.markdown(
-    '<div class="gl-grid-3" style="margin:6px 0 14px;">'
-    + "".join(gate_cards_html) + "</div>",
-    unsafe_allow_html=True,
-)
+render_gate_matrix = _utils.render_gate_matrix
+render_gate_matrix(gates, gate_names_zh=gate_names_zh)
 
 # ---- Design-ported ring summary (SVG gauge repurposed for gate pass rate) ----
 render_auc_gauge = _utils.render_auc_gauge
