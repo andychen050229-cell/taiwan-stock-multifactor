@@ -1271,24 +1271,33 @@ def inject_custom_css():
         border: 1px solid rgba(255,255,255,0.06);
         letter-spacing: 0.04em;
     }}
-    /* v11.5.10 — amplified frame breathing animation (cyan, visible).
-       Same rhythm as .gl-topnav-breathe / .gl-sidebtn-pulse for a
-       unified cockpit feel — everything breathes on the same 3.6s beat. */
+    /* v11.5.12 — smooth, organic frame breathing.
+       Three fixes over the v11.5.10 version that felt janky:
+       1. MATCHED shadow-layer counts (4 layers in both 0% and 50%) so
+          the browser can interpolate each layer continuously.  When
+          layer counts differ, browsers can't tween the missing layer
+          and the animation snaps at the transition.
+       2. GENTLER amplitude (border 0.30→0.70, 2.3× swing instead of
+          3.5×) so the effect reads as breathing rather than flashing.
+       3. Base layers never drop to 0 opacity — they fade down to low
+          but non-zero values so the halo is always subtly present
+          and grows/recedes smoothly rather than popping on/off. */
     @keyframes gl-frame-breathe {{
         0%, 100% {{
-            border-color: rgba(103,232,249,0.26);
+            border-color: rgba(103,232,249,0.30);
             box-shadow:
-                0 0 0 0 rgba(103,232,249,0),
-                0 0 10px 0 rgba(103,232,249,0.10),
-                inset 0 1px 0 rgba(103,232,249,0.06);
+                0 0 0 0 rgba(103,232,249,0.04),
+                0 0 12px 0 rgba(103,232,249,0.14),
+                0 0 24px 0 rgba(103,232,249,0.06),
+                inset 0 1px 0 rgba(103,232,249,0.08);
         }}
         50% {{
-            border-color: rgba(103,232,249,0.92);
+            border-color: rgba(103,232,249,0.70);
             box-shadow:
-                0 0 0 1px rgba(103,232,249,0.30),
-                0 0 26px 0 rgba(103,232,249,0.40),
-                0 0 44px 0 rgba(103,232,249,0.20),
-                inset 0 1px 0 rgba(103,232,249,0.22);
+                0 0 0 1px rgba(103,232,249,0.22),
+                0 0 22px 0 rgba(103,232,249,0.36),
+                0 0 42px 0 rgba(103,232,249,0.16),
+                inset 0 1px 0 rgba(103,232,249,0.18);
         }}
     }}
     /* ---- System health card (now at TOP of sidebar, above nav) ---- */
@@ -1301,7 +1310,12 @@ def inject_custom_css():
         box-shadow: 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.04);
         position: relative;
         overflow: hidden;
-        animation: gl-frame-breathe 3.6s ease-in-out infinite;  /* v11.5.9 */
+        /* v11.5.12 — 4.8s cubic-bezier sine-like curve (the natural breath
+           curve) + will-change hint so the compositor keeps the element on
+           its own layer and box-shadow repaints no longer fight the conic
+           gradient ring for paint bandwidth. */
+        animation: gl-frame-breathe 4.8s cubic-bezier(0.445, 0.050, 0.550, 0.950) infinite;
+        will-change: border-color, box-shadow;
     }}
     .gl-syshealth::after {{
         content: "";
@@ -1771,25 +1785,27 @@ def inject_custom_css():
     /* ---- Page-link pills — GLOBAL (drop .gl-topnav prefix) ------------- */
     /* render_top_nav is the only st.page_link caller, so these are safe
        globally. Selector list covers Streamlit DOM variations. */
-    /* v11.5.10 — amplified breathing border animation.  Dim→bright cycle
-       pushes the border from 0.24 to 0.95 opacity and adds a second
-       halo ring so the breath is unmistakable even at a glance. */
+    /* v11.5.12 — smooth breathing border animation.
+       Matched shadow-layer counts (5 both sides) so interpolation is
+       continuous; amplitude tamed so it reads as a breath rather than
+       a flash (border 0.28 → 0.72, 2.6× swing). */
     @keyframes gl-topnav-breathe {{
         0%, 100% {{
-            border-color: rgba(103,232,249,0.24);
+            border-color: rgba(103,232,249,0.28);
             box-shadow:
-                inset 0 1px 0 rgba(103,232,249,0.12),
-                0 0 0 0 rgba(103,232,249,0),
-                0 0 8px 0 rgba(103,232,249,0.06),
+                inset 0 1px 0 rgba(103,232,249,0.14),
+                0 0 0 0 rgba(103,232,249,0.02),
+                0 0 10px 0 rgba(103,232,249,0.08),
+                0 0 20px 0 rgba(103,232,249,0.04),
                 0 1px 2px rgba(0,0,0,0.35);
         }}
         50% {{
-            border-color: rgba(103,232,249,0.95);
+            border-color: rgba(103,232,249,0.72);
             box-shadow:
-                inset 0 1px 0 rgba(103,232,249,0.28),
-                0 0 0 1px rgba(103,232,249,0.28),
-                0 0 22px 0 rgba(103,232,249,0.38),
-                0 0 38px 0 rgba(103,232,249,0.18),
+                inset 0 1px 0 rgba(103,232,249,0.22),
+                0 0 0 1px rgba(103,232,249,0.20),
+                0 0 20px 0 rgba(103,232,249,0.30),
+                0 0 34px 0 rgba(103,232,249,0.14),
                 0 1px 2px rgba(0,0,0,0.35);
         }}
     }}
@@ -1821,7 +1837,9 @@ def inject_custom_css():
         line-height: 1.2 !important;
         text-decoration: none !important;
         text-shadow: 0 1px 2px rgba(0,0,0,0.55) !important;
-        animation: gl-topnav-breathe 3.6s ease-in-out infinite;  /* v11.5.9 */
+        /* v11.5.12 — sine-curve easing + will-change for smooth breath */
+        animation: gl-topnav-breathe 4.8s cubic-bezier(0.445, 0.050, 0.550, 0.950) infinite;
+        will-change: border-color, box-shadow;
     }}
     /* Force all descendants (p, span, svg text) to inherit bright color */
     a[data-testid="stPageLink-NavLink"] *,
@@ -2412,24 +2430,26 @@ def inject_custom_css():
     /*  9. Sidebar real action buttons (重整 / 手冊) — compact grid       */
     /*     v11.5.6 · smaller type + breathing-light tech accent           */
     /* ================================================================= */
-    /* v11.5.10 — amplified breathing rhythm: brighter cyan peak + a
-       second halo ring for extra glow so the breath reads clearly
-       even on the tiny 0.50rem labels. */
+    /* v11.5.12 — smooth breathing rhythm.  Matched 4-layer shadows
+       on both 0% and 50% keyframes, gentler amplitude, never-fully-
+       zero base layers so the glow grows and recedes continuously
+       rather than snapping on/off. */
     @keyframes gl-sidebtn-pulse {{
         0%, 100% {{
             box-shadow:
-                0 0 0 0 rgba(103,232,249,0.00),
-                0 0 6px 0 rgba(103,232,249,0.06),
-                inset 0 0 0 1px rgba(103,232,249,0.08);
-            border-color: rgba(103,232,249,0.22);
+                0 0 0 0 rgba(103,232,249,0.04),
+                0 0 8px 0 rgba(103,232,249,0.08),
+                0 0 16px 0 rgba(103,232,249,0.04),
+                inset 0 0 0 1px rgba(103,232,249,0.10);
+            border-color: rgba(103,232,249,0.26);
         }}
         50% {{
             box-shadow:
-                0 0 0 1px rgba(103,232,249,0.32),
-                0 0 14px 0 rgba(103,232,249,0.42),
-                0 0 28px 0 rgba(103,232,249,0.22),
-                inset 0 0 0 1px rgba(103,232,249,0.42);
-            border-color: rgba(103,232,249,0.88);
+                0 0 0 1px rgba(103,232,249,0.24),
+                0 0 14px 0 rgba(103,232,249,0.34),
+                0 0 26px 0 rgba(103,232,249,0.18),
+                inset 0 0 0 1px rgba(103,232,249,0.32);
+            border-color: rgba(103,232,249,0.70);
         }}
     }}
     @keyframes gl-sidebtn-dot-blink {{
@@ -2461,7 +2481,11 @@ def inject_custom_css():
         overflow: hidden !important;
         text-overflow: clip !important;
         transition: all .2s ease !important;
-        animation: gl-sidebtn-pulse 3.2s ease-in-out infinite !important;
+        /* v11.5.12 — sine-curve easing on the same 4.8s beat as the
+           system-health card / top-nav pills so the whole cockpit
+           breathes on one organic rhythm. */
+        animation: gl-sidebtn-pulse 4.8s cubic-bezier(0.445, 0.050, 0.550, 0.950) infinite !important;
+        will-change: border-color, box-shadow !important;
     }}
     /* v11.5.9 — Streamlit renders the button label inside nested
        <div><p>LABEL</p></div>.  Streamlit's default <p> font-size can
@@ -2572,10 +2596,10 @@ def inject_custom_css():
     section[data-testid="stSidebar"] .gl-sidebtn-row.gl-sidebtn-bottom {{
         margin-top: 0 !important;
     }}
-    /* Stagger MANUAL's breath phase by half so the three buttons
-       don't pulse in lockstep — reads more "alive". */
+    /* Stagger MANUAL's breath phase by half the cycle so the three
+       buttons don't pulse in lockstep — reads more "alive". */
     section[data-testid="stSidebar"] .gl-sidebtn-row.gl-sidebtn-bottom [data-testid="stButton"] > button {{
-        animation-delay: -1.6s !important;
+        animation-delay: -2.4s !important;  /* v11.5.12 · half of 4.8s */
     }}
     /* ================================================================= */
     /* 10. v7 Dark-Terminal tokens (surface layer — panels / banners)    */
