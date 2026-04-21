@@ -4804,6 +4804,126 @@ div[data-testid="stDataFrameResizable"] {
 .gl-pillar[data-p="ind"]   { background: rgba(6,182,212,0.14)  !important; color: #67e8f9 !important; }
 .gl-pillar[data-p="txt"]   { background: rgba(167,139,250,0.14) !important; color: #c4b5fd !important; }
 .gl-pillar[data-p="sent"]  { background: rgba(236,72,153,0.14) !important; color: #f9a8d4 !important; }
+
+/* =========================================================================
+   v11.5 §A — Main-canvas CSS variable FLIP (root fix for dark-on-dark)
+   The THEME Python dict still ships light-theme values:
+     bg_primary=#fafbfc · bg_surface=#ffffff · text_primary=#0f172a
+   Every v7-v11 component that uses `var(--gl-surface)` / `var(--gl-text)`
+   therefore renders as "light bg + dark text". That worked when the
+   canvas was light. Since v8 darkened the canvas via panels/hero/shell,
+   ~862 DOM elements on the main canvas still compute color #0f172a
+   (dark-on-dark invisible — live-probed 2026-04-21).
+
+   Strategy: redefine the tokens at `[data-testid="stMain"]` scope.
+   This re-routes every `var(--gl-*)` usage to dark-theme values —
+   single change, ~40 components fixed via CSS cascade. Sidebar tokens
+   are NOT touched (sidebar has its own palette in inject_custom_css).
+   ========================================================================= */
+[data-testid="stMain"],
+[data-testid="stMainBlockContainer"] {
+    /* Text — all three tiers flipped bright for dark canvas */
+    --gl-text:       #E8F7FC !important;   /* was #0f172a  */
+    --gl-text-2:     #cfe2ee !important;   /* was #475569  */
+    --gl-text-3:     #b4ccdf !important;   /* was #94a3b8  */
+    /* Surfaces — flip to glint-dark gradient base */
+    --gl-bg:         #060A12 !important;   /* was #fafbfc  */
+    --gl-surface:    #0F1725 !important;   /* was #ffffff  */
+    --gl-subtle:     rgba(10,20,32,0.72) !important;   /* was #f1f5f9 */
+    --gl-tint:       rgba(15,23,37,0.60) !important;   /* was #f8fafc */
+    --gl-overlay:    rgba(10,20,32,0.86) !important;
+    /* Borders — cyan-tint for glint terminal feel */
+    --gl-border:     rgba(103,232,249,0.22) !important;
+    --gl-border-str: rgba(103,232,249,0.42) !important;
+    color: #E8F7FC;
+}
+/* Base text elements on main canvas — guarantee light color even when
+   a rule uses `color: inherit` or an explicit hex like #0f172a that
+   the variable flip can't reach. */
+[data-testid="stMain"] p,
+[data-testid="stMain"] li,
+[data-testid="stMain"] label,
+[data-testid="stMain"] .stMarkdown,
+[data-testid="stMain"] .stMarkdown p,
+[data-testid="stMain"] .stMarkdown li,
+[data-testid="stMain"] .stMarkdown strong,
+[data-testid="stMain"] .stMarkdown em,
+[data-testid="stMain"] .stMarkdown code {
+    color: #E8F7FC;
+}
+/* Captions and small text — slightly dimmer for hierarchy, still readable */
+[data-testid="stMain"] [data-testid="stCaptionContainer"],
+[data-testid="stMain"] .stCaption,
+[data-testid="stMain"] small,
+[data-testid="stMain"] figcaption {
+    color: #b4ccdf !important;
+}
+/* stMetric (KPI cards) — label+value+delta all light */
+[data-testid="stMain"] [data-testid="stMetric"] [data-testid="stMetricLabel"],
+[data-testid="stMain"] [data-testid="stMetric"] [data-testid="stMetricLabel"] p {
+    color: #67e8f9 !important;
+}
+[data-testid="stMain"] [data-testid="stMetric"] [data-testid="stMetricValue"] {
+    color: #E8F7FC !important;
+}
+[data-testid="stMain"] [data-testid="stMetric"] [data-testid="stMetricDelta"] {
+    color: #6ee7b7 !important;
+}
+
+/* =========================================================================
+   v11.5 §B — Hardcoded light-bg component overrides
+   These components use explicit hex like `#ffffff` / `#f8fafc` in their
+   base definition, so the variable flip above can't reach them.
+   ========================================================================= */
+/* Trust strip (hero metadata row) */
+[data-testid="stMain"] .gl-trust-strip {
+    background: linear-gradient(180deg, rgba(15,23,37,0.88) 0%, rgba(8,16,32,0.94) 100%) !important;
+    border: 1px solid rgba(103,232,249,0.22) !important;
+    box-shadow: 0 1px 2px rgba(2,6,23,0.40) !important;
+}
+[data-testid="stMain"] .gl-trust-cell {
+    background: rgba(10,20,32,0.72) !important;
+    border: 1px solid rgba(103,232,249,0.20) !important;
+    color: #cfe2ee !important;
+}
+/* 9-pillar bar pills (.gl-pb-pill — pillar contribution charts) */
+[data-testid="stMain"] .gl-pb-pill[data-p="trend"] { background: rgba(37,99,235,0.14)  !important; color: #93c5fd !important; }
+[data-testid="stMain"] .gl-pb-pill[data-p="fund"]  { background: rgba(16,185,129,0.14) !important; color: #6ee7b7 !important; }
+[data-testid="stMain"] .gl-pb-pill[data-p="val"]   { background: rgba(217,70,239,0.14) !important; color: #f0abfc !important; }
+[data-testid="stMain"] .gl-pb-pill[data-p="event"] { background: rgba(245,158,11,0.14) !important; color: #fde68a !important; }
+[data-testid="stMain"] .gl-pb-pill[data-p="risk"]  { background: rgba(244,63,94,0.14)  !important; color: #fda4af !important; }
+[data-testid="stMain"] .gl-pb-pill[data-p="chip"]  { background: rgba(99,102,241,0.14) !important; color: #a5b4fc !important; }
+[data-testid="stMain"] .gl-pb-pill[data-p="ind"]   { background: rgba(6,182,212,0.14)  !important; color: #67e8f9 !important; }
+[data-testid="stMain"] .gl-pb-pill[data-p="txt"]   { background: rgba(167,139,250,0.14) !important; color: #c4b5fd !important; }
+[data-testid="stMain"] .gl-pb-pill[data-p="sent"]  { background: rgba(236,72,153,0.14) !important; color: #f9a8d4 !important; }
+/* Industry sector chips (.gl-sector) */
+[data-testid="stMain"] .gl-sector[data-s="半導體"]    { background: rgba(37,99,235,0.14)  !important; color: #93c5fd !important; }
+[data-testid="stMain"] .gl-sector[data-s="電子零組件"]  { background: rgba(99,102,241,0.14) !important; color: #a5b4fc !important; }
+[data-testid="stMain"] .gl-sector[data-s="金融"]      { background: rgba(16,185,129,0.14) !important; color: #6ee7b7 !important; }
+[data-testid="stMain"] .gl-sector[data-s="生技醫療"]   { background: rgba(217,70,239,0.14) !important; color: #f0abfc !important; }
+[data-testid="stMain"] .gl-sector[data-s="傳產"]      { background: rgba(245,158,11,0.14) !important; color: #fde68a !important; }
+[data-testid="stMain"] .gl-sector[data-s="航運"]      { background: rgba(6,182,212,0.14)  !important; color: #67e8f9 !important; }
+[data-testid="stMain"] .gl-sector[data-s="通訊網路"]   { background: rgba(167,139,250,0.14) !important; color: #c4b5fd !important; }
+[data-testid="stMain"] .gl-sector[data-s="汽車"]      { background: rgba(244,63,94,0.14)  !important; color: #fda4af !important; }
+/* Download button on main canvas — was forced #ffffff / #0f172a in v10 §7 */
+[data-testid="stMain"] .stDownloadButton > button,
+[data-testid="stMain"] .stDownloadButton > button p,
+[data-testid="stMain"] .stDownloadButton > button span {
+    background: rgba(10,20,32,0.72) !important;
+    color: #E8F7FC !important;
+    border: 1px solid rgba(103,232,249,0.28) !important;
+}
+[data-testid="stMain"] .stDownloadButton > button:hover {
+    background: rgba(103,232,249,0.14) !important;
+    border-color: rgba(103,232,249,0.55) !important;
+    color: #E8F7FC !important;
+}
+/* Radio labels on main canvas — dark canvas needs light text */
+[data-testid="stMain"] div[data-testid="stRadio"] label,
+[data-testid="stMain"] div[data-testid="stRadio"] label p,
+[data-testid="stMain"] div[data-testid="stRadio"] label span {
+    color: #E8F7FC !important;
+}
 </style>
 """
 
