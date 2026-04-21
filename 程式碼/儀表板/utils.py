@@ -4960,6 +4960,165 @@ div[data-testid="stDataFrameResizable"] {
     color: #E8F7FC !important;
     text-decoration-color: rgba(232,247,252,0.7);
 }
+
+/* =========================================================================
+   v11.5.2 — Legacy light-surface components that pre-date the dark canvas
+   flip. With v11.5 turning body text #E8F7FC, any component that still
+   renders with `background: #ffffff` (or a near-white pastel) produces
+   LIGHT-text-on-LIGHT-bg — invisible.
+
+   Strategy: repaint each offender with the Glint dark panel palette
+   (#0F1725 surface on #060A12 canvas, cyan accents). Also override the
+   inline-style alert callouts (`#ecfdf5`/`#fffbeb`/`#fef2f2`) via
+   attribute-substring selectors so we don't have to touch call sites.
+   ========================================================================= */
+
+/* --- A. Global canvas gradient — remove white stop ---------------------- */
+/* utils.py line 103 ended at `#ffffff 400px`; that creates a white smear
+   at the top of every page. Anchor to the Glint canvas instead.         */
+[data-testid="stMain"] .main,
+[data-testid="stMain"] .block-container,
+div.main,
+div.block-container {
+    background:
+        radial-gradient(ellipse at top left, rgba(37,99,235,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at top right, rgba(124,58,237,0.05) 0%, transparent 50%),
+        linear-gradient(180deg, #060A12 0%, #0A1420 400px) !important;
+}
+
+/* --- B. Path cards (home 個股觀察 / 量化引擎) --------------------------- */
+[data-testid="stMain"] .path-card.path-inv,
+[data-testid="stMain"] .path-card.path-qnt {
+    background: linear-gradient(135deg, rgba(15,23,37,0.92) 0%, rgba(10,20,32,0.85) 100%) !important;
+    border: 1px solid rgba(103,232,249,0.22) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(103,232,249,0.08) !important;
+}
+[data-testid="stMain"] .path-card.path-qnt {
+    border-color: rgba(167,139,250,0.28) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(167,139,250,0.10) !important;
+}
+[data-testid="stMain"] .path-card .path-title,
+[data-testid="stMain"] .path-card .path-desc,
+[data-testid="stMain"] .path-card .path-tags,
+[data-testid="stMain"] .path-card .path-tags span {
+    color: #E8F7FC !important;
+}
+[data-testid="stMain"] .path-card .path-desc {
+    color: #cfe2ee !important;
+}
+[data-testid="stMain"] .path-card .path-tags span {
+    background: rgba(103,232,249,0.12) !important;
+    color: #67e8f9 !important;
+    border: 1px solid rgba(103,232,249,0.25) !important;
+}
+[data-testid="stMain"] .path-card.path-qnt .path-tags span {
+    background: rgba(167,139,250,0.14) !important;
+    color: #c4b5fd !important;
+    border-color: rgba(167,139,250,0.28) !important;
+}
+
+/* --- C. Phase chips (current/active state) ------------------------------ */
+[data-testid="stMain"] .phase-chip.cur,
+[data-testid="stMain"] .phase-chip.current {
+    background: linear-gradient(135deg, rgba(37,99,235,0.22) 0%, rgba(124,58,237,0.22) 100%) !important;
+    color: #E8F7FC !important;
+    border: 1px solid rgba(103,232,249,0.35) !important;
+}
+
+/* --- D. Ticker bar — remove mid white stop ------------------------------ */
+[data-testid="stMain"] .gl-ticker {
+    background: linear-gradient(90deg,
+        rgba(15,23,37,0.85) 0%,
+        rgba(10,20,32,0.95) 50%,
+        rgba(15,23,37,0.85) 100%) !important;
+    color: #E8F7FC !important;
+    border: 1px solid rgba(103,232,249,0.18) !important;
+}
+
+/* --- E. Legacy page heading block (pre-terminal-hero) ------------------- */
+[data-testid="stMain"] .gl-page-heading {
+    background: linear-gradient(135deg, rgba(15,23,37,0.95) 0%, rgba(6,10,18,0.92) 100%) !important;
+    border: 1px solid rgba(103,232,249,0.22) !important;
+    color: #E8F7FC !important;
+}
+[data-testid="stMain"] .gl-page-heading *,
+[data-testid="stMain"] .gl-page-heading h1,
+[data-testid="stMain"] .gl-page-heading h2,
+[data-testid="stMain"] .gl-page-heading h3,
+[data-testid="stMain"] .gl-page-heading p {
+    color: inherit !important;
+}
+
+/* --- F. Panel tint surface --------------------------------------------- */
+[data-testid="stMain"] .gl-panel-tint {
+    background: linear-gradient(135deg, rgba(15,23,37,0.88) 0%, rgba(10,20,32,0.82) 100%) !important;
+    border: 1px solid rgba(103,232,249,0.18) !important;
+    color: #E8F7FC !important;
+}
+
+/* --- G. System-health light variant (shouldn't render in main, belt&braces) */
+[data-testid="stMain"] .gl-syshealth.light,
+[data-testid="stMain"] .gl-syshealth {
+    background: linear-gradient(180deg, rgba(10,20,32,0.88) 0%, rgba(18,28,43,0.92) 100%) !important;
+    color: #E8F7FC !important;
+    border-color: rgba(103,232,249,0.18) !important;
+}
+
+/* --- H. Inline-style alert callouts (page 0_投資解讀面板) --------------- */
+/* Page 0 sets alert_bg = #ecfdf5 | #fffbeb | #fef2f2 via inline styles.
+   Catch them via attribute-substring selectors so the call site stays
+   untouched and future pastels fall under the same treatment.           */
+[data-testid="stMain"] div[style*="#ecfdf5"],
+[data-testid="stMain"] div[style*="#fffbeb"],
+[data-testid="stMain"] div[style*="#fef2f2"],
+[data-testid="stMain"] div[style*="#ECFDF5"],
+[data-testid="stMain"] div[style*="#FFFBEB"],
+[data-testid="stMain"] div[style*="#FEF2F2"] {
+    background: linear-gradient(135deg, rgba(15,23,37,0.92) 0%, rgba(10,20,32,0.86) 100%) !important;
+    color: #E8F7FC !important;
+}
+[data-testid="stMain"] div[style*="#ecfdf5"] *,
+[data-testid="stMain"] div[style*="#fffbeb"] *,
+[data-testid="stMain"] div[style*="#fef2f2"] *,
+[data-testid="stMain"] div[style*="#ECFDF5"] *,
+[data-testid="stMain"] div[style*="#FFFBEB"] *,
+[data-testid="stMain"] div[style*="#FEF2F2"] * {
+    color: #E8F7FC !important;
+}
+/* Preserve colour coding on the border-left stripe: high = rose,
+   elevated = amber, normal = emerald. The original inline `color:`
+   on interior spans (if any) already override, so just ensure the
+   banner header text is readable.                                     */
+[data-testid="stMain"] div[style*="#fef2f2"] strong,
+[data-testid="stMain"] div[style*="#FEF2F2"] strong { color: #fda4af !important; }
+[data-testid="stMain"] div[style*="#fffbeb"] strong,
+[data-testid="stMain"] div[style*="#FFFBEB"] strong { color: #fde68a !important; }
+[data-testid="stMain"] div[style*="#ecfdf5"] strong,
+[data-testid="stMain"] div[style*="#ECFDF5"] strong { color: #6ee7b7 !important; }
+
+/* --- I. Generic .insight-box / .warning-box / .tip-box pastels --------- */
+/* Some pages wrap commentary in these classes with near-white or pastel
+   backgrounds. Give them dark-panel treatment consistently.             */
+[data-testid="stMain"] .insight-box,
+[data-testid="stMain"] .warning-box,
+[data-testid="stMain"] .tip-box,
+[data-testid="stMain"] .info-box,
+[data-testid="stMain"] .note-box {
+    background: linear-gradient(135deg, rgba(15,23,37,0.88) 0%, rgba(10,20,32,0.82) 100%) !important;
+    color: #E8F7FC !important;
+    border: 1px solid rgba(103,232,249,0.20) !important;
+}
+[data-testid="stMain"] .insight-box *,
+[data-testid="stMain"] .warning-box *,
+[data-testid="stMain"] .tip-box *,
+[data-testid="stMain"] .info-box *,
+[data-testid="stMain"] .note-box * {
+    color: inherit !important;
+}
+[data-testid="stMain"] .insight-box strong,
+[data-testid="stMain"] .tip-box strong { color: #67e8f9 !important; }
+[data-testid="stMain"] .warning-box    { border-left: 4px solid #f59e0b !important; }
+[data-testid="stMain"] .warning-box strong { color: #fde68a !important; }
 </style>
 """
 
