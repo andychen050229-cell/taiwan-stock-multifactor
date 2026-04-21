@@ -393,30 +393,31 @@ with tab1:
     # Detailed table
     st.markdown("### 完整結果表")
 
-    # 欄位說明 — 每一欄代表什麼（白話版）
+    # 欄位說明 — v11.2 dark-glint 化
     st.markdown("""
     <div style="
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.95) 100%);
+        border: 1px solid rgba(103,232,249,0.28);
         border-radius: 10px;
         padding: 14px 18px;
         margin-bottom: 12px;
         font-size: 0.86rem;
-        color: #334155;
+        color: #cfe2ee;
         line-height: 1.75;
+        box-shadow: inset 0 1px 0 rgba(103,232,249,0.12);
     ">
-        <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">
+        <div style="font-weight: 700; color: #67e8f9; margin-bottom: 6px; letter-spacing: 0.04em;">
             📘 欄位說明 — 每一欄代表什麼?
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 6px 20px;">
-            <div><strong style="color: #2563eb;">支柱代碼</strong>:技術代稱(trend/risk/fund...)</div>
-            <div><strong style="color: #2563eb;">中文名稱</strong>:白話說明(技術面/風險面/基本面...)</div>
-            <div><strong style="color: #7c3aed;">特徵數</strong>:這個面向用了幾個資料欄位</div>
-            <div><strong style="color: #10b981;">ΔAUC (bps)</strong>:拿掉這面向後,模型整體準度掉多少(越大越不可少)</div>
-            <div><strong style="color: #f59e0b;">ΔAUC_up (bps)</strong>:對「會漲」這件事的判斷力掉多少</div>
-            <div><strong style="color: #ef4444;">ΔIC_up</strong>:預測機率與實際表現的相關性變化</div>
+            <div><strong style="color: #67e8f9;">支柱代碼</strong>:技術代稱(trend/risk/fund...)</div>
+            <div><strong style="color: #67e8f9;">中文名稱</strong>:白話說明(技術面/風險面/基本面...)</div>
+            <div><strong style="color: #a78bfa;">特徵數</strong>:這個面向用了幾個資料欄位</div>
+            <div><strong style="color: #6ee7b7;">ΔAUC (bps)</strong>:拿掉這面向後,模型整體準度掉多少(越大越不可少)</div>
+            <div><strong style="color: #fde68a;">ΔAUC_up (bps)</strong>:對「會漲」這件事的判斷力掉多少</div>
+            <div><strong style="color: #fda4af;">ΔIC_up</strong>:預測機率與實際表現的相關性變化</div>
         </div>
-        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #cbd5e1; font-size: 0.82rem; color: #64748b;">
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(103,232,249,0.22); font-size: 0.82rem; color: #b4ccdf;">
             <strong>bps</strong> = basis point(基點),1 bps = 0.01% 準確度。
             <strong>AUC</strong> 是分類準確度的指標,越靠近 1 越準。
         </div>
@@ -442,17 +443,20 @@ with tab1:
     st.markdown(
         f"""
         <style>
-        .gl-table {{ width:100%; border-collapse: collapse; font-family: var(--gl-font-sans); }}
+        .gl-table {{ width:100%; border-collapse: collapse; font-family: var(--gl-font-sans);
+                    background: rgba(8,16,32,0.55); border: 1px solid rgba(103,232,249,0.20);
+                    border-radius: 8px; overflow: hidden; }}
         .gl-table th {{
-            background: #f1f5f9; color: #0f172a; font-weight:600;
-            padding:10px 12px; text-align:left; border-bottom:2px solid #cbd5e1;
-            font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em;
+            background: rgba(103,232,249,0.08); color: #67e8f9; font-weight:700;
+            padding:10px 12px; text-align:left; border-bottom:1px solid rgba(103,232,249,0.32);
+            font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em;
+            font-family: var(--gl-font-mono);
         }}
         .gl-table td {{
-            padding:10px 12px; border-bottom:1px solid #e2e8f0;
-            font-family: var(--gl-font-mono); font-size: 0.86rem;
+            padding:10px 12px; border-bottom:1px solid rgba(103,232,249,0.12);
+            font-family: var(--gl-font-mono); font-size: 0.86rem; color: #cfe2ee;
         }}
-        .gl-table tbody tr:hover {{ background: #f8fafc; }}
+        .gl-table tbody tr:hover {{ background: rgba(103,232,249,0.06); }}
 </style>
         {html_table}
         """, unsafe_allow_html=True
@@ -744,30 +748,31 @@ with tab3:
 
     st.markdown("""
     <div style="
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.95) 100%);
+        border: 1px solid rgba(103,232,249,0.28);
         border-radius: 10px;
         padding: 14px 18px;
         margin-bottom: 12px;
         font-size: 0.86rem;
-        color: #334155;
+        color: #cfe2ee;
         line-height: 1.75;
+        box-shadow: inset 0 1px 0 rgba(103,232,249,0.12);
     ">
-        <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">
+        <div style="font-weight: 700; color: #67e8f9; margin-bottom: 6px; letter-spacing: 0.04em;">
             📘 欄位說明 — 每一欄怎麼看?
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 20px;">
-            <div><strong style="color: #2563eb;">月份</strong>:OOS 期間的月份(YYYY-MM)</div>
-            <div><strong style="color: #2563eb;">交易日</strong>:該月 2454 有多少個交易日</div>
-            <div><strong style="color: #10b981;">實際上漲天數</strong>:真實結果,該月漲了幾天</div>
-            <div><strong style="color: #7c3aed;">出手次數</strong>:模型認為會漲(機率≥門檻)的天數</div>
-            <div><strong style="color: #10b981;">命中次數</strong>:出手後實際真的漲了幾次</div>
-            <div><strong style="color: #f59e0b;">平均上漲機率</strong>:該月模型平均預測有多看好</div>
-            <div><strong style="color: #f59e0b;">當月上漲率</strong>:實際上漲天數 / 總交易日</div>
-            <div><strong style="color: #ef4444;">出手率</strong>:模型出手次數 / 總交易日</div>
-            <div><strong style="color: #10b981;">出手命中率</strong>:命中次數 / 出手次數(越高越準)</div>
+            <div><strong style="color: #67e8f9;">月份</strong>:OOS 期間的月份(YYYY-MM)</div>
+            <div><strong style="color: #67e8f9;">交易日</strong>:該月 2454 有多少個交易日</div>
+            <div><strong style="color: #6ee7b7;">實際上漲天數</strong>:真實結果,該月漲了幾天</div>
+            <div><strong style="color: #a78bfa;">出手次數</strong>:模型認為會漲(機率≥門檻)的天數</div>
+            <div><strong style="color: #6ee7b7;">命中次數</strong>:出手後實際真的漲了幾次</div>
+            <div><strong style="color: #fde68a;">平均上漲機率</strong>:該月模型平均預測有多看好</div>
+            <div><strong style="color: #fde68a;">當月上漲率</strong>:實際上漲天數 / 總交易日</div>
+            <div><strong style="color: #fda4af;">出手率</strong>:模型出手次數 / 總交易日</div>
+            <div><strong style="color: #6ee7b7;">出手命中率</strong>:命中次數 / 出手次數(越高越準)</div>
         </div>
-        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #cbd5e1; font-size: 0.82rem; color: #64748b;">
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(103,232,249,0.22); font-size: 0.82rem; color: #b4ccdf;">
             <strong>怎麼讀?</strong>重點看「平均上漲機率」是否有在行情來前上升,
             以及「出手命中率」是否 > 當月上漲率(代表選時能力)。
         </div>

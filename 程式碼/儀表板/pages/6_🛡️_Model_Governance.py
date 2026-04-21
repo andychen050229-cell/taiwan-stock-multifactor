@@ -251,7 +251,7 @@ if dsr_data:
             y=dsr_data.get("revised_expected_max_sharpe", 0),
             line_dash="dash", line_color="#f59e0b", line_width=2,
             annotation_text=f"E[max(SR)] = {dsr_data.get('revised_expected_max_sharpe', 0):.4f}",
-            annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#b45309"),
+            annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#fde68a"),
         )
         fig_dsr.update_layout(**glint_plotly_layout(
             title="各策略觀察 Sharpe vs DSR 門檻",
@@ -492,10 +492,12 @@ if pipeline:
         # 欄位說明
         st.markdown("""
         <div style="
-            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
-            padding: 12px 16px; margin: 10px 0; font-size: 0.85rem; color: #334155; line-height: 1.75;
+            background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.95) 100%);
+            border: 1px solid rgba(103,232,249,0.28); border-radius: 10px;
+            padding: 12px 16px; margin: 10px 0; font-size: 0.85rem; color: #cfe2ee; line-height: 1.75;
+            box-shadow: inset 0 1px 0 rgba(103,232,249,0.12);
         ">
-            <strong style="color: #0f172a;">📘 欄位說明</strong><br>
+            <strong style="color: #67e8f9; letter-spacing: 0.04em;">📘 欄位說明</strong><br>
             <strong>模型</strong>:引擎 × 預測天期(如 lightgbm_D20 = LightGBM 預測 20 天後漲跌)<br>
             <strong>狀態</strong>:通過 = 管線輸出合法;跳過 = 該模型無 OOS 樣本;失敗 = 有 NaN 或 shape 錯誤<br>
             <strong>樣本數</strong>:該模型在 OOS 期間可用的預測樣本<br>

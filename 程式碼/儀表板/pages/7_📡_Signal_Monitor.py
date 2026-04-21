@@ -205,11 +205,13 @@ if drift_data:
             # 欄位說明
             st.markdown("""
             <div style="
-                background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+                background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.95) 100%);
+                border: 1px solid rgba(103,232,249,0.28); border-radius: 10px;
                 padding: 12px 16px; margin-bottom: 10px;
-                font-size: 0.86rem; color: #334155; line-height: 1.75;
+                font-size: 0.86rem; color: #cfe2ee; line-height: 1.75;
+                box-shadow: inset 0 1px 0 rgba(103,232,249,0.12);
             ">
-                <strong style="color: #0f172a;">📘 欄位說明</strong><br>
+                <strong style="color: #67e8f9; letter-spacing: 0.04em;">📘 欄位說明</strong><br>
                 <strong>特徵</strong>:被檢查的特徵欄位名稱<br>
                 <strong>PSI</strong>:分佈差異量化指標(數字越大 = 變化越大)<br>
                 <strong>PSI 等級</strong>:🟢&lt;0.1(穩定) / 🟡 0.1~0.2(輕微偏移) / 🔴&gt;0.2(顯著偏移)<br>

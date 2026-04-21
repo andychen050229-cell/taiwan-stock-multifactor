@@ -444,7 +444,7 @@ try:
                                 annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#10b981"))
                 fig_j.add_hline(y=0.5, line_dash="dash", line_color="#f59e0b",
                                 annotation_text="及格 Fair (0.5)",
-                                annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#b45309"))
+                                annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#fde68a"))
                 st.plotly_chart(fig_j, use_container_width=True)
 
         with col_s2:
@@ -628,10 +628,10 @@ try:
                 fig_q.update_layout(yaxis_ticksuffix="%", hovermode="x unified")
 
                 avg_return = np.mean(q_vals)
-                fig_q.add_hline(y=avg_return, line_dash="dash", line_color="#94a3b8",
+                fig_q.add_hline(y=avg_return, line_dash="dash", line_color="rgba(103,232,249,0.55)",
                                 annotation_text=f"平均 {avg_return:.2f}%",
-                                annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#64748b"))
-                fig_q.add_hline(y=0, line_color="#cbd5e1", line_dash="dot")
+                                annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#b4ccdf"))
+                fig_q.add_hline(y=0, line_color="rgba(103,232,249,0.30)", line_dash="dot")
 
                 st.plotly_chart(fig_q, use_container_width=True)
 

@@ -3627,29 +3627,29 @@ def render_pillar_radar(values: dict, title: str = "九支柱雷達圖",
     fig.update_layout(
         title=dict(text=title, x=0.02, y=0.98,
                    font=dict(family="Inter, 'Microsoft JhengHei'", size=14,
-                             color="#0f172a")),
+                             color="#E8F7FC")),
         polar=dict(
-            bgcolor="rgba(248,250,252,0.7)",
+            bgcolor="rgba(10,20,32,0.60)",
             radialaxis=dict(
                 visible=True, range=[0, max(1.0, max(r_main) * 1.15)],
-                showline=False, gridcolor="rgba(37,99,235,0.08)",
-                tickfont=dict(family="JetBrains Mono", size=9, color="#94a3b8"),
+                showline=False, gridcolor="rgba(103,232,249,0.14)",
+                tickfont=dict(family="JetBrains Mono", size=9, color="#b4ccdf"),
                 tickformat=".2f",
             ),
             angularaxis=dict(
-                gridcolor="rgba(37,99,235,0.12)",
-                linecolor="rgba(37,99,235,0.18)",
+                gridcolor="rgba(103,232,249,0.14)",
+                linecolor="rgba(103,232,249,0.22)",
                 tickfont=dict(family="Inter, 'Microsoft JhengHei'", size=11,
-                              color="#475569"),
+                              color="#cfe2ee"),
             ),
         ),
         showlegend=True,
         legend=dict(orientation="h", y=-0.08, x=0.5, xanchor="center",
-                    font=dict(family="Inter", size=11)),
+                    font=dict(family="Inter", size=11, color="#b4ccdf")),
         height=height,
         margin=dict(t=50, b=40, l=40, r=40),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="#0A1420",
+        plot_bgcolor="#081220",
     )
     return fig
 
@@ -5353,13 +5353,13 @@ def glint_heatmap_colorscale(kind: str = "diverging") -> list:
 
 
 def glint_colorbar(title: str = "", fmt: str = "") -> dict:
-    """Return a compact, glint-styled Plotly colorbar config."""
+    """Return a compact, glint-styled Plotly colorbar config (v11.2 dark-safe)."""
     cb = dict(
-        title=dict(text=f"<b>{title}</b>", font=dict(family=_GL_FONT_MONO, size=10, color="#64748b"), side="right"),
+        title=dict(text=f"<b>{title}</b>", font=dict(family=_GL_FONT_MONO, size=10, color="#b4ccdf"), side="right"),
         thickness=10, len=0.75, outlinewidth=0,
-        tickfont=dict(family=_GL_FONT_MONO, size=10, color="#64748b"),
-        tickformat=fmt, ticks="outside", ticklen=3, tickcolor="rgba(37,99,235,0.15)",
-        bgcolor="rgba(255,255,255,0.5)",
+        tickfont=dict(family=_GL_FONT_MONO, size=10, color="#b4ccdf"),
+        tickformat=fmt, ticks="outside", ticklen=3, tickcolor="rgba(103,232,249,0.28)",
+        bgcolor="rgba(10,20,32,0.55)",
     )
     return cb
 

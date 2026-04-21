@@ -196,9 +196,9 @@ try:
             ylabel="年化報酬 Return",
         ))
         fig.update_layout(yaxis_tickformat=".1%", hovermode="x unified")
-        fig.add_hline(y=0, line_color="#94a3b8", line_dash="dash",
+        fig.add_hline(y=0, line_color="rgba(103,232,249,0.55)", line_dash="dash",
                       annotation_text="零軸",
-                      annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#64748b"))
+                      annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#b4ccdf"))
         st.plotly_chart(fig, use_container_width=True)
 
     with r2:
@@ -280,10 +280,10 @@ try:
         ylabel="年化報酬 Annualized Return",
     ))
     fig_scatter.update_layout(yaxis_tickformat=".1%", xaxis_tickformat=".1%", hovermode="closest")
-    fig_scatter.add_hline(y=0, line_color="#94a3b8", line_dash="dash")
+    fig_scatter.add_hline(y=0, line_color="rgba(103,232,249,0.45)", line_dash="dash")
     fig_scatter.add_vline(x=0.15, line_color="#f59e0b", line_dash="dash",
                           annotation_text="典型回撤 Typical DD",
-                          annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#b45309"))
+                          annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#fde68a"))
     st.plotly_chart(fig_scatter, use_container_width=True)
     render_chart_note(
         "左上象限＝風險低、報酬高。Ensemble（綠）相對 LightGBM（藍）與 XGBoost（紫）通常位於較佳象限，基準（灰）落於右下提供對照。",

@@ -596,7 +596,7 @@ try:
             ece_before = [r["校準前 ECE | Before"] for r in cal_rows]
             ece_after = [r["校準後 ECE | After"] for r in cal_rows]
 
-            _tf = dict(family="JetBrains Mono", size=10, color="#0f172a")
+            _tf = dict(family="JetBrains Mono", size=10, color="#E8F7FC")
             fig_cal.add_trace(go.Bar(
                 name="校準前", x=models, y=ece_before,
                 marker_color="#f43f5e", text=[f"{v:.4f}" for v in ece_before],
