@@ -1266,22 +1266,24 @@ def inject_custom_css():
         border: 1px solid rgba(255,255,255,0.06);
         letter-spacing: 0.04em;
     }}
-    /* v11.5.9 — shared frame breathing animation (cyan, gentle).
-       Same luminance-modulation rhythm as .gl-thero for consistency. */
+    /* v11.5.10 — amplified frame breathing animation (cyan, visible).
+       Same rhythm as .gl-topnav-breathe / .gl-sidebtn-pulse for a
+       unified cockpit feel — everything breathes on the same 3.6s beat. */
     @keyframes gl-frame-breathe {{
         0%, 100% {{
-            border-color: rgba(103,232,249,0.22);
+            border-color: rgba(103,232,249,0.26);
             box-shadow:
                 0 0 0 0 rgba(103,232,249,0),
-                0 0 10px 0 rgba(103,232,249,0.08),
-                inset 0 1px 0 rgba(103,232,249,0.04);
+                0 0 10px 0 rgba(103,232,249,0.10),
+                inset 0 1px 0 rgba(103,232,249,0.06);
         }}
         50% {{
-            border-color: rgba(103,232,249,0.62);
+            border-color: rgba(103,232,249,0.92);
             box-shadow:
-                0 0 0 1px rgba(103,232,249,0.18),
-                0 0 22px 0 rgba(103,232,249,0.28),
-                inset 0 1px 0 rgba(103,232,249,0.16);
+                0 0 0 1px rgba(103,232,249,0.30),
+                0 0 26px 0 rgba(103,232,249,0.40),
+                0 0 44px 0 rgba(103,232,249,0.20),
+                inset 0 1px 0 rgba(103,232,249,0.22);
         }}
     }}
     /* ---- System health card (now at TOP of sidebar, above nav) ---- */
@@ -1764,22 +1766,25 @@ def inject_custom_css():
     /* ---- Page-link pills — GLOBAL (drop .gl-topnav prefix) ------------- */
     /* render_top_nav is the only st.page_link caller, so these are safe
        globally. Selector list covers Streamlit DOM variations. */
-    /* v11.5.9 — breathing border animation for non-active pills */
+    /* v11.5.10 — amplified breathing border animation.  Dim→bright cycle
+       pushes the border from 0.24 to 0.95 opacity and adds a second
+       halo ring so the breath is unmistakable even at a glance. */
     @keyframes gl-topnav-breathe {{
         0%, 100% {{
-            border-color: rgba(103,232,249,0.20);
+            border-color: rgba(103,232,249,0.24);
             box-shadow:
-                inset 0 1px 0 rgba(103,232,249,0.10),
+                inset 0 1px 0 rgba(103,232,249,0.12),
                 0 0 0 0 rgba(103,232,249,0),
-                0 0 0 0 rgba(103,232,249,0),
+                0 0 8px 0 rgba(103,232,249,0.06),
                 0 1px 2px rgba(0,0,0,0.35);
         }}
         50% {{
-            border-color: rgba(103,232,249,0.58);
+            border-color: rgba(103,232,249,0.95);
             box-shadow:
-                inset 0 1px 0 rgba(103,232,249,0.22),
-                0 0 0 1px rgba(103,232,249,0.14),
-                0 0 18px 0 rgba(103,232,249,0.24),
+                inset 0 1px 0 rgba(103,232,249,0.28),
+                0 0 0 1px rgba(103,232,249,0.28),
+                0 0 22px 0 rgba(103,232,249,0.38),
+                0 0 38px 0 rgba(103,232,249,0.18),
                 0 1px 2px rgba(0,0,0,0.35);
         }}
     }}
@@ -2402,20 +2407,24 @@ def inject_custom_css():
     /*  9. Sidebar real action buttons (重整 / 手冊) — compact grid       */
     /*     v11.5.6 · smaller type + breathing-light tech accent           */
     /* ================================================================= */
+    /* v11.5.10 — amplified breathing rhythm: brighter cyan peak + a
+       second halo ring for extra glow so the breath reads clearly
+       even on the tiny 0.50rem labels. */
     @keyframes gl-sidebtn-pulse {{
         0%, 100% {{
             box-shadow:
                 0 0 0 0 rgba(103,232,249,0.00),
-                0 0 8px 0 rgba(103,232,249,0.08),
-                inset 0 0 0 1px rgba(103,232,249,0.06);
-            border-color: rgba(103,232,249,0.18);
+                0 0 6px 0 rgba(103,232,249,0.06),
+                inset 0 0 0 1px rgba(103,232,249,0.08);
+            border-color: rgba(103,232,249,0.22);
         }}
         50% {{
             box-shadow:
-                0 0 0 1px rgba(103,232,249,0.18),
-                0 0 18px 0 rgba(103,232,249,0.32),
-                inset 0 0 0 1px rgba(103,232,249,0.26);
-            border-color: rgba(103,232,249,0.58);
+                0 0 0 1px rgba(103,232,249,0.32),
+                0 0 14px 0 rgba(103,232,249,0.42),
+                0 0 28px 0 rgba(103,232,249,0.22),
+                inset 0 0 0 1px rgba(103,232,249,0.42);
+            border-color: rgba(103,232,249,0.88);
         }}
     }}
     @keyframes gl-sidebtn-dot-blink {{
@@ -2545,6 +2554,23 @@ def inject_custom_css():
     }}
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button:active {{
         transform: translateY(0) !important;
+    }}
+    /* v11.5.10 — 3-zone layout spacing: top row (RELOAD + HOME) sits
+       flush to the system-health card above it; bottom row (MANUAL
+       full-width) gets a small gap under the top row so the two rows
+       read as a visually unified 2×1 + 1×2 grid.  MANUAL inherits
+       the same breathing/shimmer/dot treatment automatically because
+       it still lives inside a .gl-sidebtn-row wrapper. */
+    section[data-testid="stSidebar"] .gl-sidebtn-row.gl-sidebtn-top {{
+        margin-bottom: 6px !important;
+    }}
+    section[data-testid="stSidebar"] .gl-sidebtn-row.gl-sidebtn-bottom {{
+        margin-top: 0 !important;
+    }}
+    /* Stagger MANUAL's breath phase by half so the three buttons
+       don't pulse in lockstep — reads more "alive". */
+    section[data-testid="stSidebar"] .gl-sidebtn-row.gl-sidebtn-bottom [data-testid="stButton"] > button {{
+        animation-delay: -1.6s !important;
     }}
     /* ================================================================= */
     /* 10. v7 Dark-Terminal tokens (surface layer — panels / banners)    */
@@ -7622,17 +7648,31 @@ def render_top_nav(groups: dict, active_page_title: str = None,
         st.markdown('</div>', unsafe_allow_html=True)
 
 
-def inject_sidebar_action_buttons(manual_page=None, reset_key: str = "_gl_reset",
+def inject_sidebar_action_buttons(manual_page=None, home_page=None,
+                                  reset_key: str = "_gl_reset",
+                                  home_key: str = "_gl_home",
                                   manual_key: str = "_gl_manual"):
-    """Render real 重整 + 手冊 buttons in the sidebar (below system-health card).
+    """Render real RELOAD + HOME + MANUAL buttons in the sidebar.
+
+    v11.5.10 layout — 3-zone grid so operators can jump back to the
+    home/情境主控 page in one click without hunting the top nav:
+
+        ┌────────────┬───────────┐
+        │  RELOAD    │   HOME    │   ← top row, 50/50 split
+        ├────────────┴───────────┤
+        │        MANUAL          │   ← bottom row, full width
+        └────────────────────────┘
 
     Args:
         manual_page: st.Page object for the 使用手冊 page, or a path string.
-            If None, manual button triggers st.rerun() as a noop fallback.
-        reset_key / manual_key: unique widget keys to avoid collisions.
+            If None, manual button shows an error toast.
+        home_page: st.Page object for the 情境主控 home page.
+            If None, home button shows an error toast.
+        reset_key / home_key / manual_key: unique widget keys.
     """
     with st.sidebar:
-        st.markdown('<div class="gl-sidebtn-row">', unsafe_allow_html=True)
+        # ---- Top row: RELOAD + HOME (50/50 split) ----
+        st.markdown('<div class="gl-sidebtn-row gl-sidebtn-top">', unsafe_allow_html=True)
         c1, c2 = st.columns(2, gap="small")
         with c1:
             # v11.5.5 — Material Symbol icons replace kawaii 🔄/❓ emoji.
@@ -7644,14 +7684,28 @@ def inject_sidebar_action_buttons(manual_page=None, reset_key: str = "_gl_reset"
                 st.toast("快取已清除 · 重新載入中", icon=":material/check_circle:")
                 st.rerun()
         with c2:
-            if st.button("MANUAL", key=manual_key, use_container_width=True,
-                         icon=":material/menu_book:",
-                         help="查看使用手冊與白話解說"):
-                if manual_page is not None:
+            if st.button("HOME", key=home_key, use_container_width=True,
+                         icon=":material/home:",
+                         help="回到情境主控首頁"):
+                if home_page is not None:
                     try:
-                        st.switch_page(manual_page)
+                        st.switch_page(home_page)
                     except Exception:
-                        st.toast("找不到手冊頁。", icon=":material/error:")
+                        st.toast("找不到首頁。", icon=":material/error:")
                 else:
-                    st.toast("手冊頁未註冊。", icon=":material/error:")
+                    st.toast("首頁未註冊。", icon=":material/error:")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # ---- Bottom row: MANUAL (full width, same total width as top row) ----
+        st.markdown('<div class="gl-sidebtn-row gl-sidebtn-bottom">', unsafe_allow_html=True)
+        if st.button("MANUAL", key=manual_key, use_container_width=True,
+                     icon=":material/menu_book:",
+                     help="查看使用手冊與白話解說"):
+            if manual_page is not None:
+                try:
+                    st.switch_page(manual_page)
+                except Exception:
+                    st.toast("找不到手冊頁。", icon=":material/error:")
+            else:
+                st.toast("手冊頁未註冊。", icon=":material/error:")
         st.markdown('</div>', unsafe_allow_html=True)

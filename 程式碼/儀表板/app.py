@@ -91,7 +91,7 @@ _utils.inject_sidebar_health(
     dsr="12.12",
     last_verified=_qg["last_verified"] or "2026-04-20 14:24",
 )
-_utils.inject_sidebar_action_buttons(manual_page=manual)
+_utils.inject_sidebar_action_buttons(manual_page=manual, home_page=home)
 
 # ===== Global Dark Sidebar CSS — 多因子股票分析系統 brand ================
 st.markdown("""<style>
