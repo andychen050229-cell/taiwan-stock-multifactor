@@ -1266,6 +1266,24 @@ def inject_custom_css():
         border: 1px solid rgba(255,255,255,0.06);
         letter-spacing: 0.04em;
     }}
+    /* v11.5.9 — shared frame breathing animation (cyan, gentle).
+       Same luminance-modulation rhythm as .gl-thero for consistency. */
+    @keyframes gl-frame-breathe {{
+        0%, 100% {{
+            border-color: rgba(103,232,249,0.22);
+            box-shadow:
+                0 0 0 0 rgba(103,232,249,0),
+                0 0 10px 0 rgba(103,232,249,0.08),
+                inset 0 1px 0 rgba(103,232,249,0.04);
+        }}
+        50% {{
+            border-color: rgba(103,232,249,0.62);
+            box-shadow:
+                0 0 0 1px rgba(103,232,249,0.18),
+                0 0 22px 0 rgba(103,232,249,0.28),
+                inset 0 1px 0 rgba(103,232,249,0.16);
+        }}
+    }}
     /* ---- System health card (now at TOP of sidebar, above nav) ---- */
     .gl-syshealth {{
         margin: 10px 6px 14px 6px;
@@ -1276,6 +1294,7 @@ def inject_custom_css():
         box-shadow: 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.04);
         position: relative;
         overflow: hidden;
+        animation: gl-frame-breathe 3.6s ease-in-out infinite;  /* v11.5.9 */
     }}
     .gl-syshealth::after {{
         content: "";
@@ -1745,6 +1764,25 @@ def inject_custom_css():
     /* ---- Page-link pills — GLOBAL (drop .gl-topnav prefix) ------------- */
     /* render_top_nav is the only st.page_link caller, so these are safe
        globally. Selector list covers Streamlit DOM variations. */
+    /* v11.5.9 — breathing border animation for non-active pills */
+    @keyframes gl-topnav-breathe {{
+        0%, 100% {{
+            border-color: rgba(103,232,249,0.20);
+            box-shadow:
+                inset 0 1px 0 rgba(103,232,249,0.10),
+                0 0 0 0 rgba(103,232,249,0),
+                0 0 0 0 rgba(103,232,249,0),
+                0 1px 2px rgba(0,0,0,0.35);
+        }}
+        50% {{
+            border-color: rgba(103,232,249,0.58);
+            box-shadow:
+                inset 0 1px 0 rgba(103,232,249,0.22),
+                0 0 0 1px rgba(103,232,249,0.14),
+                0 0 18px 0 rgba(103,232,249,0.24),
+                0 1px 2px rgba(0,0,0,0.35);
+        }}
+    }}
     a[data-testid="stPageLink-NavLink"],
     a[data-testid="stPageLink"],
     div[data-testid="stPageLink"] > a {{
@@ -1773,6 +1811,7 @@ def inject_custom_css():
         line-height: 1.2 !important;
         text-decoration: none !important;
         text-shadow: 0 1px 2px rgba(0,0,0,0.55) !important;
+        animation: gl-topnav-breathe 3.6s ease-in-out infinite;  /* v11.5.9 */
     }}
     /* Force all descendants (p, span, svg text) to inherit bright color */
     a[data-testid="stPageLink-NavLink"] *,
@@ -1801,6 +1840,7 @@ def inject_custom_css():
             0 8px 22px rgba(6,182,212,0.38),
             inset 0 1px 0 rgba(255,255,255,0.14),
             0 0 0 1px rgba(103,232,249,0.32) !important;
+        animation: none !important;  /* v11.5.9 · freeze breath on hover */
     }}
     /* Keyboard focus */
     a[data-testid="stPageLink-NavLink"]:focus-visible,
@@ -1825,6 +1865,7 @@ def inject_custom_css():
             0 6px 22px rgba(6,182,212,0.5),
             inset 0 1px 0 rgba(255,255,255,0.2) !important;
         text-shadow: 0 0 10px rgba(103,232,249,0.75), 0 1px 2px rgba(0,0,0,0.55) !important;
+        animation: none !important;  /* v11.5.9 · active page uses strong sweep, no breath */
     }}
     a[data-testid="stPageLink-NavLink"][aria-current="page"]::before,
     a[data-testid="stPageLink"][aria-current="page"]::before,
@@ -2365,14 +2406,16 @@ def inject_custom_css():
         0%, 100% {{
             box-shadow:
                 0 0 0 0 rgba(103,232,249,0.00),
+                0 0 8px 0 rgba(103,232,249,0.08),
                 inset 0 0 0 1px rgba(103,232,249,0.06);
-            border-color: rgba(255,255,255,0.10);
+            border-color: rgba(103,232,249,0.18);
         }}
         50% {{
             box-shadow:
-                0 0 10px 0 rgba(103,232,249,0.22),
-                inset 0 0 0 1px rgba(103,232,249,0.18);
-            border-color: rgba(103,232,249,0.32);
+                0 0 0 1px rgba(103,232,249,0.18),
+                0 0 18px 0 rgba(103,232,249,0.32),
+                inset 0 0 0 1px rgba(103,232,249,0.26);
+            border-color: rgba(103,232,249,0.58);
         }}
     }}
     @keyframes gl-sidebtn-dot-blink {{
@@ -2388,14 +2431,14 @@ def inject_custom_css():
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button {{
         position: relative !important;
         background: linear-gradient(180deg, rgba(14,23,38,0.88), rgba(8,14,24,0.92)) !important;
-        border: 1px solid rgba(255,255,255,0.10) !important;
+        border: 1px solid rgba(103,232,249,0.18) !important;
         color: #cfe2ee !important;
         font-family: var(--gl-font-mono, 'JetBrains Mono', ui-monospace, monospace) !important;
-        font-size: 0.58rem !important;              /* v11.5.8 · smaller so MANUAL never wraps */
+        font-size: 0.50rem !important;              /* v11.5.9 · 0.58 → 0.50 so MANUAL always fits */
         font-weight: 700 !important;
-        letter-spacing: 0.06em !important;          /* v11.5.8 · tighter tracking */
+        letter-spacing: 0.04em !important;          /* v11.5.9 · tighter tracking */
         text-transform: uppercase !important;
-        padding: 4px 6px 4px 14px !important;       /* v11.5.8 · extra left pad for dot */
+        padding: 4px 6px 4px 13px !important;
         border-radius: 7px !important;
         min-height: 28px !important;
         height: 28px !important;
@@ -2405,6 +2448,26 @@ def inject_custom_css():
         text-overflow: clip !important;
         transition: all .2s ease !important;
         animation: gl-sidebtn-pulse 3.2s ease-in-out infinite !important;
+    }}
+    /* v11.5.9 — Streamlit renders the button label inside nested
+       <div><p>LABEL</p></div>.  Streamlit's default <p> font-size can
+       override the button-level font-size, making the MANUAL label
+       wrap onto two lines.  Force the inner text elements to inherit
+       the tiny 0.50rem and keep them on a single line. */
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button > div,
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button > div > p,
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button p,
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button span,
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button [data-testid="stMarkdownContainer"],
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button [data-testid="stMarkdownContainer"] p {{
+        font-size: 0.50rem !important;
+        letter-spacing: 0.04em !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: clip !important;
+        max-width: 100% !important;
+        margin: 0 !important;
     }}
     /* breathing status-dot on the left edge */
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button::before {{
@@ -4683,6 +4746,32 @@ section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="s
     padding-top: 12px !important;
     padding-bottom: 4px !important;
     background: transparent !important;
+}
+/* v11.5.9 — force every intermediate wrapper div INSIDE the cartridge to be
+   fully transparent so ONLY the outer violet frame + the inner rail +
+   thumb are visible.  The user reported a clearly-visible lighter violet
+   rectangle in the middle of the cartridge — that is one of the baseweb
+   wrapper divs carrying its own background.  Blanket-zap them but keep
+   the track ([role=progressbar]), active fill, thumb ([role=slider]),
+   value bubble, and tick bar intact. */
+section[data-testid="stSidebar"] div[data-testid="stSlider"] > div,
+section[data-testid="stSidebar"] div[data-testid="stSlider"] > div > div,
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] > div {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+/* Re-assert the track, active fill, thumb, value bubble as non-transparent
+   (they were intentionally styled above; this guards against the blanket
+   rule above accidentally resetting them on baseweb DOM changes). */
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[role="progressbar"] {
+    background:
+        linear-gradient(180deg, rgba(10,4,20,0.95), rgba(20,12,40,0.92)) !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(139,92,246,0.32),
+        inset 0 1px 4px rgba(0,0,0,0.70),
+        0 0 0 1px rgba(103,232,249,0.08) !important;
 }
 /* Track (unfilled portion) — deep violet-black void with hairline */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] div[role="progressbar"],
