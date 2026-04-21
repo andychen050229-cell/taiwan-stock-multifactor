@@ -4039,6 +4039,176 @@ def render_empty_from_copy_map(key: str, actions: list | None = None,
     )
 
 
+# --- v8 §11 · SVG icon registry (lucide-inspired, zero-emoji mandate) -----
+# Each icon is a standalone inline SVG path set that inherits currentColor.
+# Callers use ``render_page_icon("radar", size=20, color="#67e8f9")`` or
+# just ``GLINT_ICON_SVG["radar"]`` to paste into their own markup.
+# Names mirror the v8 §11 icon registry roster (radar / eye / building-2
+# / waveform / text-search / chart-column / layers-3 / line-chart /
+# flask-conical / shield-check / activity / combine / search / pulse-dot).
+GLINT_ICON_SVG = {
+    # Situation command · 總覽 hub
+    "radar": (
+        '<circle cx="12" cy="12" r="10"/>'
+        '<circle cx="12" cy="12" r="6"/>'
+        '<circle cx="12" cy="12" r="2"/>'
+        '<path d="M12 12L22 5"/>'
+    ),
+    # Investment research · 個股解讀
+    "eye": (
+        '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>'
+        '<circle cx="12" cy="12" r="3"/>'
+    ),
+    # Data foundation · 資料基礎
+    "building-2": (
+        '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>'
+        '<path d="M6 12H4a2 2 0 0 0-2 2v8h4"/>'
+        '<path d="M18 9h2a2 2 0 0 1 2 2v11h-4"/>'
+        '<path d="M10 6h4"/>'
+        '<path d="M10 10h4"/>'
+        '<path d="M10 14h4"/>'
+        '<path d="M10 18h4"/>'
+    ),
+    # Signal stability · 訊號穩定
+    "waveform": (
+        '<path d="M2 12h2l3-9 4 18 3-12 3 6h5"/>'
+    ),
+    # Text sentiment · 文本情緒
+    "text-search": (
+        '<path d="M14 18h1"/>'
+        '<path d="M10 4h9"/>'
+        '<path d="M5 8h14"/>'
+        '<circle cx="15" cy="14" r="4"/>'
+        '<path d="m21 20-2.1-2.1"/>'
+    ),
+    # Model performance · 模型績效
+    "chart-column": (
+        '<path d="M3 3v18h18"/>'
+        '<path d="M7 13v5"/>'
+        '<path d="M12 9v9"/>'
+        '<path d="M17 5v13"/>'
+    ),
+    # Factor engineering · 因子工程
+    "layers-3": (
+        '<path d="M12 2 2 7l10 5 10-5-10-5Z"/>'
+        '<path d="M2 17l10 5 10-5"/>'
+        '<path d="M2 12l10 5 10-5"/>'
+    ),
+    # Strategy lab · 策略回測
+    "line-chart": (
+        '<path d="M3 3v18h18"/>'
+        '<path d="m19 9-5 5-4-4-3 3"/>'
+    ),
+    # Validation lab · 驗證壓測 (Phase 6)
+    "flask-conical": (
+        '<path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/>'
+        '<path d="M8.5 2h7"/>'
+        '<path d="M7 16h10"/>'
+    ),
+    # Model governance · 模型治理
+    "shield-check": (
+        '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>'
+        '<path d="m9 12 2 2 4-4"/>'
+    ),
+    # Signal monitor · 訊號監控
+    "activity": (
+        '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'
+    ),
+    # Extended analytics · 延伸分析
+    "combine": (
+        '<path d="M10 18H5a3 3 0 0 1-3-3v-1"/>'
+        '<path d="M14 2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>'
+        '<path d="M20 2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>'
+        '<path d="M20 14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z"/>'
+        '<path d="M7 9v6"/>'
+    ),
+    # User manual · 使用手冊
+    "book-open": (
+        '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>'
+        '<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'
+    ),
+    # Generic search (utility bar etc)
+    "search": (
+        '<circle cx="11" cy="11" r="7"/>'
+        '<path d="m21 21-4.3-4.3"/>'
+    ),
+    # Pulse dot (small live indicator)
+    "pulse-dot": (
+        '<circle cx="12" cy="12" r="3"/>'
+    ),
+}
+
+# Nav key → icon name mapping (v8 §11 roster).
+PAGE_ICON_NAMES = {
+    "home":        "radar",
+    "interpret":   "eye",
+    "data":        "building-2",
+    "icir":        "waveform",
+    "text":        "text-search",
+    "model":       "chart-column",
+    "feature":     "layers-3",
+    "backtest":    "line-chart",
+    "phase6":      "flask-conical",
+    "governance":  "shield-check",
+    "signal":      "activity",
+    "extended":    "combine",
+    "manual":      "book-open",
+}
+
+
+def render_page_icon(name: str, size: int = 20, color: str = "currentColor",
+                     stroke_width: float = 2.0, as_html: bool = True,
+                     aria_hidden: bool = True):
+    """Return (or render) a lucide-style SVG icon string by name.
+
+    Args:
+        name: key in ``GLINT_ICON_SVG`` (e.g. ``"radar"``, ``"shield-check"``).
+        size: px width/height. Default 20 for inline header glyphs.
+        color: CSS colour. ``"currentColor"`` lets CSS control tint.
+        stroke_width: stroke width in SVG units.
+        as_html: if ``True`` returns the raw SVG markup string; if ``False``
+            emits via ``st.markdown`` and returns None.
+        aria_hidden: adds ``aria-hidden="true"`` so screen readers skip
+            purely decorative glyphs.
+
+    The registry is immutable at runtime — unknown names fall back to a
+    small bullet so the UI never crashes.
+    """
+    path_data = GLINT_ICON_SVG.get(name, '<circle cx="12" cy="12" r="5"/>')
+    aria = ' aria-hidden="true"' if aria_hidden else ''
+    svg = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" '
+        f'width="{int(size)}" height="{int(size)}" '
+        f'viewBox="0 0 24 24" fill="none" stroke="{color}" '
+        f'stroke-width="{stroke_width}" stroke-linecap="round" '
+        f'stroke-linejoin="round"{aria}>'
+        f'{path_data}'
+        f'</svg>'
+    )
+    if as_html:
+        return svg
+    import streamlit as _st
+    _st.markdown(svg, unsafe_allow_html=True)
+    return None
+
+
+def render_nav_icon(page_key: str, size: int = 18, color: str = "currentColor",
+                    stroke_width: float = 2.0, as_html: bool = True):
+    """Convenience wrapper: resolve ``page_key`` → icon name → SVG.
+
+    Use this inside top-nav / sidebar / hero icon slots so page-level code
+    never needs to know the icon name directly.
+    """
+    icon_name = PAGE_ICON_NAMES.get(page_key, "pulse-dot")
+    return render_page_icon(
+        icon_name,
+        size=size,
+        color=color,
+        stroke_width=stroke_width,
+        as_html=as_html,
+    )
+
+
 # --- Unified colorscales for heatmaps -------------------------------------
 GLINT_DIVERGING = [
     [0.00, "#9f1239"],   # deep rose
