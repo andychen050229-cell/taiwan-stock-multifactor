@@ -719,7 +719,7 @@ try:
      border-radius:8px; padding:14px 18px; margin:8px 0 16px 0;">
     <strong>{alert_icon} 市場環境監測</strong><br>
     <span style="font-size:0.9rem;">{alert_text}</span><br>
-    <span style="font-size:0.85rem; color:#6b7280;">{trend_text}</span>
+    <span style="font-size:0.85rem; color:#b4ccdf;">{trend_text}</span>
 </div>
         """, unsafe_allow_html=True)
 
@@ -1211,28 +1211,28 @@ try:
     with r1:
         st.markdown(f"""
 <div class="cost-result">
-    <div style="font-size:0.8rem; color:#5a6577;">買進金額</div>
-    <div class="cost-total" style="color:#1a1f36;">${buy_amount:,.0f}</div>
+    <div style="font-size:0.8rem; color:#67e8f9;">買進金額</div>
+    <div class="cost-total">${buy_amount:,.0f}</div>
 </div>
         """, unsafe_allow_html=True)
     with r2:
         st.markdown(f"""
 <div class="cost-result">
-    <div style="font-size:0.8rem; color:#5a6577;">手續費（買+賣）</div>
+    <div style="font-size:0.8rem; color:#67e8f9;">手續費（買+賣）</div>
     <div class="cost-total" style="font-size:1.3rem;">${buy_fee + sell_fee:,.0f}</div>
 </div>
         """, unsafe_allow_html=True)
     with r3:
         st.markdown(f"""
 <div class="cost-result">
-    <div style="font-size:0.8rem; color:#5a6577;">證交稅（賣出）</div>
+    <div style="font-size:0.8rem; color:#67e8f9;">證交稅（賣出）</div>
     <div class="cost-total" style="font-size:1.3rem;">${sell_tax:,.0f}</div>
 </div>
         """, unsafe_allow_html=True)
     with r4:
         st.markdown(f"""
 <div class="cost-result">
-    <div style="font-size:0.8rem; color:#5a6577;">總成本</div>
+    <div style="font-size:0.8rem; color:#67e8f9;">總成本</div>
     <div class="cost-total">${total_cost:,.0f}</div>
     <div style="font-size:0.75rem; color:#9ca3af;">{cost_ratio:.2f}%</div>
 </div>

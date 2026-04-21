@@ -24,6 +24,7 @@ PAGE_TITLES = _utils.PAGE_TITLES
 PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
+render_section_title = _utils.render_section_title
 
 inject_custom_css()
 
@@ -122,7 +123,7 @@ with st.sidebar:
 # ============================================================
 # Section 1: Data Drift Detection
 # ============================================================
-st.header("資料漂移偵測")
+render_section_title("資料漂移偵測", "Feature Drift · PSI / KS")
 
 st.info("""
 **PSI（Population Stability Index）是什麼？**
@@ -293,7 +294,7 @@ st.divider()
 # ============================================================
 # Section 2: Signal Stability
 # ============================================================
-st.header("訊號穩定性分析")
+render_section_title("訊號穩定性分析", "Signal Stability · Half-Life")
 
 st.info("""
 **ICIR（Information Coefficient Information Ratio）是什麼？**
@@ -467,7 +468,7 @@ st.divider()
 # ============================================================
 # Section 3: Retrain Recommendation Summary
 # ============================================================
-st.header("綜合建議")
+render_section_title("綜合建議", "Integrated Recommendation")
 
 has_data = drift_data or decay_data
 
@@ -518,27 +519,31 @@ if has_data:
 
     st.markdown(f"""
     <div style="
-        background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
-        border: 1px solid rgba(6,182,212,0.18);
-        border-left: 4px solid #06b6d4;
+        background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+        border: 1px solid rgba(103,232,249,0.22);
+        border-left: 4px solid #67e8f9;
         border-radius: 12px;
         padding: 20px 24px;
         margin: 18px 0 4px 0;
+        box-shadow: inset 0 1px 0 rgba(103,232,249,0.10);
     ">
         <div style="
-            display: inline-block; background: #06b6d4; color: white;
-            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+            display: inline-block;
+            background: rgba(103,232,249,0.14); color: #67e8f9;
+            border: 1px solid rgba(103,232,249,0.32);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.70rem; font-weight: 700; letter-spacing: 0.12em;
             padding: 3px 10px; border-radius: 4px; margin-bottom: 10px;
         ">目前狀態 · HEALTH SNAPSHOT</div>
-        <div style="font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">
+        <div style="font-size: 1.3rem; font-weight: 800; color: #E8F7FC; margin-bottom: 6px;">
             {_traffic} · {_status_txt}
         </div>
-        <div style="font-size: 0.92rem; color: #334155; line-height: 1.85; margin-top: 8px;">
-            漂移 <strong>{drift_sev}</strong> ·
-            PSI&gt;0.2 特徵 <strong>{n_drifted}</strong> 個 ·
-            強/中/弱訊號 <strong>{strong}</strong>/<strong>{moderate}</strong>/<strong>{weak}</strong> ·
-            最短半衰期 <strong>{f'{min_hl} 月' if min_hl else '未衰減'}</strong><br>
-            <strong style="color: #0891b2;">→ 建議 {retrain_cycle}</strong>
+        <div style="font-size: 0.92rem; color: #cfe2ee; line-height: 1.85; margin-top: 8px;">
+            漂移 <strong style="color:#E8F7FC;">{drift_sev}</strong> ·
+            PSI&gt;0.2 特徵 <strong style="color:#E8F7FC;">{n_drifted}</strong> 個 ·
+            強/中/弱訊號 <strong style="color:#E8F7FC;">{strong}</strong>/<strong style="color:#E8F7FC;">{moderate}</strong>/<strong style="color:#E8F7FC;">{weak}</strong> ·
+            最短半衰期 <strong style="color:#E8F7FC;">{f'{min_hl} 月' if min_hl else '未衰減'}</strong><br>
+            <strong style="color: #6ee7b7;">→ 建議 {retrain_cycle}</strong>
         </div>
     </div>
     """, unsafe_allow_html=True)

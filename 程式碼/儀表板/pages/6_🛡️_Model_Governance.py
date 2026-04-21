@@ -23,6 +23,7 @@ PAGE_TITLES = _utils.PAGE_TITLES
 PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
+render_section_title = _utils.render_section_title
 
 inject_custom_css()
 
@@ -133,7 +134,7 @@ with st.sidebar:
 # ============================================================
 # Section 1: Quality Gates Overview
 # ============================================================
-st.header("品質閘門總覽")
+render_section_title("品質閘門總覽", "Quality Gate Matrix")
 
 gates = p3_report.get("quality_gates", {})
 overall = p3_report.get("overall_status", "UNKNOWN")
@@ -184,7 +185,7 @@ st.divider()
 # ============================================================
 # Section 2: DSR Revalidation
 # ============================================================
-st.header("DSR 重新驗證")
+render_section_title("DSR 重新驗證", "Deflated Sharpe Ratio · Re-validation")
 
 st.info("""
 **什麼是 DSR（Deflated Sharpe Ratio）？**
@@ -295,7 +296,7 @@ st.divider()
 # ============================================================
 # Section 3: Performance Baselines
 # ============================================================
-st.header("效能基線")
+render_section_title("效能基線", "Performance Baselines")
 
 st.info("""
 **效能基線用途**
@@ -327,7 +328,7 @@ st.divider()
 # ============================================================
 # Section 4: Model Cards
 # ============================================================
-st.header("Model Cards")
+render_section_title("Model Cards", "Engine × Horizon Metadata")
 
 st.info("""
 **Model Card 是什麼？**
@@ -455,7 +456,7 @@ st.divider()
 # ============================================================
 # Section 5: Prediction Pipeline Validation
 # ============================================================
-st.header("預測管線驗證")
+render_section_title("預測管線驗證", "Pipeline Validation")
 
 st.info("""
 **這一段在做什麼?**
@@ -519,7 +520,7 @@ st.divider()
 # ============================================================
 # Section 6: 資料健康度快照 - 補齊原先空白區
 # ============================================================
-st.header("治理快照 · Governance Snapshot")
+render_section_title("治理快照", "Governance Snapshot")
 
 st.info("""
 **為什麼要有這段?**
@@ -554,26 +555,27 @@ with snap_c4:
     st.metric("基線指標數", f"{_n_baselines} 個",
               help="系統正在監測的基線指標(AUC/IC/Sharpe 等),任何一項異常都會觸發警告。")
 
-# 簡短治理摘要(白話版)
+# 簡短治理摘要(白話版) — v11.3 dark-glint 化
 st.markdown(f"""
 <div style="
-    background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
-    border: 1px solid rgba(6,182,212,0.18);
-    border-left: 4px solid #06b6d4;
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+    border: 1px solid rgba(103,232,249,0.22);
+    border-left: 4px solid #67e8f9;
     border-radius: 12px;
     padding: 18px 22px;
     margin: 16px 0;
     font-size: 0.92rem;
-    color: #334155;
+    color: #cfe2ee;
     line-height: 1.85;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.10);
 ">
-    <strong style="color: #0f172a; font-size: 1.02rem;">📌 一句話總結</strong><br>
-    本模型通過 <strong>{n_pass}/{n_total}</strong> 項品質閘門檢查、
-    DSR 判定為 <strong>{dsr_data.get("final_verdict", "—") if dsr_data else "—"}</strong>、
-    資料漂移為 <strong>{_drift_severity}</strong>,
-    最短半衰期 <strong>{_hl}</strong> 個月,
-    建議 <strong>{_retrain_short if _retrain != "—" else "每季"}</strong> 重訓一次。<br><br>
-    <strong style="color: #0891b2;">→ 可以放心部署;若要實盤,記得每月追蹤漂移指標與基線差距。</strong>
+    <strong style="color: #67e8f9; font-size: 1.02rem; letter-spacing: 0.04em;">📌 一句話總結</strong><br>
+    本模型通過 <strong style="color:#E8F7FC;">{n_pass}/{n_total}</strong> 項品質閘門檢查、
+    DSR 判定為 <strong style="color:#E8F7FC;">{dsr_data.get("final_verdict", "—") if dsr_data else "—"}</strong>、
+    資料漂移為 <strong style="color:#E8F7FC;">{_drift_severity}</strong>,
+    最短半衰期 <strong style="color:#E8F7FC;">{_hl}</strong> 個月,
+    建議 <strong style="color:#E8F7FC;">{_retrain_short if _retrain != "—" else "每季"}</strong> 重訓一次。<br><br>
+    <strong style="color: #6ee7b7;">→ 可以放心部署;若要實盤,記得每月追蹤漂移指標與基線差距。</strong>
 </div>
 """, unsafe_allow_html=True)
 

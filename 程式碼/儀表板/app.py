@@ -1,5 +1,5 @@
 """
-股票預測系統 · Multi-Factor Navigation Router (Option B — Top-Nav Architecture)
+台股多因子研究終端 · Multi-Factor Navigation Router (Option B — Top-Nav Architecture)
 
 2026-04-20 重構：採用 Option B 頂部導覽，與 Streamlit Cloud embed mode
 (`/~/+/`) 完全相容 —— 無論側邊欄是否顯示，頁面都有完整導覽。
@@ -93,10 +93,10 @@ _utils.inject_sidebar_health(
 )
 _utils.inject_sidebar_action_buttons(manual_page=manual)
 
-# ===== Global Dark Sidebar CSS — 股票預測系統 brand ================
+# ===== Global Dark Sidebar CSS — 台股多因子研究終端 brand ================
 st.markdown("""<style>
     /* ================================================================= */
-    /*  Dark "tech-data" sidebar — 股票預測系統 brand                    */
+    /*  Dark "tech-data" sidebar — 台股多因子研究終端 brand              */
     /* ================================================================= */
     section[data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0a1420 0%, #121c2b 55%, #0f1a28 100%) !important;

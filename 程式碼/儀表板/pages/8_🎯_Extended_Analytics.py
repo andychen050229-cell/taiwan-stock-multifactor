@@ -24,6 +24,7 @@ figures_dir = _utils.figures_dir
 glint_plotly_layout = _utils.glint_plotly_layout
 glint_heatmap_colorscale = _utils.glint_heatmap_colorscale
 glint_colorbar = _utils.glint_colorbar
+render_section_title = _utils.render_section_title
 
 inject_custom_css()
 
@@ -84,7 +85,7 @@ results = analytics.get("results", {})
 fig_dir = figures_dir()
 
 # ----- A. Cost Sensitivity -----
-st.header("A. Cost Sensitivity — 成本敏感度分析")
+render_section_title("A. 成本敏感度分析", "Cost Sensitivity · 9 × 3")
 st.info(
     "9 個模型（3 引擎 × 3 地平線）在三種手續費情境下的績效對照：\n"
     "- **standard**：0.583% per rebalance（一般散戶）\n"
@@ -147,7 +148,7 @@ if cs:
             st.image(str(png), use_container_width=True)
 
 # ----- B. Cross-Horizon -----
-st.header("B. Cross-Horizon — 跨引擎 × 跨地平線")
+render_section_title("B. 跨引擎 × 跨地平線", "Cross-Horizon · Engine × D+1/5/20")
 
 ch = results.get("cross_horizon", {})
 if ch:
@@ -210,7 +211,7 @@ if ch:
             st.image(str(png), use_container_width=True)
 
 # ----- C. Pillar Contribution -----
-st.header("C. Pillar Contribution — 特徵支柱貢獻")
+render_section_title("C. 特徵支柱貢獻", "Pillar Contribution · 9 Pillars")
 st.caption("依 P2 報告 top_features 正規化重要度，跨 6 個模型（LGB/XGB × D1/D5/D20）平均")
 
 pc = results.get("pillar_contribution", {})
@@ -266,7 +267,7 @@ if pc:
             st.image(str(png), use_container_width=True)
 
 # ----- D. Case Study -----
-st.header("D. Case Study — 龍頭個股命中率")
+render_section_title("D. 龍頭個股命中率", "Case Study · 2330 / 2317 / 2454 / 2303")
 st.caption("xgboost_D20 OOF predictions（2024-04 → 2025-03, n≈213 個交易日）")
 
 cs_d = results.get("case_study", {})

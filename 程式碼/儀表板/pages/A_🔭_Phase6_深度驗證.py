@@ -63,67 +63,65 @@ _utils.render_trust_strip([
 ])
 
 # ============================================================================
-# 白話導讀 — 用吃早餐的比喻說明三個分析(非技術使用者友善)
+# 白話導讀 — v11.3 dark-glint 全面重繪
 # ============================================================================
 st.markdown("""
 <div style="
-    background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 50%, #f0f9ff 100%);
-    border: 1px solid rgba(6,182,212,0.18);
-    border-left: 4px solid #06b6d4;
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+    border: 1px solid rgba(103,232,249,0.22);
+    border-left: 4px solid #67e8f9;
     border-radius: 14px;
     padding: 22px 26px;
     margin: 18px 0 8px 0;
-    box-shadow: 0 2px 8px rgba(6,182,212,0.06);
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.12);
 ">
     <div style="
         display: inline-block;
-        background: #06b6d4;
-        color: #ffffff;
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        padding: 3px 10px;
-        border-radius: 4px;
-        margin-bottom: 12px;
+        background: rgba(103,232,249,0.14); color: #67e8f9;
+        border: 1px solid rgba(103,232,249,0.32);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+        padding: 3px 10px; border-radius: 4px; margin-bottom: 12px;
     ">白話導讀 · PLAIN-LANGUAGE GUIDE</div>
-    <div style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;">
+    <div style="font-size: 1.05rem; font-weight: 700; color: #E8F7FC; margin-bottom: 10px;">
         這一頁在做什麼?一句話:
-        <span style="color: #0891b2;">檢驗模型是不是真的懂股票,還是只是運氣好。</span>
+        <span style="color: #67e8f9;">檢驗模型是不是真的懂股票,還是只是運氣好。</span>
     </div>
-    <div style="font-size: 0.95rem; color: #334155; line-height: 1.85;">
+    <div style="font-size: 0.95rem; color: #cfe2ee; line-height: 1.85;">
         想像一個廚師宣稱自己做的菜很好吃,<br>
         我們要做三件事來驗證他:
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# 三個白話比喻卡片
+# 三個白話比喻卡片 — v11.3 dark-glint 化
 col_g1, col_g2, col_g3 = st.columns(3, gap="medium")
 
 with col_g1:
     st.markdown("""
     <div style="
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-top: 3px solid #2563eb;
+        background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+        border: 1px solid rgba(103,232,249,0.22);
+        border-top: 3px solid #67e8f9;
         border-radius: 12px;
         padding: 20px;
         height: 100%;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(103,232,249,0.10);
     ">
         <div style="
             display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
         ">
             <span style="font-size: 1.5rem;">🔬</span>
             <span style="
-                font-size: 0.7rem; font-weight: 700; color: #2563eb;
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.7rem; font-weight: 700; color: #67e8f9;
                 letter-spacing: 0.08em; text-transform: uppercase;
             ">§1 LOPO · 把食材一個一個拔掉</span>
         </div>
-        <div style="font-size: 1.0rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+        <div style="font-size: 1.0rem; font-weight: 700; color: #E8F7FC; margin-bottom: 8px;">
             哪個食材最不可或缺?
         </div>
-        <div style="font-size: 0.88rem; color: #475569; line-height: 1.7;">
+        <div style="font-size: 0.88rem; color: #cfe2ee; line-height: 1.7;">
             就像大廚的招牌菜,<br>
             我們把番茄、洋蔥、蒜頭 <strong>一個一個拿掉</strong>,<br>
             看少了哪一樣最難吃。<br><br>
@@ -131,7 +129,7 @@ with col_g1:
             每次拔掉一個面向的所有資料<br>
             (技術面、基本面、風險面......),<br>
             少了它,模型的準確度掉多少?<br>
-            <strong style="color: #2563eb;">掉越多 → 這面向越重要。</strong>
+            <strong style="color: #67e8f9;">掉越多 → 這面向越重要。</strong>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -139,27 +137,28 @@ with col_g1:
 with col_g2:
     st.markdown("""
     <div style="
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-top: 3px solid #7c3aed;
+        background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+        border: 1px solid rgba(167,139,250,0.28);
+        border-top: 3px solid #a78bfa;
         border-radius: 12px;
         padding: 20px;
         height: 100%;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(167,139,250,0.10);
     ">
         <div style="
             display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
         ">
             <span style="font-size: 1.5rem;">🎯</span>
             <span style="
-                font-size: 0.7rem; font-weight: 700; color: #7c3aed;
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.7rem; font-weight: 700; color: #a78bfa;
                 letter-spacing: 0.08em; text-transform: uppercase;
             ">§2 閾值敏感度 · 要多有把握才出手</span>
         </div>
-        <div style="font-size: 1.0rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+        <div style="font-size: 1.0rem; font-weight: 700; color: #E8F7FC; margin-bottom: 8px;">
             模型說「會漲」時,我該多信任?
         </div>
-        <div style="font-size: 0.88rem; color: #475569; line-height: 1.7;">
+        <div style="font-size: 0.88rem; color: #cfe2ee; line-height: 1.7;">
             就像紅綠燈的紅有深淺,<br>
             機率 60% 跟 90% 意義不同。<br><br>
             把門檻從 30% 拉到 50%,<br>
@@ -167,7 +166,7 @@ with col_g2:
             怎麼跟著變化。<br><br>
             門檻高 → 出手少但命中高(保守),<br>
             門檻低 → 出手多但命中低(積極)。<br>
-            <strong style="color: #7c3aed;">找出「兼顧次數與準度」的甜蜜點。</strong>
+            <strong style="color: #a78bfa;">找出「兼顧次數與準度」的甜蜜點。</strong>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -175,27 +174,28 @@ with col_g2:
 with col_g3:
     st.markdown("""
     <div style="
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-top: 3px solid #10b981;
+        background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+        border: 1px solid rgba(110,231,183,0.28);
+        border-top: 3px solid #6ee7b7;
         border-radius: 12px;
         padding: 20px;
         height: 100%;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(110,231,183,0.10);
     ">
         <div style="
             display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
         ">
             <span style="font-size: 1.5rem;">📈</span>
             <span style="
-                font-size: 0.7rem; font-weight: 700; color: #10b981;
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.7rem; font-weight: 700; color: #6ee7b7;
                 letter-spacing: 0.08em; text-transform: uppercase;
             ">§3 2454 聯發科 · 真的拿去買會賺嗎</span>
         </div>
-        <div style="font-size: 1.0rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+        <div style="font-size: 1.0rem; font-weight: 700; color: #E8F7FC; margin-bottom: 8px;">
             紙上 OK,實戰呢?
         </div>
-        <div style="font-size: 0.88rem; color: #475569; line-height: 1.7;">
+        <div style="font-size: 0.88rem; color: #cfe2ee; line-height: 1.7;">
             挑一檔大家熟悉的股票 ─<br>
             <strong>2454 聯發科</strong>,<br>
             用過去一年真實盤面驗證。<br><br>
@@ -203,24 +203,26 @@ with col_g3:
             看實際 <strong>漲了幾次 / 錯了幾次</strong>。<br><br>
             模型該在行情來時提高機率,<br>
             在盤整震盪時閉嘴不亂喊。<br>
-            <strong style="color: #10b981;">會講話、會閉嘴,才是真本事。</strong>
+            <strong style="color: #6ee7b7;">會講話、會閉嘴,才是真本事。</strong>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown("""
 <div style="
-    background: #fefce8;
-    border: 1px solid rgba(234,179,8,0.25);
+    background: linear-gradient(180deg, rgba(37,25,12,0.92) 0%, rgba(22,14,5,0.96) 100%);
+    border: 1px solid rgba(245,158,11,0.32);
+    border-left: 4px solid #f59e0b;
     border-radius: 10px;
     padding: 14px 18px;
     margin: 14px 0 18px 0;
     font-size: 0.88rem;
-    color: #713f12;
+    color: #fde68a;
+    line-height: 1.65;
 ">
     <strong>💡 小提醒</strong>:下方三個分頁(🔬/🎯/📈)對應上面三個白話問題,
     每個分頁都附「方法論」說明與圖表,<br>
-    不理解技術細節也能從 <strong>「關鍵洞察」區塊</strong> 看到重點結論。
+    不理解技術細節也能從 <strong style="color:#fef3c7;">「關鍵洞察」區塊</strong> 看到重點結論。
 </div>
 """, unsafe_allow_html=True)
 

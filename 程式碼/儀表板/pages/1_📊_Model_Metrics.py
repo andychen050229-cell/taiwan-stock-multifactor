@@ -309,9 +309,9 @@ try:
         ))
         fig_auc.update_yaxes(range=[0.48, max(r["AUC"] for r in rows) + 0.02])
         fig_auc.update_layout(hovermode="x unified")
-        fig_auc.add_hline(y=0.5, line_dash="dash", line_color="#94a3b8",
+        fig_auc.add_hline(y=0.5, line_dash="dash", line_color="rgba(103,232,249,0.40)",
                           annotation_text="隨機基線 0.50",
-                          annotation_font=dict(family="JetBrains Mono", size=10, color="#94a3b8"))
+                          annotation_font=dict(family="JetBrains Mono", size=10, color="#b4ccdf"))
         fig_auc.add_hline(y=0.52, line_dash="dash", line_color="#f43f5e",
                           annotation_text="品質門檻 0.52",
                           annotation_font=dict(family="JetBrains Mono", size=10, color="#f43f5e"))
@@ -384,9 +384,9 @@ try:
         ))
         fig.update_yaxes(range=[0.45, 0.75])
         fig.update_layout(barmode="group", hovermode="x unified")
-        fig.add_hline(y=0.5, line_dash="dash", line_color="#94a3b8",
+        fig.add_hline(y=0.5, line_dash="dash", line_color="rgba(103,232,249,0.40)",
                       annotation_text="隨機基線 0.50",
-                      annotation_font=dict(family="JetBrains Mono", size=10, color="#94a3b8"))
+                      annotation_font=dict(family="JetBrains Mono", size=10, color="#b4ccdf"))
         st.plotly_chart(fig, use_container_width=True)
 
         with st.expander("📋 逐折明細 | Per-Fold Details"):

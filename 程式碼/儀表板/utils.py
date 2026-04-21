@@ -1182,7 +1182,7 @@ def inject_custom_css():
     @media (max-width: 1200px) {{ .gl-grid-6 {{ grid-template-columns: repeat(3, 1fr); }} }}
     @media (max-width: 900px) {{ .gl-grid-3 {{ grid-template-columns: 1fr; }} .gl-grid-6 {{ grid-template-columns: repeat(2, 1fr); }} }}
     /* ================================================================= */
-    /* 6. 股票預測系統 — sidebar brand + system health card (dark theme) */
+    /* 6. 台股多因子研究終端 — sidebar brand + system health card       */
     /* ================================================================= */
     /* Brand block at the top of the dark sidebar — softer, tech-luxe */
     .gl-brand {{
@@ -3209,47 +3209,34 @@ def render_hero(eyebrow: str, title_html: str, meta_chips: list = None,
     )
 
 
-def render_page_heading(icon: str, title_zh: str, title_en: str = "",
-                         command_line: str = "", tone: str = "blue") -> None:
-    """Render a unified analyst-page heading: big Chinese title + English eyebrow
-    + a single-line *command-center* subtitle. Replaces ad-hoc
-    ``st.title / st.caption`` pairs so every page opens with the same 3-second
-    scan.
+def render_section_title(title_zh: str, title_en: str = "", sub: str = "") -> None:
+    """v11.3 § dark-glint section header — replaces raw ``st.header(...)``.
+
+    Uses ``.gl-section-head`` (cyan left-bar + gradient) so every page
+    gets the same monospace-english sub + chinese-bold divider instead
+    of Streamlit's default white ``h2``.
 
     Args:
-        icon:         single emoji, shown before the Chinese title.
-        title_zh:     Chinese (primary) title.
-        title_en:     English gloss appended next to the Chinese title.
-        command_line: one-line command-center subtitle (terse, task-driven).
-        tone:         accent color — ``blue`` / ``violet`` / ``cyan`` / ``emerald``.
+        title_zh: primary (Chinese) section title.
+        title_en: optional monospace english gloss rendered on the right.
+        sub:      alternative for ``title_en`` — kept for call-site flexibility.
     """
-    accent_map = {
-        "blue":    "#2563eb",
-        "violet":  "#7c3aed",
-        "cyan":    "#06b6d4",
-        "emerald": "#10b981",
-        "amber":   "#f59e0b",
-    }
-    accent = accent_map.get(tone, "#2563eb")
-    en_html = (
-        f'<span class="gl-page-heading-en">· {title_en}</span>' if title_en else ""
-    )
-    cmd_html = (
-        f'<div class="gl-page-heading-cmd">'
-        f'<span class="gl-page-heading-cmd-dot" style="background:{accent};"></span>'
-        f'{command_line}</div>'
-    ) if command_line else ""
+    right = title_en or sub or ""
+    right_html = f'<span class="sub">{right}</span>' if right else ""
     st.markdown(
-        f'<div class="gl-page-heading" style="--gl-page-accent:{accent};">'
-        f'<div class="gl-page-heading-title">'
-        f'<span class="gl-page-heading-icon">{icon}</span>'
-        f'<span class="gl-page-heading-zh">{title_zh}</span>'
-        f'{en_html}'
-        f'</div>'
-        f'{cmd_html}'
+        f'<div class="gl-section-head">'
+        f'<h2>{title_zh}</h2>'
+        f'{right_html}'
         f'</div>',
         unsafe_allow_html=True,
     )
+
+
+# v11.3 § dead-code removal — legacy light-mode ``render_page_heading``
+# has been superseded by ``render_terminal_hero`` (dark terminal) + the
+# ``render_topbar + render_secnav`` breadcrumb stack. No page imports it
+# any more, so the function was deleted. The ``.gl-page-heading*`` CSS
+# classes remain for now in case a downstream user re-enables it.
 
 
 def render_trust_strip(items: list) -> None:

@@ -200,7 +200,7 @@ try:
         fig_main.add_hline(y=1.0, line_dash="dash", line_color="#065f46",
                            annotation_text="優秀閾值 Excellent (1.0)",
                            annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#065f46"))
-        fig_main.add_hline(y=0, line_dash="dot", line_color="#94a3b8")
+        fig_main.add_hline(y=0, line_dash="dot", line_color="rgba(103,232,249,0.40)")
         st.plotly_chart(fig_main, use_container_width=True)
         render_chart_note(
             "關鍵訊號：僅 <b>D+20</b> 地平線（綠柱）穩定站上零軸，<b>D+1/D+5</b>（紅/橘）普遍落於負區——驗證月頻才是可交易尺度。",
@@ -284,7 +284,7 @@ try:
                 y=[min_val, max_val],
                 mode="lines",
                 name="Reference (equal)",
-                line=dict(color="#94a3b8", dash="dash")
+                line=dict(color="rgba(103,232,249,0.45)", dash="dash")
             ))
 
             fig_qq.update_layout(**glint_plotly_layout(

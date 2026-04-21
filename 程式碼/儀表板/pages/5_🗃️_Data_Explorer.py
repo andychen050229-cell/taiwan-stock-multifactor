@@ -68,29 +68,33 @@ render_trust_strip([
     ("PIT",      "已對齊 · 無洩漏",       "emerald"),
 ])
 
-# 白話版資料產生說明
+# 白話版資料產生說明 — v11.3 dark-glint 化
 st.markdown("""
 <div style="
-    background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
-    border: 1px solid rgba(6,182,212,0.18);
-    border-left: 4px solid #06b6d4;
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+    border: 1px solid rgba(103,232,249,0.22);
+    border-left: 4px solid #67e8f9;
     border-radius: 12px;
     padding: 18px 22px;
     margin: 14px 0;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.10);
 ">
     <div style="
-        display: inline-block; background: #06b6d4; color: white;
-        font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+        display: inline-block;
+        background: rgba(103,232,249,0.14); color: #67e8f9;
+        border: 1px solid rgba(103,232,249,0.32);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.70rem; font-weight: 700; letter-spacing: 0.12em;
         padding: 3px 10px; border-radius: 4px; margin-bottom: 10px;
     ">資料怎麼來? · DATA PIPELINE</div>
-    <div style="font-size: 0.95rem; color: #334155; line-height: 1.85;">
-        <strong style="color: #0f172a;">這一頁的 94 萬筆資料怎麼產生?</strong><br>
+    <div style="font-size: 0.95rem; color: #cfe2ee; line-height: 1.85;">
+        <strong style="color: #E8F7FC;">這一頁的 94 萬筆資料怎麼產生?</strong><br>
         ① <strong>教授 bda2026 資料庫</strong>提供 4 張主表(公司基本、股價、財報、文本);<br>
         ② <strong>FinMind 公開 API</strong>補上 OHLCV、資產負債表、現金流、產業、三大法人等 6 張表;<br>
         ③ 經過 <strong>PIT 合規對齊</strong>(財報按法定申報日延遲)與 <strong>洩漏偵測</strong>;<br>
         ④ 依九大面向建構 1,623 個候選特徵 → 三階段篩選到 91 個生產用特徵;<br>
         ⑤ 使用 <strong>Purged Walk-Forward CV</strong>(訓練集往前擴展 + 20 日 embargo),確保模型評估不偷看未來。<br>
-        <strong style="color: #0891b2;">→ 所有門檻都通過,才代表模型輸出可信。</strong>
+        <strong style="color: #67e8f9;">→ 所有門檻都通過,才代表模型輸出可信。</strong>
     </div>
 </div>
 """, unsafe_allow_html=True)

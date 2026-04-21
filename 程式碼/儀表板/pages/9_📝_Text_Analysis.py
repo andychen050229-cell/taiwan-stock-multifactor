@@ -22,6 +22,13 @@ _spec.loader.exec_module(_utils)
 inject_custom_css = _utils.inject_custom_css
 render_topbar = _utils.render_topbar
 figures_dir = _utils.figures_dir
+render_terminal_hero = _utils.render_terminal_hero
+render_section_title = _utils.render_section_title
+PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
+PAGE_TITLES = _utils.PAGE_TITLES
+PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
+render_trust_strip = _utils.render_trust_strip
+render_page_footer = _utils.render_page_footer
 
 inject_custom_css()
 
@@ -33,15 +40,18 @@ render_topbar(
     show_clock=True,
 )
 
-# ===== Banner =====
-st.markdown("""
-<div class="gl-box-info" style="margin-top:14px;">
-📝 <strong>Phase 5B 文本分析儀表板</strong>：1,125,134 篇文章 → 500 selected keywords + 11 sentiment features → 1,532 txt_/sent_ 特徵入 feature_store
-</div>
-""", unsafe_allow_html=True)
-
-st.title("📝 文本分析 — Text Analysis")
-st.caption("Phase 5B Stage 2.1–2.4 + 2.5 視覺化｜jieba 斷詞 + Chi²/MI/Lift 關鍵字三重篩選 + SnowNLP 情緒打分")
+# v11.3 § Page-9 rescue — dark terminal hero + trust strip (parity with other pages)
+render_terminal_hero(
+    eyebrow=PAGE_EYEBROWS["text"],
+    title=PAGE_TITLES["text"],
+    briefing=PAGE_BRIEFINGS["text"],
+)
+render_trust_strip([
+    ("原始文章",    "1,125,134",  "violet"),
+    ("關鍵字",       "500",        "cyan"),
+    ("txt_ 特徵",   "1,521",      "blue"),
+    ("sent_ 特徵",  "11",         "emerald"),
+])
 
 fig_dir = figures_dir()
 
@@ -56,7 +66,7 @@ col4.metric("sent_ 特徵", "11", "polarity / ratio / spread / vol / reversal")
 st.divider()
 
 # ===== A. Wordcloud =====
-st.header("A. 關鍵字詞雲 — Wordcloud")
+render_section_title("A. 關鍵字詞雲", "Wordcloud · Top 500 keywords")
 st.caption("500 個 selected keywords，字體大小依 Chi²+MI+Lift 三重排序的 rank_combined 倒數加權")
 png = fig_dir / "text_wordcloud.png"
 if png.exists():
@@ -72,7 +82,7 @@ else:
     st.warning(f"圖檔不存在：{png}，請先執行 `python 程式碼/執行Phase5B_文本視覺化.py`")
 
 # ===== B. Top 30 keywords (3 metrics) =====
-st.header("B. Top 30 關鍵字 — 三指標對照")
+render_section_title("B. Top 30 關鍵字", "Chi² / MI / Lift · 三指標對照")
 st.caption("Chi² 捕捉與標籤的相關性 ｜ Mutual Information 捕捉非線性依賴 ｜ Lift 捕捉正標籤相對發生率")
 png = fig_dir / "text_top_keywords.png"
 if png.exists():
@@ -141,7 +151,7 @@ if kw_path.exists():
     )
 
 # ===== C. Sentiment distribution =====
-st.header("C. 情緒特徵分布 — Sentiment Features")
+render_section_title("C. 情緒特徵分布", "Sentiment Features · 9 core")
 st.caption("SnowNLP 極性（-1 ~ +1）+ 辭典輔助 ｜ 5d/20d rolling 窗 ｜ 區分新聞與論壇來源")
 png = fig_dir / "text_sentiment_distribution.png"
 if png.exists():
@@ -157,14 +167,14 @@ if png.exists():
     """, unsafe_allow_html=True)
 
 # ===== D. Platform share =====
-st.header("D. 資料來源平台 — Platform Share")
+render_section_title("D. 資料來源平台", "Platform Share · PTT / Dcard / Mobile01 / Yahoo")
 st.caption("五個來源：Dcard / Mobile01 / PTT / Yahoo 新聞 / Yahoo 股市")
 png = fig_dir / "text_platform_share.png"
 if png.exists():
     st.image(str(png), use_container_width=True)
 
 # ===== E. Volume over time =====
-st.header("E. 文本量時序 — Volume Over Time")
+render_section_title("E. 文本量時序", "Volume Over Time · 2023-03 ~ 2025-03")
 st.caption("每日文章量（article × stock mention）+ 7 日滑動平均")
 png = fig_dir / "text_volume_over_time.png"
 if png.exists():
@@ -179,7 +189,7 @@ if png.exists():
     """, unsafe_allow_html=True)
 
 # ===== F. Coverage heatmap =====
-st.header("F. Top 20 個股 × 月份 — Coverage Heatmap")
+render_section_title("F. Top 20 個股 × 月份", "Coverage Heatmap")
 st.caption("縱軸為被提及最頻繁的前 20 檔，橫軸為月份，顏色深淺代表月度提及次數")
 png = fig_dir / "text_coverage_heatmap.png"
 if png.exists():

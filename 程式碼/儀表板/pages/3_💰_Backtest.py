@@ -226,7 +226,7 @@ try:
         fig_sr.add_hline(y=1.0, line_dash="dash", line_color="#065f46",
                          annotation_text="優秀門檻 Excellent (1.0)",
                          annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#065f46"))
-        fig_sr.add_hline(y=0, line_color="#94a3b8", line_dash="dot")
+        fig_sr.add_hline(y=0, line_color="rgba(103,232,249,0.40)", line_dash="dot")
         st.plotly_chart(fig_sr, use_container_width=True)
 
     # ===== Risk-Return Scatter Plot =====
@@ -395,7 +395,7 @@ $$
             ylabel="年化報酬 Return",
         ))
         fig_cost.update_layout(yaxis_tickformat=".1%", hovermode="x unified")
-        fig_cost.add_hline(y=0, line_color="#94a3b8", line_dash="dash")
+        fig_cost.add_hline(y=0, line_color="rgba(103,232,249,0.40)", line_dash="dash")
         st.plotly_chart(fig_cost, use_container_width=True)
 
         # Cost sensitivity analysis
@@ -424,7 +424,7 @@ $$
                 ylabel="年化報酬 Return",
             ))
             fig_cost_sens.update_layout(yaxis_tickformat=".1%")
-            fig_cost_sens.add_hline(y=0, line_color="#94a3b8", line_dash="dash")
+            fig_cost_sens.add_hline(y=0, line_color="rgba(103,232,249,0.40)", line_dash="dash")
             st.plotly_chart(fig_cost_sens, use_container_width=True)
 
     # ===== Turnover Analysis (Cross-Horizon) =====
@@ -481,7 +481,7 @@ $$
                 ylabel="年化報酬 Return",
             ))
             fig3.update_layout(yaxis_tickformat=".1%", xaxis_tickformat=".4f", hovermode="closest")
-            fig3.add_hline(y=0, line_color="#94a3b8", line_dash="dash")
+            fig3.add_hline(y=0, line_color="rgba(103,232,249,0.40)", line_dash="dash")
             st.plotly_chart(fig3, use_container_width=True)
 
         with t2:
@@ -516,7 +516,7 @@ $$
                 ylabel="年化報酬 Return",
             ))
             fig4.update_layout(yaxis_tickformat=".1%", xaxis_tickformat=".0%", hovermode="closest")
-            fig4.add_hline(y=0, line_color="#94a3b8", line_dash="dash")
+            fig4.add_hline(y=0, line_color="rgba(103,232,249,0.40)", line_dash="dash")
             st.plotly_chart(fig4, use_container_width=True)
         render_chart_note(
             "色條由紅→橘→綠對應 D+1 → D+5 → D+20。綠色泡泡（月頻）明顯位於右上／低成本區——換手率愈低、成本壓力愈小，越靠近正報酬區。",
