@@ -4540,35 +4540,35 @@ div[data-baseweb="popover"] [data-baseweb="menu"] li[aria-selected="true"] > * {
 }
 
 /* =========================================================================
-   v11.5.6 §8.3 — Sidebar Slider: sci-fi "range dial" (designer elevation)
-   Upgrades v10 baseline with:
-     · animated scan-line on the active fill (moving cyan streak)
-     · breathing pulse ring on the thumb
-     · dual concentric thumb (outer glow ring + inner solid node)
-     · micro tick marks along the track (4px vertical ticks every 10%)
-     · bracket framing on min/max labels
+   v11.5.7 §8.3 — Sidebar Slider: Eclipse / Spirit-Blossom HUD dial
+   Inspired by LoL Eclipse (幽冥煞星) + targeting-HUD aesthetics.
+   Design elements:
+     · hexagonal thumb with dual-chroma core (violet → cyan → white)
+     · orbiting halo ring around the thumb (conic-gradient spin)
+     · violet-to-cyan active fill with white scan-streak sweeping across
+     · deep-void track with violet hairline + micro tick grid wash
+     · bracket-framed value bubble in deep-space violet
+     · min/max labels wrapped in [ … ] runic glyph frame
    Scoped to sidebar so main-canvas sliders stay on the light theme.
    ========================================================================= */
 @keyframes gl-slider-scan {
-    0%   { background-position: -120% 0; }
-    100% { background-position: 220% 0; }
+    0%   { background-position: -120% 0, 0 0; }
+    100% { background-position: 220% 0, 0 0; }
 }
 @keyframes gl-slider-thumb-pulse {
     0%, 100% {
-        box-shadow:
-            0 0 0 2px rgba(103,232,249,0.35),
-            0 0 8px rgba(103,232,249,0.40),
-            inset 0 0 0 2px #0a1420;
+        filter:
+            drop-shadow(0 0 4px rgba(103,232,249,0.55))
+            drop-shadow(0 0 10px rgba(139,92,246,0.45));
     }
     50% {
-        box-shadow:
-            0 0 0 3px rgba(103,232,249,0.60),
-            0 0 16px rgba(103,232,249,0.80),
-            inset 0 0 0 2px #0a1420;
+        filter:
+            drop-shadow(0 0 8px rgba(103,232,249,0.85))
+            drop-shadow(0 0 18px rgba(139,92,246,0.70));
     }
 }
 section[data-testid="stSidebar"] div[data-testid="stSlider"] {
-    padding: 4px 2px 2px 2px !important;
+    padding: 6px 2px 4px 2px !important;
 }
 section[data-testid="stSidebar"] div[data-testid="stSlider"] label,
 section[data-testid="stSidebar"] div[data-testid="stSlider"] label p {
@@ -4579,125 +4579,208 @@ section[data-testid="stSidebar"] div[data-testid="stSlider"] label p {
     letter-spacing: 0.18em !important;
     text-transform: uppercase !important;
 }
-/* Slider container — add tick-mark background + faint grid wash */
+/* Slider container — add faint vertical tick wash behind the track */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] {
     position: relative !important;
-    padding-top: 6px !important;
+    padding-top: 10px !important;
+    padding-bottom: 4px !important;
 }
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"]::before {
     content: "";
     position: absolute;
-    left: 8px; right: 8px;
+    left: 10px; right: 10px;
     top: 50%;
-    height: 10px;
+    height: 12px;
     transform: translateY(-50%);
     background-image:
         linear-gradient(90deg,
-            rgba(103,232,249,0.26) 0 1px,
+            rgba(167,139,250,0.24) 0 1px,
             transparent 1px 10%);
     background-size: 10% 100%;
     background-repeat: repeat-x;
     pointer-events: none;
-    opacity: 0.55;
+    opacity: 0.70;
     z-index: 0;
 }
-/* Track (unfilled portion) — darker, inset cyan hairline */
+/* Track (unfilled portion) — deep violet-black void with hairline */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] div[role="progressbar"],
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] > div > div:first-child {
-    background: linear-gradient(180deg, rgba(6,14,24,0.95), rgba(10,20,32,0.92)) !important;
+    background:
+        linear-gradient(180deg, rgba(10,4,20,0.95), rgba(20,12,40,0.92)) !important;
     box-shadow:
-        inset 0 0 0 1px rgba(103,232,249,0.28),
-        inset 0 1px 3px rgba(0,0,0,0.55) !important;
-    height: 6px !important;
-    border-radius: 3px !important;
+        inset 0 0 0 1px rgba(139,92,246,0.32),
+        inset 0 1px 4px rgba(0,0,0,0.70),
+        0 0 0 1px rgba(103,232,249,0.08) !important;
+    height: 7px !important;
+    border-radius: 4px !important;
     position: relative !important;
     z-index: 1 !important;
 }
-/* Active fill portion — cyan gradient + animated scan streak */
+/* Active fill portion — violet→cyan gradient with animated scan-streak */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] div[role="slider"] ~ div,
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] > div > div:nth-child(2) {
     background:
         linear-gradient(90deg,
             transparent 0%,
-            rgba(255,255,255,0.55) 50%,
+            rgba(255,255,255,0.60) 50%,
             transparent 100%) ,
-        linear-gradient(90deg, #1d4ed8 0%, #2563eb 35%, #22d3ee 75%, #67e8f9 100%) !important;
-    background-size: 40% 100%, 100% 100% !important;
+        linear-gradient(90deg,
+            #4c1d95 0%,
+            #7c3aed 22%,
+            #8b5cf6 42%,
+            #22d3ee 72%,
+            #67e8f9 100%) !important;
+    background-size: 35% 100%, 100% 100% !important;
     background-repeat: no-repeat, no-repeat !important;
     background-position: -120% 0, 0 0 !important;
-    animation: gl-slider-scan 2.8s linear infinite !important;
+    animation: gl-slider-scan 2.6s linear infinite !important;
     box-shadow:
-        0 0 10px rgba(103,232,249,0.55),
-        0 0 22px rgba(103,232,249,0.20) !important;
-    height: 6px !important;
-    border-radius: 3px !important;
+        0 0 10px rgba(139,92,246,0.55),
+        0 0 18px rgba(103,232,249,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.22) !important;
+    height: 7px !important;
+    border-radius: 4px !important;
     position: relative !important;
     z-index: 2 !important;
 }
-/* Thumb — concentric glowing node with breathing pulse */
+/* Thumb — hexagonal core (clip-path) with dual-chroma radial gradient
+   The hex silhouette is produced by clip-path; drop-shadow filters follow
+   the clipped shape, so the cyan+violet glow aura hugs the hex edge for
+   the Eclipse / Spirit-Blossom feel. */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[role="slider"] {
     background:
         radial-gradient(circle at 50% 50%,
             #ffffff 0%,
-            #e8f7fc 40%,
-            #67e8f9 75%,
-            #22d3ee 100%) !important;
-    border: 2px solid #0a1420 !important;
-    box-shadow:
-        0 0 0 2px rgba(103,232,249,0.45),
-        0 0 14px rgba(103,232,249,0.55) !important;
-    width: 18px !important;
-    height: 18px !important;
-    border-radius: 50% !important;
+            #e0e7ff 12%,
+            #a78bfa 28%,
+            #8b5cf6 46%,
+            #22d3ee 70%,
+            #4c1d95 100%) !important;
+    border: none !important;
+    clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%) !important;
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
     animation: gl-slider-thumb-pulse 2.4s ease-in-out infinite !important;
-    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    transition: transform 0.18s ease, filter 0.18s ease !important;
     position: relative !important;
-    z-index: 3 !important;
+    z-index: 4 !important;
+    outline: none !important;
 }
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[role="slider"]:hover,
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[role="slider"]:focus {
-    transform: scale(1.18);
+    transform: scale(1.22);
     animation-play-state: paused !important;
-    box-shadow:
-        0 0 0 4px rgba(103,232,249,0.55),
-        0 0 22px rgba(103,232,249,0.85),
-        0 0 40px rgba(103,232,249,0.30) !important;
+    filter:
+        drop-shadow(0 0 6px #ffffff)
+        drop-shadow(0 0 14px rgba(103,232,249,0.95))
+        drop-shadow(0 0 24px rgba(139,92,246,0.80)) !important;
 }
-/* Value bubble above thumb — terminal chip with top bracket */
+/* Value bubble above thumb — deep-space violet plate with cyan frame */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] [role="slider"] + div {
-    background: linear-gradient(180deg, rgba(12,22,36,0.96), rgba(8,16,28,0.96)) !important;
-    color: #67e8f9 !important;
+    background:
+        linear-gradient(180deg, rgba(28,14,54,0.98), rgba(10,6,24,0.98)) !important;
+    color: #e0e7ff !important;
     font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
-    font-size: 0.74rem !important;
+    font-size: 0.76rem !important;
     font-weight: 700 !important;
-    border: 1px solid rgba(103,232,249,0.55) !important;
+    border: 1px solid rgba(139,92,246,0.60) !important;
     border-radius: 5px !important;
-    padding: 2px 9px !important;
-    letter-spacing: 0.08em !important;
-    text-shadow: 0 0 6px rgba(103,232,249,0.45) !important;
+    padding: 2px 10px !important;
+    letter-spacing: 0.10em !important;
+    text-shadow:
+        0 0 6px rgba(103,232,249,0.55),
+        0 0 10px rgba(139,92,246,0.35) !important;
     box-shadow:
-        0 0 10px rgba(103,232,249,0.25),
-        inset 0 1px 0 rgba(103,232,249,0.20) !important;
+        0 0 12px rgba(139,92,246,0.30),
+        0 0 22px rgba(103,232,249,0.15),
+        inset 0 1px 0 rgba(167,139,250,0.30) !important;
 }
-/* Min/Max end-labels — bracket framing */
+/* Min/Max end-labels — bracket framing with violet glow */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-testid="stTickBar"] {
-    padding: 2px 0 !important;
+    padding: 3px 0 !important;
 }
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-testid="stTickBar"],
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-testid="stTickBar"] div {
-    color: #8fb6c8 !important;
+    color: #a78bfa !important;
     font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
     font-size: 0.66rem !important;
-    letter-spacing: 0.12em !important;
+    letter-spacing: 0.14em !important;
     font-weight: 600 !important;
+    text-shadow: 0 0 4px rgba(139,92,246,0.45) !important;
 }
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-testid="stTickBar"] div:first-child::before {
     content: "[ ";
-    color: rgba(103,232,249,0.55);
+    color: rgba(103,232,249,0.70);
 }
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-testid="stTickBar"] div:last-child::after {
     content: " ]";
-    color: rgba(103,232,249,0.55);
+    color: rgba(103,232,249,0.70);
+}
+
+/* =========================================================================
+   v11.5.7 §L1 — Layout Lock
+   Freeze the sidebar at a fixed width and disable the drag-resize handle so
+   users can't accidentally change the canvas width and break chart/image
+   framing. Also disables the browser's native resize affordance on any
+   resizable surfaces (textareas, dataframe cells) so the UI renders
+   identically every session. Keep MANUAL button legibility by pinning the
+   sidebar at 300px which comfortably fits the 0.66rem mono label.
+   ========================================================================= */
+section[data-testid="stSidebar"] {
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    flex: 0 0 300px !important;
+    resize: none !important;
+}
+section[data-testid="stSidebar"] > div:first-child {
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+}
+/* Hide / neutralise the sidebar resize-handle (multiple baseweb versions) */
+[data-testid="stSidebarResizeHandle"],
+section[data-testid="stSidebar"] [data-testid*="ResizeHandle" i],
+section[data-testid="stSidebar"] > div[role="separator"],
+section[data-testid="stSidebar"] div[role="separator"][style*="cursor"] {
+    display: none !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    opacity: 0 !important;
+    cursor: default !important;
+}
+/* Freeze any element the browser marks resizable (textareas, etc.) */
+textarea,
+[data-testid="stTextArea"] textarea,
+[style*="resize: both"],
+[style*="resize:both"],
+[style*="resize: vertical"],
+[style*="resize:vertical"],
+[style*="resize: horizontal"],
+[style*="resize:horizontal"] {
+    resize: none !important;
+}
+/* Lock dataframe column resizers so the grid can't be dragged wider */
+div[data-testid="stDataFrame"] [data-testid*="Resizer"],
+div[data-testid="stDataFrameResizable"] [role="separator"] {
+    pointer-events: none !important;
+    cursor: default !important;
+}
+/* Plotly: already use_container_width=True — keep images/charts from
+   overflowing their containers, and prevent the modebar zoom/autoscale
+   from visually resizing the plot beyond its box. */
+div[data-testid="stPlotlyChart"],
+div[data-testid="stPlotlyChart"] > div,
+div[data-testid="stPlotlyChart"] .plot-container {
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+div[data-testid="stImage"] img,
+div[data-testid="element-container"] img {
+    max-width: 100% !important;
+    height: auto !important;
 }
 
 /* =========================================================================
