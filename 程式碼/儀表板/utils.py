@@ -4924,6 +4924,42 @@ div[data-testid="stDataFrameResizable"] {
 [data-testid="stMain"] div[data-testid="stRadio"] label span {
     color: #E8F7FC !important;
 }
+
+/* =========================================================================
+   v11.5.1 — Residual offenders found by live-probe (2026-04-21)
+   Two components still compute dark text on the dark main canvas:
+     · button[data-testid="stTab"] inactive state → #475569 (slate-500)
+     · .gl-footer <a> links → #2563eb (too dim on dark canvas)
+   ========================================================================= */
+/* Streamlit tab inactive state — light muted on dark */
+[data-testid="stMain"] button[data-testid="stTab"],
+[data-testid="stMain"] button[data-testid="stTab"] p,
+[data-testid="stMain"] button[data-testid="stTab"] div[data-testid="stMarkdownContainer"] {
+    color: #b4ccdf !important;
+}
+/* Active tab → brighter cyan accent */
+[data-testid="stMain"] button[data-testid="stTab"][aria-selected="true"],
+[data-testid="stMain"] button[data-testid="stTab"][aria-selected="true"] p,
+[data-testid="stMain"] button[data-testid="stTab"][aria-selected="true"] div[data-testid="stMarkdownContainer"] {
+    color: #67e8f9 !important;
+}
+/* Hover state on main-canvas tabs */
+[data-testid="stMain"] button[data-testid="stTab"]:hover,
+[data-testid="stMain"] button[data-testid="stTab"]:hover p {
+    color: #E8F7FC !important;
+}
+/* Footer anchor links — cyan accent on dark canvas */
+[data-testid="stMain"] .gl-footer a,
+[data-testid="stMain"] .page-footer a {
+    color: #67e8f9 !important;
+    text-decoration: underline dotted rgba(103,232,249,0.4);
+    text-underline-offset: 2px;
+}
+[data-testid="stMain"] .gl-footer a:hover,
+[data-testid="stMain"] .page-footer a:hover {
+    color: #E8F7FC !important;
+    text-decoration-color: rgba(232,247,252,0.7);
+}
 </style>
 """
 
