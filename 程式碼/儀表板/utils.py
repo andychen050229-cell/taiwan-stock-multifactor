@@ -1825,6 +1825,17 @@ def inject_custom_css():
     /* ================================================================= */
     /*  7b. v4 audit §5 — 3-layer top-nav: Utility Bar + Primary + Secondary */
     /* ================================================================= */
+    /* v9 §4 — Shell root safe top spacing: never let utility bar clip against
+       viewport top. Also ensure no Streamlit parent clips the sticky header. */
+    section.main > div.block-container,
+    [data-testid="stAppViewContainer"] [data-testid="stMain"] .block-container {{
+        padding-top: max(12px, env(safe-area-inset-top, 12px)) !important;
+    }}
+    [data-testid="stVerticalBlock"]:has(> div > .gl-utilbar),
+    [data-testid="stVerticalBlock"]:has(> .gl-utilbar) {{
+        overflow: visible !important;
+    }}
+
     /* Utility bar — terminal-style metadata strip (pure HTML, no links) */
     .gl-utilbar {{
         display: flex;
@@ -1832,8 +1843,9 @@ def inject_custom_css():
         align-items: center;
         justify-content: space-between;
         gap: 8px;
-        padding: 7px 14px;
-        margin: -0.5rem -1rem 0 -1rem;
+        padding: 8px 14px;
+        margin: 6px -1rem 0 -1rem;  /* v9 §4 · was -0.5rem; was clipping on tall viewports */
+        min-height: 44px;            /* v9 §4 · fixed height so bar never collapses */
         background:
             linear-gradient(180deg, #050b15 0%, #081020 55%, #060d1a 100%);
         border: 1px solid rgba(6,182,212,0.35);
@@ -1847,12 +1859,14 @@ def inject_custom_css():
         position: sticky;
         top: 0;
         z-index: 41;
+        overflow: visible;           /* v9 §4 · never clip chip content vertically */
     }}
     /* v8 §8.3 — three-zone grid (LEFT / CENTER / RIGHT) */
     .gl-utilbar {{
         display: grid !important;
         grid-template-columns: minmax(0,1fr) minmax(260px, 420px) minmax(0,1fr);
         column-gap: 14px;
+        align-items: center;
     }}
     .gl-util-left {{
         display: inline-flex;
@@ -2086,17 +2100,34 @@ def inject_custom_css():
         position: relative;
         z-index: 38;
     }}
+    /* v9 §7 + user feedback — sec-nav group label is effectively the page's
+       section title bar: larger, centered, bracketed with a subtle terminal
+       rule so it reads as a real header instead of a 0.6rem eyebrow chip. */
     .gl-sec-gname {{
-        display: inline-block;
+        display: block;
+        width: 100%;
+        text-align: center;
         font-family: var(--gl-font-mono);
-        font-size: 0.60rem;
-        color: #67e8f9;
+        font-size: 1.02rem;
+        color: #ccf6ff;
         font-weight: 700;
-        letter-spacing: 0.22em;
+        letter-spacing: 0.32em;
         text-transform: uppercase;
-        margin-bottom: 6px;
-        padding-left: 2px;
-        opacity: 0.85;
+        margin: 2px 0 12px 0;
+        padding: 8px 0 10px 0;
+        border-bottom: 1px dashed rgba(103,232,249,0.26);
+        text-shadow: 0 0 12px rgba(103,232,249,0.28);
+        position: relative;
+    }}
+    .gl-sec-gname::before,
+    .gl-sec-gname::after {{
+        content: "";
+        display: inline-block;
+        width: 22px;
+        height: 1px;
+        vertical-align: middle;
+        margin: 0 14px;
+        background: linear-gradient(90deg, transparent, rgba(103,232,249,0.65), transparent);
     }}
     .gl-sec-pill a[data-testid="stPageLink-NavLink"],
     .gl-sec-pill a[data-testid="stPageLink"] {{
@@ -3741,6 +3772,377 @@ def glint_dark_hist_style(series: str = "primary",
         opacity=max(0.0, min(1.0, float(opacity))),
         line=dict(color=line_color, width=0.8),
     )
+
+
+# ============================================================================
+#  v9 §9 — Glint Dark Chart Language: extended helpers
+#   The §9 audit requires zero plotly_white and a single source of truth for
+#   donut / composition / gauge / legend styling. Pages that need a composition
+#   visual MUST call ``render_signal_donut()`` or ``render_market_composition_strip()``
+#   instead of constructing their own ``go.Pie()`` with hand-picked hex.
+# ============================================================================
+
+# Canonical semantic palette for 5-bucket signal mixes. Cyan-bright for strong
+# long, blue for long, muted slate for neutral, amber for short, rose for
+# strong short — mirroring v9 §8.4 "radial spectrum" spec.
+GLINT_SIGNAL_SEMANTIC_COLORS = {
+    "strong_long":  "#67e8f9",   # cyan-bright
+    "long":         "#2563eb",   # blue
+    "neutral":      "#5B7186",   # muted slate
+    "short":        "#f59e0b",   # amber
+    "strong_short": "#f43f5e",   # rose
+    # zh aliases the existing pages use freely
+    "偏多": "#2563eb",
+    "看多": "#2563eb",
+    "強烈看多": "#67e8f9",
+    "中性": "#5B7186",
+    "觀望": "#5B7186",
+    "看空": "#f59e0b",
+    "強烈看空": "#f43f5e",
+}
+
+# 5-pillar colorway for feature-pillar / category donuts (v9 §8.5).
+GLINT_CATEGORY_COLORWAY = ["#67e8f9", "#a78bfa", "#10b981", "#f59e0b", "#f43f5e", "#2563eb"]
+
+
+def glint_dark_legend(orientation: str = "h", position: str = "bottom") -> dict:
+    """Canonical dark terminal legend style (v9 §9.1).
+
+    ``orientation``: ``"h"`` (horizontal, bottom) or ``"v"`` (vertical, right).
+    ``position``   : ``"bottom"`` | ``"top"`` | ``"right"``.
+
+    Wrap as ``fig.update_layout(legend=glint_dark_legend())``.
+    """
+    base = dict(
+        font=dict(family=_GL_FONT_MONO, size=10.5, color="#B4CCDF"),
+        bgcolor="rgba(10,20,32,0.72)",
+        bordercolor="rgba(103,232,249,0.22)",
+        borderwidth=1,
+        itemsizing="constant",
+    )
+    if orientation == "h":
+        base["orientation"] = "h"
+        if position == "top":
+            base.update(yanchor="bottom", y=1.08, xanchor="center", x=0.5)
+        else:
+            base.update(yanchor="top", y=-0.12, xanchor="center", x=0.5)
+    else:
+        base["orientation"] = "v"
+        base.update(yanchor="middle", y=0.5, xanchor="left", x=1.02)
+    return base
+
+
+def glint_dark_donut_style(hole: float = 0.62) -> dict:
+    """Canonical ``go.Pie`` props for a dark terminal donut (v9 §8.4).
+
+    Returns a dict of `go.Pie(...)` kwargs: narrow ring, dark separators,
+    no side-legend (caller supplies chip-style legend), hover mono text.
+    Caller supplies ``labels``, ``values`` and a ``marker.colors`` list
+    (recommend mapping via ``GLINT_SIGNAL_SEMANTIC_COLORS``).
+
+    Example::
+
+        fig = go.Figure(go.Pie(
+            labels=labels, values=values,
+            marker=dict(colors=[GLINT_SIGNAL_SEMANTIC_COLORS[l] for l in labels],
+                        line=dict(color="#060A12", width=1.4)),
+            **glint_dark_donut_style(),
+        ))
+    """
+    return dict(
+        hole=max(0.25, min(0.80, float(hole))),
+        sort=False,                    # respect caller order (semantic ordering matters)
+        direction="clockwise",
+        rotation=270,                  # start at 9 o'clock — feels more "gauge-like"
+        textinfo="none",               # keep ring clean; counts live in custom legend
+        hovertemplate=(
+            "<b>%{label}</b><br>"
+            "<span style='font-family:JetBrains Mono,monospace;'>%{value}</span> · "
+            "<span style='color:#67e8f9;'>%{percent}</span>"
+            "<extra></extra>"
+        ),
+        showlegend=False,
+    )
+
+
+def glint_dark_composition_style(tones: list | None = None,
+                                 border_color: str = "#060A12",
+                                 opacity: float = 0.90) -> list:
+    """Canonical per-segment marker specs for a horizontal composition strip.
+
+    Returns a list of ``dict(color=..., opacity=..., line=...)`` the caller
+    can zip with their segment values. Used by
+    :func:`render_market_composition_strip`.
+    """
+    tones = tones or ["cyan", "blue", "slate", "amber", "rose"]
+    out = []
+    for t in tones:
+        accent = _GL_DARK_BAR_ACCENTS.get(t, _GL_DARK_BAR_ACCENTS["cyan"])
+        out.append(dict(
+            color=accent,
+            opacity=max(0.0, min(1.0, float(opacity))),
+            line=dict(color=border_color, width=0.8),
+        ))
+    return out
+
+
+def glint_dark_gauge_style(tone: str = "cyan") -> dict:
+    """Canonical dark terminal gauge (``go.Indicator`` mode='gauge+number') style.
+
+    Returns a ``gauge`` dict — pass via ``go.Indicator(gauge=glint_dark_gauge_style())``.
+    """
+    accent = _GL_DARK_BAR_ACCENTS.get(tone, _GL_DARK_BAR_ACCENTS["cyan"])
+    return dict(
+        axis=dict(tickfont=dict(family=_GL_FONT_MONO, size=9, color="#8397ac"),
+                  tickcolor="rgba(103,232,249,0.22)"),
+        bar=dict(color=accent, thickness=0.22),
+        bgcolor="rgba(10,20,32,0.6)",
+        bordercolor="rgba(103,232,249,0.22)",
+        borderwidth=1,
+    )
+
+
+def render_signal_donut(labels: list, values: list, *,
+                        title: str = "全市場訊號分布",
+                        subtitle: str = "Market Signal Mix",
+                        center_metric: str | None = None,
+                        center_metric_label: str | None = None,
+                        tones: list | None = None,
+                        height: int = 320,
+                        key: str | None = None,
+                        verdict: str | None = None) -> None:
+    """Render a v9 §8.4 "Glint-style signal donut" — Plotly donut + center
+    metric + dark panel + chip-style legend, emitted directly via
+    ``st.plotly_chart`` / ``st.markdown``. Zero page-level styling needed.
+
+    Args:
+        labels: segment labels in canonical order (e.g. ``["偏多","中性","觀望"]``).
+        values: matching segment values (counts or fractions).
+        title / subtitle: center-stacked heading in the donut hole.
+        center_metric: large mono number (e.g. ``"N=1,930"``); when omitted, auto-set to
+            ``f"N={sum(values):,}"``.
+        center_metric_label: small mono label under the metric (e.g. ``"Total"``).
+        tones: explicit list of tone keys (``cyan/blue/violet/emerald/amber/rose/slate``)
+            matching ``labels``. If omitted, picks a sensible default based on label text
+            via ``GLINT_SIGNAL_SEMANTIC_COLORS``.
+        height: chart height in px (default 320 — the spec's compact reading height).
+        key: Streamlit chart key.
+        verdict: optional one-line summary line rendered under the donut as a subtle
+            mono caption (terminal verdict feel).
+    """
+    import plotly.graph_objects as go  # noqa: WPS433
+
+    # Resolve colors per label
+    if tones is not None:
+        colors = [_GL_DARK_BAR_ACCENTS.get(t, _GL_DARK_BAR_ACCENTS["cyan"]) for t in tones]
+    else:
+        colors = [
+            GLINT_SIGNAL_SEMANTIC_COLORS.get(lbl, GLINT_CATEGORY_COLORWAY[i % len(GLINT_CATEGORY_COLORWAY)])
+            for i, lbl in enumerate(labels)
+        ]
+
+    total = sum(float(v) for v in values)
+    if center_metric is None:
+        if total == int(total):
+            center_metric = f"N={int(total):,}"
+        else:
+            center_metric = f"{total:,.2f}"
+
+    fig = go.Figure(go.Pie(
+        labels=list(labels),
+        values=list(values),
+        marker=dict(colors=colors, line=dict(color="#060A12", width=1.4)),
+        **glint_dark_donut_style(),
+    ))
+
+    # Center annotation — stacked title / subtitle / metric / metric-label.
+    annot_lines = []
+    if title:
+        annot_lines.append(
+            f"<span style='font-family:{_GL_FONT_SANS};font-size:13px;font-weight:700;"
+            f"color:#E8F7FC;'>{safe_html(title)}</span>"
+        )
+    if subtitle:
+        annot_lines.append(
+            f"<span style='font-family:{_GL_FONT_MONO};font-size:10px;"
+            f"letter-spacing:0.18em;color:#8397ac;text-transform:uppercase;'>"
+            f"{safe_html(subtitle)}</span>"
+        )
+    if center_metric:
+        annot_lines.append(
+            f"<span style='font-family:{_GL_FONT_MONO};font-size:17px;"
+            f"color:#67e8f9;font-weight:700;'>{safe_html(center_metric)}</span>"
+        )
+    if center_metric_label:
+        annot_lines.append(
+            f"<span style='font-family:{_GL_FONT_MONO};font-size:9.5px;"
+            f"letter-spacing:0.22em;color:#5B7186;text-transform:uppercase;'>"
+            f"{safe_html(center_metric_label)}</span>"
+        )
+    annot_text = "<br>".join(annot_lines) if annot_lines else ""
+    fig.update_layout(
+        annotations=[dict(
+            text=annot_text, x=0.5, y=0.5,
+            showarrow=False, align="center",
+        )],
+        **glint_dark_layout(height=height, show_grid=False),
+    )
+    # Override — donuts don't want axes (glint_dark_layout's default x/y axes are invisible
+    # for pie anyway but it's cleaner to force margins tighter).
+    fig.update_layout(margin=dict(t=12, b=12, l=12, r=12), xaxis=dict(visible=False),
+                      yaxis=dict(visible=False), showlegend=False)
+
+    st.plotly_chart(fig, use_container_width=True, key=key)
+
+    # Chip legend (v9 §8.4 — replaces default side legend).
+    legend_chips_html = []
+    for lbl, val, color in zip(labels, values, colors):
+        pct = (float(val) / total * 100.0) if total else 0.0
+        legend_chips_html.append(
+            '<span class="gl-donut-chip">'
+            f'<span class="gl-donut-chip-dot" style="background:{color};'
+            f'box-shadow:0 0 8px {color}80;"></span>'
+            f'<span class="gl-donut-chip-label">{safe_html(str(lbl))}</span>'
+            f'<span class="gl-donut-chip-val">{val:,.0f}</span>'
+            f'<span class="gl-donut-chip-pct">{pct:.1f}%</span>'
+            '</span>'
+        )
+    st.markdown(
+        '<div class="gl-donut-legend">' + "".join(legend_chips_html) + "</div>",
+        unsafe_allow_html=True,
+    )
+    if verdict:
+        st.markdown(
+            f'<div class="gl-donut-verdict">&gt; {safe_html(verdict)}</div>',
+            unsafe_allow_html=True,
+        )
+
+
+def render_market_composition_strip(segments: list, *,
+                                    title: str | None = None,
+                                    height: int = 46,
+                                    show_percent: bool = True,
+                                    key: str | None = None) -> None:
+    """Render a v9 §8.3 "Signal Composition Strip" — a single horizontal bar
+    split into semantic segments (強烈看多 → 看多 → 中性 → 看空 → 強烈看空).
+
+    Args:
+        segments: list of ``(label, value, tone)`` tuples where ``tone`` keys any
+            ``_GL_DARK_BAR_ACCENTS`` entry.  Order matters — the strip renders
+            left-to-right in the order given.
+        title: small mono label rendered above the strip (e.g. ``"D+20 · 市場訊號比例"``).
+        height: strip height in px (default 46 — reads as a clean signal bar).
+        show_percent: if True, overlays ``n · p%`` inside each segment.
+        key: Streamlit chart key.
+    """
+    import plotly.graph_objects as go  # noqa: WPS433
+
+    # Normalise input — filter zeros that would render as hairlines.
+    segs = [(lbl, float(v), t) for (lbl, v, t) in segments if float(v) > 0]
+    if not segs:
+        st.info("無訊號分佈資料。")
+        return
+
+    total = sum(v for _, v, _ in segs)
+
+    if title:
+        st.markdown(
+            f'<div class="gl-composition-title">{safe_html(title)}'
+            f'<span class="gl-composition-total">TOTAL {total:,.0f}</span></div>',
+            unsafe_allow_html=True,
+        )
+
+    fig = go.Figure()
+    for lbl, val, tone in segs:
+        accent = _GL_DARK_BAR_ACCENTS.get(tone, _GL_DARK_BAR_ACCENTS["cyan"])
+        pct = val / total * 100.0 if total else 0.0
+        text = f"{safe_html(str(lbl))} · {int(val):,} · {pct:.1f}%" if show_percent else safe_html(str(lbl))
+        fig.add_trace(go.Bar(
+            y=["mkt"], x=[val], name=lbl, orientation="h",
+            marker=dict(color=accent, opacity=0.92,
+                        line=dict(color="#060A12", width=0.8)),
+            text=[text],
+            textposition="inside",
+            textangle=0,
+            insidetextanchor="middle",
+            textfont=dict(family=_GL_FONT_MONO, size=10.5, color="#06111C"),
+            hovertemplate=f"<b>{safe_html(str(lbl))}</b><br>%{{x:,.0f}} · {pct:.1f}%<extra></extra>",
+        ))
+
+    fig.update_layout(
+        barmode="stack",
+        height=height + 24,
+        margin=dict(t=8, b=6, l=10, r=10),
+        showlegend=False,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        xaxis=dict(visible=False, showgrid=False, range=[0, total]),
+        yaxis=dict(visible=False, showgrid=False),
+        hoverlabel=dict(
+            bgcolor="#0A1420",
+            bordercolor="rgba(103,232,249,0.55)",
+            font=dict(family=_GL_FONT_MONO, color="#E8F7FC", size=11),
+        ),
+    )
+    st.plotly_chart(fig, use_container_width=True, key=key)
+
+
+# --- v9 §9 · CSS for donut chip legend + composition strip --------------
+_GLINT_V9_CHART_CSS = """
+<style>
+/* Chip-style legend that accompanies render_signal_donut (v9 §8.4) */
+.gl-donut-legend {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    margin: -4px 0 10px 0;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace);
+}
+.gl-donut-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 11px;
+    background: rgba(10,20,32,0.78);
+    border: 1px solid rgba(103,232,249,0.22);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    color: #B4CCDF;
+    white-space: nowrap;
+}
+.gl-donut-chip-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex: 0 0 auto;
+}
+.gl-donut-chip-label { color: #E8F7FC; font-weight: 600; letter-spacing: 0.04em; }
+.gl-donut-chip-val   { color: #67e8f9; font-weight: 700; }
+.gl-donut-chip-pct   { color: #8397ac; font-size: 0.66rem; }
+.gl-donut-verdict {
+    text-align: center;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.72rem;
+    color: #8397ac;
+    margin: 4px 0 10px 0;
+    letter-spacing: 0.04em;
+}
+
+/* Composition strip (v9 §8.3 signal composition bar) */
+.gl-composition-title {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.68rem; letter-spacing: 0.18em;
+    color: #8397ac; text-transform: uppercase;
+    margin: 0 2px 4px 2px;
+}
+.gl-composition-total { color: #67e8f9; font-weight: 700; letter-spacing: 0.12em; }
+</style>
+"""
+
+
+def inject_v9_chart_css():
+    """Inject the v9 chart-language CSS (donut chip legend + composition strip).
+
+    Safe to call multiple times — Streamlit dedupes identical st.markdown writes
+    within a single script run. Call near the top of pages that use
+    ``render_signal_donut`` or ``render_market_composition_strip``.
+    """
+    st.markdown(_GLINT_V9_CHART_CSS, unsafe_allow_html=True)
 
 
 # --- v7 §18.2 Schema-safe helpers ----------------------------------------
