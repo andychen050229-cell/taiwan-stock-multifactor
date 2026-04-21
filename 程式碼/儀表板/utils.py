@@ -351,47 +351,73 @@ def inject_custom_css():
     .gl-panel-tint {{
         background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
     }}
-    /* Insight / status boxes (left accent bar) */
+    /* v11 §4a — Insight / status callout boxes repainted as Glint dark
+       terminal cards. Previous pastel backgrounds (#eff6ff / #fef3c7 /
+       #ecfdf5 / #fff1f2) rendered as washed-out islands on the mostly
+       dark canvas and caused the "yellow-on-yellow invisible text" bug
+       when a nested strong inherited the light tone. Dark-bg + kind-
+       specific accent text keeps every callout readable AND on-brand. */
     .insight-box, .gl-box-info {{
-        background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
-        border-left: 4px solid var(--gl-blue);
-        border-radius: 0 10px 10px 0;
+        background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(10,20,32,0.92) 100%);
+        border: 1px solid rgba(103,232,249,0.30);
+        border-left: 3px solid #67e8f9;
+        border-radius: 10px;
         padding: 14px 18px;
         margin: 12px 0;
         font-size: 0.9rem;
-        color: #0c4a6e;
+        color: #cffafe;
+        box-shadow: 0 2px 10px rgba(2,6,23,0.28), inset 0 1px 0 rgba(103,232,249,0.12);
     }}
-    .insight-box strong, .gl-box-info strong {{ color: #0c4a6e; }}
+    .insight-box strong, .gl-box-info strong {{ color: #e0f9ff; font-weight: 700; }}
     .warning-box, .gl-box-warn {{
-        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-        border-left: 4px solid var(--gl-amber);
-        border-radius: 0 10px 10px 0;
+        background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(10,20,32,0.92) 100%);
+        border: 1px solid rgba(245,158,11,0.40);
+        border-left: 3px solid #f59e0b;
+        border-radius: 10px;
         padding: 14px 18px;
         margin: 12px 0;
         font-size: 0.9rem;
-        color: #92400e;
+        color: #fde68a;
+        box-shadow: 0 2px 10px rgba(2,6,23,0.28), inset 0 1px 0 rgba(245,158,11,0.10);
     }}
-    .warning-box strong, .gl-box-warn strong {{ color: #78350f; }}
+    .warning-box strong, .gl-box-warn strong {{ color: #fef3c7; font-weight: 700; }}
     .success-box, .gl-box-ok {{
-        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-        border-left: 4px solid var(--gl-emerald);
-        border-radius: 0 10px 10px 0;
+        background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(10,20,32,0.92) 100%);
+        border: 1px solid rgba(16,185,129,0.40);
+        border-left: 3px solid #10b981;
+        border-radius: 10px;
         padding: 14px 18px;
         margin: 12px 0;
         font-size: 0.9rem;
-        color: #065f46;
+        color: #a7f3d0;
+        box-shadow: 0 2px 10px rgba(2,6,23,0.28), inset 0 1px 0 rgba(16,185,129,0.10);
     }}
-    .success-box strong, .gl-box-ok strong {{ color: #064e3b; }}
+    .success-box strong, .gl-box-ok strong {{ color: #d1fae5; font-weight: 700; }}
     .gl-box-danger {{
-        background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
-        border-left: 4px solid var(--gl-rose);
-        border-radius: 0 10px 10px 0;
+        background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(10,20,32,0.92) 100%);
+        border: 1px solid rgba(244,63,94,0.40);
+        border-left: 3px solid #f43f5e;
+        border-radius: 10px;
         padding: 14px 18px;
         margin: 12px 0;
         font-size: 0.9rem;
-        color: #9f1239;
+        color: #fecaca;
+        box-shadow: 0 2px 10px rgba(2,6,23,0.28), inset 0 1px 0 rgba(244,63,94,0.10);
     }}
-    .gl-box-danger strong {{ color: #881337; }}
+    .gl-box-danger strong {{ color: #fde0e0; font-weight: 700; }}
+    /* Legacy code/ticker chips inside these dark callouts need a visible bg */
+    .insight-box code, .gl-box-info code,
+    .warning-box code, .gl-box-warn code,
+    .success-box code, .gl-box-ok code,
+    .gl-box-danger code {{
+        background: rgba(103,232,249,0.14) !important;
+        color: #e8f7fc !important;
+        border: 1px solid rgba(103,232,249,0.22);
+        border-radius: 5px;
+        padding: 1px 6px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.84em;
+    }}
     /* Degraded-mode banner — 優雅降級提示（非錯誤，而是摘要版模式） */
     .gl-degraded {{
         background: var(--gl-surface);
@@ -1899,34 +1925,56 @@ def inject_custom_css():
         > div[data-testid="column"] {{
         padding: 0 !important;
     }}
-    /* LEFT / RIGHT inline HTML wrappers */
+    /* LEFT / RIGHT inline HTML wrappers
+       v11 §1 — prevent right-side truncation:
+       · flex-wrap: nowrap + overflow-x: auto so chips always render in a
+         single row and the last chip never gets clipped at viewport edge
+       · tighter font-size + padding so Model/Gates/PASS/DSR fit at 1280px
+       · hide scrollbar visually (clean terminal look) but preserve scroll */
     .gl-util-left {{
         display: inline-flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
         justify-content: flex-start;
         min-width: 0;
+        max-width: 100%;
         width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
     }}
+    .gl-util-left::-webkit-scrollbar {{ display: none; }}
     .gl-util-right {{
         display: inline-flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
         justify-content: flex-end;
-        gap: 8px;
+        gap: 4px;
         min-width: 0;
+        max-width: 100%;
         width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
     }}
+    .gl-util-right::-webkit-scrollbar {{ display: none; }}
     .gl-util-seg {{
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 2px 14px;
+        gap: 5px;
+        padding: 2px 10px;
         border-right: 1px solid rgba(6,182,212,0.18);
         white-space: nowrap;
+        flex-shrink: 0;
     }}
     .gl-util-left .gl-util-seg:last-child {{ border-right: none; }}
-    .gl-util-right .gl-util-seg {{ border-right: none; padding: 2px 6px; }}
+    .gl-util-right .gl-util-seg {{ border-right: none; padding: 2px 4px; }}
+    /* v11 §1 — shrink LEFT seg padding further and the RIGHT monospace chip
+       font so the full right triplet (Model · Gates N/N PASS · DSR) fits
+       even at 1280px viewport without clipping. */
+    .gl-util-right .gl-util-k {{ font-size: 0.64rem; }}
+    .gl-util-right .gl-util-mono {{ font-size: 0.68rem; letter-spacing: 0.02em; }}
+    .gl-util-right .gl-util-chip {{ font-size: 0.62rem; padding: 1px 6px; }}
 
     /* ============================================================
        v10 §6 — Functional Search widget paint (selectbox as terminal input)
@@ -2173,34 +2221,55 @@ def inject_custom_css():
         position: relative;
         z-index: 38;
     }}
-    /* v9 §7 + user feedback — sec-nav group label is effectively the page's
-       section title bar: larger, centered, bracketed with a subtle terminal
-       rule so it reads as a real header instead of a 0.6rem eyebrow chip. */
+    /* v11 §2 — sec-nav group label is the page's section title bar. Previous
+       1.02rem was too small on a 44px-tall band — the eye reads it as an
+       eyebrow label rather than a section header. Now:
+         · font-size 1.45rem (scales up to ~23px) — clearly a header
+         · bracket rules widened and centered with flex so they mirror the
+           label regardless of label length
+         · stronger cyan glow (breathing-light effect) to reinforce the
+           "LIVE TERMINAL section" feel */
     .gl-sec-gname {{
-        display: block;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
         width: 100%;
         text-align: center;
         font-family: var(--gl-font-mono);
-        font-size: 1.02rem;
-        color: #ccf6ff;
-        font-weight: 700;
-        letter-spacing: 0.32em;
+        font-size: 1.45rem;
+        color: #e8f9ff;
+        font-weight: 800;
+        letter-spacing: 0.34em;
         text-transform: uppercase;
-        margin: 2px 0 12px 0;
-        padding: 8px 0 10px 0;
-        border-bottom: 1px dashed rgba(103,232,249,0.26);
-        text-shadow: 0 0 12px rgba(103,232,249,0.28);
+        margin: 8px 0 18px 0;
+        padding: 12px 0 14px 0;
+        border-bottom: 1px dashed rgba(103,232,249,0.32);
+        text-shadow:
+            0 0 14px rgba(103,232,249,0.55),
+            0 0 32px rgba(103,232,249,0.20);
         position: relative;
+        animation: gl-sec-breathe 4.8s ease-in-out infinite;
+    }}
+    @keyframes gl-sec-breathe {{
+        0%, 100% {{
+            text-shadow:
+                0 0 14px rgba(103,232,249,0.55),
+                0 0 32px rgba(103,232,249,0.20);
+        }}
+        50% {{
+            text-shadow:
+                0 0 22px rgba(103,232,249,0.78),
+                0 0 48px rgba(103,232,249,0.32);
+        }}
     }}
     .gl-sec-gname::before,
     .gl-sec-gname::after {{
         content: "";
         display: inline-block;
-        width: 22px;
+        flex: 0 0 60px;
         height: 1px;
-        vertical-align: middle;
-        margin: 0 14px;
-        background: linear-gradient(90deg, transparent, rgba(103,232,249,0.65), transparent);
+        margin: 0 18px;
+        background: linear-gradient(90deg, transparent, rgba(103,232,249,0.70), transparent);
     }}
     .gl-sec-pill a[data-testid="stPageLink-NavLink"],
     .gl-sec-pill a[data-testid="stPageLink"] {{
@@ -3631,8 +3700,12 @@ def glint_plotly_layout(title: str = "", height: int = 360,
         legend_text = "#B4CCDF"
         legend_bg = "rgba(15,23,37,0.88)"
         legend_border = "rgba(103,232,249,0.22)"
-        paper_bg = "rgba(15,23,37,0)"
-        plot_bg = "rgba(10,20,32,0)"
+        # v11 §4b — opaque dark backgrounds so charts render as a crisp
+        # terminal panel even when the host page canvas is light. Previously
+        # the glint layout used fully transparent paper/plot bg which made
+        # charts look washed-out on Streamlit's default white main canvas.
+        paper_bg = "#0A1420"
+        plot_bg = "#081220"
         colorway = GLINT_DARK_COLORWAY
     else:
         title_color = "#0f172a"
@@ -3969,14 +4042,25 @@ def glint_dark_gauge_style(tone: str = "cyan") -> dict:
     """Canonical dark terminal gauge (``go.Indicator`` mode='gauge+number') style.
 
     Returns a ``gauge`` dict — pass via ``go.Indicator(gauge=glint_dark_gauge_style())``.
+
+    v11 §5 — tick numbers bumped up (9→12) so the 0/1/2/…/9 labels around
+    the arc are visible on screenshot at any DPI, and bar thickness
+    widened (0.22→0.30) so the "filled" portion reads as a strong chip.
     """
     accent = _GL_DARK_BAR_ACCENTS.get(tone, _GL_DARK_BAR_ACCENTS["cyan"])
     return dict(
-        axis=dict(tickfont=dict(family=_GL_FONT_MONO, size=9, color="#8397ac"),
-                  tickcolor="rgba(103,232,249,0.22)"),
-        bar=dict(color=accent, thickness=0.22),
-        bgcolor="rgba(10,20,32,0.6)",
-        bordercolor="rgba(103,232,249,0.22)",
+        axis=dict(
+            tickfont=dict(family=_GL_FONT_MONO, size=12, color="#b4ccdf"),
+            tickcolor="rgba(103,232,249,0.40)",
+            tickwidth=1.5,
+            ticklen=6,
+            tickmode="linear",
+            dtick=1,
+        ),
+        bar=dict(color=accent, thickness=0.30,
+                 line=dict(color="rgba(103,232,249,0.55)", width=1.5)),
+        bgcolor="rgba(10,20,32,0.75)",
+        bordercolor="rgba(103,232,249,0.32)",
         borderwidth=1,
     )
 
@@ -4442,6 +4526,207 @@ section[data-testid="stSidebar"] div[data-testid="stTextInput"] input:focus {
     border-color: rgba(103,232,249,0.80) !important;
     box-shadow: 0 0 0 3px rgba(103,232,249,0.18) !important;
 }
+
+/* =========================================================================
+   v11 §4a — Native st.warning / st.info / st.success / st.error alerts
+   as dark-glint terminal callouts (fixes invisible yellow-on-yellow text).
+   BaseWeb's default notification keeps inheriting the page colour stack
+   which lands on light-bg + light-text on some browser profiles. Anchor
+   the colour explicitly + add glint accents so each alert reads as a
+   kind-specific terminal chip.
+   ========================================================================= */
+div[data-baseweb="notification"] {
+    background: linear-gradient(180deg, rgba(15,23,37,0.95) 0%, rgba(10,20,32,0.95) 100%) !important;
+    border: 1px solid rgba(245,158,11,0.45) !important;
+    border-left: 3px solid #f59e0b !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.28), inset 0 1px 0 rgba(245,158,11,0.10) !important;
+    font-family: var(--gl-font-sans, 'Inter', sans-serif) !important;
+}
+div[data-baseweb="notification"],
+div[data-baseweb="notification"] > div,
+div[data-baseweb="notification"] p,
+div[data-baseweb="notification"] span,
+div[data-baseweb="notification"] a {
+    color: #fde68a !important;
+    font-weight: 500 !important;
+}
+div[data-baseweb="notification"] svg,
+div[data-baseweb="notification"] [data-testid="stIcon"] {
+    color: #f59e0b !important;
+    fill: #f59e0b !important;
+}
+/* Kind-specific accents — Streamlit tags the notification div with kind="*" */
+div[data-baseweb="notification"][kind="info"],
+div[data-baseweb="notification"].stAlertContainer-info {
+    border-color: rgba(103,232,249,0.45) !important;
+    border-left-color: #67e8f9 !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.28), inset 0 1px 0 rgba(103,232,249,0.10) !important;
+}
+div[data-baseweb="notification"][kind="info"],
+div[data-baseweb="notification"][kind="info"] > div,
+div[data-baseweb="notification"][kind="info"] p,
+div[data-baseweb="notification"].stAlertContainer-info p {
+    color: #cffafe !important;
+}
+div[data-baseweb="notification"][kind="info"] svg {
+    color: #67e8f9 !important;
+    fill: #67e8f9 !important;
+}
+div[data-baseweb="notification"][kind="success"],
+div[data-baseweb="notification"].stAlertContainer-success {
+    border-color: rgba(16,185,129,0.45) !important;
+    border-left-color: #10b981 !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.28), inset 0 1px 0 rgba(16,185,129,0.10) !important;
+}
+div[data-baseweb="notification"][kind="success"],
+div[data-baseweb="notification"][kind="success"] > div,
+div[data-baseweb="notification"][kind="success"] p {
+    color: #a7f3d0 !important;
+}
+div[data-baseweb="notification"][kind="success"] svg {
+    color: #10b981 !important;
+    fill: #10b981 !important;
+}
+div[data-baseweb="notification"][kind="error"],
+div[data-baseweb="notification"].stAlertContainer-error {
+    border-color: rgba(244,63,94,0.45) !important;
+    border-left-color: #f43f5e !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.28), inset 0 1px 0 rgba(244,63,94,0.10) !important;
+}
+div[data-baseweb="notification"][kind="error"],
+div[data-baseweb="notification"][kind="error"] > div,
+div[data-baseweb="notification"][kind="error"] p {
+    color: #fecaca !important;
+}
+div[data-baseweb="notification"][kind="error"] svg {
+    color: #f43f5e !important;
+    fill: #f43f5e !important;
+}
+
+/* =========================================================================
+   v11 §3 — Glint terminal dataframe (fallback styling for st.dataframe)
+   When pages can't switch to render_glint_table (e.g. interactive sorting
+   needed), anchor Streamlit dataframe wrappers to the dark terminal palette.
+   ========================================================================= */
+div[data-testid="stDataFrame"],
+div[data-testid="stDataFrameResizable"] {
+    border: 1px solid rgba(103,232,249,0.24) !important;
+    border-radius: 10px !important;
+    background: linear-gradient(180deg, rgba(15,23,37,0.55) 0%, rgba(10,20,32,0.55) 100%) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.18) !important;
+    overflow: hidden;
+}
+
+/* =========================================================================
+   v11 §3 — render_glint_table: native-looking Glint terminal table
+   ========================================================================= */
+.gl-term-table-wrap {
+    margin: 10px 0 14px 0;
+    border: 1px solid rgba(103,232,249,0.28);
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(10,20,32,0.92) 100%);
+    box-shadow:
+        0 4px 18px rgba(2,6,23,0.32),
+        inset 0 1px 0 rgba(103,232,249,0.14);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+}
+.gl-term-table-wrap::-webkit-scrollbar { height: 6px; }
+.gl-term-table-wrap::-webkit-scrollbar-thumb {
+    background: rgba(103,232,249,0.28);
+    border-radius: 3px;
+}
+.gl-term-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--gl-font-sans, 'Inter', sans-serif);
+    font-size: 0.86rem;
+    color: #cfe2ee;
+    table-layout: auto;
+}
+.gl-term-table thead tr {
+    background: linear-gradient(180deg, rgba(103,232,249,0.16) 0%, rgba(103,232,249,0.05) 100%);
+    border-bottom: 1px solid rgba(103,232,249,0.38);
+}
+.gl-term-table thead th {
+    padding: 10px 16px;
+    text-align: left;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.70rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #cffafe;
+    text-shadow: 0 0 10px rgba(103,232,249,0.35);
+    white-space: nowrap;
+}
+.gl-term-table tbody tr {
+    border-bottom: 1px solid rgba(103,232,249,0.08);
+    transition: background 0.18s ease;
+}
+.gl-term-table tbody tr:last-child { border-bottom: none; }
+.gl-term-table tbody tr:hover {
+    background: rgba(103,232,249,0.05);
+}
+.gl-term-table tbody td {
+    padding: 9px 16px;
+    vertical-align: top;
+    line-height: 1.46;
+}
+.gl-term-table tbody td.gl-term-mono {
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.82rem;
+    color: #e8f7fc;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+.gl-term-table tbody td.gl-term-accent-cyan {
+    color: #67e8f9;
+    font-weight: 600;
+}
+.gl-term-table tbody td.gl-term-accent-emerald {
+    color: #34d399;
+    font-weight: 600;
+}
+.gl-term-table tbody td.gl-term-accent-amber {
+    color: #fbbf24;
+    font-weight: 600;
+}
+.gl-term-table tbody td.gl-term-accent-rose {
+    color: #fda4af;
+    font-weight: 600;
+}
+.gl-term-table-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px 8px 16px;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #cffafe;
+    border-bottom: 1px dashed rgba(103,232,249,0.24);
+}
+.gl-term-table-title::before {
+    content: "";
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #67e8f9;
+    box-shadow: 0 0 8px rgba(103,232,249,0.70);
+}
+.gl-term-table-meta {
+    padding: 8px 16px;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: #8397ac;
+    border-top: 1px solid rgba(103,232,249,0.10);
+}
 </style>
 """
 
@@ -4466,6 +4751,101 @@ def inject_v10_dark_widgets_css():
     Safe to call multiple times (Streamlit dedupes identical writes).
     """
     st.markdown(_GLINT_V10_DARK_WIDGETS_CSS, unsafe_allow_html=True)
+
+
+# ============================================================================
+# v11 §3 — Glint terminal table renderer (replaces raw st.dataframe
+# for static reference tables where we want editorial control over the
+# look). Unlike st.dataframe (canvas-based, not CSS-stylable), this emits
+# a real <table> so we can apply the Glint dark terminal palette.
+# ============================================================================
+def render_glint_table(df,
+                       *,
+                       title: str | None = None,
+                       caption: str | None = None,
+                       mono_columns: list | None = None,
+                       accent_columns: dict | None = None,
+                       max_rows: int | None = None) -> None:
+    """Render a small reference dataframe as a Glint dark terminal table.
+
+    Use this for editorial / static tables (data dictionaries, legend
+    tables, schema tables). For interactive sortable tables with large
+    row counts, keep ``st.dataframe`` — it's CSS-accented via v11 §3.
+
+    Args:
+        df: pandas DataFrame. Must have string-safe values in cells.
+        title: optional header label rendered above the table with a
+            cyan terminal dot. Appears as a left-aligned mono header.
+        caption: optional footer caption in mono muted colour.
+        mono_columns: list of column names to render in the mono accent
+            face (good for counts, IDs, numeric codes).
+        accent_columns: map of ``{column_name: accent}`` where accent is
+            one of ``"cyan" | "emerald" | "amber" | "rose"``. Applies to
+            the whole column's body cells.
+        max_rows: optional row cap — rows beyond this are elided with
+            a footer meta line (e.g. "…{N} more rows").
+    """
+    import html as _html
+    if df is None or len(df) == 0:
+        st.markdown(
+            '<div class="gl-term-table-wrap">'
+            '<div class="gl-term-table-meta">— no rows —</div>'
+            '</div>', unsafe_allow_html=True
+        )
+        return
+
+    mono = set(mono_columns or [])
+    accents = dict(accent_columns or {})
+    cols = list(df.columns)
+    total_rows = len(df)
+    shown = df.head(max_rows) if max_rows is not None and total_rows > max_rows else df
+
+    header_cells = "".join(
+        f"<th>{_html.escape(str(c))}</th>" for c in cols
+    )
+
+    body_rows = []
+    for _, row in shown.iterrows():
+        tds = []
+        for c in cols:
+            raw = row[c]
+            cell_text = _html.escape("" if raw is None else str(raw))
+            classes = []
+            if c in mono:
+                classes.append("gl-term-mono")
+            if c in accents:
+                tone = str(accents[c]).lower().strip()
+                if tone in {"cyan", "emerald", "amber", "rose"}:
+                    classes.append(f"gl-term-accent-{tone}")
+            cls_attr = f' class="{" ".join(classes)}"' if classes else ""
+            tds.append(f"<td{cls_attr}>{cell_text}</td>")
+        body_rows.append(f"<tr>{''.join(tds)}</tr>")
+
+    title_html = (
+        f'<div class="gl-term-table-title">{_html.escape(title)}</div>'
+        if title else ""
+    )
+    meta_parts = []
+    if max_rows is not None and total_rows > max_rows:
+        meta_parts.append(f"... {total_rows - max_rows} more rows")
+    if caption:
+        meta_parts.append(_html.escape(caption))
+    meta_html = (
+        f'<div class="gl-term-table-meta">{" · ".join(meta_parts)}</div>'
+        if meta_parts else ""
+    )
+
+    html_out = (
+        '<div class="gl-term-table-wrap">'
+        + title_html
+        + '<table class="gl-term-table">'
+        + f'<thead><tr>{header_cells}</tr></thead>'
+        + f'<tbody>{"".join(body_rows)}</tbody>'
+        + '</table>'
+        + meta_html
+        + '</div>'
+    )
+    st.markdown(html_out, unsafe_allow_html=True)
 
 
 # --- v7 §18.2 Schema-safe helpers ----------------------------------------
@@ -6015,7 +6395,9 @@ def render_utility_bar(info: dict | None = None):
     # v10 §6 — 3-zone layout via st.columns. Wrapping marker div lets the
     # outer CSS `:has()` selector paint this block as the sticky terminal bar.
     st.markdown('<div class="gl-utilbar-marker" aria-hidden="true"></div>', unsafe_allow_html=True)
-    c_left, c_center, c_right = st.columns([2.4, 1.9, 2.4], gap="small")
+    # v11 §1 — ratio shifted to give RIGHT chips (Model + Gates + DSR) extra
+    # room; previously [2.4, 1.9, 2.4] clipped the last chip at <1400px.
+    c_left, c_center, c_right = st.columns([2.3, 1.7, 2.8], gap="small")
     with c_left:
         st.markdown(
             f'<span class="gl-util-left">{left_html}</span>',

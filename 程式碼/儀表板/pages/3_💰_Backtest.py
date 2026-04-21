@@ -652,8 +652,9 @@ try:
         fig_perm.update_layout(barmode="group", yaxis_range=[0.45, max(obs_aucs) + 0.03])
         st.plotly_chart(fig_perm, use_container_width=True)
 
+        # v11 §4a — migrated inline pastel div → shared `.gl-box-ok` dark card.
         st.markdown("""
-        <div style="background:#ecfdf5; border-left:4px solid #059669; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#065f46;">
+        <div class="gl-box-ok">
         <strong>✅ 結論：</strong><br>
         所有 9 個模型×天期組合的 Permutation Test p-value = 0.000，Z-Score 均超過 170。<br>
         模型的預測能力具有極高的統計顯著性，排除了偶然性。

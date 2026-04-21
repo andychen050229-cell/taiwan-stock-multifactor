@@ -65,26 +65,31 @@ render_trust_strip([
 ])
 
 # 白話版資料產生說明
+# v11 §4a — DATA PROVENANCE callout migrated from pastel teal to dark-glint.
 st.markdown("""
 <div style="
-    background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
-    border: 1px solid rgba(6,182,212,0.18);
-    border-left: 4px solid #06b6d4;
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(10,20,32,0.92) 100%);
+    border: 1px solid rgba(103,232,249,0.32);
+    border-left: 3px solid #67e8f9;
     border-radius: 12px;
     padding: 18px 22px;
     margin: 14px 0;
+    box-shadow: 0 4px 14px rgba(2,6,23,0.28), inset 0 1px 0 rgba(103,232,249,0.12);
 ">
     <div style="
-        display: inline-block; background: #06b6d4; color: white;
-        font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
-        padding: 3px 10px; border-radius: 4px; margin-bottom: 10px;
+        display: inline-block; background: rgba(103,232,249,0.22); color: #67e8f9;
+        border: 1px solid rgba(103,232,249,0.40);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.68rem; font-weight: 800; letter-spacing: 0.16em;
+        padding: 3px 10px; border-radius: 5px; margin-bottom: 10px;
+        text-shadow: 0 0 8px rgba(103,232,249,0.35);
     ">資料怎麼來? · DATA PROVENANCE</div>
-    <div style="font-size: 0.95rem; color: #334155; line-height: 1.85;">
-        <strong style="color: #0f172a;">這一頁的 ICIR 數字怎麼算出來的?</strong><br>
-        ① 先對每個交易日算出<strong>模型預測排序</strong>和<strong>實際報酬排序</strong>的相關性(Rank IC);<br>
+    <div style="font-size: 0.95rem; color: #cfe2ee; line-height: 1.85;">
+        <strong style="color: #e8f7fc;">這一頁的 ICIR 數字怎麼算出來的?</strong><br>
+        ① 先對每個交易日算出<strong style="color:#e8f7fc;">模型預測排序</strong>和<strong style="color:#e8f7fc;">實際報酬排序</strong>的相關性(Rank IC);<br>
         ② 把過去 ~500 個交易日的 Rank IC 收集起來,算出平均值與標準差;<br>
-        ③ <code style="background:#e0f2fe;padding:1px 6px;border-radius:3px;">ICIR = 平均 / 標準差</code>,像「訊號的夏普比率」。<br>
-        <strong style="color: #0891b2;">|ICIR| &gt; 0.5 → 訊號穩定可用</strong>;&gt; 1.0 為優秀。<br>
+        ③ <code style="background:rgba(103,232,249,0.16);border:1px solid rgba(103,232,249,0.32);color:#cffafe;padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;">ICIR = 平均 / 標準差</code>,像「訊號的夏普比率」。<br>
+        <strong style="color: #67e8f9;">|ICIR| &gt; 0.5 → 訊號穩定可用</strong>;&gt; 1.0 為優秀。<br>
         D+20 通常優於 D+1,因為日內價格雜訊比月頻趨勢大得多。
     </div>
 </div>

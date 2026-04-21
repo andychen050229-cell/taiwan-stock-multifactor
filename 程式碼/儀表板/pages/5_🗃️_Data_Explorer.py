@@ -20,8 +20,10 @@ load_feature_store = _utils.load_feature_store
 load_companies = _utils.load_companies
 glint_plotly_layout = _utils.glint_plotly_layout
 glint_dark_tooltip = _utils.glint_dark_tooltip
+glint_dark_gauge_style = _utils.glint_dark_gauge_style
 render_chart_note = _utils.render_chart_note
 render_terminal_hero = _utils.render_terminal_hero
+render_glint_table = _utils.render_glint_table
 PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
 PAGE_TITLES = _utils.PAGE_TITLES
 PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
@@ -29,6 +31,7 @@ render_trust_strip = _utils.render_trust_strip
 render_page_footer = _utils.render_page_footer
 
 inject_custom_css()
+_utils.inject_v10_dark_widgets_css()
 
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
@@ -146,25 +149,31 @@ try:
 
     # ===== Data Source Transparency =====
     st.markdown("### 🔎 資料來源透明宣告 | Data Source Transparency")
+    # v11 §4a — replaced ad-hoc pastel div with the shared `.gl-box-warn` class
+    # so it inherits the dark-glint terminal palette.
     st.markdown("""
-    <div style="background:#fef3c7; border-left:4px solid #d97706; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.9rem; color:#78350f; margin-bottom:16px;">
+    <div class="gl-box-warn">
     <strong>本專案使用兩類資料</strong>：主資料為教授提供之 <code>bda2026</code> 研究型資料庫（4 張表），<strong>輔以 FinMind 公開 API 取得 6 張補充表</strong>以完整支援 8 支柱多因子分析。自 2026-04-19 起依 <code>SCOPE.md</code> v1.0 封版，不再新增任何外部資料。
     </div>
     """, unsafe_allow_html=True)
 
     col_a, col_b = st.columns(2)
     with col_a:
-        st.markdown("#### 📘 A. 教授提供資料庫（bda2026，4 張表）")
         prof_data = pd.DataFrame([
             {"資料表": "companies", "筆數": "1,932", "用途": "公司基本識別（JOIN key）"},
             {"資料表": "stock_prices", "筆數": "877,699", "用途": "標籤生成、val_估值｜僅 closing_price"},
             {"資料表": "income_stmt", "筆數": "14,968", "用途": "fund_基本面｜僅 6 個損益科目"},
             {"資料表": "stock_text", "筆數": "1,125,134", "用途": "event_/txt_/sent_｜PTT/Dcard/Mobile01/Yahoo"},
         ])
-        st.dataframe(prof_data, use_container_width=True, hide_index=True)
+        # v11 §3 — Glint dark terminal table (replaces raw st.dataframe)
+        render_glint_table(
+            prof_data,
+            title="A · 教授提供資料庫 (bda2026 · 4 tables)",
+            mono_columns=["筆數"],
+            accent_columns={"資料表": "cyan"},
+        )
 
     with col_b:
-        st.markdown("#### 📗 B. FinMind 補充資料（6 張表，已封版）")
         finmind_data = pd.DataFrame([
             {"檔案": "stock_prices_ohlcv", "FinMind Dataset": "TaiwanStockPrice", "補教授資料之不足": "OHLCV（教授僅收盤價）"},
             {"檔案": "balance_sheet", "FinMind Dataset": "TaiwanStockBalanceSheet", "補教授資料之不足": "資產負債表（教授未提供）"},
@@ -173,10 +182,15 @@ try:
             {"檔案": "institutional_investors", "FinMind Dataset": "TaiwanStockInstitutionalInvestorsBuySell", "補教授資料之不足": "三大法人籌碼（教授未提供）"},
             {"檔案": "margin_trading", "FinMind Dataset": "TaiwanStockMarginPurchaseShortSale", "補教授資料之不足": "融資融券（教授未提供）— ⚠️ mg_ 支柱已於 2026-04-19 下架，檔案保留作為資料透明之證明"},
         ])
-        st.dataframe(finmind_data, use_container_width=True, hide_index=True)
+        render_glint_table(
+            finmind_data,
+            title="B · FinMind 補充資料 (6 tables · sealed)",
+            accent_columns={"檔案": "cyan", "FinMind Dataset": "amber"},
+        )
 
+    # v11 §4a — replaced ad-hoc pastel div with shared `.gl-box-danger` class.
     st.markdown("""
-    <div style="background:#fef2f2; border-left:4px solid #dc2626; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#7f1d1d; margin-top:8px; margin-bottom:16px;">
+    <div class="gl-box-danger">
     <strong>⚠️ mg_ 融資融券支柱已於 2026-04-19 下架</strong>：FinMind 覆蓋僅 1,136 / 1,932 = 58.8% 公司，其中約 100 支為結構性不可下載（KY 股、創業板、新上市、ETF 非信用交易標的），無法達到 100% 覆蓋。過往範例（G1/G10/G20/G2）亦未使用此特徵。改由 <code>chip_</code>（三大法人）、<code>trend_</code>（技術）、<code>event_</code>（文本）承擔市場結構訊號。parquet 檔案仍保留作為資料透明之證明，詳見 <code>資料來源宣告.md</code> 的 B6 欄位說明。
     </div>
     """, unsafe_allow_html=True)
@@ -397,41 +411,97 @@ try:
         n_total = len(gates)
         pass_rate = n_pass / n_total
 
+        # v11 §5 — Glint dark terminal progress bar (replaces light #f0f0f0
+        # track with deep-navy track + cyan/emerald/amber/rose accent fill
+        # that matches the kind of the result).
+        if pass_rate == 1.0:
+            _fill = "linear-gradient(90deg, #10b981 0%, #34d399 100%)"
+            _glow = "rgba(16,185,129,0.45)"
+            _label_color = "#d1fae5"
+        elif pass_rate >= 0.8:
+            _fill = "linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)"
+            _glow = "rgba(245,158,11,0.45)"
+            _label_color = "#fef3c7"
+        else:
+            _fill = "linear-gradient(90deg, #f43f5e 0%, #fb7185 100%)"
+            _glow = "rgba(244,63,94,0.45)"
+            _label_color = "#fecaca"
+
         st.markdown(f"""
         <div style="margin: 20px 0;">
-        <div style="background-color: #f0f0f0; border-radius: 8px; height: 30px; overflow: hidden;">
-            <div style="background-color: {'#059669' if pass_rate == 1.0 else '#f59e0b' if pass_rate >= 0.8 else '#dc2626'};
-                        width: {pass_rate*100}%; height: 100%; display: flex; align-items: center;
-                        justify-content: center; color: white; font-weight: bold;">
-                {n_pass}/{n_total} ({pass_rate*100:.0f}%)
+          <div style="
+              background: linear-gradient(180deg, rgba(10,20,32,0.95), rgba(15,23,37,0.95));
+              border: 1px solid rgba(103,232,249,0.24);
+              border-radius: 10px; height: 34px; overflow: hidden; padding: 2px;
+              box-shadow: inset 0 1px 0 rgba(103,232,249,0.14), 0 2px 10px rgba(2,6,23,0.32);">
+            <div style="
+                background: {_fill};
+                width: {pass_rate*100:.1f}%; height: 100%;
+                border-radius: 7px;
+                display: flex; align-items: center; justify-content: center;
+                color: {_label_color};
+                font-family: 'JetBrains Mono', monospace; font-weight: 800;
+                font-size: 0.88rem; letter-spacing: 0.10em;
+                text-shadow: 0 0 8px {_glow};
+                box-shadow: 0 0 14px {_glow};
+                transition: width 0.6s ease;">
+                {n_pass}/{n_total} · {pass_rate*100:.0f}%
             </div>
-        </div>
+          </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Gauge chart
+        # v11 §5 — Glint dark terminal gauge (was: raw #059669/#f59e0b/#dc2626
+        # bar + light #fee2e2/#fef3c7/#ecfdf5 step bands on white canvas).
+        if n_pass == n_total:
+            _gauge_tone = "emerald"
+        elif n_pass >= n_total * 0.8:
+            _gauge_tone = "amber"
+        else:
+            _gauge_tone = "rose"
+        _gauge_style = glint_dark_gauge_style(tone=_gauge_tone)
+        # Layer in kind-tinted step bands (still dark but with subtle glow
+        # so the threshold arcs are visible instead of white wedges).
+        _gauge_style["steps"] = [
+            {"range": [0, n_total * 0.5], "color": "rgba(244,63,94,0.28)"},
+            {"range": [n_total * 0.5, n_total * 0.8], "color": "rgba(245,158,11,0.28)"},
+            {"range": [n_total * 0.8, n_total], "color": "rgba(16,185,129,0.28)"},
+        ]
+        _gauge_style["threshold"] = {
+            "line": {"color": "#67e8f9", "width": 4},
+            "thickness": 0.80,
+            "value": n_pass,
+        }
         fig_gate = go.Figure(go.Indicator(
             mode="gauge+number+delta",
             value=n_pass,
-            delta={"reference": n_total, "suffix": " gates"},
-            title={"text": "品質門控通過 | Gates Passed"},
-            gauge={
-                "axis": {"range": [0, n_total]},
-                "bar": {"color": "#059669" if n_pass == n_total else "#f59e0b" if n_pass >= n_total * 0.8 else "#dc2626"},
-                "steps": [
-                    {"range": [0, n_total * 0.5], "color": "#fee2e2"},
-                    {"range": [n_total * 0.5, n_total * 0.8], "color": "#fef3c7"},
-                    {"range": [n_total * 0.8, n_total], "color": "#ecfdf5"},
-                ],
-                "threshold": {
-                    "line": {"color": "#059669", "width": 4},
-                    "thickness": 0.75,
-                    "value": n_pass
-                }
+            delta={
+                "reference": n_total, "suffix": " gates",
+                "increasing": {"color": "#34d399"},
+                "decreasing": {"color": "#fb7185"},
+                "font": {"family": "'JetBrains Mono', monospace",
+                         "size": 13, "color": "#b4ccdf"},
             },
-            number={"suffix": f" / {n_total}"},
+            title={
+                "text": "<b>品質門控通過</b><br>"
+                        "<span style='font-size:10px;color:#8397ac;font-weight:400;'>"
+                        "GATES PASSED · Live</span>",
+                "font": {"family": "Inter, sans-serif",
+                         "size": 14, "color": "#e8f7fc"},
+            },
+            gauge=_gauge_style,
+            number={
+                "suffix": f" / {n_total}",
+                "font": {"family": "'JetBrains Mono', monospace",
+                         "size": 40, "color": "#e8f7fc"},
+            },
         ))
-        fig_gate.update_layout(height=300, margin=dict(l=20, r=20, t=60, b=20))
+        fig_gate.update_layout(**glint_plotly_layout(height=340, show_grid=False))
+        fig_gate.update_layout(
+            margin=dict(l=30, r=30, t=80, b=28),
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False),
+        )
         st.plotly_chart(fig_gate, use_container_width=True)
 
 except Exception as e:

@@ -435,8 +435,9 @@ if decay_data:
             ))
             st.plotly_chart(fig_hl, use_container_width=True)
 
+        # v11 §4a — migrated inline pastel div → shared `.gl-box-ok` dark card.
         st.markdown("""
-        <div style="background:#ecfdf5; border-left:4px solid #059669; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.85rem; color:#065f46;">
+        <div class="gl-box-ok">
         <strong>📌 半衰期解讀：</strong><br>
         D+5 與 D+20 的訊號均呈<strong>持續改善</strong>趨勢（正斜率），表示模型的預測能力在研究期間內尚未出現衰減。<br>
         建議再訓練週期：<strong>3-6 個月</strong>。

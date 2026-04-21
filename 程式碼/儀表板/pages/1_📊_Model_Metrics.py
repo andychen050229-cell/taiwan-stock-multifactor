@@ -412,7 +412,7 @@ try:
                 y=heatmap_data.index,
                 text=[[f"{v:.3f}" for v in row] for row in heatmap_data.values],
                 texttemplate="%{text}",
-                textfont={"family": "JetBrains Mono", "size": 11, "color": "#0f172a"},
+                textfont={"family": "JetBrains Mono", "size": 11, "color": "#E8F7FC"},
                 colorscale=glint_heatmap_colorscale("diverging"),
                 zmid=0.52, xgap=3, ygap=3,
                 colorbar=glint_colorbar(title="AUC", fmt=".3f"),

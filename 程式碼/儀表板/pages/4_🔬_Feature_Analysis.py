@@ -195,12 +195,12 @@ Jaccard 相似度 > 0.7 表示特徵集穩定。
 
         df_all = pd.DataFrame(all_43_features)
 
-        # Color code the table
+        # v11 §4a — glint dark palette for pass/fail dataframe cells.
         def highlight_status(val):
             if "✅" in str(val):
-                return "background-color: #ecfdf5; color: #065f46"
+                return "background-color: rgba(16,185,129,0.22); color: #a7f3d0"
             elif "❌" in str(val):
-                return "background-color: #fef2f2; color: #991b1b"
+                return "background-color: rgba(244,63,94,0.22); color: #fecaca"
             return ""
 
         st.dataframe(

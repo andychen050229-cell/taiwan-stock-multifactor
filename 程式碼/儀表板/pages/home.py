@@ -248,27 +248,29 @@ with tab_observe:
     _tp_zh = _PILLAR_ZH.get(_tp_key, _tp_key)
     _tp_bps = (top_pillar["delta_auc"] * 10000) if top_pillar else 24.0
 
+    # v11 §4a — Today's Key Finding card: dark-glint amber terminal.
     st.markdown(f"""
-<div style="background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 60%,#fffbeb 100%);
-            border:1px solid rgba(245,158,11,0.35);
-            border-left:4px solid #f59e0b;
-            border-radius:14px;
+<div style="background:linear-gradient(180deg,rgba(15,23,37,0.95) 0%,rgba(10,20,32,0.95) 100%);
+            border:1px solid rgba(245,158,11,0.45);
+            border-left:3px solid #f59e0b;
+            border-radius:12px;
             padding:18px 22px;
             margin:14px 0 18px;
-            box-shadow:0 4px 14px rgba(245,158,11,0.08);">
-  <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#92400e;
-              letter-spacing:0.14em;font-weight:700;text-transform:uppercase;margin-bottom:6px;">
+            box-shadow:0 4px 18px rgba(2,6,23,0.38), inset 0 1px 0 rgba(245,158,11,0.14);">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.70rem;color:#fbbf24;
+              letter-spacing:0.18em;font-weight:800;text-transform:uppercase;margin-bottom:8px;
+              text-shadow:0 0 10px rgba(245,158,11,0.40);">
     📌 TODAY'S KEY FINDING · 今日研究重點 &nbsp;·&nbsp; 判讀日 {_h20_date} (D+20 月度)
   </div>
-  <div style="font-size:1.04rem;line-height:1.85;color:#1e293b;">
-    ① <strong>模型最看好</strong> → <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#b45309;">{_top1_id} {_top1_name}</span>
-    <span style="color:#78350f;font-size:0.88rem;">（{_top1_ind}）</span>
-    <span style="color:#065f46;font-weight:600;">歷史同情境 +{_top1_ret*100:.1f}%</span> &nbsp;·&nbsp;
-    ② <strong>最強因子支柱</strong> → <span style="font-weight:700;color:#b45309;">{_tp_zh}</span>
-    <span style="font-family:'JetBrains Mono',monospace;color:#065f46;">(+{_tp_bps:.1f} bps AUC)</span> &nbsp;·&nbsp;
-    ③ <strong>整體可信度</strong> → AUC {baseline_auc:.3f}、DSR {best_dsr:.2f}、{kpis['gates_passed']}/{kpis['total_gates']} gates {'✓' if kpis['all_pass'] else '⚠'}
+  <div style="font-size:1.04rem;line-height:1.85;color:#e0f2fe;">
+    ① <strong style="color:#fef3c7;">模型最看好</strong> → <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#fbbf24;">{_top1_id} {_top1_name}</span>
+    <span style="color:#b4ccdf;font-size:0.88rem;">（{_top1_ind}）</span>
+    <span style="color:#34d399;font-weight:600;">歷史同情境 +{_top1_ret*100:.1f}%</span> &nbsp;·&nbsp;
+    ② <strong style="color:#fef3c7;">最強因子支柱</strong> → <span style="font-weight:700;color:#fbbf24;">{_tp_zh}</span>
+    <span style="font-family:'JetBrains Mono',monospace;color:#34d399;">(+{_tp_bps:.1f} bps AUC)</span> &nbsp;·&nbsp;
+    ③ <strong style="color:#fef3c7;">整體可信度</strong> → AUC {baseline_auc:.3f}、DSR {best_dsr:.2f}、{kpis['gates_passed']}/{kpis['total_gates']} gates {'✓' if kpis['all_pass'] else '⚠'}
   </div>
-  <div style="font-size:0.82rem;color:#78350f;margin-top:10px;opacity:0.85;">
+  <div style="font-size:0.82rem;color:#fbbf24;margin-top:10px;opacity:0.88;">
     💡 這三個數字是今天系統「最值得你關注的研究結論」。下方卡片逐一展開細節。
   </div>
 </div>
@@ -372,51 +374,57 @@ with tab_observe:
             _sind = _st.get("industry", "")
             _sret = _st.get("fwd_ret_20", 0)
             _price = _st.get("closing_price", None)
-            _ret_color = "#059669" if _sret >= 0 else "#dc2626"
+            # v11 §4a — glint palette: emerald for positive, rose for negative.
+            _ret_color = "#34d399" if _sret >= 0 else "#fb7185"
             _price_str = (
-                f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:.78rem;color:#64748b;">'
+                f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:.78rem;color:#8397ac;">'
                 f'收盤 {_price:.1f}</span>' if _price else ""
             )
             with _col:
                 st.markdown(f"""
-<div style="background:#ffffff;
-            border:1px solid #e2e8f0;
+<div style="background:linear-gradient(180deg,rgba(15,23,37,0.92) 0%,rgba(10,20,32,0.92) 100%);
+            border:1px solid rgba(103,232,249,0.24);
             border-left:3px solid {_ret_color};
             border-radius:12px;
             padding:14px 14px 12px;
             height:100%;
             transition:all .2s ease;
-            box-shadow:0 2px 6px rgba(15,23,42,0.04);">
+            box-shadow:0 4px 14px rgba(2,6,23,0.32), inset 0 1px 0 rgba(103,232,249,0.10);">
   <div style="font-family:'JetBrains Mono',monospace;font-size:0.66rem;
-              color:#94a3b8;letter-spacing:0.12em;font-weight:700;margin-bottom:4px;">
+              color:#67e8f9;letter-spacing:0.14em;font-weight:800;margin-bottom:4px;
+              text-shadow:0 0 8px rgba(103,232,249,0.35);">
     RANK {_i+1}
   </div>
-  <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;
-              color:#0f172a;letter-spacing:-0.02em;line-height:1.1;">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:800;
+              color:#e8f7fc;letter-spacing:-0.02em;line-height:1.1;">
     {_sid}
   </div>
-  <div style="font-size:0.92rem;font-weight:600;color:#1e293b;margin:4px 0 2px;
+  <div style="font-size:0.92rem;font-weight:600;color:#cfe2ee;margin:4px 0 2px;
               overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
     {_sname}
   </div>
-  <div style="font-size:0.74rem;color:#64748b;margin-bottom:10px;
+  <div style="font-size:0.74rem;color:#8397ac;margin-bottom:10px;
               overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
     {_sind or "—"}
   </div>
   <div style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;
-              color:{_ret_color};line-height:1.1;">
+              color:{_ret_color};line-height:1.1;
+              text-shadow:0 0 10px {('rgba(52,211,153,0.40)' if _sret >= 0 else 'rgba(251,113,133,0.40)')};">
     {'+' if _sret >= 0 else ''}{_sret*100:.1f}%
   </div>
-  <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">歷史同情境 20 日後</div>
+  <div style="font-size:0.7rem;color:#8397ac;margin-top:2px;">歷史同情境 20 日後</div>
   <div style="margin-top:8px;">{_price_str}</div>
 </div>
 """, unsafe_allow_html=True)
 
-        # Note below the 5 cards
+        # Note below the 5 cards — v11 §4a dark-glint callout.
         st.markdown(
-            '<div style="background:#f8fafc;border-radius:8px;padding:10px 14px;margin-top:12px;'
-            'font-size:0.82rem;color:#475569;line-height:1.6;border-left:2px solid #06b6d4;">'
-            '📌 <strong>注意</strong>：這是「歷史同情境下的 20 日後平均報酬」，非未來預測。'
+            '<div style="background:linear-gradient(180deg,rgba(15,23,37,0.92),rgba(10,20,32,0.92));'
+            'border:1px solid rgba(103,232,249,0.24);border-left:3px solid #67e8f9;'
+            'border-radius:10px;padding:10px 14px;margin-top:12px;'
+            'font-size:0.82rem;color:#cfe2ee;line-height:1.6;'
+            'box-shadow:0 2px 10px rgba(2,6,23,0.26);">'
+            '📌 <strong style="color:#e0f9ff;">注意</strong>：這是「歷史同情境下的 20 日後平均報酬」，非未來預測。'
             '推薦是模型排序（ranking），目的是協助研究者聚焦前 5% 標的，不構成投資建議。'
             '</div>', unsafe_allow_html=True,
         )
@@ -437,12 +445,14 @@ with tab_observe:
         if not _stocks:
             st.info(f"{label_cn} 暫無資料。")
             return
+        # v11 §4a — dark-glint label chrome (was slate-on-white).
         st.markdown(
             f'<div style="display:flex;align-items:baseline;gap:14px;margin-top:4px;">'
             f'  <span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;'
-            f'color:#64748b;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;">'
+            f'color:#67e8f9;letter-spacing:0.14em;text-transform:uppercase;font-weight:800;'
+            f'text-shadow:0 0 8px rgba(103,232,249,0.35);">'
             f'{label_en}</span>'
-            f'  <span style="font-size:0.9rem;color:#475569;">判讀日 {_date} · {note}</span>'
+            f'  <span style="font-size:0.9rem;color:#b4ccdf;">判讀日 {_date} · {note}</span>'
             f'</div>', unsafe_allow_html=True,
         )
         _cols = st.columns(5, gap="small")
@@ -451,19 +461,22 @@ with tab_observe:
             _sname = _s.get("short_name", "")
             _sind = _s.get("industry", "")
             _ret = _s.get(ret_key, 0) or 0
-            _color = "#059669" if _ret >= 0 else "#dc2626"
+            _color = "#34d399" if _ret >= 0 else "#fb7185"
             with _col:
+                # v11 §4a — dark-glint compact card for short-horizon recs.
                 st.markdown(f"""
-<div style="background:#fbfdff;border:1px solid #e2e8f0;
+<div style="background:linear-gradient(180deg,rgba(15,23,37,0.88) 0%,rgba(10,20,32,0.88) 100%);
+            border:1px solid rgba(103,232,249,0.22);
             border-left:2px solid {_color};border-radius:10px;
-            padding:10px 12px;height:100%;">
+            padding:10px 12px;height:100%;
+            box-shadow:0 2px 10px rgba(2,6,23,0.24), inset 0 1px 0 rgba(103,232,249,0.08);">
   <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;
-              color:#94a3b8;letter-spacing:0.12em;font-weight:700;">#{_i+1}</div>
+              color:#8397ac;letter-spacing:0.12em;font-weight:700;">#{_i+1}</div>
   <div style="font-family:'JetBrains Mono',monospace;font-size:1.05rem;
-              font-weight:700;color:#0f172a;line-height:1.1;margin-top:2px;">{_sid}</div>
-  <div style="font-size:0.8rem;color:#334155;font-weight:600;margin-top:2px;
+              font-weight:800;color:#e8f7fc;line-height:1.1;margin-top:2px;">{_sid}</div>
+  <div style="font-size:0.8rem;color:#cfe2ee;font-weight:600;margin-top:2px;
               overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{_sname}</div>
-  <div style="font-size:0.68rem;color:#94a3b8;margin:2px 0 6px;
+  <div style="font-size:0.68rem;color:#8397ac;margin:2px 0 6px;
               overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{_sind or '—'}</div>
   <div style="font-family:'JetBrains Mono',monospace;font-size:0.95rem;
               font-weight:700;color:{_color};line-height:1.1;">
@@ -597,21 +610,27 @@ with tab_observe:
         '</div>', unsafe_allow_html=True,
     )
     rg1, rg2, rg3 = st.columns(3, gap="medium")
+    # v11 §4a — Path A/B/C reading-guide cards repainted as dark-glint terminals
+    # (was pastel emerald/blue/violet gradients). Each keeps its accent hue on
+    # left rail + uppercase mono header but body text is now on dark bg so
+    # nothing reads as washed-out islands against the rest of the dashboard.
     with rg1:
         st.markdown("""
-<div style="background:linear-gradient(135deg,#ecfdf5 0%,#f0fdfa 100%);
-            border:1px solid rgba(16,185,129,0.28);
+<div style="background:linear-gradient(180deg,rgba(15,23,37,0.92) 0%,rgba(10,20,32,0.92) 100%);
+            border:1px solid rgba(16,185,129,0.38);
             border-left:3px solid #10b981;
-            border-radius:12px;padding:16px 18px;height:100%;">
-  <div style="font-family:'JetBrains Mono',monospace;font-size:0.66rem;color:#047857;
-              letter-spacing:0.14em;font-weight:700;margin-bottom:4px;">PATH A · BEGINNER</div>
-  <div style="font-size:1.05rem;font-weight:700;color:#064e3b;margin-bottom:8px;">
+            border-radius:12px;padding:16px 18px;height:100%;
+            box-shadow:0 4px 16px rgba(2,6,23,0.30), inset 0 1px 0 rgba(16,185,129,0.12);">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#34d399;
+              letter-spacing:0.18em;font-weight:800;margin-bottom:4px;
+              text-shadow:0 0 8px rgba(16,185,129,0.35);">PATH A · BEGINNER</div>
+  <div style="font-size:1.05rem;font-weight:700;color:#d1fae5;margin-bottom:8px;">
     🕐 1 分鐘速讀
   </div>
-  <div style="font-size:0.9rem;color:#065f46;line-height:1.72;">
-    · 看上方<strong>今日重點</strong>三行<br>
-    · 看 <strong>Top 5 推薦</strong>卡片<br>
-    · 看三顆<strong>訊號燈</strong>綠不綠<br>
+  <div style="font-size:0.9rem;color:#a7f3d0;line-height:1.72;">
+    · 看上方<strong style="color:#ecfdf5;">今日重點</strong>三行<br>
+    · 看 <strong style="color:#ecfdf5;">Top 5 推薦</strong>卡片<br>
+    · 看三顆<strong style="color:#ecfdf5;">訊號燈</strong>綠不綠<br>
     <br>
     <span style="font-size:.82rem;opacity:.85;">→ 停在這裡就是「系統說了什麼」</span>
   </div>
@@ -620,19 +639,21 @@ with tab_observe:
 
     with rg2:
         st.markdown("""
-<div style="background:linear-gradient(135deg,#eff6ff 0%,#f0f9ff 100%);
-            border:1px solid rgba(37,99,235,0.28);
+<div style="background:linear-gradient(180deg,rgba(15,23,37,0.92) 0%,rgba(10,20,32,0.92) 100%);
+            border:1px solid rgba(37,99,235,0.38);
             border-left:3px solid #2563eb;
-            border-radius:12px;padding:16px 18px;height:100%;">
-  <div style="font-family:'JetBrains Mono',monospace;font-size:0.66rem;color:#1e40af;
-              letter-spacing:0.14em;font-weight:700;margin-bottom:4px;">PATH B · INVESTOR</div>
-  <div style="font-size:1.05rem;font-weight:700;color:#1e3a8a;margin-bottom:8px;">
+            border-radius:12px;padding:16px 18px;height:100%;
+            box-shadow:0 4px 16px rgba(2,6,23,0.30), inset 0 1px 0 rgba(37,99,235,0.12);">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#60a5fa;
+              letter-spacing:0.18em;font-weight:800;margin-bottom:4px;
+              text-shadow:0 0 8px rgba(37,99,235,0.35);">PATH B · INVESTOR</div>
+  <div style="font-size:1.05rem;font-weight:700;color:#dbeafe;margin-bottom:8px;">
     📊 5 分鐘細看
   </div>
-  <div style="font-size:0.9rem;color:#1e40af;line-height:1.72;">
-    · 進入 <strong>🌱 投資觀察</strong><br>
-    · 逐一展開推薦股票的<strong>四件事</strong>解讀<br>
-    · 用成本<strong>試算機</strong>估算折價空間<br>
+  <div style="font-size:0.9rem;color:#bfdbfe;line-height:1.72;">
+    · 進入 <strong style="color:#e0ecfe;">🌱 投資觀察</strong><br>
+    · 逐一展開推薦股票的<strong style="color:#e0ecfe;">四件事</strong>解讀<br>
+    · 用成本<strong style="color:#e0ecfe;">試算機</strong>估算折價空間<br>
     <br>
     <span style="font-size:.82rem;opacity:.85;">→ 適合想自己判斷的投資人</span>
   </div>
@@ -641,18 +662,20 @@ with tab_observe:
 
     with rg3:
         st.markdown("""
-<div style="background:linear-gradient(135deg,#faf5ff 0%,#f5f3ff 100%);
-            border:1px solid rgba(124,58,237,0.28);
+<div style="background:linear-gradient(180deg,rgba(15,23,37,0.92) 0%,rgba(10,20,32,0.92) 100%);
+            border:1px solid rgba(124,58,237,0.38);
             border-left:3px solid #7c3aed;
-            border-radius:12px;padding:16px 18px;height:100%;">
-  <div style="font-family:'JetBrains Mono',monospace;font-size:0.66rem;color:#6d28d9;
-              letter-spacing:0.14em;font-weight:700;margin-bottom:4px;">PATH C · RESEARCHER</div>
-  <div style="font-size:1.05rem;font-weight:700;color:#4c1d95;margin-bottom:8px;">
+            border-radius:12px;padding:16px 18px;height:100%;
+            box-shadow:0 4px 16px rgba(2,6,23,0.30), inset 0 1px 0 rgba(124,58,237,0.12);">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#a78bfa;
+              letter-spacing:0.18em;font-weight:800;margin-bottom:4px;
+              text-shadow:0 0 8px rgba(124,58,237,0.35);">PATH C · RESEARCHER</div>
+  <div style="font-size:1.05rem;font-weight:700;color:#ede9fe;margin-bottom:8px;">
     🔬 深入研究
   </div>
-  <div style="font-size:0.9rem;color:#5b21b6;line-height:1.72;">
-    · 切到 <strong>⚙️ 研究工作站</strong> tab<br>
-    · 看完整的 <strong>AUC/DSR/ICIR</strong> + LOPO<br>
+  <div style="font-size:0.9rem;color:#ddd6fe;line-height:1.72;">
+    · 切到 <strong style="color:#f1edfd;">⚙️ 研究工作站</strong> tab<br>
+    · 看完整的 <strong style="color:#f1edfd;">AUC/DSR/ICIR</strong> + LOPO<br>
     · 再到治理監控確認模型健康度<br>
     <br>
     <span style="font-size:.82rem;opacity:.85;">→ 給分析師、學術審閱者</span>
@@ -916,21 +939,26 @@ with tab_workstation:
             font=dict(family="JetBrains Mono, monospace", size=9, color="#94a3b8"),
         )
 
+    # v11 §4b — arrow connector paints cyan-translucent on dark panel.
     for i in range(len(stages) - 1):
         fig.add_annotation(
             x=i + 0.75, y=0, ax=i + 0.25, ay=0,
             xref='x', yref='y', axref='x', ayref='y',
             arrowhead=2, arrowsize=1.1, arrowwidth=1.5,
-            arrowcolor='#cbd5e1', showarrow=True,
+            arrowcolor='rgba(103,232,249,0.45)', showarrow=True,
         )
 
+    # v11 §4b — use glint_dark_layout so the pipeline flow renders as a
+    # dark terminal panel instead of a transparent band that reveals the
+    # light host canvas.
+    fig.update_layout(**_utils.glint_dark_layout(height=200, show_grid=False))
     fig.update_layout(
         showlegend=False,
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False,
-                   range=[-0.5, len(stages) - 0.5]),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-0.9, 0.9]),
-        plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-        height=160, margin=dict(l=20, r=20, t=30, b=20),
+                   range=[-0.5, len(stages) - 0.5], visible=False),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False,
+                   range=[-0.9, 0.9], visible=False),
+        margin=dict(l=20, r=20, t=36, b=24),
     )
     st.plotly_chart(fig, use_container_width=True)
 
