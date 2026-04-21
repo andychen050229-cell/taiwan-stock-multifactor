@@ -19,6 +19,7 @@ load_report = _utils.load_report
 load_feature_store = _utils.load_feature_store
 load_companies = _utils.load_companies
 glint_plotly_layout = _utils.glint_plotly_layout
+glint_dark_tooltip = _utils.glint_dark_tooltip
 render_chart_note = _utils.render_chart_note
 render_page_heading = _utils.render_page_heading
 render_trust_strip = _utils.render_trust_strip
@@ -219,51 +220,101 @@ try:
     folds = wf.get("folds", [])
 
     if folds:
-        # Visual timeline
+        # v8 §15.9 — Dark walk-forward timeline.
+        # Train = deep blue scale (dark→light as folds expand), Test = emerald scale.
         fig = go.Figure()
-        colors_train = ["#3B82F6", "#60A5FA", "#93C5FD", "#DBEAFE"]
-        colors_test = ["#059669", "#10B981", "#34D399", "#6EE7B7"]
+        colors_train = ["#1E3A8A", "#1D4ED8", "#2563EB", "#3B82F6"]   # deep blue scale
+        colors_test  = ["#064E3B", "#065F46", "#047857", "#10B981"]   # emerald scale
+        embargo_color = "rgba(245,158,11,0.35)"                       # amber — embargo strip
 
         for fold in folds:
             fid = fold["fold_id"]
+            y_label = f"Fold {fid+1:02d}" if isinstance(fid, int) else f"Fold {fid}"
+            # Train bar (filled from 0→1.0)
             fig.add_trace(go.Bar(
-                y=[f"Fold {fid}"],
-                x=[1],
+                y=[y_label],
+                x=[1.0],
                 base=[0],
                 orientation="h",
-                name="訓練集 | Train" if fid == 0 else None,
-                marker_color=colors_train[fid % len(colors_train)],
+                name="Train · expanding" if fid == 0 else None,
+                marker=dict(
+                    color=colors_train[fid % len(colors_train)],
+                    line=dict(color="rgba(103,232,249,0.20)", width=0.5),
+                ),
                 showlegend=(fid == 0),
-                text=[f"{fold['train_period']}"],
+                text=[f"TRAIN · {fold['train_period']}"],
                 textposition="inside",
-                width=0.6,
-                hovertemplate=f"<b>Fold {fid} Train</b><br>Samples: {fold['n_train']:,}<extra></extra>",
+                insidetextanchor="start",
+                textfont=dict(family="'JetBrains Mono', monospace", size=10, color="#DBEAFE"),
+                width=0.55,
+                hovertemplate=(
+                    f"<b>Fold {fid+1:02d} · TRAIN</b><br>"
+                    f"Period: {fold['train_period']}<br>"
+                    f"Samples: {fold['n_train']:,}<extra></extra>"
+                ),
             ))
+            # Embargo strip (1.0→1.08) — 20-day purge band
             fig.add_trace(go.Bar(
-                y=[f"Fold {fid}"],
+                y=[y_label],
+                x=[0.08],
+                base=[1.0],
+                orientation="h",
+                name="Embargo · 20d" if fid == 0 else None,
+                marker=dict(color=embargo_color, line=dict(width=0)),
+                showlegend=(fid == 0),
+                text=[""],
+                width=0.55,
+                hovertemplate=f"<b>Embargo · 20 trading days</b><extra></extra>",
+            ))
+            # Test bar (1.08→1.33)
+            fig.add_trace(go.Bar(
+                y=[y_label],
                 x=[0.25],
                 base=[1.08],
                 orientation="h",
-                name="測試集 | Test" if fid == 0 else None,
-                marker_color=colors_test[fid % len(colors_test)],
+                name="Test · hold-out" if fid == 0 else None,
+                marker=dict(
+                    color=colors_test[fid % len(colors_test)],
+                    line=dict(color="rgba(103,232,249,0.20)", width=0.5),
+                ),
                 showlegend=(fid == 0),
-                text=[f"{fold['test_period']}"],
+                text=[f"TEST · {fold['test_period']}"],
                 textposition="inside",
-                width=0.6,
-                hovertemplate=f"<b>Fold {fid} Test</b><br>Samples: {fold['n_test']:,}<extra></extra>",
+                insidetextanchor="middle",
+                textfont=dict(family="'JetBrains Mono', monospace", size=10, color="#D1FAE5"),
+                width=0.55,
+                hovertemplate=(
+                    f"<b>Fold {fid+1:02d} · TEST</b><br>"
+                    f"Period: {fold['test_period']}<br>"
+                    f"Samples: {fold['n_test']:,}<extra></extra>"
+                ),
             ))
 
         fig.update_layout(**glint_plotly_layout(
-            title="Purged Walk-Forward CV 時間軸",
-            subtitle="Temporal Structure · 防未來資訊洩露",
-            height=340,
+            title="Purged Walk-Forward CV · Temporal Structure",
+            subtitle=f"{len(folds)}-fold expanding window · 20-day embargo · 防前瞻偏差",
+            height=320,
             show_grid=False,
         ))
         fig.update_layout(
             barmode="stack",
-            xaxis_visible=False,
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0,
-                        font=dict(family="JetBrains Mono, monospace", size=11)),
+            bargap=0.45,
+            xaxis=dict(visible=False, range=[-0.02, 1.36]),
+            yaxis=dict(
+                autorange="reversed",
+                tickfont=dict(family="'JetBrains Mono', monospace", size=11, color="#B4CCDF"),
+                gridcolor="rgba(103,232,249,0.06)",
+            ),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1,
+                bgcolor="rgba(0,0,0,0)",
+                font=dict(family="'JetBrains Mono', monospace", size=11, color="#B4CCDF"),
+            ),
+            hoverlabel=glint_dark_tooltip(),
             hovermode="closest",
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -472,30 +523,82 @@ $$
 
     st.warning("⚠️ 以下標籤分佈數據基於固定歷史資料集。FLAT 類別佔比 ≈ 50% 反映市場多數時間無明確趨勢，符合真實市場特徵。")
 
-    label_dist_data = pd.DataFrame({
-        "Horizon": ["D+1", "D+1", "D+1", "D+5", "D+5", "D+5", "D+20", "D+20", "D+20"],
-        "Label": ["DOWN", "FLAT", "UP", "DOWN", "FLAT", "UP", "DOWN", "FLAT", "UP"],
-        "Count": [145000, 310000, 145000, 142000, 316000, 142000, 138000, 324000, 138000]
-    })
-
-    fig_label = px.bar(
-        label_dist_data,
-        x="Horizon",
-        y="Count",
-        color="Label",
-        barmode="group",
-        color_discrete_map={"DOWN": "#f43f5e", "FLAT": "#94a3b8", "UP": "#10b981"},
-        labels={"Count": "樣本數 Sample Count", "Horizon": "預測天期 Horizon"},
-    )
+    # v8 §15.8 — Stacked horizontal composition bars (Bloomberg-style)
+    # DOWN = deep rose · FLAT = muted slate · UP = emerald
+    horizons_order = ["D+1", "D+5", "D+20"]
+    counts_map = {
+        "D+1":  {"DOWN": 145000, "FLAT": 310000, "UP": 145000},
+        "D+5":  {"DOWN": 142000, "FLAT": 316000, "UP": 142000},
+        "D+20": {"DOWN": 138000, "FLAT": 324000, "UP": 138000},
+    }
+    # Build three traces so the stacked horizontal bars share a common axis.
+    import plotly.graph_objects as _go
+    fig_label = _go.Figure()
+    _tone_map = {
+        "DOWN": {"color": "#9f1239", "label_fg": "#fecdd3"},   # deep rose
+        "FLAT": {"color": "#475569", "label_fg": "#cbd5e1"},   # muted slate
+        "UP":   {"color": "#10b981", "label_fg": "#d1fae5"},   # emerald
+    }
+    for lbl in ["DOWN", "FLAT", "UP"]:
+        values = [counts_map[h][lbl] for h in horizons_order]
+        totals = [sum(counts_map[h].values()) for h in horizons_order]
+        pcts = [v / t for v, t in zip(values, totals)]
+        fig_label.add_trace(_go.Bar(
+            y=horizons_order,
+            x=values,
+            name=lbl,
+            orientation="h",
+            marker=dict(
+                color=_tone_map[lbl]["color"],
+                line=dict(color="rgba(6,10,18,0.85)", width=0.6),
+            ),
+            text=[f"{lbl} {p*100:.1f}% · {v/1000:.0f}k" for p, v in zip(pcts, values)],
+            textposition="inside",
+            insidetextanchor="middle",
+            textfont=dict(
+                family="'JetBrains Mono', monospace",
+                size=11,
+                color=_tone_map[lbl]["label_fg"],
+            ),
+            hovertemplate=(
+                f"<b>{lbl}</b><br>"
+                "Horizon %{y}<br>"
+                "樣本 %{x:,}<br>"
+                "占比 %{customdata:.1%}<extra></extra>"
+            ),
+            customdata=pcts,
+        ))
     fig_label.update_layout(**glint_plotly_layout(
-        title="各天期標籤分佈",
-        subtitle="Label Distribution by Horizon · FLAT 佔比偏高屬市場常態",
-        height=400,
-        xlabel="預測天期 Horizon",
-        ylabel="樣本數 Sample Count",
+        title="標籤組成 · Label Composition",
+        subtitle="Stacked by horizon · DOWN/FLAT/UP share of D+1, D+5, D+20",
+        height=320,
+        xlabel="Sample Count",
+        ylabel="",
     ))
-    fig_label.update_layout(hovermode="x unified")
+    fig_label.update_layout(
+        barmode="stack",
+        bargap=0.42,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            bgcolor="rgba(0,0,0,0)",
+            font=dict(family="'JetBrains Mono', monospace", size=11, color="#B4CCDF"),
+        ),
+        hoverlabel=glint_dark_tooltip(),
+    )
+    fig_label.update_xaxes(
+        showticklabels=False,
+        showgrid=False,
+        zeroline=False,
+    )
     st.plotly_chart(fig_label, use_container_width=True)
+    st.caption(
+        "FLAT 佔比最高屬市場常態，長天期分佈更接近平穩趨勢型分類。"
+        "　DOWN / UP 近乎對稱 (±2% 內) 顯示訓練資料未出現方向偏差。"
+    )
 
     # ===== Raw JSON Report =====
     st.divider()

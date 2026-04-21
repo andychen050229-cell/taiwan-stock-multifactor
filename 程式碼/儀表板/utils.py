@@ -1848,17 +1848,32 @@ def inject_custom_css():
         top: 0;
         z-index: 41;
     }}
+    /* v8 §8.3 — three-zone grid (LEFT / CENTER / RIGHT) */
+    .gl-utilbar {{
+        display: grid !important;
+        grid-template-columns: minmax(0,1fr) minmax(260px, 420px) minmax(0,1fr);
+        column-gap: 14px;
+    }}
     .gl-util-left {{
         display: inline-flex;
         flex-wrap: wrap;
         align-items: center;
-        flex: 1 1 auto;
+        justify-content: flex-start;
+        min-width: 0;
+    }}
+    .gl-util-center {{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         min-width: 0;
     }}
     .gl-util-right {{
         display: inline-flex;
+        flex-wrap: wrap;
         align-items: center;
-        flex: 0 0 auto;
+        justify-content: flex-end;
+        gap: 8px;
+        min-width: 0;
     }}
     .gl-util-seg {{
         display: inline-flex;
@@ -1869,22 +1884,27 @@ def inject_custom_css():
         white-space: nowrap;
     }}
     .gl-util-left .gl-util-seg:last-child {{ border-right: none; }}
-    /* Fake command-palette search placeholder — visual hint, not functional */
+    .gl-util-right .gl-util-seg {{ border-right: none; padding: 2px 6px; }}
+    /* v8 §8.3 — CENTER zone command-palette search placeholder (visual only) */
     .gl-util-search {{
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 3px 8px 3px 10px;
+        padding: 4px 10px 4px 12px;
+        width: 100%;
         background: rgba(103,232,249,0.06);
         border: 1px solid rgba(103,232,249,0.28);
-        border-radius: 6px;
+        border-radius: 7px;
         font-family: var(--gl-font-mono);
         font-size: 0.68rem;
         color: #8397ac;
         letter-spacing: 0.04em;
         min-width: 220px;
-        max-width: 360px;
         transition: all .2s ease;
+    }}
+    @media (max-width: 900px) {{
+        .gl-utilbar {{ grid-template-columns: 1fr; row-gap: 6px; }}
+        .gl-util-left, .gl-util-right {{ justify-content: flex-start !important; }}
     }}
     .gl-util-search:hover {{
         background: rgba(103,232,249,0.10);
@@ -2369,6 +2389,299 @@ def inject_custom_css():
         font-family: var(--gl-font-mono);
         font-size: 0.82rem;
         color: var(--dc-accent);
+    }}
+    /* ================================================================= */
+    /* 13. v8 Terminal hero (render_terminal_hero)                        */
+    /* ================================================================= */
+    .gl-thero {{
+        position: relative;
+        background: linear-gradient(180deg, #0F1725 0%, #0A1420 100%);
+        border: 1px solid var(--th-border);
+        border-radius: 14px;
+        padding: 26px 32px 22px;
+        margin: 8px 0 22px;
+        color: var(--gl-fg-primary, #E8F7FC);
+        overflow: hidden;
+    }}
+    .gl-thero::before {{
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 12% 18%, rgba(103,232,249,0.10), transparent 50%),
+            radial-gradient(ellipse at 92% 100%, rgba(124,58,237,0.07), transparent 55%);
+        pointer-events: none;
+        z-index: 0;
+    }}
+    .gl-thero > * {{ position: relative; z-index: 1; }}
+    .gl-thero-topline {{
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg,
+            transparent 0%,
+            var(--th-accent) 30%,
+            var(--th-accent) 70%,
+            transparent 100%);
+        opacity: 0.85;
+        z-index: 2;
+    }}
+    .gl-thero-eyebrow {{
+        display: inline-block;
+        font-family: var(--gl-font-mono);
+        font-size: 0.70rem;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        color: var(--th-accent);
+        padding: 3px 10px;
+        border: 1px solid var(--th-border);
+        border-radius: 4px;
+        background: rgba(103,232,249,0.04);
+        text-transform: uppercase;
+    }}
+    .gl-thero-title {{
+        font-family: var(--gl-font-sans);
+        font-size: 2.05rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        color: #F6FDFF;
+        margin-top: 12px;
+        line-height: 1.2;
+    }}
+    .gl-thero-briefing {{
+        margin-top: 10px;
+        font-family: var(--gl-font-sans);
+        font-size: 0.96rem;
+        color: #B4CCDF;
+        line-height: 1.78;
+        max-width: 780px;
+    }}
+    .gl-thero-chips {{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+    }}
+    .gl-thero-chip {{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        background: var(--ch-bg);
+        border: 1px solid var(--ch-border);
+        border-radius: 5px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.74rem;
+        letter-spacing: 0.06em;
+        color: var(--ch-accent);
+        font-weight: 600;
+    }}
+    .gl-thero-chipval {{
+        color: #E8F7FC;
+        font-weight: 700;
+    }}
+    .gl-thero-verdict {{
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 18px;
+        padding: 10px 14px;
+        background: rgba(103,232,249,0.05);
+        border: 1px solid rgba(103,232,249,0.18);
+        border-left: 3px solid var(--th-accent);
+        border-radius: 6px;
+    }}
+    .gl-thero-verdict-tag {{
+        font-family: var(--gl-font-mono);
+        font-size: 0.66rem;
+        letter-spacing: 0.20em;
+        color: var(--th-accent);
+        padding: 2px 8px;
+        border: 1px solid var(--th-border);
+        border-radius: 3px;
+    }}
+    .gl-thero-verdict-text {{
+        font-family: var(--gl-font-sans);
+        font-size: 0.92rem;
+        color: #E8F7FC;
+        font-weight: 600;
+    }}
+    /* ================================================================= */
+    /* 14. Terminal chip / table / empty / error                          */
+    /* ================================================================= */
+    .gl-tchip {{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 2px 10px;
+        background: var(--tc-bg);
+        border: 1px solid var(--tc-border);
+        border-radius: 4px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        color: var(--tc-accent);
+        font-weight: 600;
+    }}
+    .gl-tchip-val {{
+        color: #E8F7FC;
+        font-weight: 700;
+        padding-left: 4px;
+        border-left: 1px solid var(--tc-border);
+        margin-left: 4px;
+    }}
+    .gl-tterm-caption {{
+        background: var(--tt-bg);
+        border: 1px solid var(--tt-border);
+        border-left: 3px solid var(--tt-accent);
+        border-radius: 6px 6px 0 0;
+        padding: 8px 14px;
+        margin: 6px 0 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-family: var(--gl-font-sans);
+        font-size: 0.82rem;
+        color: #B4CCDF;
+    }}
+    .gl-tterm-caption-tag {{
+        font-family: var(--gl-font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        color: var(--tt-accent);
+        padding: 2px 8px;
+        border: 1px solid var(--tt-border);
+        border-radius: 3px;
+        white-space: nowrap;
+    }}
+    .gl-tterm-caption-text {{
+        line-height: 1.7;
+    }}
+    .gl-tterm-wrap {{
+        background: #0A1420;
+        border: 1px solid rgba(103,232,249,0.12);
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        padding: 0;
+        margin: 0 0 18px;
+    }}
+    .gl-tterm-wrap [data-testid="stDataFrame"],
+    .gl-tterm-wrap div[data-testid="stDataFrameResizable"] {{
+        background: transparent !important;
+    }}
+    .gl-tempty {{
+        background:
+            repeating-linear-gradient(0deg,
+                rgba(103,232,249,0.02) 0 1px,
+                transparent 1px 3px),
+            #0A1420;
+        border: 1px dashed rgba(103,232,249,0.26);
+        border-radius: 12px;
+        padding: 28px 24px;
+        text-align: center;
+        margin: 12px 0 20px;
+    }}
+    .gl-tempty-glyph {{
+        font-family: var(--gl-font-mono);
+        font-size: 1.8rem;
+        color: #67E8F9;
+        opacity: 0.75;
+        margin-bottom: 6px;
+    }}
+    .gl-tempty-title {{
+        font-family: var(--gl-font-sans);
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: #E8F7FC;
+    }}
+    .gl-tempty-reason {{
+        margin-top: 6px;
+        font-family: var(--gl-font-sans);
+        font-size: 0.88rem;
+        color: #8397AC;
+        line-height: 1.7;
+    }}
+    .gl-tempty-actions-label {{
+        margin-top: 14px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
+        color: #67E8F9;
+    }}
+    .gl-tempty-actions {{
+        display: inline-flex;
+        flex-direction: column;
+        gap: 4px;
+        list-style: none;
+        padding: 6px 0 0;
+        margin: 0;
+    }}
+    .gl-tempty-item {{
+        font-family: var(--gl-font-sans);
+        font-size: 0.86rem;
+        color: #B4CCDF;
+    }}
+    .gl-tempty-item::before {{
+        content: "› ";
+        color: #67E8F9;
+        opacity: 0.8;
+    }}
+    .gl-terror {{
+        background: var(--te-bg);
+        border: 1px solid var(--te-border);
+        border-left: 3px solid var(--te-accent);
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin: 12px 0 18px;
+        color: var(--te-text);
+    }}
+    .gl-terror-head {{
+        display: flex; align-items: center; gap: 10px;
+        font-family: var(--gl-font-sans);
+        font-weight: 700;
+    }}
+    .gl-terror-glyph {{
+        font-family: var(--gl-font-mono);
+        color: var(--te-accent);
+        font-size: 1.05rem;
+    }}
+    .gl-terror-tag {{
+        font-family: var(--gl-font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.18em;
+        color: var(--te-accent);
+        padding: 2px 8px;
+        border: 1px solid var(--te-border);
+        border-radius: 3px;
+    }}
+    .gl-terror-title {{ color: var(--te-text); }}
+    .gl-terror-reason {{
+        margin-top: 6px;
+        font-size: 0.88rem;
+        color: var(--te-text);
+        opacity: 0.95;
+        line-height: 1.7;
+    }}
+    .gl-terror-schema,
+    .gl-terror-fallback {{
+        margin-top: 8px;
+        font-family: var(--gl-font-mono);
+        font-size: 0.80rem;
+        color: var(--te-text);
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+    }}
+    .gl-terror-schema span:first-child,
+    .gl-terror-fallback span:first-child {{
+        font-size: 0.62rem;
+        letter-spacing: 0.14em;
+        color: var(--te-accent);
+        padding: 2px 7px;
+        border: 1px solid var(--te-border);
+        border-radius: 3px;
+        flex: 0 0 auto;
     }}
 </style>
     """, unsafe_allow_html=True)
@@ -3232,6 +3545,116 @@ def glint_dark_table_style() -> dict:
     }
 
 
+def glint_dark_axes(show_grid: bool = True, x_title: str = "",
+                    y_title: str = "") -> dict:
+    """Canonical dark terminal axis overrides (v8 §15.2).
+
+    Returns a dict containing ``xaxis`` / ``yaxis`` sub-dicts suitable for
+    ``fig.update_layout(**glint_dark_axes())``. Use this when a chart is
+    built from raw ``go.Figure()`` without ``glint_plotly_layout``, so axis
+    typography stays consistent (mono ticks, cyan grid 0.06α, 0.22α lines).
+
+    Example::
+
+        fig = go.Figure()
+        fig.add_trace(go.Bar(...))
+        fig.update_layout(**glint_dark_layout(), **glint_dark_axes())
+    """
+    base_axis = dict(
+        showgrid=show_grid,
+        gridcolor="rgba(103,232,249,0.06)",
+        linecolor="rgba(103,232,249,0.22)",
+        zeroline=False,
+        ticks="outside",
+        ticklen=4,
+        tickcolor="rgba(103,232,249,0.22)",
+        tickfont=dict(family=_GL_FONT_MONO, size=10, color="#8397AC"),
+    )
+    xaxis = dict(base_axis)
+    if x_title:
+        xaxis["title"] = dict(
+            text=x_title,
+            font=dict(family=_GL_FONT_MONO, size=10, color="#5B7186"),
+        )
+    yaxis = dict(base_axis)
+    if y_title:
+        yaxis["title"] = dict(
+            text=y_title,
+            font=dict(family=_GL_FONT_MONO, size=10, color="#5B7186"),
+        )
+    return {"xaxis": xaxis, "yaxis": yaxis}
+
+
+# Terminal tone → Plotly bar accent lookup (v8 §15.2 / §13).
+_GL_DARK_BAR_ACCENTS = {
+    "cyan":    "#67e8f9",
+    "blue":    "#2563eb",
+    "violet":  "#a78bfa",
+    "emerald": "#10b981",
+    "amber":   "#f59e0b",
+    "rose":    "#f43f5e",
+    "slate":   "#475569",
+    "info":    "#67e8f9",   # alias of cyan
+    "ok":      "#10b981",   # alias of emerald
+    "warn":    "#f59e0b",   # alias of amber
+    "danger":  "#f43f5e",   # alias of rose
+}
+
+
+def glint_dark_bar_style(tone: str = "cyan", opacity: float = 0.85,
+                         border: bool = True) -> dict:
+    """Canonical dark terminal ``go.Bar`` marker style (v8 §15.2).
+
+    Returns a ``marker`` dict — pass as ``go.Bar(..., marker=glint_dark_bar_style())``.
+    Pages MUST NOT hardcode their own hex per spec §15.2. For multi-series
+    bars, call once per series with tone ``"cyan"`` / ``"violet"`` / ``"emerald"``.
+
+    ``tone`` accepts any key in ``_GL_DARK_BAR_ACCENTS`` (cyan/blue/violet/
+    emerald/amber/rose/slate plus info/ok/warn/danger aliases).
+    """
+    accent = _GL_DARK_BAR_ACCENTS.get(tone, _GL_DARK_BAR_ACCENTS["cyan"])
+    marker = dict(
+        color=accent,
+        opacity=max(0.0, min(1.0, float(opacity))),
+    )
+    if border:
+        marker["line"] = dict(
+            color="rgba(6,10,18,0.85)",
+            width=0.6,
+        )
+    return marker
+
+
+def glint_dark_hist_style(series: str = "primary",
+                          opacity: float = 0.65) -> dict:
+    """Canonical dark terminal ``go.Histogram`` marker style (v8 §15.2).
+
+    Distinct overlay styles for ``"primary"`` (cyan) vs ``"secondary"``
+    (violet) so two populations can be compared on the same axis without
+    page-level color choices. Use ``opacity≈0.55`` when overlaying.
+
+    Example::
+
+        fig.add_trace(go.Histogram(x=live,     marker=glint_dark_hist_style("primary")))
+        fig.add_trace(go.Histogram(x=baseline, marker=glint_dark_hist_style("secondary")))
+    """
+    series = (series or "primary").lower()
+    if series in ("secondary", "violet", "baseline"):
+        color = "#a78bfa"
+        line_color = "rgba(167,139,250,0.55)"
+    elif series in ("tertiary", "emerald", "ok"):
+        color = "#10b981"
+        line_color = "rgba(16,185,129,0.55)"
+    else:  # primary / cyan / live
+        color = "#67e8f9"
+        line_color = "rgba(103,232,249,0.55)"
+    return dict(
+        color=color,
+        opacity=max(0.0, min(1.0, float(opacity))),
+        line=dict(color=line_color, width=0.8),
+    )
+
+
 # --- v7 §18.2 Schema-safe helpers ----------------------------------------
 def safe_col(df, primary, fallbacks=(), default=None):
     """Return a Series from ``df`` using a schema-safe lookup chain.
@@ -3278,6 +3701,194 @@ def safe_html(value) -> str:
     if value is None:
         return ""
     return _html.escape(str(value), quote=True)
+
+
+def safe_get(obj, key, *fallbacks, default=None):
+    """Schema-safe dict / object attribute lookup with fallback chain.
+
+    Mirrors :func:`safe_col` but for plain dicts / objects instead of
+    DataFrames. Tries ``key`` first, then each name in ``fallbacks`` in
+    order. Returns ``default`` if none are present. Handles both
+    ``obj[key]`` (mappings) and ``getattr(obj, key)`` (objects) styles.
+
+    Example::
+
+        name = safe_get(stock, "short_name", "company_name", "name",
+                        default=str(stock.get("company_id", "")))
+    """
+    if obj is None:
+        return default
+    keys = (key,) + tuple(fallbacks)
+    for k in keys:
+        # Dict-style
+        try:
+            if k in obj:
+                v = obj[k]
+                if v is not None:
+                    return v
+        except TypeError:
+            pass
+        # Attribute-style
+        v = getattr(obj, k, None)
+        if v is not None:
+            return v
+    return default
+
+
+def schema_adapter(df, rename_map: dict | None = None,
+                   required: tuple = (), defaults: dict | None = None):
+    """Normalize a DataFrame to an expected schema.
+
+    * ``rename_map`` — ``{old_name: new_name}`` applied via ``DataFrame.rename``.
+    * ``required`` — iterable of column names that MUST exist after rename.
+      Missing columns are added filled with ``defaults.get(name)`` if
+      ``defaults`` provides a value, otherwise NaN.
+    * Returns a *copy* (never mutates caller's df).
+
+    Use at page entry to insulate render code from upstream column drift.
+    """
+    if df is None:
+        return df
+    import pandas as _pd  # local import to avoid loading unless needed
+    out = df.copy()
+    if rename_map:
+        out = out.rename(columns=rename_map)
+    defaults = defaults or {}
+    for col in (required or ()):
+        if col not in out.columns:
+            out[col] = defaults.get(col, _pd.NA)
+    return out
+
+
+def fallback_display_name(row, primary: str = "short_name",
+                          fallbacks=("company_name", "name"),
+                          default: str = "") -> str:
+    """Return the best display name from a pandas row / dict.
+
+    Always returns a string (never raises). Tries ``primary`` then each
+    fallback; if none resolve to a non-empty value, returns ``default``.
+
+    Typical use inside a row-apply loop::
+
+        df["股票"] = df.apply(fallback_display_name, axis=1)
+    """
+    if row is None:
+        return default
+    if isinstance(fallbacks, str):
+        fallbacks = (fallbacks,)
+    for key in (primary,) + tuple(fallbacks or ()):
+        try:
+            val = row[key]
+        except Exception:
+            val = getattr(row, key, None)
+        if val is None:
+            continue
+        s = str(val).strip()
+        if s and s.lower() not in ("nan", "none", "<na>"):
+            return s
+    return str(default) if default is not None else ""
+
+
+# --- v8 §19.4 Centralized naming / copy maps -----------------------------
+# Single source of truth so page-level code never hardcodes labels. Pages
+# read ``NAV_LABELS[key]`` / ``PAGE_TITLES[key]`` etc. rather than literal
+# strings so a rename cascades automatically.
+
+NAV_LABELS = {
+    "home":       "情境主控",
+    "interpret":  "投資觀察",
+    "data":       "資料基礎",
+    "icir":       "訊號穩定",
+    "text":       "文本情緒",
+    "model":      "模型績效",
+    "feature":    "因子工程",
+    "backtest":   "策略回測",
+    "phase6":     "驗證壓測",
+    "governance": "模型治理",
+    "signal":     "訊號監控",
+    "extended":   "延伸分析",
+    "manual":     "使用手冊",
+}
+
+PAGE_EYEBROWS = {
+    "home":       "SITUATION COMMAND",
+    "interpret":  "INVESTMENT RESEARCH",
+    "data":       "DATA FOUNDATION",
+    "icir":       "SIGNAL STABILITY LAB",
+    "text":       "TEXT SENTIMENT",
+    "model":      "MODEL PERFORMANCE",
+    "feature":    "FACTOR ENGINEERING",
+    "backtest":   "STRATEGY LAB",
+    "phase6":     "VALIDATION LAB",
+    "governance": "MODEL GOVERNANCE",
+    "signal":     "SIGNAL MONITOR",
+    "extended":   "EXTENDED ANALYTICS",
+    "manual":     "USER MANUAL",
+}
+
+PAGE_TITLES = {
+    "home":       "情境主控",
+    "interpret":  "投資觀察",
+    "data":       "資料基礎",
+    "icir":       "訊號穩定",
+    "text":       "文本情緒",
+    "model":      "模型績效",
+    "feature":    "因子工程",
+    "backtest":   "策略回測",
+    "phase6":     "驗證壓力測試",   # full descriptive for hero
+    "governance": "模型治理",
+    "signal":     "訊號監控",
+    "extended":   "延伸分析",
+    "manual":     "使用手冊",
+}
+
+PAGE_BRIEFINGS = {
+    "home":       "把最新研究快照用三個主要訊號說清楚：方向、信心、風險。",
+    "interpret":  "把機器推薦的候選股，換成投資人能讀懂的結論與風險。",
+    "data":       "看資料從哪來、覆蓋多廣、Walk-Forward 怎麼切、品質門檻過了幾關。",
+    "icir":       "三個角度驗證訊號穩不穩：橫截面、時序、衰減。",
+    "text":       "新聞／公告／法說情緒如何影響訊號方向與強度。",
+    "model":      "九引擎績效、AUC 分佈、特徵重要性與風格一覽。",
+    "feature":    "1,623 → 91 因子漏斗，九支柱結構與篩選三階段。",
+    "backtest":   "九引擎策略回測：累積報酬、Sharpe、MDD、成本敏感度。",
+    "phase6":     "用三種最嚴格的方式檢查模型是否真的有用：LOPO 支柱拔測、閾值敏感度掃描、2454 實證個案。",
+    "governance": "九道品質門、模型卡、DSR、漂移監控，讓每次上線可被審查。",
+    "signal":     "訓練 vs 生產的 PSI / KS 漂移、特徵分佈變化與告警。",
+    "extended":   "成本敏感度、跨地平線穩定性、支柱貢獻、龍頭個股實測。",
+    "manual":     "系統導讀、專業術語、九支柱架構、常見 Q&A。",
+}
+
+TOOLTIP_MAP = {
+    "AUC":       "ROC 曲線下面積，0.5 為隨機、1.0 為完美。金融訊號常見 0.52–0.60。",
+    "ICIR":      "資訊係數 / 標準差 — 訊號穩定度指標，越高表示預測力越一致。",
+    "IC":        "Information Coefficient — 預測值與實際報酬的 rank 相關係數。",
+    "DSR":       "Deflated Sharpe Ratio — 多重檢定修正後的 Sharpe，過關表示績效非偶然。",
+    "Sharpe":    "年化超額報酬 / 年化波動。越高代表單位風險換到的報酬越多。",
+    "MDD":       "Max Drawdown — 峰值回撤，衡量策略最壞情況下能虧多少。",
+    "PSI":       "Population Stability Index — 分佈漂移量測，>0.25 代表顯著漂移。",
+    "LOPO":      "Leave-One-Pillar-Out — 輪流拔掉一個支柱重訓，量化該支柱邊際貢獻。",
+    "Hit Rate":  "命中率 — 模型出手時預測方向正確的比例。",
+    "Call Rate": "出手率 — 模型在全部樣本中產生建議的比例。",
+    "Gates":     "品質門 — 上線前的強制檢查（資料、訓練、穩定、治理）。",
+    "Walk-Forward":"Purged Walk-Forward CV — 考慮時間序列洩漏的分段驗證法。",
+    "Pillar":    "支柱 — 九類因子面向：趨勢 / 基本面 / 估值 / 事件 / 風險 / 籌碼 / 產業 / 文本 / 情緒。",
+}
+
+ERROR_COPY_MAP = {
+    "report_missing":   ("報告檔缺件", "找不到最新的研究報告 JSON，請先執行對應的 Phase 指令。"),
+    "schema_drift":     ("欄位結構不符", "上游資料的欄位名稱與本頁預期不同，請檢查 schema 對應表。"),
+    "feature_store_offline":("因子倉離線", "雲端部署未同步 feature_store，以降級模式顯示總覽統計。"),
+    "governance_offline":("治理報告不可用", "尚未產生 governance JSON；請重新執行模型治理流程。"),
+    "phase6_missing":   ("壓測報告缺件", "LOPO / Threshold / Case 三份壓測 JSON 缺一不可，請執行 run_phase6。"),
+}
+
+EMPTY_COPY_MAP = {
+    "no_recommendations":  ("目前無建議", "此橫線 / 情境組合沒有符合門檻的候選股，改試其他情境。"),
+    "no_news":             ("尚無新聞", "此期間內無可用公告 / 法說資料，情緒訊號暫不顯示。"),
+    "no_industry_peer":    ("找不到同業", "此類股樣本不足，無法進行產業相對比較。"),
+    "no_gate_history":     ("尚無歷史品質門", "系統首次執行或 gate 歷史尚未累積，請於下次 Phase 2 後回訪。"),
+    "no_drift":            ("近期無漂移", "PSI/KS 均低於告警門檻，訊號穩定。"),
+}
 
 
 # --- Unified colorscales for heatmaps -------------------------------------
@@ -3572,6 +4183,226 @@ def render_decision_card(verdict: str, reason: str = "", tone: str = "info",
         f'</div>'
     )
     _st.markdown(html, unsafe_allow_html=True)
+
+
+# --- v8 §12 / §19.5 Terminal hero ---------------------------------------
+def render_terminal_hero(eyebrow: str, title: str, briefing: str = "",
+                         chips: list | None = None, verdict: str = "",
+                         tone: str = "cyan") -> None:
+    """Render the dark terminal page hero (v8 §12).
+
+    Structure: eyebrow → title → briefing → chips → optional verdict strip.
+    Replaces the legacy light-mode ``render_page_heading`` on pages that
+    have been upgraded to full dark. Keeps the signal-first discipline
+    (3-second comprehension) mandated by §12.1.
+    """
+    import streamlit as _st
+    tone_map = {
+        "cyan":    ("#67E8F9", "rgba(103,232,249,0.32)"),
+        "blue":    ("#60A5FA", "rgba(96,165,250,0.32)"),
+        "violet":  ("#A78BFA", "rgba(167,139,250,0.32)"),
+        "emerald": ("#34D399", "rgba(52,211,153,0.32)"),
+        "amber":   ("#FBBF24", "rgba(251,191,36,0.32)"),
+        "rose":    ("#FB7185", "rgba(251,113,133,0.32)"),
+    }
+    accent, border = tone_map.get(tone, tone_map["cyan"])
+    safe_eyebrow = safe_html(eyebrow)
+    safe_title = safe_html(title)
+    safe_briefing = safe_html(briefing) if briefing else ""
+
+    chip_html = ""
+    if chips:
+        parts = []
+        for c in chips:
+            if isinstance(c, tuple):
+                if len(c) == 2:
+                    label, c_tone = c
+                    val = ""
+                elif len(c) >= 3:
+                    label, val, c_tone = c[0], c[1], c[2]
+                else:
+                    label, val, c_tone = c[0], "", "info"
+            elif isinstance(c, dict):
+                label = c.get("label", "")
+                val = c.get("value", "")
+                c_tone = c.get("tone", "info")
+            else:
+                label, val, c_tone = str(c), "", "info"
+            c_t = _GL_TERMINAL_TONES.get(c_tone, _GL_TERMINAL_TONES["info"])
+            chip_inner = safe_html(label)
+            if val:
+                chip_inner += f' <span class="gl-thero-chipval">{safe_html(val)}</span>'
+            parts.append(
+                f'<span class="gl-thero-chip" '
+                f'style="--ch-accent:{c_t["accent"]};--ch-border:{c_t["border"]};'
+                f'--ch-bg:{c_t["bg"]};">{chip_inner}</span>'
+            )
+        chip_html = f'<div class="gl-thero-chips">{"".join(parts)}</div>'
+
+    verdict_html = ""
+    if verdict:
+        verdict_html = (
+            f'<div class="gl-thero-verdict">'
+            f'<span class="gl-thero-verdict-tag">VERDICT</span>'
+            f'<span class="gl-thero-verdict-text">{safe_html(verdict)}</span>'
+            f'</div>'
+        )
+
+    briefing_html = (
+        f'<div class="gl-thero-briefing">{safe_briefing}</div>' if safe_briefing else ""
+    )
+
+    html = (
+        f'<div class="gl-thero gl-thero-{tone}" '
+        f'style="--th-accent:{accent};--th-border:{border};">'
+        f'<div class="gl-thero-topline"></div>'
+        f'<div class="gl-thero-eyebrow">{safe_eyebrow}</div>'
+        f'<div class="gl-thero-title">{safe_title}</div>'
+        f'{briefing_html}'
+        f'{chip_html}'
+        f'{verdict_html}'
+        f'</div>'
+    )
+    _st.markdown(html, unsafe_allow_html=True)
+
+
+def render_terminal_chip(label: str, value: str = "", tone: str = "info",
+                         as_html: bool = False):
+    """Render a single terminal chip. Returns str when ``as_html=True``.
+
+    Chips are the atomic status / metric marker of the terminal UI —
+    useful in breadcrumb rows, inline annotations, or anywhere a tiny
+    status token is needed.
+    """
+    import streamlit as _st
+    t = _GL_TERMINAL_TONES.get(tone, _GL_TERMINAL_TONES["info"])
+    inner = safe_html(label)
+    if value:
+        inner += f' <span class="gl-tchip-val">{safe_html(value)}</span>'
+    html = (
+        f'<span class="gl-tchip gl-tchip-{tone}" '
+        f'style="--tc-accent:{t["accent"]};--tc-border:{t["border"]};'
+        f'--tc-bg:{t["bg"]};">{inner}</span>'
+    )
+    if as_html:
+        return html
+    _st.markdown(html, unsafe_allow_html=True)
+    return None
+
+
+def render_terminal_table(df, how_to_read: str = "",
+                          column_config: dict | None = None,
+                          height: int | None = None,
+                          caption_tone: str = "info") -> None:
+    """Render a DataFrame wrapped in terminal-style caption + container.
+
+    * ``how_to_read`` — 1–2 line guide shown *above* the table so readers
+      know which columns to scan first.
+    * ``column_config`` — passes through to ``st.dataframe(column_config=)``
+    * ``height`` — px override for long tables.
+
+    The dataframe itself is styled dark via global CSS (``.gl-tterm-table``).
+    """
+    import streamlit as _st
+    if df is None:
+        return
+    if how_to_read:
+        t = _GL_TERMINAL_TONES.get(caption_tone, _GL_TERMINAL_TONES["info"])
+        _st.markdown(
+            f'<div class="gl-tterm-caption" '
+            f'style="--tt-accent:{t["accent"]};--tt-border:{t["border"]};'
+            f'--tt-bg:{t["bg"]};">'
+            f'<span class="gl-tterm-caption-tag">HOW TO READ</span>'
+            f'<span class="gl-tterm-caption-text">{safe_html(how_to_read)}</span>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+    _st.markdown('<div class="gl-tterm-wrap">', unsafe_allow_html=True)
+    kwargs = {"use_container_width": True}
+    if column_config:
+        kwargs["column_config"] = column_config
+    if height:
+        kwargs["height"] = height
+    _st.dataframe(df, **kwargs)
+    _st.markdown('</div>', unsafe_allow_html=True)
+
+
+def render_terminal_empty_state(title: str, reason: str = "",
+                                available_actions: list | None = None,
+                                icon: str = "◇") -> None:
+    """Render a dark terminal empty-state panel (v8 §18.3).
+
+    Answers the three mandatory questions: why empty, is it normal, what
+    can I still look at. ``available_actions`` is a list of short strings
+    shown as bullet-style items.
+    """
+    import streamlit as _st
+    safe_title = safe_html(title)
+    safe_reason = safe_html(reason) if reason else ""
+    actions_html = ""
+    if available_actions:
+        items = "".join(
+            f'<li class="gl-tempty-item">{safe_html(a)}</li>'
+            for a in available_actions
+        )
+        actions_html = (
+            f'<div class="gl-tempty-actions-label">仍可查看</div>'
+            f'<ul class="gl-tempty-actions">{items}</ul>'
+        )
+    reason_html = (
+        f'<div class="gl-tempty-reason">{safe_reason}</div>' if safe_reason else ""
+    )
+    html = (
+        f'<div class="gl-tempty">'
+        f'<div class="gl-tempty-glyph">{safe_html(icon)}</div>'
+        f'<div class="gl-tempty-title">{safe_title}</div>'
+        f'{reason_html}'
+        f'{actions_html}'
+        f'</div>'
+    )
+    _st.markdown(html, unsafe_allow_html=True)
+
+
+def render_terminal_error_state(title: str, reason: str = "",
+                                schema_hint: str = "",
+                                fallback_note: str = "") -> None:
+    """Render a dark terminal error panel (v8 §18.4).
+
+    Answers: which module failed, what's still usable, what paused, and
+    (if schema) which field is missing. ``schema_hint`` should be a short
+    phrase like ``"缺欄位 short_name / company_name"``.
+    """
+    import streamlit as _st
+    t = _GL_TERMINAL_TONES["danger"]
+    safe_title = safe_html(title)
+    safe_reason = safe_html(reason) if reason else ""
+    safe_schema = safe_html(schema_hint) if schema_hint else ""
+    safe_fallback = safe_html(fallback_note) if fallback_note else ""
+    reason_html = (
+        f'<div class="gl-terror-reason">{safe_reason}</div>' if safe_reason else ""
+    )
+    schema_html = (
+        f'<div class="gl-terror-schema"><span>schema</span>{safe_schema}</div>'
+        if safe_schema else ""
+    )
+    fallback_html = (
+        f'<div class="gl-terror-fallback"><span>可用模式</span>{safe_fallback}</div>'
+        if safe_fallback else ""
+    )
+    html = (
+        f'<div class="gl-terror" '
+        f'style="--te-accent:{t["accent"]};--te-border:{t["border"]};'
+        f'--te-bg:{t["bg"]};--te-text:{t["text"]};">'
+        f'<div class="gl-terror-head">'
+        f'<span class="gl-terror-glyph">!</span>'
+        f'<span class="gl-terror-tag">ERROR</span>'
+        f'<span class="gl-terror-title">{safe_title}</span>'
+        f'</div>'
+        f'{reason_html}{schema_html}{fallback_html}'
+        f'</div>'
+    )
+    _st.markdown(html, unsafe_allow_html=True)
+
 
 # 9-pillar palette aligned with the .gl-pillar badges
 PILLAR_COLORS = {
@@ -3881,16 +4712,19 @@ def load_companies():
 # Works identically with or without sidebar (embed mode safe)
 # ============================================================================
 def render_utility_bar(info: dict | None = None):
-    """Render the terminal-style utility bar above the primary nav.
+    """Render the terminal-style utility bar above the primary nav (v8 §8.3).
 
-    v7 §10 — system-level metadata + command-palette search placeholder.
-    Metadata segments on the left, a compact "search" indicator on the right
-    (visual only — it cues the user to the in-page ticker input rather than
-    implementing global search here).
+    Three-zone grid:
+      LEFT   — LIVE/SNAPSHOT status dot + Dataset window (system state)
+      CENTER — command-palette placeholder "Search pages, metrics, tickers"
+      RIGHT  — up to 3 key runtime chips: Model · Gates · DSR
+
+    "Verified" timestamp is tucked into the LEFT zone after the Dataset chip
+    so the CENTER search stays visually dominant (spec §8.3 "Search 居中").
 
     Args:
         info: optional overrides. Keys: status, dataset, model, dsr,
-              gates_passed, gates_total, last_verified, snapshot, search_hint.
+              gates_passed, gates_total, last_verified, search_hint.
     """
     info = info or {}
     # Sensible defaults — the dashboard truth-of-source is the quality-gates
@@ -3902,23 +4736,21 @@ def render_utility_bar(info: dict | None = None):
     gates_passed = safe_html(info.get("gates_passed", 9))
     gates_total = safe_html(info.get("gates_total", 9))
     last_verified = safe_html(info.get("last_verified", "2026-04-20 14:24"))
-    search_hint = safe_html(info.get("search_hint", "輸入股票代碼 / 頁面關鍵字"))
+    search_hint = safe_html(info.get("search_hint", "Search pages, metrics, tickers"))
     snapshot_tone = "live" if str(info.get("status", "SNAPSHOT")).upper() == "LIVE" else "snapshot"
 
+    # --- LEFT zone: live dot + dataset window + last verified (§8.3 LEFT) ---
     left_parts = [
         f'<span class="gl-util-dot gl-util-{snapshot_tone}"></span>'
         f'<span class="gl-util-label">{status}</span>',
         f'<span class="gl-util-k">Dataset</span><span class="gl-util-v">{dataset}</span>',
-        f'<span class="gl-util-k">Model</span><span class="gl-util-v gl-util-mono">{model}</span>',
-        f'<span class="gl-util-k">DSR</span><span class="gl-util-v gl-util-mono">{dsr}</span>'
-        f'<span class="gl-util-chip ok">PASS</span>',
-        f'<span class="gl-util-k">Gates</span>'
-        f'<span class="gl-util-v gl-util-mono">{gates_passed}/{gates_total}</span>',
         f'<span class="gl-util-k">Verified</span><span class="gl-util-v">{last_verified}</span>',
     ]
     left_html = ''.join(f'<span class="gl-util-seg">{p}</span>' for p in left_parts)
-    search_html = (
-        '<span class="gl-util-search">'
+
+    # --- CENTER zone: command-palette search placeholder (§8.3 CENTER) ----
+    center_html = (
+        '<span class="gl-util-search" role="search" aria-label="search placeholder">'
         '<span class="gl-util-search-icon" aria-hidden="true">'
         '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
         'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'
@@ -3930,10 +4762,31 @@ def render_utility_bar(info: dict | None = None):
         '<span class="gl-util-kbd">/</span>'
         '</span>'
     )
+
+    # --- RIGHT zone: max 3 runtime chips — Model · Gates · DSR (§8.3 RIGHT) ---
+    # PASS / FAIL gate chip tone follows gates_passed vs gates_total.
+    try:
+        gates_ok = int(info.get("gates_passed", 9)) >= int(info.get("gates_total", 9))
+    except Exception:
+        gates_ok = True
+    gate_chip_tone = "ok" if gates_ok else "warn"
+    gate_chip_label = "PASS" if gates_ok else "HOLD"
+    right_parts = [
+        f'<span class="gl-util-k">Model</span>'
+        f'<span class="gl-util-v gl-util-mono">{model}</span>',
+        f'<span class="gl-util-k">Gates</span>'
+        f'<span class="gl-util-v gl-util-mono">{gates_passed}/{gates_total}</span>'
+        f'<span class="gl-util-chip {gate_chip_tone}">{gate_chip_label}</span>',
+        f'<span class="gl-util-k">DSR</span>'
+        f'<span class="gl-util-v gl-util-mono">{dsr}</span>',
+    ]
+    right_html = ''.join(f'<span class="gl-util-seg">{p}</span>' for p in right_parts)
+
     st.markdown(
         '<div class="gl-utilbar">'
         f'<span class="gl-util-left">{left_html}</span>'
-        f'<span class="gl-util-right">{search_html}</span>'
+        f'<span class="gl-util-center">{center_html}</span>'
+        f'<span class="gl-util-right">{right_html}</span>'
         '</div>',
         unsafe_allow_html=True,
     )
