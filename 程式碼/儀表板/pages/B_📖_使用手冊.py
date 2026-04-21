@@ -39,24 +39,43 @@ _qg_suffix = "全通過" if _qg_all else f"有 {len(_qg['failed_names'])} 項待
 # ============================================================================
 st.markdown("""
 <style>
+/* =====================================================================
+   v9 §6 · Manual page redressed as dark terminal onboarding (no longer
+   a bright onboarding-card article). All mn-* classes now speak the
+   same dark panel / cyan accent / mono eyebrow language as the rest
+   of the shell.
+   ===================================================================== */
 .mn-hero-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f0fafe 50%, #eef2ff 100%);
-    border: 1px solid rgba(6,182,212,0.18);
-    border-left: 4px solid #06b6d4;
-    border-radius: 16px;
-    padding: 26px 30px;
-    margin: 14px 0 24px 0;
-    box-shadow: 0 4px 18px rgba(15,23,42,0.04);
+    background: linear-gradient(180deg, #0F1725 0%, #0B1320 100%);
+    border: 1px solid rgba(103,232,249,0.22);
+    border-left: 3px solid #67e8f9;
+    border-radius: 14px;
+    padding: 22px 26px;
+    margin: 14px 0 22px 0;
+    box-shadow: 0 8px 26px rgba(2,6,23,0.55), inset 0 1px 0 rgba(103,232,249,0.12);
 }
-.mn-hero-card h2 { margin: 0 0 12px 0 !important; padding-left: 0 !important; color: #0f172a !important; }
+.mn-hero-card h2 {
+    margin: 0 0 10px 0 !important;
+    padding-left: 0 !important;
+    color: #E8F7FC !important;
+    font-size: 1.15rem !important;
+    letter-spacing: 0.01em;
+}
 .mn-hero-card h2::before { display: none !important; }
-.mn-hero-card p { color: #334155 !important; font-size: 1.02rem !important; line-height: 1.85 !important; margin: 0 0 8px 0 !important; }
+.mn-hero-card h2 span { color: #67e8f9 !important; font-weight: 700; }
+.mn-hero-card p {
+    color: #B4CCDF !important;
+    font-size: 1rem !important;
+    line-height: 1.82 !important;
+    margin: 0 0 6px 0 !important;
+}
+.mn-hero-card strong { color: #E8F7FC; }
 
 .mn-tile {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 18px 20px 16px 20px;
+    background: linear-gradient(180deg, #111B2B 0%, #0D1624 100%);
+    border: 1px solid rgba(103,232,249,0.18);
+    border-radius: 12px;
+    padding: 16px 18px 14px 18px;
     height: 100%;
     transition: all .22s ease;
     position: relative;
@@ -66,20 +85,20 @@ st.markdown("""
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #06b6d4, #2563eb);
+    height: 2px;
+    background: linear-gradient(90deg, rgba(103,232,249,0.9), rgba(37,99,235,0.55));
     opacity: 0.85;
 }
 .mn-tile:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(6,182,212,0.12);
-    border-color: rgba(6,182,212,0.45);
+    border-color: rgba(103,232,249,0.48);
+    box-shadow: 0 10px 24px rgba(2,6,23,0.55), 0 0 0 1px rgba(103,232,249,0.22);
 }
 .mn-tile-head {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 .mn-tile-icon {
     width: 34px; height: 34px;
@@ -87,41 +106,43 @@ st.markdown("""
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    font-size: 1.05rem;
-    background: linear-gradient(135deg, rgba(6,182,212,0.14), rgba(37,99,235,0.1));
-    color: #2563eb;
-    border: 1px solid rgba(6,182,212,0.28);
+    color: #67e8f9;
+    background: rgba(103,232,249,0.08);
+    border: 1px solid rgba(103,232,249,0.32);
+    box-shadow: inset 0 0 0 1px rgba(103,232,249,0.06);
 }
+.mn-tile-icon svg { width: 18px; height: 18px; }
 .mn-tile-title {
     font-family: 'Inter', 'Microsoft JhengHei', sans-serif;
-    font-size: 1.02rem;
+    font-size: 1rem;
     font-weight: 700;
-    color: #0f172a;
-    letter-spacing: -0.005em;
+    color: #E8F7FC;
+    letter-spacing: 0;
 }
 .mn-tile-eyebrow {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.62rem;
-    color: #06b6d4;
-    letter-spacing: 0.16em;
+    font-size: 0.60rem;
+    color: #67e8f9;
+    letter-spacing: 0.20em;
     font-weight: 700;
     text-transform: uppercase;
     margin-bottom: 2px;
+    opacity: 0.88;
 }
 .mn-tile-body {
     font-size: 0.92rem;
-    color: #475569;
+    color: #B4CCDF;
     line-height: 1.72;
 }
-.mn-tile-body strong { color: #0f172a; }
+.mn-tile-body strong { color: #E8F7FC; }
 .mn-tile-example {
-    margin-top: 12px;
-    padding: 10px 12px;
-    background: #f8fafc;
-    border-left: 2px solid #06b6d4;
+    margin-top: 10px;
+    padding: 9px 11px;
+    background: rgba(6,10,18,0.55);
+    border-left: 2px solid #67e8f9;
     border-radius: 6px;
     font-size: 0.84rem;
-    color: #334155;
+    color: #8397ac;
     line-height: 1.6;
 }
 
@@ -130,101 +151,113 @@ st.markdown("""
     border-collapse: collapse;
     border-radius: 10px;
     overflow: hidden;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(15,23,42,.04);
+    border: 1px solid rgba(103,232,249,0.18);
+    box-shadow: 0 4px 14px rgba(2,6,23,0.35);
 }
 .mn-jargon th {
     text-align: left;
-    padding: 12px 16px;
-    background: #f1f5f9;
-    color: #0f172a;
-    font-size: 0.78rem;
+    padding: 11px 16px;
+    background: linear-gradient(180deg, #0F1725 0%, #0B1320 100%);
+    color: #67e8f9;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.74rem;
     font-weight: 700;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid rgba(103,232,249,0.22);
 }
 .mn-jargon td {
-    padding: 12px 16px;
-    border-bottom: 1px solid #f1f5f9;
-    color: #334155;
+    padding: 11px 16px;
+    border-bottom: 1px solid rgba(103,232,249,0.10);
+    color: #B4CCDF;
     font-size: 0.92rem;
     line-height: 1.6;
+    background: rgba(10,20,32,0.55);
 }
 .mn-jargon tr:last-child td { border-bottom: none; }
-.mn-jargon tr:hover td { background: #f8fafc; }
-.mn-jargon .j-term { font-family: 'JetBrains Mono', monospace; color: #2563eb; font-weight: 700; font-size: 0.88rem; white-space: nowrap; }
-.mn-jargon .j-plain { color: #0f172a; font-weight: 600; }
+.mn-jargon tr:hover td { background: rgba(103,232,249,0.06); }
+.mn-jargon .j-term {
+    font-family: 'JetBrains Mono', monospace;
+    color: #67e8f9;
+    font-weight: 700;
+    font-size: 0.86rem;
+    white-space: nowrap;
+}
+.mn-jargon .j-plain { color: #E8F7FC; font-weight: 600; }
 
 .mn-flow {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 14px;
-    margin: 18px 0;
+    margin: 22px 0 14px 0;
 }
 @media (max-width: 900px) { .mn-flow { grid-template-columns: 1fr 1fr; } }
 .mn-flow-step {
-    background: linear-gradient(135deg, #ffffff 0%, #f0fafe 100%);
-    border: 1px solid rgba(6,182,212,0.22);
+    background: linear-gradient(180deg, #111B2B 0%, #0D1624 100%);
+    border: 1px solid rgba(103,232,249,0.22);
     border-radius: 12px;
-    padding: 14px 16px;
+    padding: 16px 14px 12px 14px;
     position: relative;
 }
 .mn-flow-step::before {
     content: attr(data-num);
     position: absolute;
     top: -12px;
-    left: 14px;
+    left: 12px;
     width: 26px; height: 26px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #06b6d4, #2563eb);
-    color: #ffffff;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #0F1725, #0B1320);
+    color: #67e8f9;
     font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    font-size: 0.82rem;
+    font-weight: 800;
+    font-size: 0.78rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 6px rgba(6,182,212,0.35);
+    border: 1px solid rgba(103,232,249,0.45);
+    box-shadow: 0 0 0 1px rgba(103,232,249,0.18), 0 2px 6px rgba(2,6,23,0.45);
 }
 .mn-flow-step-title {
     font-weight: 700;
-    color: #0f172a;
+    color: #E8F7FC;
     font-size: 0.96rem;
     margin: 8px 0 6px 0;
 }
 .mn-flow-step-desc {
     font-size: 0.84rem;
-    color: #475569;
+    color: #B4CCDF;
     line-height: 1.6;
 }
 
 .mn-callout {
-    padding: 14px 18px;
+    padding: 13px 18px;
     border-radius: 12px;
     margin: 14px 0;
     font-size: 0.94rem;
-    line-height: 1.7;
+    line-height: 1.72;
+    background: linear-gradient(180deg, rgba(15,23,37,0.85) 0%, rgba(11,19,32,0.85) 100%);
+    color: #B4CCDF;
 }
+.mn-callout strong { color: #E8F7FC; }
 .mn-callout.ok {
-    background: linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 100%);
-    border: 1px solid rgba(16,185,129,0.25);
+    border: 1px solid rgba(16,185,129,0.30);
     border-left: 3px solid #10b981;
-    color: #064e3b;
+    box-shadow: 0 0 0 1px rgba(16,185,129,0.08) inset;
 }
 .mn-callout.warn {
-    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-    border: 1px solid rgba(245,158,11,0.3);
+    border: 1px solid rgba(245,158,11,0.30);
     border-left: 3px solid #f59e0b;
-    color: #713f12;
+    box-shadow: 0 0 0 1px rgba(245,158,11,0.08) inset;
 }
 .mn-callout.info {
-    background: linear-gradient(135deg, #f0fafe 0%, #eff6ff 100%);
-    border: 1px solid rgba(6,182,212,0.25);
-    border-left: 3px solid #06b6d4;
-    color: #0c4a6e;
+    border: 1px solid rgba(103,232,249,0.28);
+    border-left: 3px solid #67e8f9;
+    box-shadow: 0 0 0 1px rgba(103,232,249,0.08) inset;
 }
-.mn-callout strong { color: #0f172a; }
+/* The mn-hero-card's "可量化、可驗證、可回看" inline span was a hardcoded
+   #2563eb — override to cyan on dark surface. */
+.mn-hero-card h2 span[style*="color:#2563eb"],
+.mn-hero-card h2 span[style*="color: #2563eb"] { color: #67e8f9 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -242,8 +275,11 @@ render_topbar(
 # Hero — what this system does
 # ============================================================================
 render_hero(
+    # v9 §5 · replaced brittle "讀完這一頁，你就懂<FW-SPACE>整個系統" (the full-width
+    # space was pushing the accent fragment into an unstable second-line position).
+    # Title is now one compact line; the accent span only highlights "整個系統".
     eyebrow="MANUAL · 使用手冊",
-    title_html='讀完這一頁，你就懂<span class="gl-hero-accent">　整個系統</span>',
+    title_html='一頁看懂<span class="gl-hero-accent">整個系統</span>',
     subtitle=(
         "這不是一份投資建議 APP —— 它是把<strong>「一檔股票值不值得關注」</strong>這件事，<br>"
         "拆成 9 個面向、用 <strong>94.8 萬筆歷史資料</strong>訓練出來的<strong>研究展示</strong>。<br>"
@@ -282,58 +318,62 @@ st.markdown("""
 # ============================================================================
 st.markdown("## 2. 九大面向：系統用哪些角度看股票")
 st.markdown(
-    '<p style="color:#475569;font-size:0.96rem;line-height:1.7;margin-top:-8px;">'
+    '<p style="color:#B4CCDF;font-size:0.96rem;line-height:1.7;margin-top:-8px;">'
     "判斷一檔股票時，人類會同時想很多事 —— 趨勢好不好？賺不賺錢？貴不貴？有沒有利多新聞？"
-    "系統把這些整理成 <strong>9 個獨立面向</strong>，每個面向背後有一群量化指標。"
-    "這樣做的好處是：你可以<strong>逐一追問</strong>「是誰把機率推高的」。"
+    "系統把這些整理成 <strong style=\"color:#E8F7FC;\">9 個獨立面向</strong>，每個面向背後有一群量化指標。"
+    "這樣做的好處是：你可以<strong style=\"color:#E8F7FC;\">逐一追問</strong>「是誰把機率推高的」。"
     '</p>',
     unsafe_allow_html=True,
 )
 
+# v9 §6 + §11 — 9 pillars now key into GLINT_ICON_SVG (lucide-style single-tone)
+# instead of consumer-grade emojis. Each tuple is (zh, en, icon_name, desc, example).
 PILLARS = [
-    ("趨勢面", "TREND", "📈",
+    ("趨勢面", "TREND", "line-chart",
      "股價過去幾天 / 幾週是上升、下降還是盤整。",
      "像爬山：前 10 天一直往上的股票，接下來一週繼續上走的機率比較高（除非過熱反轉）。"),
-    ("基本面", "FUND", "💼",
+    ("基本面", "FUND", "building-2",
      "公司本身賺不賺錢、負債高不高、營運效率如何。",
      "ROE 15%、負債比 30%，就比 ROE 5%、負債比 80% 的公司體質好 —— 系統會量化這些數字。"),
-    ("估值面", "VAL", "💎",
+    ("估值面", "VAL", "chart-column",
      "現在股價相對公司價值是偏貴還是偏便宜。",
      "同樣賺 10 元的公司，股價 100 元（本益比 10）比 300 元（本益比 30）便宜。"),
-    ("事件面", "EVENT", "📢",
+    ("事件面", "EVENT", "activity",
      "除權息、發布新品、併購、法說會等<strong>重要日期</strong>前後的影響。",
      "法說會隔天，股價平均會反應一次 —— 系統記住「事件前後 5 天」的歷史行為。"),
-    ("風險面", "RISK", "🎯",
+    ("風險面", "RISK", "shield-check",
      "股價波動多大、跌起來有多兇、跟大盤連動性如何（系統性風險）。",
      "同樣預期報酬 10%，波動度 5% 的股票比 30% 的好 —— 夏普值高代表「報酬/風險」比優。"),
-    ("籌碼面", "CHIP", "🏦",
+    ("籌碼面", "CHIP", "combine",
      "誰在買、誰在賣 —— 外資、投信、大戶、散戶的持股變化。",
      "外資連 5 天買超 + 投信同步買，通常是機構看好的訊號；反之則要留意。"),
-    ("產業面", "IND", "🏭",
+    ("產業面", "IND", "layers-3",
      "個股在<strong>所屬產業</strong>中的相對表現（超額報酬、排名）。",
      "AI 題材火熱時，即使是半導體最弱的一檔，漲幅可能也贏過金融股最強的一檔。"),
-    ("文字面", "TXT", "📝",
+    ("文字面", "TXT", "text-search",
      "新聞標題、公告摘要裡出現<strong>哪些關鍵字</strong>、頻率多高。",
      "「訂單能見度高」「毛利率創新高」這類字眼出現時，未來 20 天的機率會往上。"),
-    ("情緒面", "SENT", "🔥",
+    ("情緒面", "SENT", "waveform",
      "新聞、社群、公告的<strong>情緒傾向</strong>（正面 / 中立 / 負面）。",
      "短期情緒極熱（+極端正面）反而是<strong>反指標</strong> —— 散戶過熱時常常在高點追進。"),
 ]
 
-# Render 9 pillars as 3×3 grid
+# Render 9 pillars as 3×3 grid — icon_name → render_page_icon SVG string.
 for row_start in (0, 3, 6):
     cols = st.columns(3, gap="medium")
     for i, col in enumerate(cols):
         pn = row_start + i
         if pn >= len(PILLARS):
             break
-        zh, en, icon, desc, example = PILLARS[pn]
+        zh, en, icon_name, desc, example = PILLARS[pn]
+        icon_svg = _utils.render_page_icon(icon_name, size=18, color="currentColor",
+                                           stroke_width=1.8, as_html=True)
         with col:
             st.markdown(f"""
 <div class="mn-tile">
   <div class="mn-tile-eyebrow">{en} · 面向 {pn+1}</div>
   <div class="mn-tile-head">
-    <div class="mn-tile-icon">{icon}</div>
+    <div class="mn-tile-icon">{icon_svg}</div>
     <div class="mn-tile-title">{zh}</div>
   </div>
   <div class="mn-tile-body">{desc}</div>
@@ -415,14 +455,20 @@ st.markdown("""
 # ============================================================================
 # § 5. 品質保證：為什麼這套系統可信
 # ============================================================================
-st.markdown("## 5. 品質保證：為什麼這套系統的結果<em style='color:#2563eb;'>不是亂講</em>")
+st.markdown("## 5. 品質保證：為什麼這套系統的結果<em style='color:#67e8f9;font-style:normal;'>不是亂講</em>")
+
+# v9 §6 + §11 — QG tiles swap emoji icons for canonical lucide SVG icons.
+_qg_icon_svg      = _utils.render_page_icon("shield-check", size=18, stroke_width=1.8)
+_qg_dsr_icon      = _utils.render_page_icon("chart-column", size=18, stroke_width=1.8)
+_qg_walk_icon     = _utils.render_page_icon("activity",     size=18, stroke_width=1.8)
+_qg_modelcard_svg = _utils.render_page_icon("shield-check", size=18, stroke_width=1.8)
 
 qg_col1, qg_col2 = st.columns(2, gap="medium")
 with qg_col1:
     st.markdown(f"""
 <div class="mn-tile">
 <div class="mn-tile-eyebrow">QUALITY GATE · {_qg_pass}/{_qg_total} {'PASS' if _qg_all else 'PARTIAL'}</div>
-<div class="mn-tile-head"><div class="mn-tile-icon">{'✓' if _qg_all else '⚠'}</div><div class="mn-tile-title">{_qg_total} 項自動檢查 · 目前 {_qg_suffix}</div></div>
+<div class="mn-tile-head"><div class="mn-tile-icon">{_qg_icon_svg}</div><div class="mn-tile-title">{_qg_total} 項自動檢查 · 目前 {_qg_suffix}</div></div>
 <div class="mn-tile-body">
   每次資料更新，系統自動跑 {_qg_total} 項檢查：資料完整性、<strong>無未來資訊穿越</strong>、樣本外乾淨、
   因子工程一致、模型可重現、回測合理、風險指標達標、文字日期未錯位、情緒分數分布合理。<br><br>
@@ -431,10 +477,10 @@ with qg_col1:
 </div>
 """, unsafe_allow_html=True)
 with qg_col2:
-    st.markdown("""
+    st.markdown(f"""
 <div class="mn-tile">
 <div class="mn-tile-eyebrow">DSR · 12.12</div>
-<div class="mn-tile-head"><div class="mn-tile-icon">🎯</div><div class="mn-tile-title">膨脹調整後夏普值極高</div></div>
+<div class="mn-tile-head"><div class="mn-tile-icon">{_qg_dsr_icon}</div><div class="mn-tile-title">膨脹調整後夏普值極高</div></div>
 <div class="mn-tile-body">
   學術文獻規定：做回測<strong>嘗試越多次，能偶然得到好結果的機率越高</strong>（過度擬合）。
   DSR 扣除這個偏誤後仍有 12.12，表示這套策略的績效<strong>不是靠運氣湊出來的</strong>。<br><br>
@@ -445,10 +491,10 @@ with qg_col2:
 
 qg_col3, qg_col4 = st.columns(2, gap="medium")
 with qg_col3:
-    st.markdown("""
+    st.markdown(f"""
 <div class="mn-tile">
 <div class="mn-tile-eyebrow">WALK-FORWARD · EMBARGO=20</div>
-<div class="mn-tile-head"><div class="mn-tile-icon">⏱️</div><div class="mn-tile-title">時序交叉驗證，嚴禁偷看未來</div></div>
+<div class="mn-tile-head"><div class="mn-tile-icon">{_qg_walk_icon}</div><div class="mn-tile-title">時序交叉驗證，嚴禁偷看未來</div></div>
 <div class="mn-tile-body">
   模型只能看「今天以前」的資料來預測，<strong>embargo=20</strong> 意思是訓練與測試之間留 20 天空窗，
   避免「訓練集最後一天」跟「測試集第一天」的資訊互相汙染。<br><br>
@@ -457,10 +503,10 @@ with qg_col3:
 </div>
 """, unsafe_allow_html=True)
 with qg_col4:
-    st.markdown("""
+    st.markdown(f"""
 <div class="mn-tile">
 <div class="mn-tile-eyebrow">MODEL CARD · 透明揭露</div>
-<div class="mn-tile-head"><div class="mn-tile-icon">🛡️</div><div class="mn-tile-title">每個模型都有身分證</div></div>
+<div class="mn-tile-head"><div class="mn-tile-icon">{_qg_modelcard_svg}</div><div class="mn-tile-title">每個模型都有身分證</div></div>
 <div class="mn-tile-body">
   像藥品仿單一樣，每個模型公開：<br>
   · 使用資料範圍（2023/03–2025/03）<br>
