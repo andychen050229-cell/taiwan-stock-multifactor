@@ -3979,6 +3979,66 @@ EMPTY_COPY_MAP = {
 }
 
 
+# --- v8 §18.4 · Error / empty from copy-map (one-line site of use) --------
+def render_error_from_copy_map(key: str, exception: Exception | None = None,
+                               schema_hint: str = "",
+                               fallback_note: str = "") -> None:
+    """Render a dark terminal error panel using a key from ``ERROR_COPY_MAP``.
+
+    Lets page code shrink:
+
+        except Exception as e:
+            render_error_from_copy_map("report_missing", exception=e)
+            st.stop()
+
+    If ``exception`` is provided and no explicit ``schema_hint`` is given, the
+    truncated exception message is surfaced as the schema hint so debugging is
+    possible without blocking the user experience.
+    """
+    entry = ERROR_COPY_MAP.get(key)
+    if entry is None:
+        title = "未預期錯誤"
+        reason = "此錯誤尚未在 ERROR_COPY_MAP 中定義，請補上明確文案後重試。"
+    else:
+        title, reason = entry
+    if not schema_hint and exception is not None:
+        msg = str(exception)
+        schema_hint = msg[:220] + ("…" if len(msg) > 220 else "")
+    render_terminal_error_state(
+        title=title,
+        reason=reason,
+        schema_hint=schema_hint,
+        fallback_note=fallback_note,
+    )
+
+
+def render_empty_from_copy_map(key: str, actions: list | None = None,
+                               icon: str = "◇") -> None:
+    """Render a dark terminal empty-state panel from ``EMPTY_COPY_MAP``.
+
+    Pairs with ``render_terminal_empty_state``. Lets pages call::
+
+        if df.empty:
+            render_empty_from_copy_map(
+                "no_recommendations",
+                actions=["切換至 D+5 橫線", "放寬情境門檻"],
+            )
+            st.stop()
+    """
+    entry = EMPTY_COPY_MAP.get(key)
+    if entry is None:
+        title = "查無資料"
+        reason = ""
+    else:
+        title, reason = entry
+    render_terminal_empty_state(
+        title=title,
+        reason=reason,
+        available_actions=actions,
+        icon=icon,
+    )
+
+
 # --- Unified colorscales for heatmaps -------------------------------------
 GLINT_DIVERGING = [
     [0.00, "#9f1239"],   # deep rose

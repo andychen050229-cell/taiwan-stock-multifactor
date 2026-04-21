@@ -41,7 +41,8 @@ try:
     results = report["results"]
     inject_advanced_sidebar(report_name, report, current_page="feature_analysis")
 except Exception as e:
-    st.error(f"無法載入報告：{str(e)}")
+    # v8 §18.4 · dark terminal error panel with schema hint
+    _utils.render_error_from_copy_map("report_missing", exception=e)
     st.stop()
 
 _n_final = len(results.get("feature_selection", {}).get("selected", []))

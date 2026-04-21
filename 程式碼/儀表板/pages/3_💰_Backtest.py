@@ -41,7 +41,8 @@ try:
     benchmark = results.get("benchmark", {})
     inject_advanced_sidebar(report_name, report, current_page="backtest")
 except Exception as e:
-    st.error(f"無法載入報告：{str(e)}")
+    # v8 §18.4 · dark terminal error panel with schema hint
+    _utils.render_error_from_copy_map("report_missing", exception=e)
     st.stop()
 
 # v8 §12 · §20.5 — Dark terminal hero driven by centralised copy maps

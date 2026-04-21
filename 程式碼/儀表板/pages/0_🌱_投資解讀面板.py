@@ -247,7 +247,8 @@ def load_all_data():
                 with open(rec_file, "r", encoding="utf-8") as f:
                     recommendations = json.load(f)
         except Exception as e:
-            st.error(f"載入 dashboard/data/ 時發生錯誤: {e}")
+            # v8 §18.4 · dark terminal error panel with schema hint
+            _utils.render_error_from_copy_map("report_missing", exception=e)
             st.stop()
 
     # Fallback to original paths (local development)
@@ -267,7 +268,8 @@ def load_all_data():
             fs_legacy = base / "outputs" / "feature_store.parquet"
             fs = pd.read_parquet(fs_final if fs_final.exists() else fs_legacy)
         except Exception as e:
-            st.error(f"無法載入資料: {e}")
+            # v8 §18.4 · dark terminal error panel with schema hint
+            _utils.render_error_from_copy_map("schema_drift", exception=e)
             st.stop()
 
     return fs, companies, prices, income, recommendations
