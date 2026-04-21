@@ -2359,29 +2359,85 @@ def inject_custom_css():
     }}
     /* ================================================================= */
     /*  9. Sidebar real action buttons (重整 / 手冊) — compact grid       */
+    /*     v11.5.6 · smaller type + breathing-light tech accent           */
     /* ================================================================= */
+    @keyframes gl-sidebtn-pulse {{
+        0%, 100% {{
+            box-shadow:
+                0 0 0 0 rgba(103,232,249,0.00),
+                inset 0 0 0 1px rgba(103,232,249,0.06);
+            border-color: rgba(255,255,255,0.10);
+        }}
+        50% {{
+            box-shadow:
+                0 0 10px 0 rgba(103,232,249,0.22),
+                inset 0 0 0 1px rgba(103,232,249,0.18);
+            border-color: rgba(103,232,249,0.32);
+        }}
+    }}
+    @keyframes gl-sidebtn-dot-blink {{
+        0%, 100% {{ opacity: 0.35; box-shadow: 0 0 0 0 rgba(103,232,249,0); }}
+        50%      {{ opacity: 1.00; box-shadow: 0 0 6px 1px rgba(103,232,249,0.65); }}
+    }}
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button {{
-        background: rgba(255,255,255,0.03) !important;
-        border: 1px solid rgba(255,255,255,0.08) !important;
-        color: #cce4f1 !important;
-        font-family: var(--gl-font-sans) !important;
-        font-size: 0.74rem !important;
-        font-weight: 600 !important;
-        padding: 6px 10px !important;
-        border-radius: 8px !important;
-        min-height: 30px !important;
-        height: 30px !important;
+        position: relative !important;
+        background: linear-gradient(180deg, rgba(14,23,38,0.88), rgba(8,14,24,0.92)) !important;
+        border: 1px solid rgba(255,255,255,0.10) !important;
+        color: #cfe2ee !important;
+        font-family: var(--gl-font-mono, 'JetBrains Mono', ui-monospace, monospace) !important;
+        font-size: 0.66rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+        padding: 4px 8px !important;
+        border-radius: 7px !important;
+        min-height: 28px !important;
+        height: 28px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: clip !important;
         transition: all .2s ease !important;
-        box-shadow: none !important;
+        animation: gl-sidebtn-pulse 3.2s ease-in-out infinite !important;
+    }}
+    /* breathing status-dot on the left edge */
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button::before {{
+        content: "";
+        position: absolute;
+        left: 7px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #67e8f9;
+        animation: gl-sidebtn-dot-blink 2.4s ease-in-out infinite;
+        pointer-events: none;
+    }}
+    /* tighten the Material icon + label so MANUAL fits in one line */
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button [data-testid="stIconMaterial"],
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button span[class*="material-symbols"] {{
+        font-size: 14px !important;
+        margin-right: 4px !important;
     }}
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button:hover {{
-        background: rgba(6,182,212,0.12) !important;
-        border-color: rgba(6,182,212,0.35) !important;
+        background: linear-gradient(180deg, rgba(6,182,212,0.14), rgba(6,182,212,0.06)) !important;
+        border-color: rgba(103,232,249,0.55) !important;
         color: #e8f7fc !important;
-        transform: translateY(-1px);
+        transform: translateY(-1px) !important;
+        box-shadow:
+            0 0 14px 0 rgba(103,232,249,0.32),
+            inset 0 0 0 1px rgba(103,232,249,0.28) !important;
+        animation: none !important;  /* freeze breath on hover for deliberate feel */
+    }}
+    section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button:hover::before {{
+        background: #a7f3d0;
+        box-shadow: 0 0 8px 1px rgba(167,243,208,0.8);
+        animation: none !important;
+        opacity: 1;
     }}
     section[data-testid="stSidebar"] .gl-sidebtn-row [data-testid="stButton"] > button:active {{
-        transform: translateY(0);
+        transform: translateY(0) !important;
     }}
     /* ================================================================= */
     /* 10. v7 Dark-Terminal tokens (surface layer — panels / banners)    */
@@ -4400,26 +4456,120 @@ section[data-testid="stSidebar"] div[data-baseweb="select"] > div:focus-within {
     border-color: rgba(103,232,249,0.80) !important;
     box-shadow: 0 0 0 3px rgba(103,232,249,0.18) !important;
 }
-/* Value text colour */
+/* Value text colour — v11.5.6: broaden selectors so the closed-state
+   "single-value" <div> (not a span/input/tag) also gets the light palette.
+   Streamlit's baseweb select renders the selected label inside a nested
+   <div> that inherits color from the outer control; force all descendants
+   to light cyan-white so the dark track never reads black-on-black. */
 section[data-testid="stSidebar"] div[data-baseweb="select"] [data-baseweb="tag"],
 section[data-testid="stSidebar"] div[data-baseweb="select"] input,
-section[data-testid="stSidebar"] div[data-baseweb="select"] span {
+section[data-testid="stSidebar"] div[data-baseweb="select"] span,
+section[data-testid="stSidebar"] div[data-baseweb="select"] div,
+section[data-testid="stSidebar"] div[data-baseweb="select"] [class*="singleValue"],
+section[data-testid="stSidebar"] div[data-baseweb="select"] [class*="ValueContainer"] {
     color: #e8f7fc !important;
     font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
     font-size: 0.84rem !important;
     letter-spacing: 0.06em !important;
     font-weight: 700 !important;
 }
+/* Preserve the container's own background/border (overridden above) */
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+    background: rgba(10,20,32,0.78) !important;
+    color: #e8f7fc !important;
+}
+/* Placeholder (when nothing selected) stays dim so the real value pops */
+section[data-testid="stSidebar"] div[data-baseweb="select"] [class*="placeholder"] {
+    color: #8397ac !important;
+    font-weight: 500 !important;
+}
 section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
     color: #67e8f9 !important;
 }
 
 /* =========================================================================
-   v10 §8.3 — Sidebar Slider: terminal range control
-   Track = deep navy, active fill = cyan gradient, thumb = glowing cyan node,
-   value bubble = mono tech chip. Scoped to sidebar so main-canvas sliders
-   (if any) stay on the light theme.
+   v11.5.6 §8.2b — Selectbox POPOVER (dropdown list) dark-readable override
+   The popover renders OUTSIDE the sidebar via React portal, so it doesn't
+   inherit sidebar-scoped rules. Target it globally by baseweb attributes
+   and repaint as a terminal-style dropdown with cyan accent on the
+   highlighted/selected item. Fixes black-on-black unreadable menu.
    ========================================================================= */
+div[data-baseweb="popover"] ul[role="listbox"],
+div[data-baseweb="popover"] [data-baseweb="menu"] ul,
+div[data-baseweb="popover"] [data-baseweb="menu"] {
+    background: linear-gradient(180deg, rgba(12,22,36,0.98), rgba(8,16,28,0.98)) !important;
+    border: 1px solid rgba(103,232,249,0.34) !important;
+    border-radius: 10px !important;
+    box-shadow:
+        0 14px 40px rgba(0,0,0,0.55),
+        0 0 22px rgba(103,232,249,0.18),
+        inset 0 1px 0 rgba(103,232,249,0.16) !important;
+    padding: 4px !important;
+    backdrop-filter: blur(6px) !important;
+}
+div[data-baseweb="popover"] ul[role="listbox"] li,
+div[data-baseweb="popover"] [data-baseweb="menu"] li {
+    background: transparent !important;
+    color: #cfe2ee !important;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', ui-monospace, monospace) !important;
+    font-size: 0.84rem !important;
+    letter-spacing: 0.04em !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    transition: all 0.15s ease !important;
+    position: relative !important;
+}
+div[data-baseweb="popover"] ul[role="listbox"] li > *,
+div[data-baseweb="popover"] [data-baseweb="menu"] li > * {
+    color: #cfe2ee !important;
+}
+/* Hover state — cyan highlight strip */
+div[data-baseweb="popover"] ul[role="listbox"] li:hover,
+div[data-baseweb="popover"] [data-baseweb="menu"] li:hover,
+div[data-baseweb="popover"] ul[role="listbox"] li[aria-selected="true"],
+div[data-baseweb="popover"] [data-baseweb="menu"] li[aria-selected="true"] {
+    background: linear-gradient(90deg, rgba(103,232,249,0.18), rgba(103,232,249,0.04)) !important;
+    color: #e8f7fc !important;
+    box-shadow: inset 2px 0 0 #67e8f9 !important;
+}
+div[data-baseweb="popover"] ul[role="listbox"] li:hover > *,
+div[data-baseweb="popover"] [data-baseweb="menu"] li:hover > *,
+div[data-baseweb="popover"] ul[role="listbox"] li[aria-selected="true"] > *,
+div[data-baseweb="popover"] [data-baseweb="menu"] li[aria-selected="true"] > * {
+    color: #e8f7fc !important;
+}
+
+/* =========================================================================
+   v11.5.6 §8.3 — Sidebar Slider: sci-fi "range dial" (designer elevation)
+   Upgrades v10 baseline with:
+     · animated scan-line on the active fill (moving cyan streak)
+     · breathing pulse ring on the thumb
+     · dual concentric thumb (outer glow ring + inner solid node)
+     · micro tick marks along the track (4px vertical ticks every 10%)
+     · bracket framing on min/max labels
+   Scoped to sidebar so main-canvas sliders stay on the light theme.
+   ========================================================================= */
+@keyframes gl-slider-scan {
+    0%   { background-position: -120% 0; }
+    100% { background-position: 220% 0; }
+}
+@keyframes gl-slider-thumb-pulse {
+    0%, 100% {
+        box-shadow:
+            0 0 0 2px rgba(103,232,249,0.35),
+            0 0 8px rgba(103,232,249,0.40),
+            inset 0 0 0 2px #0a1420;
+    }
+    50% {
+        box-shadow:
+            0 0 0 3px rgba(103,232,249,0.60),
+            0 0 16px rgba(103,232,249,0.80),
+            inset 0 0 0 2px #0a1420;
+    }
+}
+section[data-testid="stSidebar"] div[data-testid="stSlider"] {
+    padding: 4px 2px 2px 2px !important;
+}
 section[data-testid="stSidebar"] div[data-testid="stSlider"] label,
 section[data-testid="stSidebar"] div[data-testid="stSlider"] label p {
     color: #cbe9f2 !important;
@@ -4429,60 +4579,125 @@ section[data-testid="stSidebar"] div[data-testid="stSlider"] label p {
     letter-spacing: 0.18em !important;
     text-transform: uppercase !important;
 }
-/* Track (unfilled portion) */
+/* Slider container — add tick-mark background + faint grid wash */
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] {
+    position: relative !important;
+    padding-top: 6px !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"]::before {
+    content: "";
+    position: absolute;
+    left: 8px; right: 8px;
+    top: 50%;
+    height: 10px;
+    transform: translateY(-50%);
+    background-image:
+        linear-gradient(90deg,
+            rgba(103,232,249,0.26) 0 1px,
+            transparent 1px 10%);
+    background-size: 10% 100%;
+    background-repeat: repeat-x;
+    pointer-events: none;
+    opacity: 0.55;
+    z-index: 0;
+}
+/* Track (unfilled portion) — darker, inset cyan hairline */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] div[role="progressbar"],
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] > div > div:first-child {
-    background: rgba(10,20,32,0.85) !important;
-    box-shadow: inset 0 0 0 1px rgba(103,232,249,0.22) !important;
-    height: 5px !important;
+    background: linear-gradient(180deg, rgba(6,14,24,0.95), rgba(10,20,32,0.92)) !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(103,232,249,0.28),
+        inset 0 1px 3px rgba(0,0,0,0.55) !important;
+    height: 6px !important;
     border-radius: 3px !important;
+    position: relative !important;
+    z-index: 1 !important;
 }
-/* Active fill portion */
+/* Active fill portion — cyan gradient + animated scan streak */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] div[role="slider"] ~ div,
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] > div > div:nth-child(2) {
-    background: linear-gradient(90deg, #2563eb 0%, #67e8f9 100%) !important;
-    box-shadow: 0 0 10px rgba(103,232,249,0.35) !important;
-    height: 5px !important;
+    background:
+        linear-gradient(90deg,
+            transparent 0%,
+            rgba(255,255,255,0.55) 50%,
+            transparent 100%) ,
+        linear-gradient(90deg, #1d4ed8 0%, #2563eb 35%, #22d3ee 75%, #67e8f9 100%) !important;
+    background-size: 40% 100%, 100% 100% !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: -120% 0, 0 0 !important;
+    animation: gl-slider-scan 2.8s linear infinite !important;
+    box-shadow:
+        0 0 10px rgba(103,232,249,0.55),
+        0 0 22px rgba(103,232,249,0.20) !important;
+    height: 6px !important;
     border-radius: 3px !important;
+    position: relative !important;
+    z-index: 2 !important;
 }
-/* Thumb */
+/* Thumb — concentric glowing node with breathing pulse */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[role="slider"] {
-    background: #67e8f9 !important;
+    background:
+        radial-gradient(circle at 50% 50%,
+            #ffffff 0%,
+            #e8f7fc 40%,
+            #67e8f9 75%,
+            #22d3ee 100%) !important;
     border: 2px solid #0a1420 !important;
     box-shadow:
         0 0 0 2px rgba(103,232,249,0.45),
         0 0 14px rgba(103,232,249,0.55) !important;
-    width: 16px !important;
-    height: 16px !important;
+    width: 18px !important;
+    height: 18px !important;
     border-radius: 50% !important;
+    animation: gl-slider-thumb-pulse 2.4s ease-in-out infinite !important;
     transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    position: relative !important;
+    z-index: 3 !important;
 }
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[role="slider"]:hover,
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[role="slider"]:focus {
-    transform: scale(1.15);
+    transform: scale(1.18);
+    animation-play-state: paused !important;
     box-shadow:
-        0 0 0 3px rgba(103,232,249,0.55),
-        0 0 20px rgba(103,232,249,0.70) !important;
+        0 0 0 4px rgba(103,232,249,0.55),
+        0 0 22px rgba(103,232,249,0.85),
+        0 0 40px rgba(103,232,249,0.30) !important;
 }
-/* Value bubble above thumb */
+/* Value bubble above thumb — terminal chip with top bracket */
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-baseweb="slider"] [role="slider"] + div {
-    background: rgba(10,20,32,0.92) !important;
+    background: linear-gradient(180deg, rgba(12,22,36,0.96), rgba(8,16,28,0.96)) !important;
     color: #67e8f9 !important;
     font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
-    font-size: 0.72rem !important;
+    font-size: 0.74rem !important;
     font-weight: 700 !important;
-    border: 1px solid rgba(103,232,249,0.45) !important;
+    border: 1px solid rgba(103,232,249,0.55) !important;
     border-radius: 5px !important;
-    padding: 2px 8px !important;
-    letter-spacing: 0.06em !important;
+    padding: 2px 9px !important;
+    letter-spacing: 0.08em !important;
+    text-shadow: 0 0 6px rgba(103,232,249,0.45) !important;
+    box-shadow:
+        0 0 10px rgba(103,232,249,0.25),
+        inset 0 1px 0 rgba(103,232,249,0.20) !important;
 }
-/* Min/Max end-labels */
+/* Min/Max end-labels — bracket framing */
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-testid="stTickBar"] {
+    padding: 2px 0 !important;
+}
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-testid="stTickBar"],
 section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-testid="stTickBar"] div {
-    color: #8397ac !important;
+    color: #8fb6c8 !important;
     font-family: var(--gl-font-mono, 'JetBrains Mono', monospace) !important;
-    font-size: 0.68rem !important;
-    letter-spacing: 0.08em !important;
+    font-size: 0.66rem !important;
+    letter-spacing: 0.12em !important;
+    font-weight: 600 !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-testid="stTickBar"] div:first-child::before {
+    content: "[ ";
+    color: rgba(103,232,249,0.55);
+}
+section[data-testid="stSidebar"] div[data-testid="stSlider"] div[data-testid="stTickBar"] div:last-child::after {
+    content: " ]";
+    color: rgba(103,232,249,0.55);
 }
 
 /* =========================================================================

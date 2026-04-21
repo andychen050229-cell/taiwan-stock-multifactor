@@ -305,7 +305,18 @@ def get_recommendations(fs, companies, horizon=20, n_top=10, recommendations=Non
             if stocks_list:
                 recs_df = pd.DataFrame(stocks_list[:n_top])
                 recs_df["company_id"] = recs_df["stock_id"].astype(str)
-                recs_df = recs_df.merge(companies, on="company_id", how="left")
+                # v11.5.6 fix — recommendations.json already carries
+                # short_name/company_name/industry; naive merge would
+                # create *_x / *_y suffixed columns and break
+                # stock.get("short_name"). Drop duplicate name columns
+                # from the companies side before merge so the recs rows
+                # keep clean short_name / company_name keys.
+                _companies = companies.copy()
+                _dup = [c for c in ("short_name", "company_name", "industry")
+                        if c in recs_df.columns and c in _companies.columns]
+                if _dup:
+                    _companies = _companies.drop(columns=_dup, errors="ignore")
+                recs_df = recs_df.merge(_companies, on="company_id", how="left")
                 rec_date = pd.to_datetime(date_str) if date_str else None
                 return recs_df, rec_date
 
@@ -864,8 +875,28 @@ try:
 
     for idx, (_, stock) in enumerate(recs.iterrows()):
         cid = str(stock["company_id"])
-        name = stock.get("short_name", cid)
-        full_name = stock.get("company_name", "")
+
+        # v11.5.6 — stock card header left side: prefer the company NAME
+        # (short_name first, then full company_name) so the left reads as
+        # a name and the right as the ticker code. Checks suffixed merge
+        # artefacts (_x / _y) as a safety net. Falls back to cid only
+        # when no name variant is present.
+        def _pick_name(row, *keys):
+            for k in keys:
+                try:
+                    v = row.get(k)
+                except Exception:
+                    v = None
+                if v is None:
+                    continue
+                s = str(v).strip()
+                if s and s.lower() not in ("nan", "none", "<na>"):
+                    return s
+            return ""
+
+        short_name_val = _pick_name(stock, "short_name", "short_name_x", "short_name_y")
+        full_name      = _pick_name(stock, "company_name", "company_name_x", "company_name_y")
+        name = short_name_val or full_name or cid
         price = float(stock.get("closing_price", 0) or 0)
         fwd_ret = float(stock.get(ret_col, 0) or 0)
         label_val = float(stock.get(label_col, 0) or 0)
