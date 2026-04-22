@@ -65,166 +65,148 @@ _utils.render_trust_strip([
 ])
 
 # ============================================================================
-# 白話導讀 — v11.3 dark-glint 全面重繪
+# 白話導讀 — v11.5.13 · 摺疊化（不熟悉壓測邏輯者可展開閱讀）
 # ============================================================================
-st.markdown("""
-<div style="
-    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
-    border: 1px solid rgba(103,232,249,0.22);
-    border-left: 4px solid #67e8f9;
-    border-radius: 14px;
-    padding: 22px 26px;
-    margin: 18px 0 8px 0;
-    box-shadow: inset 0 1px 0 rgba(103,232,249,0.12);
-">
-    <div style="
-        display: inline-block;
-        background: rgba(103,232,249,0.14); color: #67e8f9;
-        border: 1px solid rgba(103,232,249,0.32);
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
-        padding: 3px 10px; border-radius: 4px; margin-bottom: 12px;
-    ">白話導讀 · PLAIN-LANGUAGE GUIDE</div>
-    <div style="font-size: 1.05rem; font-weight: 700; color: #E8F7FC; margin-bottom: 10px;">
-        這一頁在做什麼?一句話:
-        <span style="color: #67e8f9;">檢驗模型是不是真的懂股票,還是只是運氣好。</span>
-    </div>
-    <div style="font-size: 0.95rem; color: #cfe2ee; line-height: 1.85;">
-        想像一個廚師宣稱自己做的菜很好吃,<br>
-        我們要做三件事來驗證他:
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# 三個白話比喻卡片 — v11.3 dark-glint 化
-col_g1, col_g2, col_g3 = st.columns(3, gap="medium")
-
-with col_g1:
+with st.expander(
+    "白話導讀 · PLAIN-LANGUAGE GUIDE — 三道壓測各在問什麼",
+    expanded=False,
+    icon=":material/menu_book:",
+):
+    # ---- Intro paragraph ----------------------------------------------------
     st.markdown("""
     <div style="
         background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
         border: 1px solid rgba(103,232,249,0.22);
-        border-top: 3px solid #67e8f9;
-        border-radius: 12px;
-        padding: 20px;
-        height: 100%;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(103,232,249,0.10);
+        border-left: 4px solid #67e8f9;
+        border-radius: 14px;
+        padding: 18px 22px;
+        margin: 6px 0 14px 0;
+        box-shadow: inset 0 1px 0 rgba(103,232,249,0.12);
     ">
-        <div style="
-            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
-        ">
-            <span style="color:#67e8f9;display:inline-flex;">""" + glint_icon("microscope", 22, "#67e8f9") + """</span>
-            <span style="
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.7rem; font-weight: 700; color: #67e8f9;
-                letter-spacing: 0.08em; text-transform: uppercase;
-            ">§1 LOPO · 把食材一個一個拔掉</span>
+        <div style="font-size: 1.08rem; font-weight: 700; color: #E8F7FC; line-height: 1.55; margin-bottom: 6px;">
+            高 AUC 不等於有用。
         </div>
-        <div style="font-size: 1.0rem; font-weight: 700; color: #E8F7FC; margin-bottom: 8px;">
-            哪個食材最不可或缺?
+        <div style="font-size: 0.98rem; font-weight: 600; color: #67e8f9; line-height: 1.65; margin-bottom: 10px;">
+            用三道獨立壓測，把結構性能力從樣本偶然中剝出來。
         </div>
-        <div style="font-size: 0.88rem; color: #cfe2ee; line-height: 1.7;">
-            就像大廚的招牌菜,<br>
-            我們把番茄、洋蔥、蒜頭 <strong>一個一個拿掉</strong>,<br>
-            看少了哪一樣最難吃。<br><br>
-            我們總共試 <strong>9 次</strong>,<br>
-            每次拔掉一個面向的所有資料<br>
-            (技術面、基本面、風險面......),<br>
-            少了它,模型的準確度掉多少?<br>
-            <strong style="color: #67e8f9;">掉越多 → 這面向越重要。</strong>
+        <div style="font-size: 0.88rem; color: #b4ccdf; line-height: 1.7;">
+            三道測試互不依賴，全部通過，訊號才算站得住。
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-with col_g2:
-    st.markdown("""
-    <div style="
-        background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
-        border: 1px solid rgba(167,139,250,0.28);
-        border-top: 3px solid #a78bfa;
-        border-radius: 12px;
-        padding: 20px;
-        height: 100%;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(167,139,250,0.10);
-    ">
-        <div style="
-            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
-        ">
-            <span style="color:#a78bfa;display:inline-flex;">""" + glint_icon("target", 22, "#a78bfa") + """</span>
-            <span style="
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.7rem; font-weight: 700; color: #a78bfa;
-                letter-spacing: 0.08em; text-transform: uppercase;
-            ">§2 閾值敏感度 · 要多有把握才出手</span>
-        </div>
-        <div style="font-size: 1.0rem; font-weight: 700; color: #E8F7FC; margin-bottom: 8px;">
-            模型說「會漲」時,我該多信任?
-        </div>
-        <div style="font-size: 0.88rem; color: #cfe2ee; line-height: 1.7;">
-            就像紅綠燈的紅有深淺,<br>
-            機率 60% 跟 90% 意義不同。<br><br>
-            把門檻從 30% 拉到 50%,<br>
-            看 <strong>出手次數</strong> 跟 <strong>命中率</strong><br>
-            怎麼跟著變化。<br><br>
-            門檻高 → 出手少但命中高(保守),<br>
-            門檻低 → 出手多但命中低(積極)。<br>
-            <strong style="color: #a78bfa;">找出「兼顧次數與準度」的甜蜜點。</strong>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # ---- Three explanatory cards -------------------------------------------
+    col_g1, col_g2, col_g3 = st.columns(3, gap="medium")
 
-with col_g3:
-    st.markdown("""
-    <div style="
-        background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
-        border: 1px solid rgba(110,231,183,0.28);
-        border-top: 3px solid #6ee7b7;
-        border-radius: 12px;
-        padding: 20px;
-        height: 100%;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(110,231,183,0.10);
-    ">
+    with col_g1:
+        st.markdown("""
         <div style="
-            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+            background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+            border: 1px solid rgba(103,232,249,0.22);
+            border-top: 3px solid #67e8f9;
+            border-radius: 12px;
+            padding: 20px;
+            height: 100%;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(103,232,249,0.10);
         ">
-            <span style="color:#6ee7b7;display:inline-flex;">""" + glint_icon("trending-up", 22, "#6ee7b7") + """</span>
-            <span style="
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.7rem; font-weight: 700; color: #6ee7b7;
-                letter-spacing: 0.08em; text-transform: uppercase;
-            ">§3 2454 聯發科 · 真的拿去買會賺嗎</span>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                <span style="color:#67e8f9;display:inline-flex;">""" + glint_icon("microscope", 22, "#67e8f9") + """</span>
+                <span style="
+                    font-family: 'JetBrains Mono', monospace;
+                    font-size: 0.7rem; font-weight: 700; color: #67e8f9;
+                    letter-spacing: 0.08em; text-transform: uppercase;
+                ">§1 LOPO · 逐一抽離支柱</span>
+            </div>
+            <div style="font-size: 1.0rem; font-weight: 700; color: #E8F7FC; margin-bottom: 8px;">
+                誰是骨幹，誰可以省？
+            </div>
+            <div style="font-size: 0.88rem; color: #cfe2ee; line-height: 1.75;">
+                依序把 <strong>9 個支柱</strong>（技術、風險、基本、籌碼……）整組移除重訓，
+                記錄 AUC 掉幅。<br><br>
+                掉越多，該面向就越無法被其他支柱替代；掉幅趨近於零者，模型少了它也走得動。<br><br>
+                <span style="color: #67e8f9; font-weight:600;">排序靠前者，才是真正的骨幹。</span>
+            </div>
         </div>
-        <div style="font-size: 1.0rem; font-weight: 700; color: #E8F7FC; margin-bottom: 8px;">
-            紙上 OK,實戰呢?
-        </div>
-        <div style="font-size: 0.88rem; color: #cfe2ee; line-height: 1.7;">
-            挑一檔大家熟悉的股票 ─<br>
-            <strong>2454 聯發科</strong>,<br>
-            用過去一年真實盤面驗證。<br><br>
-            當模型說「會漲」,我們買進,<br>
-            看實際 <strong>漲了幾次 / 錯了幾次</strong>。<br><br>
-            模型該在行情來時提高機率,<br>
-            在盤整震盪時閉嘴不亂喊。<br>
-            <strong style="color: #6ee7b7;">會講話、會閉嘴,才是真本事。</strong>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
+    with col_g2:
+        st.markdown("""
+        <div style="
+            background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+            border: 1px solid rgba(167,139,250,0.28);
+            border-top: 3px solid #a78bfa;
+            border-radius: 12px;
+            padding: 20px;
+            height: 100%;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(167,139,250,0.10);
+        ">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                <span style="color:#a78bfa;display:inline-flex;">""" + glint_icon("target", 22, "#a78bfa") + """</span>
+                <span style="
+                    font-family: 'JetBrains Mono', monospace;
+                    font-size: 0.7rem; font-weight: 700; color: #a78bfa;
+                    letter-spacing: 0.08em; text-transform: uppercase;
+                ">§2 閾值敏感度 · 訊號分級</span>
+            </div>
+            <div style="font-size: 1.0rem; font-weight: 700; color: #E8F7FC; margin-bottom: 8px;">
+                多高的機率，才值得下注？
+            </div>
+            <div style="font-size: 0.88rem; color: #cfe2ee; line-height: 1.75;">
+                把門檻從 <span class="gl-mono" style="color:#ddd6fe;">t = 0.30</span> 逐步拉到 0.50，
+                追蹤 <strong>出手率</strong> 與 <strong>命中率</strong> 的同步變化。<br><br>
+                越嚴越準、越寬越頻，兩者必然互斥——alpha 與交易頻率之間，只能取捨。<br><br>
+                <span style="color: #a78bfa; font-weight:600;">找到兩邊交會的可執行門檻。</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_g3:
+        st.markdown("""
+        <div style="
+            background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+            border: 1px solid rgba(110,231,183,0.28);
+            border-top: 3px solid #6ee7b7;
+            border-radius: 12px;
+            padding: 20px;
+            height: 100%;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(110,231,183,0.10);
+        ">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                <span style="color:#6ee7b7;display:inline-flex;">""" + glint_icon("trending-up", 22, "#6ee7b7") + """</span>
+                <span style="
+                    font-family: 'JetBrains Mono', monospace;
+                    font-size: 0.7rem; font-weight: 700; color: #6ee7b7;
+                    letter-spacing: 0.08em; text-transform: uppercase;
+                ">§3 個股回放 · 2454 聯發科</span>
+            </div>
+            <div style="font-size: 1.0rem; font-weight: 700; color: #E8F7FC; margin-bottom: 8px;">
+                紙上 OK，真實盤面頂得住？
+            </div>
+            <div style="font-size: 0.88rem; color: #cfe2ee; line-height: 1.75;">
+                取 <strong>2454 聯發科</strong> 最近一年 OOS 資料逐日回放，
+                對照模型機率與當日漲跌。<br><br>
+                關鍵不在命中率高低，而在節奏——行情來臨時機率先升溫、盤整期閉得住嘴。<br><br>
+                <span style="color: #6ee7b7; font-weight:600;">會出手、也懂收手，才是選時能力的樣貌。</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ---- Persistent nav hint (always visible even when 白話 collapsed) ---------
 st.markdown("""
 <div style="
     background: linear-gradient(180deg, rgba(37,25,12,0.92) 0%, rgba(22,14,5,0.96) 100%);
     border: 1px solid rgba(167,139,250,0.32);
     border-left: 4px solid #a78bfa;
     border-radius: 10px;
-    padding: 14px 18px;
+    padding: 10px 16px;
     margin: 14px 0 18px 0;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     color: #ddd6fe;
     line-height: 1.65;
 ">
-    <strong style="display:inline-flex;align-items:center;gap:6px;">""" + glint_icon("lightbulb", 15, "#c4b5fd") + """ 小提醒</strong>：下方三個分頁對應上面三個白話問題，
-    每個分頁都附「方法論」說明與圖表，<br>
-    不理解技術細節也能從 <strong style="color:#ede9fe;">「關鍵洞察」區塊</strong> 看到重點結論。
+    <strong style="display:inline-flex;align-items:center;gap:6px;">""" + glint_icon("lightbulb", 15, "#c4b5fd") + """ 閱讀指引</strong>
+    ：下方三個分頁對應三道壓測，結論直接看
+    <strong style="color:#ede9fe;">「關鍵洞察」</strong>；細節收在「方法論」與欄位對照中。
 </div>
 """, unsafe_allow_html=True)
 
@@ -273,32 +255,27 @@ with tab1:
     ranking = lopo_data["ranking_by_delta_auc"]
     pillar_counts = lopo_data["pillar_counts"]
 
-    st.markdown("### 方法論 · LOPO 三層解釋（v4 §6.4）")
+    st.markdown("### 方法論 · LOPO 三層拆解")
     st.markdown("""
     <div class="gl-box-info">
-    <strong>第一層 · 一句話：</strong>
-    「拿掉這個支柱，模型會退步多少？」<br>
-    <strong>第二層 · 怎麼量：</strong>
-    依次把 9 個支柱的所有因子從訓練集中「移除」重訓，計算
-    <span class="gl-mono">ΔAUC = baseline − LOPO</span>——
-    <strong>ΔAUC 越大 → 該支柱越不可或缺。</strong><br>
-    <strong>第三層 · 怎麼用：</strong>
-    ΔAUC &gt; 50 bps 代表強必要（紅色警戒，不能拔）；
-    20–50 bps 代表中度必要（橘色）；&lt; 20 bps 代表可替代
-    （灰色，可考慮簡化模型降低維度）。
+    <strong>問題：</strong>拿掉這個支柱，模型會退步多少？<br>
+    <strong>量法：</strong>依次移除 9 個支柱的所有因子並重訓，計算
+    <span class="gl-mono">ΔAUC = baseline − LOPO</span>；ΔAUC 越大，代表該支柱越不可取代。<br>
+    <strong>判讀：</strong>ΔAUC &gt; 50 bps 為強必要（不可抽）、20–50 bps 為中度必要、
+    &lt; 20 bps 為可替代（可考慮瘦身）。
     </div>
     """, unsafe_allow_html=True)
 
-    with st.expander("🔎 為什麼是 Leave-One-Pillar-Out 而不是 permutation importance？", expanded=False):
+    with st.expander("為什麼用 Leave-One-Pillar-Out，不用 permutation importance？", expanded=False, icon=":material/search:"):
         st.markdown("""
-        **Leave-One-Pillar-Out (LOPO)** 與 **permutation importance** 回答不同問題：
+        兩者回答的問題不同：
 
-        - **Permutation importance**：對既訓練好的模型打亂某一欄位，觀察 AUC 下降 ——
-          衡量「這個因子被模型用了多少」，對**共線因子**會嚴重低估（兩個相關因子互相頂替）。
-        - **LOPO（我們採用）**：**整個支柱重訓** —— 若 fund 支柱拿掉，trend / val / risk 可以
-          重新瓜分訊號空間。衡量「**這個支柱有沒有其他支柱無法取代的獨立資訊**」。
+        - **Permutation importance**：對既訓練好的模型打亂某一欄位後觀察 AUC 下降，
+          衡量「該因子被模型用了多少」。對共線因子會嚴重低估——兩個相關因子可以互相頂替。
+        - **LOPO（本頁採用）**：整組支柱移除後重訓。若 fund 支柱被拿掉，trend / val / risk
+          可以重新瓜分訊號空間；衡量的是「**這個支柱有沒有其他支柱無法取代的獨立資訊**」。
 
-        對多因子模型而言，LOPO 更嚴格、更誠實 —— 這也是本儀表板採用它作為壓力測試的理由。
+        多因子壓測需要的是後者——LOPO 更嚴格、也更誠實。
         """)
 
     # KPI row
@@ -374,9 +351,9 @@ with tab1:
     ))
     fig.add_hline(y=0, line_dash="dash", line_color="rgba(148,163,184,0.5)", line_width=1)
     fig.update_layout(**glint_plotly_layout(
-        title="LOPO ΔAUC · 拿掉該支柱後 AUC 下降多少",
-        subtitle="負值越大=該支柱越不可或缺 (basis points, bps)",
-        height=460, xlabel="特徵支柱 (依 ΔAUC 降序)", ylabel="ΔAUC (bps)",
+        title="LOPO ΔAUC · 支柱抽離後的準度跌幅",
+        subtitle="跌幅越大，該支柱越不可取代（單位：bps）",
+        height=460, xlabel="特徵支柱（依 ΔAUC 排序）", ylabel="ΔAUC (bps)",
     ), showlegend=False)
     st.plotly_chart(fig, use_container_width=True)
 
@@ -385,12 +362,12 @@ with tab1:
     second = ranking[1]
     st.markdown(f"""
     <div class="success-box">
-    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 關鍵洞察</strong>：<strong>{top['zh']}</strong> 是最不可或缺的支柱
-    （ΔAUC = <span class="gl-mono">+{top['delta_auc']*10000:.1f} bps</span>，
-    ΔAUC_up = <span class="gl-mono">+{top['delta_auc_up']*10000:.1f} bps</span>），
-    其次是 <strong>{second['zh']}</strong>（<span class="gl-mono">+{second['delta_auc']*10000:.1f} bps</span>）。
-    風險支柱僅 <span class="gl-mono">{top['n_feats']}</span> 個特徵卻貢獻最大 ΔAUC_up，
-    證明 <strong>downside 保護的邊際價值遠高於單純追求 upside</strong>。
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 關鍵洞察</strong>：
+    <strong>{top['zh']}</strong> 排名第一（ΔAUC <span class="gl-mono">+{top['delta_auc']*10000:.1f} bps</span>、
+    ΔAUC_up <span class="gl-mono">+{top['delta_auc_up']*10000:.1f} bps</span>），
+    僅憑 <span class="gl-mono">{top['n_feats']}</span> 個特徵就撐起最大 upside 貢獻；
+    <strong>{second['zh']}</strong> 緊跟其後（<span class="gl-mono">+{second['delta_auc']*10000:.1f} bps</span>）。
+    結論：<strong>防守側資訊的邊際價值，遠高於單邊看多</strong>——模型的根基來自風險辨識，不是追漲。
     </div>
     """, unsafe_allow_html=True)
 
@@ -410,20 +387,18 @@ with tab1:
         line-height: 1.75;
         box-shadow: inset 0 1px 0 rgba(103,232,249,0.12);
     ">
-        <div style="font-weight: 700; color: #67e8f9; margin-bottom: 6px; letter-spacing: 0.04em;">
-            📘 欄位說明 — 每一欄代表什麼?
+        <div style="font-family:'JetBrains Mono',monospace;font-weight: 700; color: #67e8f9; margin-bottom: 8px; letter-spacing: 0.10em; font-size:0.78rem;">
+            欄位對照 · COLUMN REFERENCE
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 6px 20px;">
-            <div><strong style="color: #67e8f9;">支柱代碼</strong>:技術代稱(trend/risk/fund...)</div>
-            <div><strong style="color: #67e8f9;">中文名稱</strong>:白話說明(技術面/風險面/基本面...)</div>
-            <div><strong style="color: #a78bfa;">特徵數</strong>:這個面向用了幾個資料欄位</div>
-            <div><strong style="color: #6ee7b7;">ΔAUC (bps)</strong>:拿掉這面向後,模型整體準度掉多少(越大越不可少)</div>
-            <div><strong style="color: #ddd6fe;">ΔAUC_up (bps)</strong>:對「會漲」這件事的判斷力掉多少</div>
-            <div><strong style="color: #fda4af;">ΔIC_up</strong>:預測機率與實際表現的相關性變化</div>
+            <div><strong style="color: #67e8f9;">支柱代碼 / 中文名稱</strong>　因子的 9 個歸類面向</div>
+            <div><strong style="color: #a78bfa;">特徵數</strong>　該支柱納入模型的因子數</div>
+            <div><strong style="color: #6ee7b7;">ΔAUC (bps)</strong>　整體準度跌幅，越大越關鍵</div>
+            <div><strong style="color: #ddd6fe;">ΔAUC_up (bps)</strong>　上漲判別的跌幅</div>
+            <div><strong style="color: #fda4af;">ΔIC_up</strong>　機率與真實報酬的相關性變化</div>
         </div>
-        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(103,232,249,0.22); font-size: 0.82rem; color: #b4ccdf;">
-            <strong>bps</strong> = basis point(基點),1 bps = 0.01% 準確度。
-            <strong>AUC</strong> 是分類準確度的指標,越靠近 1 越準。
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(103,232,249,0.22); font-size: 0.80rem; color: #b4ccdf;">
+            bps = 0.01%；AUC 越接近 1，分類能力越精準。
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -476,8 +451,8 @@ with tab1:
             color="n_features", color_continuous_scale=GLINT_SEQUENTIAL_COOL,
         )
         fig2.update_layout(**glint_plotly_layout(
-            title="9 支柱特徵數 · 生產版 91 個",
-            subtitle="每根條代表一個支柱實際納入模型的特徵數量",
+            title="9 支柱 · 特徵數分布",
+            subtitle="生產版 91 個因子的分攤狀況",
             height=340, xlabel="Pillar", ylabel="Feature count",
         ), showlegend=False, coloraxis_showscale=False)
         st.plotly_chart(fig2, use_container_width=True)
@@ -496,11 +471,11 @@ with tab2:
     st.markdown("### 方法論")
     st.markdown(f"""
     <div class="gl-box-info">
-    <strong>閾值敏感度掃描</strong>回答「我該多嚴格地相信模型訊號？」：
-    讓預測機率閾值 <span class="gl-mono">t ∈ [0.30, 0.50]</span> 逐步調整，觀察
-    <strong>出手率 (call rate)</strong>、<strong>命中率 (hit rate)</strong>、
-    <strong>邊際優勢 (edge = hit rate − base rate)</strong> 的 trade-off。
-    樣本 <span class="gl-mono">n = {oos_n:,}</span>，基準上漲率 <span class="gl-mono">{base_rate:.2%}</span>。
+    <strong>問題：</strong>多高的機率才值得出手？<br>
+    <strong>量法：</strong>將機率門檻 <span class="gl-mono">t ∈ [0.30, 0.50]</span> 逐步掃描，
+    觀察 <strong>出手率 (call rate)</strong>、<strong>命中率 (hit rate)</strong> 以及
+    <strong>邊際優勢 (edge = hit − base)</strong> 三者的 trade-off。<br>
+    <strong>樣本：</strong>OOS n = <span class="gl-mono">{oos_n:,}</span>，基準上漲率 <span class="gl-mono">{base_rate:.2%}</span>。
     </div>
     """, unsafe_allow_html=True)
 
@@ -529,7 +504,7 @@ with tab2:
                    delta=(f"+{a['edge']*100:.2f}pp edge", "up"),
                    sub=f"call {a['call_rate']:.1%}", accent="amber")
 
-    st.markdown("### 閾值掃描曲線")
+    st.markdown("### 閾值掃描 · 命中 vs. 出手")
 
     png = fig_dir / "threshold_sweep_xgb_D20.png"
     if png.exists():
@@ -561,8 +536,8 @@ with tab2:
                   annotation_text=f"Base rate {base_rate:.1%}",
                   annotation_position="top left")
     _lay = glint_plotly_layout(
-        title="閾值 vs 命中率 / 出手率",
-        subtitle="藍=hit rate (越嚴越準),橙=call rate (越嚴越少)",
+        title="閾值掃描 · 命中率 vs. 出手率",
+        subtitle="拉高門檻 → 命中上升、出手下降（兩者永遠互斥）",
         height=460, xlabel="Probability Threshold t", ylabel="Hit Rate (%)",
     )
     _lay["yaxis"]["tickfont"] = dict(family="JetBrains Mono", color="#2563eb", size=10)
@@ -577,7 +552,7 @@ with tab2:
     st.plotly_chart(fig, use_container_width=True)
 
     # Edge curve
-    st.markdown("### Edge (命中率 − 基準率) 曲線")
+    st.markdown("### Edge 曲線 · 相對基準的超額命中")
     fig_edge = go.Figure()
     fig_edge.add_trace(go.Scatter(
         x=sweep["threshold"],
@@ -591,23 +566,25 @@ with tab2:
     ))
     fig_edge.add_hline(y=0, line_dash="dash", line_color="rgba(148,163,184,0.5)")
     fig_edge.update_layout(**glint_plotly_layout(
-        title="Edge 曲線 · 命中率 - 基準率",
-        subtitle="正值=模型比隨機有優勢,曲線越陡越有 alpha",
+        title="Edge 曲線 · 相對基準的超額命中",
+        subtitle="正值 = 勝過隨機；曲線越陡，alpha 越集中",
         height=360, xlabel="Probability Threshold t", ylabel="Edge (pp)",
     ))
     st.plotly_chart(fig_edge, use_container_width=True)
 
     st.markdown(f"""
     <div class="success-box">
-    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 關鍵洞察</strong>：Edge 幾乎**單調遞增**至 <span class="gl-mono">t=0.50</span>
-    達到 <strong>+{sweep['edge'].max()*100:.2f}pp</strong>（命中率 {sweep.loc[sweep['edge'].idxmax(), 'hit_rate']:.1%} vs 基準 {base_rate:.1%}），
-    但出手率降至 <span class="gl-mono">{sweep.loc[sweep['edge'].idxmax(), 'call_rate']:.2%}</span>（極端稀少）。
-    <strong>實務建議使用 t=0.40</strong>（保守型）：edge +3.14pp，call 8.83%，兼顧統計顯著性與交易頻率。
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 關鍵洞察</strong>：
+    Edge 單調遞增，於 <span class="gl-mono">t = 0.50</span> 達 <strong>+{sweep['edge'].max()*100:.2f}pp</strong>
+    （命中率 {sweep.loc[sweep['edge'].idxmax(), 'hit_rate']:.1%} vs. 基準 {base_rate:.1%}），
+    但出手率僅 <span class="gl-mono">{sweep.loc[sweep['edge'].idxmax(), 'call_rate']:.2%}</span>——
+    統計上顯著，執行上罕見。
+    <strong>實務收在 t = 0.40</strong>：edge +3.14pp、出手率 8.83%，是次數與準度的交會點。
     </div>
     """, unsafe_allow_html=True)
 
     # Top-K Precision
-    st.markdown("### Top-K Precision（最強訊號命中率）")
+    st.markdown("### Top-K Precision · 高信心訊號的命中率")
     topk_display = topk.copy()
     topk_display["top_pct_fmt"] = topk_display["top_pct"].apply(lambda v: f"Top {v*100:.1f}%")
     topk_display["hit_rate_fmt"] = topk_display["hit_rate"].apply(lambda v: f"{v:.2%}")
@@ -630,8 +607,8 @@ with tab2:
     fig_topk.add_hline(y=base_rate * 100, line_dash="dash", line_color="rgba(148,163,184,0.5)",
                        annotation_text=f"Base {base_rate:.1%}")
     fig_topk.update_layout(**glint_plotly_layout(
-        title="Top-K Precision · 精度曲線",
-        subtitle="只看最強 K% 訊號的命中率,越靠左越嚴格、越該有 alpha",
+        title="Top-K Precision · 高信心訊號的命中率",
+        subtitle="K 越小 = 條件越嚴，越該展現 alpha",
         height=380, ylabel="Hit Rate (%)",
     ))
     st.plotly_chart(fig_topk, use_container_width=True)
@@ -639,9 +616,9 @@ with tab2:
     best = topk.iloc[0]
     st.markdown(f"""
     <div class="gl-box-info">
-    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#22d3ee")} 最強訊號 Top 0.1%</strong>（n={int(best['n_picks'])} 筆最有把握的預測）
-    命中率 <strong>{best['hit_rate']:.2%}</strong>，相對基準 <strong>+{best['edge']*100:.2f}pp edge</strong>。
-    精度曲線隨 Top-K 擴大而單調下降，證明模型**機率校準合理、排序可信**。
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#22d3ee")} Top 0.1% 信心帶</strong>
+    （<span class="gl-mono">n = {int(best['n_picks'])}</span> 筆最有把握的預測）命中率 <strong>{best['hit_rate']:.2%}</strong>、
+    edge <strong>+{best['edge']*100:.2f}pp</strong>。精度隨 K 放寬而單調下降——代表 <strong>排序可信、非偶然集中</strong>。
     </div>
     """, unsafe_allow_html=True)
 
@@ -681,7 +658,7 @@ with tab3:
         render_kpi("BASE UP RATE", f"{case_data['base_up_rate']:.2%}",
                    sub="2454 OOS 上漲比率", accent="blue")
 
-    st.markdown("### 月度命中 vs 出手走勢")
+    st.markdown("### 月度信心 vs. 實戰命中")
 
     png = fig_dir / "single_stock_2454_mediatek.png"
     if png.exists():
@@ -723,8 +700,8 @@ with tab3:
             customdata=called["n_calls"],
         ))
     _lay_m = glint_plotly_layout(
-        title="2454 聯發科 · 月度平均上漲機率 vs 命中率",
-        subtitle="藍=模型信心 (左軸),綠=實際命中 (右軸),高度吻合代表機率校準佳",
+        title="2454 · 月度信心 vs. 實戰命中",
+        subtitle="藍線 = 模型平均機率｜綠柱 = 當月出手命中率",
         height=460, xlabel="Month", ylabel="Avg Up Prob (%)",
     )
     _lay_m["yaxis"]["tickfont"] = dict(family="JetBrains Mono", color="#2563eb", size=10)
@@ -739,11 +716,11 @@ with tab3:
 
     st.markdown(f"""
     <div class="success-box">
-    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 關鍵洞察</strong>：模型在 <strong>2024-10 ~ 2025-01</strong> 這段 AI 族群行情期間
-    **明顯提升平均機率**（突破 t=0.35 門檻），並累積大部分出手；2025-01 命中率達
-    <span class="gl-mono">81.8%</span>（11 次出手對中 9 次）。
-    2024-06 ~ 2024-09 期間模型正確判斷**風險較高不出手**。
-    顯示模型具備「有訊號時才喊、沒把握時閉嘴」的理想行為。
+    <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} 關鍵洞察</strong>：
+    <strong>2024 Q4 – 2025 Q1</strong>（AI 族群主升段）平均機率明顯升溫、突破 t = 0.35，出手集中於此段；
+    <strong>2025-01 命中率 81.8%</strong>（11 次出手 9 中）。
+    反觀 <strong>2024 Q2 – Q3</strong> 盤整期，機率被壓低、出手趨近於零——
+    會出手、也懂得收手，正是選時能力的型態。
     </div>
     """, unsafe_allow_html=True)
 
@@ -762,23 +739,21 @@ with tab3:
         line-height: 1.75;
         box-shadow: inset 0 1px 0 rgba(103,232,249,0.12);
     ">
-        <div style="font-weight: 700; color: #67e8f9; margin-bottom: 6px; letter-spacing: 0.04em;">
-            📘 欄位說明 — 每一欄怎麼看?
+        <div style="font-family:'JetBrains Mono',monospace;font-weight: 700; color: #67e8f9; margin-bottom: 8px; letter-spacing: 0.10em; font-size:0.78rem;">
+            欄位對照 · COLUMN REFERENCE
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 20px;">
-            <div><strong style="color: #67e8f9;">月份</strong>:OOS 期間的月份(YYYY-MM)</div>
-            <div><strong style="color: #67e8f9;">交易日</strong>:該月 2454 有多少個交易日</div>
-            <div><strong style="color: #6ee7b7;">實際上漲天數</strong>:真實結果,該月漲了幾天</div>
-            <div><strong style="color: #a78bfa;">出手次數</strong>:模型認為會漲(機率≥門檻)的天數</div>
-            <div><strong style="color: #6ee7b7;">命中次數</strong>:出手後實際真的漲了幾次</div>
-            <div><strong style="color: #ddd6fe;">平均上漲機率</strong>:該月模型平均預測有多看好</div>
-            <div><strong style="color: #ddd6fe;">當月上漲率</strong>:實際上漲天數 / 總交易日</div>
-            <div><strong style="color: #fda4af;">出手率</strong>:模型出手次數 / 總交易日</div>
-            <div><strong style="color: #6ee7b7;">出手命中率</strong>:命中次數 / 出手次數(越高越準)</div>
+            <div><strong style="color: #67e8f9;">月份 / 交易日</strong>　OOS 月份與月內交易日數</div>
+            <div><strong style="color: #6ee7b7;">實際上漲天數</strong>　當月真正上漲的天數</div>
+            <div><strong style="color: #a78bfa;">出手次數</strong>　機率 ≥ 門檻的日數</div>
+            <div><strong style="color: #6ee7b7;">命中次數</strong>　出手後實際上漲的日數</div>
+            <div><strong style="color: #ddd6fe;">平均上漲機率</strong>　該月模型平均信心</div>
+            <div><strong style="color: #ddd6fe;">當月上漲率</strong>　上漲天數 ÷ 交易日</div>
+            <div><strong style="color: #fda4af;">出手率</strong>　出手次數 ÷ 交易日</div>
+            <div><strong style="color: #6ee7b7;">出手命中率</strong>　命中 ÷ 出手（&gt; 當月上漲率即具選時力）</div>
         </div>
-        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(103,232,249,0.22); font-size: 0.82rem; color: #b4ccdf;">
-            <strong>怎麼讀?</strong>重點看「平均上漲機率」是否有在行情來前上升,
-            以及「出手命中率」是否 > 當月上漲率(代表選時能力)。
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(103,232,249,0.22); font-size: 0.80rem; color: #b4ccdf;">
+            讀法：平均機率在行情前升溫、出手命中率 &gt; 當月上漲率 = 選時能力。
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -803,8 +778,32 @@ with tab3:
     })
     st.dataframe(m_display, use_container_width=True, hide_index=True)
 
-    # Top-10 probability days
-    st.markdown("### Top-10 機率最高交易日（模型最看好）")
+    # Top-10 probability days — v11.5.13 redesigned presentation block
+    st.markdown("""
+    <div style="margin:26px 0 12px 0;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;
+                         font-weight:700;letter-spacing:0.16em;color:#c4b5fd;
+                         text-transform:uppercase;
+                         background:rgba(167,139,250,0.12);
+                         border:1px solid rgba(167,139,250,0.32);
+                         padding:3px 10px;border-radius:4px;">
+                HIGH-CONVICTION DAYS · 模型下注最重
+            </span>
+            <span style="height:1px;flex:1;background:linear-gradient(90deg,
+                         rgba(167,139,250,0.32) 0%,transparent 100%);"></span>
+        </div>
+        <h3 style="margin:4px 0 6px 0;font-weight:700;color:#E8F7FC;">
+            Top-10 機率最高交易日
+        </h3>
+        <div style="font-size:0.9rem;color:#b4ccdf;line-height:1.7;
+                    border-left:2px solid rgba(167,139,250,0.32);padding-left:12px;">
+            依 <span class="gl-mono" style="color:#ddd6fe;">up_prob</span> 由高至低排序的 10 個點位——
+            模型在這 10 天投入了最多信心分量。
+            高信心預測的實戰表現，是機率校準能力最直接的檢驗。
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     t_display = top10.copy()
     t_display["up_prob"] = t_display["up_prob"].apply(lambda v: f"{v:.3f}")
     st.dataframe(t_display, use_container_width=True, hide_index=True)
