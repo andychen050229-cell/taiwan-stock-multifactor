@@ -1,0 +1,67 @@
+{
+  "file": "多因子股票分析系統_研究報告_v11.5.17_2026-04-24.docx",
+  "size_kb": 43.1,
+  "all_passed": true,
+  "checks": [
+    {
+      "name": "1. ZIP integrity",
+      "passed": true,
+      "detail": "26 files"
+    },
+    {
+      "name": "2. Required OOXML files",
+      "passed": true,
+      "detail": "all 4 present"
+    },
+    {
+      "name": "3. XML well-formedness",
+      "passed": true,
+      "detail": "22 files OK"
+    },
+    {
+      "name": "4. Content_Types completeness",
+      "passed": true,
+      "detail": "all parts covered"
+    },
+    {
+      "name": "5. Relationship targets resolve",
+      "passed": true,
+      "detail": "all targets found"
+    },
+    {
+      "name": "6. OOXML namespace",
+      "passed": true,
+      "detail": "correct WML namespace"
+    },
+    {
+      "name": "7. Table structure",
+      "passed": true,
+      "detail": "23 tables, 190 rows — all valid"
+    },
+    {
+      "name": "8. Numbering references",
+      "passed": true,
+      "detail": "1 refs, 2 defined"
+    },
+    {
+      "name": "9. Header/Footer integrity",
+      "passed": true,
+      "detail": "2 files OK"
+    },
+    {
+      "name": "10. Style definitions",
+      "passed": true,
+      "detail": "4 used, 16 defined"
+    },
+    {
+      "name": "11. CJK font availability",
+      "passed": true,
+      "detail": "found: {'Microsoft JhengHei'}"
+    },
+    {
+      "name": "12. Content statistics",
+      "passed": true,
+      "detail": "1020 paragraphs, 23 tables, 15644 chars (5896 CJK)"
+    }
+  ]
+}
