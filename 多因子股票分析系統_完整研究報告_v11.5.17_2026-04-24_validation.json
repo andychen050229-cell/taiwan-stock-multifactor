@@ -1,6 +1,6 @@
 {
-  "file": "多因子股票分析系統_研究報告_v11.5.17_2026-04-24.docx",
-  "size_kb": 43.1,
+  "file": "多因子股票分析系統_完整研究報告_v11.5.17_2026-04-24.docx",
+  "size_kb": 64.0,
   "all_passed": true,
   "checks": [
     {
@@ -36,7 +36,7 @@
     {
       "name": "7. Table structure",
       "passed": true,
-      "detail": "23 tables, 190 rows — all valid"
+      "detail": "39 tables, 379 rows — all valid"
     },
     {
       "name": "8. Numbering references",
@@ -61,7 +61,7 @@
     {
       "name": "12. Content statistics",
       "passed": true,
-      "detail": "1020 paragraphs, 23 tables, 15644 chars (5896 CJK)"
+      "detail": "1863 paragraphs, 39 tables, 26768 chars (8533 CJK)"
     }
   ]
 }
