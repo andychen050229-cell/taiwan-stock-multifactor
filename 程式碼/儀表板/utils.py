@@ -7413,7 +7413,19 @@ def load_companies():
 _GL_SEARCH_SELECT_KEY = "_gl_util_search"       # selectbox value
 _GL_SEARCH_LAST_KEY = "_gl_util_search_last"    # last-processed selection
 _GL_SEARCH_TARGET_KEY = "target_ticker"         # consumed by page 0
-_GL_SEARCH_ROUTE_PAGE = "pages/0_🌱_投資解讀面板.py"
+_GL_SEARCH_PENDING_KEY = "_gl_util_search_pending"  # defer switch_page to safe point
+
+# v11.5.18 FIX — `st.switch_page` requires the EXACT path string that was
+# registered via `st.Page()` in app.py. app.py builds absolute paths via
+# `P(name) -> str(PAGES / name)` where `PAGES = Path(__file__).resolve().parent
+# / "pages"`. A relative path like `"pages/0_🌱_投資解讀面板.py"` does NOT
+# match and `switch_page` silently raises (then the `except Exception: pass`
+# in the callback swallows it) — the search box becomes a no-op.
+#
+# We rebuild the same absolute path here from utils.py's own location
+# (utils.py lives in the same directory as app.py, so `Path(__file__).parent
+# / "pages" / <name>` matches app.py's `P()` output byte-for-byte).
+_GL_SEARCH_ROUTE_PAGE = str(Path(__file__).resolve().parent / "pages" / "0_🌱_投資解讀面板.py")
 
 
 @st.cache_data(show_spinner=False)
@@ -7454,11 +7466,26 @@ def _build_ticker_search_options():
 
 
 def _handle_gl_search_change():
-    """Selectbox on_change callback — routes to the investment page if a real
-    ticker was picked (i.e. not the sentinel / placeholder option).
+    """Selectbox on_change callback — routes to the investment page when a
+    real ticker is picked (i.e. not the sentinel / placeholder option).
 
-    Uses a "last-processed" sentinel so navigating *back* to the nav bar after
-    the jump doesn't re-trigger the switch on every rerun.
+    Flow:
+      1. Resolve label → ticker id; bail on sentinel / duplicate.
+      2. Persist `target_ticker` in session_state for page 0 to consume.
+      3. Reset the select widget back to the sentinel so the same ticker can
+         be re-picked after the user returns to the nav.
+      4. Call `st.switch_page()` with the ABSOLUTE path that matches the
+         `st.Page()` registration in app.py. RerunException is the intended
+         signal from switch_page; any other exception is kept silent so the
+         app doesn't break, but the target_ticker is already in session_state
+         — the deferred-switch guard (`_consume_pending_switch`) in
+         `render_utility_bar` picks it up on the next rerun if needed.
+
+    v11.5.18 fix: the previous implementation used a RELATIVE path
+    (`"pages/0_..."`) which does NOT match the absolute path registered by
+    app.py's `P()` helper — `st.switch_page` raised a silent exception and
+    the search box became a no-op. We now rebuild the same absolute path
+    that app.py uses, and add a pending-switch fallback for robustness.
     """
     picked = st.session_state.get(_GL_SEARCH_SELECT_KEY)
     if not picked:
@@ -7479,10 +7506,65 @@ def _handle_gl_search_change():
     st.session_state[_GL_SEARCH_TARGET_KEY] = tid
     # Reset the select so the same option can be re-picked on return.
     st.session_state[_GL_SEARCH_SELECT_KEY] = "— 搜尋個股代號、公司名 —"
+    # Deferred-switch fallback: only set the pending flag if the callback-
+    # time switch_page truly failed. The intended RerunException propagates
+    # through `raise` and exits the callback without executing the `else`
+    # branch — no pending flag, no redundant rerun. If any OTHER exception
+    # fires (the defensive case), the flag guarantees a jump on next rerun.
     try:
         st.switch_page(_GL_SEARCH_ROUTE_PAGE)
+    except BaseException as _e:
+        # RerunException (and StopException) are Streamlit's internal script-
+        # control signals — they extend BaseException, not Exception, on
+        # purpose so user code can't accidentally swallow them with a plain
+        # `except Exception`. `switch_page()` succeeds by RAISING RerunException,
+        # so we must re-raise it for the runtime to perform the rerun.
+        #
+        # Anything else is a real failure (e.g. path not registered with
+        # st.navigation) — we swallow it and arm the deferred-switch guard
+        # so `_consume_pending_switch` retries on the next rerun.
+        _cls = type(_e).__name__
+        if _cls in ("RerunException", "StopException") or "ScriptControl" in _cls:
+            raise
+        # True failure path — arm the deferred-switch guard.
+        st.session_state[_GL_SEARCH_PENDING_KEY] = _GL_SEARCH_ROUTE_PAGE
+
+
+def _consume_pending_switch():
+    """Deferred-switch guard — called at the top of `render_utility_bar()`.
+
+    If the previous run's `_handle_gl_search_change` callback set a pending
+    switch target but the in-callback `switch_page` didn't actually rerun
+    the app onto page 0, this guard completes the jump on the next rerun.
+
+    Idempotent: once consumed, the key is popped; further reruns do nothing
+    unless the user picks a new ticker.
+
+    We only trigger the switch when the dashboard is NOT already on the
+    target page — otherwise we'd cause an unnecessary rerun loop. The
+    detection uses `st.session_state["_gl_active_page"]` which page 0 sets
+    on every run; if that key says we're on page 0, we just clear the
+    pending flag and exit.
+    """
+    target = st.session_state.get(_GL_SEARCH_PENDING_KEY)
+    if not target:
+        return
+    # If page 0 has already rendered once and stamped its signature, we're
+    # on the target page — no need to re-switch.
+    active = st.session_state.get("_gl_active_page", "")
+    already_on_target = bool(active) and (active == _GL_SEARCH_ROUTE_PAGE)
+    # Always clear the flag so we don't loop — consumed on first pickup.
+    st.session_state.pop(_GL_SEARCH_PENDING_KEY, None)
+    if already_on_target:
+        return
+    try:
+        st.switch_page(target)
     except Exception:
-        # switch_page can raise RerunException mid-page; that's the intended signal.
+        # RerunException extends BaseException (not Exception) on purpose,
+        # so it propagates past this `except Exception` block up to the
+        # Streamlit runtime where it signals the rerun — exactly what we
+        # want. This block only swallows TRUE failures (e.g. page not
+        # registered), logging them silently so the UI doesn't crash.
         pass
 
 
@@ -7537,6 +7619,12 @@ def render_utility_bar(info: dict | None = None):
               gates_passed, gates_total, last_verified, search_hint.
     """
     info = info or {}
+
+    # v11.5.18 — Deferred-switch guard. If the Search callback set a pending
+    # target ticker but switch_page didn't actually fire (older Streamlit or
+    # path drift), complete the navigation now before rendering the nav.
+    _consume_pending_switch()
+
     # Sensible defaults — the dashboard truth-of-source is the quality-gates
     # report (already loaded once at app.py boot via load_quality_gates()).
     status = safe_html(info.get("status", "SNAPSHOT"))

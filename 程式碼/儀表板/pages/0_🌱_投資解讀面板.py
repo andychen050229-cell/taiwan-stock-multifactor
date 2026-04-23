@@ -52,6 +52,11 @@ PAGE_TITLES = _utils.PAGE_TITLES
 PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
 glint_icon = _utils.glint_icon
 
+# v11.5.18 — Stamp the current page path so the shell-level deferred-switch
+# guard in `utils._consume_pending_switch` can tell when we've already landed
+# on the target page and must not re-trigger a switch (which would loop).
+st.session_state["_gl_active_page"] = str(Path(__file__).resolve())
+
 # ---- Top-bar (sticky breadcrumb + model chips + clock) ----
 render_topbar(
     crumb_left="多因子股票分析系統",
@@ -518,6 +523,287 @@ def get_direction_emoji(label_val):
         return "🔴"
 
 
+# ===== v11.5.18 — Out-of-Top-N Ticker Detail Renderer ======================
+def render_searched_ticker_detail(target_tid: str, companies: pd.DataFrame,
+                                   prices: pd.DataFrame, income: pd.DataFrame,
+                                   horizon: int, n_display: int) -> None:
+    """Render a focused data-lookup card for a ticker that is NOT in the
+    current D+{horizon} Top-{n_display} bullish picks.
+
+    Context: the utility-bar Search lets users look up ANY of the 1,932
+    listed companies. Only a handful show up in the model's Top-N bullish
+    shortlist on any given snapshot — the rest still deserve a meaningful
+    detail view so Search functions as a true "jump to stock" feature
+    rather than silently filtering to an empty list.
+
+    This view purposefully distinguishes itself from the model-judgment
+    cards above: the "非本期判讀範圍" chip is the visual anchor, and the
+    copy explicitly notes that no direction/strength signal is shown
+    because the stock is outside the current snapshot's bullish shortlist.
+
+    Args:
+        target_tid: ticker id string (e.g. "2330")
+        companies: full companies dataframe (1,932 rows)
+        prices: full price history dataframe
+        income: income-statement dataframe
+        horizon: current D+{horizon} selector value (for contextual copy)
+        n_display: current Top-N slider value (for contextual copy)
+    """
+    # ----- Resolve the company metadata row (may be absent if ticker has
+    # been delisted / merged; we still render a minimal card in that case).
+    try:
+        _ci = companies[companies["company_id"].astype(str) == target_tid]
+    except Exception:
+        _ci = pd.DataFrame()
+    short = ""
+    full = ""
+    if not _ci.empty:
+        r0 = _ci.iloc[0]
+        short = str(r0.get("short_name") or "").strip()
+        full = str(r0.get("company_name") or "").strip()
+    display_name = short or full or target_tid
+    chip_label = f"{target_tid} · {short}" if short else target_tid
+
+    # ----- Hero banner — make it clear this is a data lookup, not a call.
+    st.markdown(
+        f'<div style="background:rgba(167,139,250,0.08);'
+        f'border:1px solid rgba(167,139,250,0.45);border-left:4px solid #a78bfa;'
+        f'border-radius:10px;padding:12px 16px;margin:8px 0 14px 0;'
+        f'display:flex;align-items:center;gap:12px;flex-wrap:wrap;'
+        f'font-family:\'Inter\',sans-serif;font-size:0.88rem;color:#cbe9f2;">'
+        f'<span style="color:#a78bfa;font-weight:700;letter-spacing:0.12em;'
+        f'text-transform:uppercase;font-size:0.70rem;'
+        f'font-family:\'JetBrains Mono\',monospace;">SEARCHED · OUT OF TOP-N</span>'
+        f'<span style="color:#e8f7fc;font-weight:700;font-size:1.02rem;">{chip_label}</span>'
+        f'<span style="color:#8397ac;">該股不在本期 D+{horizon} 偏多 Top-{n_display}；'
+        f'以下為其歷史價量與財報資料，供研究參考，非模型判讀結果。</span>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    # ----- Top KPI row: price + pieces pulled from income statement latest.
+    cp = get_price_history(prices, target_tid, n_days=120)
+    latest_price = float(cp["closing_price"].iloc[-1]) if not cp.empty else None
+    first_price = float(cp["closing_price"].iloc[0]) if not cp.empty else None
+    ret_120d = ((latest_price / first_price - 1.0) * 100.0) if (latest_price and first_price) else None
+
+    # Extract latest fundamentals row
+    try:
+        ci_all = income[income["company_id"].astype(str) == target_tid].copy()
+    except Exception:
+        ci_all = pd.DataFrame()
+    latest_fund = None
+    prev_yoy_rev = None
+    if not ci_all.empty:
+        ci_all = ci_all.sort_values(["fiscal_year", "fiscal_quarter"])
+        latest_fund = ci_all.iloc[-1]
+        # Find same-quarter prior-year for YoY
+        try:
+            pf = ci_all[
+                (ci_all["fiscal_year"] == latest_fund["fiscal_year"] - 1) &
+                (ci_all["fiscal_quarter"] == latest_fund["fiscal_quarter"])
+            ]
+            if not pf.empty:
+                prev_yoy_rev = pf.iloc[0].get("revenue")
+        except Exception:
+            prev_yoy_rev = None
+
+    k1, k2, k3, k4 = st.columns(4)
+    with k1:
+        st.metric("最新收盤價",
+                  f"${latest_price:.2f}" if latest_price is not None else "—")
+    with k2:
+        if ret_120d is not None:
+            st.metric("近 120 日報酬", f"{ret_120d:+.1f}%")
+        else:
+            st.metric("近 120 日報酬", "—")
+    with k3:
+        if latest_fund is not None and pd.notna(latest_fund.get("eps")):
+            eps_v = float(latest_fund["eps"])
+            st.metric("最新 EPS", f"${eps_v:.2f}")
+        else:
+            st.metric("最新 EPS", "—")
+    with k4:
+        # Revenue YoY
+        if (latest_fund is not None and prev_yoy_rev is not None
+                and pd.notna(latest_fund.get("revenue")) and prev_yoy_rev != 0):
+            yoy_pct = (float(latest_fund["revenue"]) - float(prev_yoy_rev)) / abs(float(prev_yoy_rev)) * 100
+            st.metric("營收年增率", f"{yoy_pct:+.1f}%")
+        else:
+            st.metric("營收年增率", "—")
+
+    # ----- Content grid: price chart (left) + company snapshot (right) -----
+    col_left, col_right = st.columns([6, 4])
+
+    with col_left:
+        st.markdown(
+            '<div class="section-header"><strong>近 120 日價格走勢</strong></div>',
+            unsafe_allow_html=True,
+        )
+        if not cp.empty:
+            fig = make_subplots(
+                rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.08,
+                row_heights=[0.7, 0.3],
+                subplot_titles=("收盤價 + MA20", "RSI 動能指標"),
+            )
+            fig.add_trace(go.Scatter(
+                x=cp["trade_date"], y=cp["closing_price"], mode="lines",
+                line=dict(color="#a78bfa", width=2.5),
+                fill="tozeroy", fillcolor="rgba(167,139,250,0.08)",
+                name="收盤價",
+                hovertemplate="日期: %{x|%Y-%m-%d}<br>收盤價: $%{y:.2f}<extra></extra>",
+            ), row=1, col=1)
+            fig.add_trace(go.Scatter(
+                x=cp["trade_date"], y=cp["ma20"], mode="lines",
+                line=dict(color="#67e8f9", width=1.5, dash="dash"),
+                name="MA20",
+                hovertemplate="MA20: $%{y:.2f}<extra></extra>",
+            ), row=1, col=1)
+            rsi_data = cp["rsi14"].dropna()
+            if not rsi_data.empty:
+                fig.add_trace(go.Scatter(
+                    x=cp[cp["rsi14"].notna()]["trade_date"], y=rsi_data,
+                    mode="lines", line=dict(color="#8b5cf6", width=1.5),
+                    fill="tozeroy", fillcolor="rgba(139, 92, 246, 0.1)",
+                    name="RSI-14",
+                    hovertemplate="RSI: %{y:.1f}<extra></extra>",
+                ), row=2, col=1)
+                fig.add_hline(y=70, line_dash="dash", line_color="#f43f5e",
+                              opacity=0.5, annotation_text="超買 (70)",
+                              row=2, col=1)
+                fig.add_hline(y=30, line_dash="dash", line_color="#10b981",
+                              opacity=0.5, annotation_text="超賣 (30)",
+                              row=2, col=1)
+            fig.update_layout(
+                height=360, paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="Inter, 'Noto Sans TC', sans-serif",
+                          color="#B4CCDF", size=11),
+                margin=dict(l=10, r=10, t=40, b=10), hovermode="x unified",
+                showlegend=True,
+                legend=dict(x=0.01, y=0.98,
+                            font=dict(family="JetBrains Mono, monospace", size=10)),
+            )
+            fig.update_xaxes(showgrid=True, gridcolor="rgba(103,232,249,0.08)",
+                             tickfont=dict(family="JetBrains Mono, monospace",
+                                            size=10, color="#8397AC"))
+            fig.update_yaxes(showgrid=True, gridcolor="rgba(103,232,249,0.08)",
+                             tickfont=dict(family="JetBrains Mono, monospace",
+                                            size=10, color="#8397AC"))
+            st.plotly_chart(fig, use_container_width=True,
+                            key=f"searched_price_{target_tid}_{horizon}")
+        else:
+            st.info("此股票於資料視窗內無可用的每日收盤資料。")
+
+    with col_right:
+        st.markdown(
+            '<div class="section-header"><strong>公司與財報資訊</strong></div>',
+            unsafe_allow_html=True,
+        )
+        # Company intro
+        if full:
+            st.markdown(f"**{full}**")
+        elif short:
+            st.markdown(f"**{short}**")
+        else:
+            st.markdown(f"**{target_tid}**（公司名稱未收錄於資料集）")
+
+        # Income-statement panel
+        if latest_fund is not None:
+            fy = int(latest_fund.get("fiscal_year", 0) or 0)
+            fq = int(latest_fund.get("fiscal_quarter", 0) or 0)
+            if fy and fq:
+                st.caption(f"最新財報：{fy} 年 Q{fq}")
+
+            rev = latest_fund.get("revenue")
+            cost = latest_fund.get("cost_of_revenue")
+            oi = latest_fund.get("operating_income")
+            ni = latest_fund.get("net_income")
+            eps_v = latest_fund.get("eps")
+
+            rows_html = ['<div style="font-family:\'JetBrains Mono\',monospace;'
+                         'font-size:0.82rem;line-height:1.7;color:#cbe9f2;">']
+            def _row(k, v):
+                rows_html.append(
+                    f'<div style="display:flex;justify-content:space-between;'
+                    f'border-bottom:1px dashed rgba(103,232,249,0.12);'
+                    f'padding:3px 0;">'
+                    f'<span style="color:#8397ac;">{k}</span>'
+                    f'<span style="color:#e8f7fc;">{v}</span></div>'
+                )
+            if pd.notna(rev):
+                _row("營收", f"{float(rev):,.0f} 仟元")
+            if pd.notna(cost) and pd.notna(rev) and rev != 0:
+                _row("毛利率", f"{(float(rev) - float(cost)) / float(rev):.1%}")
+            if pd.notna(oi) and pd.notna(rev) and rev != 0:
+                _row("營業利益率", f"{float(oi) / float(rev):.1%}")
+            if pd.notna(ni) and pd.notna(rev) and rev != 0:
+                _row("淨利率", f"{float(ni) / float(rev):.1%}")
+            if pd.notna(eps_v):
+                _row("EPS", f"${float(eps_v):.2f}")
+            rows_html.append("</div>")
+            st.markdown("".join(rows_html), unsafe_allow_html=True)
+        else:
+            st.caption("此股票於資料視窗內無可用的季財報資料。")
+
+        # Quarterly revenue trend (up to last 8 quarters)
+        if not ci_all.empty and "revenue" in ci_all.columns:
+            trend = ci_all.tail(8).copy()
+            trend["period"] = trend.apply(
+                lambda r: f"{int(r['fiscal_year'])}Q{int(r['fiscal_quarter'])}"
+                if pd.notna(r.get('fiscal_year')) and pd.notna(r.get('fiscal_quarter')) else "",
+                axis=1,
+            )
+            trend = trend[trend["period"] != ""]
+            if not trend.empty:
+                with st.expander("近期營收趨勢（最多 8 季）", expanded=False):
+                    fig_r = go.Figure()
+                    fig_r.add_trace(go.Bar(
+                        x=trend["period"], y=trend["revenue"],
+                        marker=dict(color="#67e8f9"),
+                        hovertemplate="%{x}<br>營收: %{y:,.0f} 仟元<extra></extra>",
+                    ))
+                    fig_r.update_layout(
+                        height=220, paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                        font=dict(family="Inter, sans-serif", color="#B4CCDF", size=10),
+                        margin=dict(l=10, r=10, t=10, b=10), showlegend=False,
+                    )
+                    fig_r.update_xaxes(showgrid=False,
+                                        tickfont=dict(family="JetBrains Mono, monospace",
+                                                       size=9, color="#8397AC"))
+                    fig_r.update_yaxes(showgrid=True, gridcolor="rgba(103,232,249,0.08)",
+                                        tickfont=dict(family="JetBrains Mono, monospace",
+                                                       size=9, color="#8397AC"))
+                    st.plotly_chart(fig_r, use_container_width=True,
+                                    key=f"searched_rev_{target_tid}")
+
+    # ----- Research disclaimer + navigation helpers --------------------------
+    st.markdown(
+        '<div style="margin-top:10px;padding:10px 14px;'
+        'background:rgba(15,23,37,0.7);border:1px solid rgba(103,232,249,0.16);'
+        'border-radius:8px;font-size:0.82rem;color:#8397ac;line-height:1.6;">'
+        '⚠️ <strong>研究備註：</strong>此股票未進入本期 Top-N 偏多名單，'
+        '不代表模型對其判讀為偏空 —— 可能是訊號強度未達前段，'
+        '或特徵欄位缺失。若需看到其他判讀方向（中性／觀望），'
+        '請前往「資料基礎」頁以 company_id 查詢原始標籤，'
+        '或調整左側 horizon / Top-N 設定。'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    # Action row — one button to clear the lock, one link to data explorer.
+    c_a, c_b = st.columns([1, 1], gap="small")
+    with c_a:
+        if st.button("清除鎖定，回到完整判讀清單",
+                     key="_gl_clear_target_ticker_outofn",
+                     use_container_width=True):
+            st.session_state.pop("target_ticker", None)
+            st.rerun()
+    with c_b:
+        st.caption("（或於上方搜尋其他個股代號）")
+
+
 # ===== Load Data =====
 fs, companies, prices, income, recommendations = load_all_data()
 
@@ -692,50 +978,77 @@ try:
         st.warning("目前沒有可用的判讀資料")
         st.stop()
 
-    if recs.empty:
-        st.info(f"在 D+{horizon} 週期的判讀中，目前沒有偏多訊號。")
-        st.stop()
-
-    # ===== v10 §6 — Shell Search target-ticker lock =========================
+    # ===== v10 §6 + v11.5.18 — Shell Search target-ticker lock =============
     # When the user searches for a ticker in the utility bar, we route here
-    # with `st.session_state["target_ticker"]` set. Filter the card list to
-    # that ticker when present; otherwise surface a clear empty state and
-    # offer a one-click return to the full snapshot.
+    # with `st.session_state["target_ticker"]` set.
+    #
+    # v11.5.18 upgrade: the Search feature must work for ALL 1,932 listed
+    # companies, not only the handful currently in the D+{horizon} Top-N
+    # bullish shortlist. The previous behavior showed only a warning string
+    # for any ticker outside Top-N, which made the search box look broken.
+    #
+    # Behavior matrix:
+    #   A. ticker IS in current recs  → render LOCKED chip + filter recs
+    #                                    to just that one card (existing path).
+    #   B. ticker NOT in current recs → render a dedicated data-lookup card
+    #                                    via `render_searched_ticker_detail()`
+    #                                    (price chart + income-statement) and
+    #                                    `st.stop()` so we don't render the
+    #                                    full-market / Top-N sections below
+    #                                    with a mismatched context.
+    #   C. no target_ticker            → fall through to the original empty
+    #                                    state for genuinely no-signal snapshots.
     _target_tid = str(st.session_state.get("target_ticker", "")).strip()
     if _target_tid:
         _match = recs[recs["company_id"].astype(str) == _target_tid].copy()
-        _short = ""
-        try:
-            _ci = companies[companies["company_id"].astype(str) == _target_tid]
-            if not _ci.empty:
-                _short = str(_ci.iloc[0].get("short_name") or _ci.iloc[0].get("company_name") or "")
-        except Exception:
-            _short = ""
-        _chip_label = f"{_target_tid} · {_short}" if _short else _target_tid
-        _bg = "rgba(103,232,249,0.08)"
-        _border = "rgba(103,232,249,0.45)"
-        st.markdown(
-            f'<div style="background:{_bg};border:1px solid {_border};'
-            f'border-radius:10px;padding:10px 14px;margin:8px 0 12px 0;'
-            f'display:flex;align-items:center;gap:10px;font-family:\'JetBrains Mono\', monospace;'
-            f'font-size:0.82rem;color:#cbe9f2;">'
-            f'<span style="color:#67e8f9;font-weight:700;letter-spacing:0.12em;'
-            f'text-transform:uppercase;font-size:0.70rem;">LOCKED ·</span>'
-            f'<span style="color:#e8f7fc;font-weight:700;">{_chip_label}</span>'
-            f'<span style="color:#8397ac;">目前已鎖定此檔個股的判讀卡片</span>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
         if not _match.empty:
-            recs = _match
-        else:
-            st.warning(
-                f"本期 D+{horizon} 判讀 Top {n_display} 並未涵蓋 {_chip_label}。"
-                f"該股可能未進入本期的偏多名單，或資料欄位未對齊。請切換 horizon 或解除鎖定後回到完整清單。"
+            # Path A: ticker is in current Top-N recs — filter and continue
+            # with the regular card-rendering pipeline below.
+            _short = ""
+            try:
+                _ci = companies[companies["company_id"].astype(str) == _target_tid]
+                if not _ci.empty:
+                    _short = str(_ci.iloc[0].get("short_name")
+                                  or _ci.iloc[0].get("company_name") or "")
+            except Exception:
+                _short = ""
+            _chip_label = f"{_target_tid} · {_short}" if _short else _target_tid
+            _bg = "rgba(103,232,249,0.08)"
+            _border = "rgba(103,232,249,0.45)"
+            st.markdown(
+                f'<div style="background:{_bg};border:1px solid {_border};'
+                f'border-radius:10px;padding:10px 14px;margin:8px 0 12px 0;'
+                f'display:flex;align-items:center;gap:10px;font-family:\'JetBrains Mono\', monospace;'
+                f'font-size:0.82rem;color:#cbe9f2;">'
+                f'<span style="color:#67e8f9;font-weight:700;letter-spacing:0.12em;'
+                f'text-transform:uppercase;font-size:0.70rem;">LOCKED ·</span>'
+                f'<span style="color:#e8f7fc;font-weight:700;">{_chip_label}</span>'
+                f'<span style="color:#8397ac;">目前已鎖定此檔個股的判讀卡片</span>'
+                f'</div>',
+                unsafe_allow_html=True,
             )
-        if st.button("清除鎖定，回到完整清單", key="_gl_clear_target_ticker"):
-            st.session_state.pop("target_ticker", None)
-            st.rerun()
+            recs = _match
+            if st.button("清除鎖定，回到完整清單", key="_gl_clear_target_ticker"):
+                st.session_state.pop("target_ticker", None)
+                st.rerun()
+        else:
+            # Path B: ticker is NOT in the current Top-N shortlist — render a
+            # dedicated data-lookup card so Search feels like a real "jump to
+            # stock" feature, then stop before the generic sections below.
+            render_searched_ticker_detail(
+                target_tid=_target_tid,
+                companies=companies,
+                prices=prices,
+                income=income,
+                horizon=horizon,
+                n_display=n_display,
+            )
+            st.stop()
+
+    # Path C (no target_ticker): regular empty-state handling.
+    if recs.empty:
+        st.info(f"在 D+{horizon} 週期的判讀中，目前沒有偏多訊號。")
+        st.stop()
 
     # ===== Market Environment Alert =====
     mkt_env = recommendations.get("market_environment", {}) if recommendations else {}
