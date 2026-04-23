@@ -186,6 +186,45 @@ def daily_sentiment_index(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ============================================================================
+# Keyword noise filter — native-speaker judgment
+# ============================================================================
+# 以中文母語者視角整理的雜訊詞表：jieba 斷詞殘留 / 泛用詞 / 單位量詞 / 單字片段。
+# 保留真訊號：個股名、事件題材（大火/私有化/deepseek）、機構（里昂/元大證）、
+#            市況（盤漲/落後補漲）、產業（生技/金融股）、財報詞（年減/年增）。
+_KW_NOISE: frozenset[str] = frozenset({
+    # --- jieba 斷詞殘留 / token 碎片 -------------------------------------
+    "銀上", "上銀上", "雙鴻營", "建準代", "客運營", "創代", "華開發", "回台",
+    "元大金擬", "之營運", "台灣廠", "月合", "年股", "東常會", "折台", "權資產",
+    "王可立", "由凱", "張庫", "海公公", "買台", "拚守", "寫佳績", "金發",
+    # --- 過於泛用、無投資訊號 -----------------------------------------
+    "生活", "台灣", "國際", "使用", "補充", "日期", "報告", "寶貝", "再講",
+    "無關", "重要", "財務", "市場", "門檻", "升高", "召開", "公告", "決議",
+    "受邀", "舉辦", "揭密", "遭控", "首富", "連拉", "器械", "富士", "有限公司",
+    "子公司", "股份", "董事", "其他", "之一",
+    # --- 單位 / 數量 ---------------------------------------------------
+    "萬元", "億元", "每股", "億", "萬",
+    # --- 單字 / 功能字（中文單字在此 corpus 幾乎都是 jieba 錯切殘留）----
+    "估", "銀", "疫", "體", "第", "金", "月", "年", "併", "逾", "達",
+    # --- 英文 / 數字異常 token -----------------------------------------
+    "ith", "55%",
+})
+
+
+def _is_meaningful_term(t: str) -> bool:
+    """Native-speaker noise filter for Chinese stock-text keywords."""
+    if not isinstance(t, str):
+        return False
+    s = t.strip()
+    if not s or len(s) < 2:        # 單字片段一律當雜訊
+        return False
+    if s in _KW_NOISE:
+        return False
+    if s.isdigit():                # 純數字
+        return False
+    return True
+
+
+# ============================================================================
 # Overview KPIs
 # ============================================================================
 st.markdown("### 輿情資產概覽")
@@ -224,22 +263,34 @@ if kw is None:
     st.warning("找不到 `outputs/text_keywords.parquet`。")
 else:
     sel = kw[kw["selected"]].copy()
-    top_bull = sel.nlargest(20, "lift").reset_index(drop=True)
-    top_bear = sel.nsmallest(20, "lift").reset_index(drop=True)
-    bull_max = top_bull["lift"].max()
-    bear_min = top_bear["lift"].min()
+    # 過濾雜訊（jieba 斷詞殘留 / 泛用詞 / 單字片段），讓榜單只剩可讀的真訊號
+    sel_clean = sel[sel["term"].apply(_is_meaningful_term)].copy()
+    noise_removed = len(sel) - len(sel_clean)
+    # 再以 lift=1 為基準分側：只有 lift > 1 的詞屬於看多、< 1 的屬於看空。
+    bull_pool = sel_clean[sel_clean["lift"] > 1.0]
+    bear_pool = sel_clean[sel_clean["lift"] < 1.0]
+    top_bull = bull_pool.nlargest(15, "lift").reset_index(drop=True)
+    top_bear = bear_pool.nsmallest(15, "lift").reset_index(drop=True)
+    bull_max = top_bull["lift"].max() if len(top_bull) else 1.5
+    bear_min = top_bear["lift"].min() if len(top_bear) else 0.5
+
+    st.caption(
+        f"已用中文母語者視角過濾 {noise_removed} 個雜訊詞（斷詞殘留、泛用字、單位量詞）。"
+        f"lift > 1 計入看多（{len(bull_pool)} 詞）、lift < 1 計入看空（{len(bear_pool)} 詞），"
+        f"每側取真訊號 Top 15 展示。"
+    )
 
     col_b, col_s = st.columns(2, gap="medium")
 
     with col_b:
         st.markdown(
-            '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
-            '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;'
-            'font-weight:700;letter-spacing:0.14em;color:#6ee7b7;text-transform:uppercase;'
-            'background:rgba(110,231,183,0.12);border:1px solid rgba(110,231,183,0.32);'
-            'padding:3px 10px;border-radius:4px;">BULLISH · 看多 TOP 20</span>'
-            '<span style="height:1px;flex:1;background:linear-gradient(90deg,rgba(110,231,183,0.32) 0%,transparent 100%);"></span>'
-            '</div>',
+            f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
+            f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;'
+            f'font-weight:700;letter-spacing:0.14em;color:#6ee7b7;text-transform:uppercase;'
+            f'background:rgba(110,231,183,0.12);border:1px solid rgba(110,231,183,0.32);'
+            f'padding:3px 10px;border-radius:4px;">BULLISH · 看多 TOP {len(top_bull)}（已濾雜訊）</span>'
+            f'<span style="height:1px;flex:1;background:linear-gradient(90deg,rgba(110,231,183,0.32) 0%,transparent 100%);"></span>'
+            f'</div>',
             unsafe_allow_html=True,
         )
         rows = []
@@ -266,12 +317,12 @@ else:
 
     with col_s:
         st.markdown(
-            '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
-            '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;'
-            'font-weight:700;letter-spacing:0.14em;color:#fb7185;text-transform:uppercase;'
-            'background:rgba(244,63,94,0.12);border:1px solid rgba(244,63,94,0.32);'
-            'padding:3px 10px;border-radius:4px;">BEARISH · 看空 TOP 20</span>'
-            '<span style="height:1px;flex:1;background:linear-gradient(90deg,rgba(244,63,94,0.32) 0%,transparent 100%);"></span>'
+            f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
+            f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;'
+            f'font-weight:700;letter-spacing:0.14em;color:#fb7185;text-transform:uppercase;'
+            f'background:rgba(244,63,94,0.12);border:1px solid rgba(244,63,94,0.32);'
+            f'padding:3px 10px;border-radius:4px;">BEARISH · 看空 TOP {len(top_bear)}（已濾雜訊）</span>'
+            f'<span style="height:1px;flex:1;background:linear-gradient(90deg,rgba(244,63,94,0.32) 0%,transparent 100%);"></span>'
             '</div>',
             unsafe_allow_html=True,
         )
@@ -309,8 +360,8 @@ else:
     <strong style="color:#f472b6;">看空詞 {bear_n}</strong>（lift &lt; 0.92）、
     中性詞 {neutral_n}。整體 lift 分布明顯右偏（mean = {sel["lift"].mean():.2f}）——
     選出的 500 詞大多對應「出現時後續偏上漲」的情境。
-    看多側以個股事件為主（上銀、建準、陽明、雙鴻、私有化、盤漲），
-    看空側則集中於總經標的與通用財報詞（生技、中鋼、金融股、年減、美元、異動）。
+    看多側的真訊號多為個股與事件題材（<strong>基泰、劉德音、deepseek、私有化、盤漲、大火</strong>），
+    看空側則集中於產業標的與財報詞（<strong>生技、中鋼、金融股、國票、年減、異動</strong>）。
     </div>
     """, unsafe_allow_html=True)
 
@@ -360,6 +411,43 @@ fv = load_sentiment_panel()
 
 render_section_title("C. 情緒 → 報酬驗證", "Sentiment Quintile → Forward Hit Rate · n = 948K")
 st.caption("把 948K 樣本依 `sent_polarity_5d` 分五桶，檢驗各桶 5 日後實際上漲率是否有系統性偏移。")
+
+# ---- Pre-chart explanation: what this chart is asking & how to read it ----
+st.markdown("""
+<div class="gl-box-info" style="margin:8px 0 16px 0;">
+<strong style="color:#E8F7FC;font-size:0.98rem;">這張圖在回答的問題 →</strong>
+<span style="font-size:0.95rem;color:#cfe2ee;">
+「論壇與新聞的情緒，到底能不能預測未來 5 天的股價走勢？」
+</span>
+
+<div style="margin-top:12px;">
+<strong style="color:#c4b5fd;">怎麼讀這張圖</strong>
+<ul style="margin:6px 0 4px 18px;padding:0;color:#b4ccdf;line-height:1.8;font-size:0.9rem;">
+<li><strong>X 軸</strong>：948K 個「股票 × 交易日」樣本依前 5 日情緒分 5 桶
+（每桶 ≈ 189K 筆）—— Q1 最負、Q3 中性、Q5 最正。</li>
+<li><strong>Y 軸</strong>：該桶在 5 日後的實際上漲率，<strong>減去全樣本基準（~29%）</strong>的 pp 差距。</li>
+<li><strong>顏色</strong>：<span style="color:#6ee7b7;">綠</span> = 該桶勝率高於基準；
+<span style="color:#f472b6;">粉</span> = 低於基準。</li>
+</ul>
+</div>
+
+<div style="margin-top:12px;">
+<strong style="color:#c4b5fd;">三種可能形態、各自代表什麼</strong>
+<ul style="margin:6px 0 4px 18px;padding:0;color:#b4ccdf;line-height:1.8;font-size:0.9rem;">
+<li><strong style="color:#6ee7b7;">單調右上</strong>（Q1 負 edge → Q5 正 edge）：情緒是「動能訊號」——
+看好就會漲，驗證傳統「情緒領先價格」的假設。</li>
+<li><strong style="color:#a78bfa;">U / V 型</strong>（Q1 高、Q3 低、Q5 偏）：情緒是「反向訊號」——
+極端情緒對應 mean-reversion 機會，跟隨情緒反而被套牢。</li>
+<li><strong style="color:#94a3b8;">柱子齊平</strong>：情緒沒有預測力，應該從模型剝離。</li>
+</ul>
+</div>
+
+<div style="margin-top:12px;font-size:0.88rem;color:#94a3b8;">
+<strong style="color:#cfe2ee;">為什麼用五等分而非線性迴歸</strong>：情緒分布極度不對稱
+（50%+ 為 0），五分位能把尾部訊號獨立出來，避免被中位區間主導。
+</div>
+</div>
+""", unsafe_allow_html=True)
 
 if fv is None:
     st.warning(
