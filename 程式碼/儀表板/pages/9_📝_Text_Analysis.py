@@ -1,13 +1,13 @@
-"""Text Analysis — 文本情緒分析儀表板（Phase 5B 產物 · v11.5.14 輿情分析師重構）
+"""Text Analysis — 文本情緒分析儀表板（Phase 5B 產物 · v11.5.17 定版）
 
 從「展示原始結果」升級為「可行動的輿情訊號」：
-  A. 看多 vs. 看空 關鍵字色譜 — 每個詞的 lift 對應勝率偏移
+  A. 看多 vs. 看空 關鍵字色譜 — 每個詞的 lift 對應勝率偏移（已過濾中文斷詞雜訊）
   B. 關鍵字 Lift × Chi² 強度圖 — 500 詞的方向性與重要性雙軸
-  C. 情緒 → 報酬驗證 — 情緒極端象限的反彈機率（contrarian 訊號）
-  D. 新聞 vs. 論壇 · 情緒分歧 — 兩個獨立來源的對照
+  C. 情緒 → 報酬驗證 — 情緒極端象限的反彈機率（contrarian 訊號，跨 1/5/20d 穩定）
+  D. 新聞 vs. 論壇 · 情緒分歧 + 4 象限共識矩陣 — 從獨立訊號到 trading rule
   E. 每日情緒指數時序
   F. 11 情緒特徵分布 + 覆蓋不均預警
-  G. 摺疊：原始輸出補件（詞雲 / 平台 / 時序 PNG）
+  G. 摺疊：原始輸出補件（平台 / 時序 / Top-30 PNG）
 """
 
 import math
@@ -587,10 +587,109 @@ if fv is not None:
     ：兩者相關係數僅 <span class="gl-mono">{corr:.2f}</span>，接近獨立。
     新聞均值 <span class="gl-mono">{news_mean:+.3f}</span> 比論壇 <span class="gl-mono">{forum_mean:+.3f}</span>
     負了一個量級，符合媒體「報憂不報喜」的選題慣性（罷工、火災、下修、調查）。
-    <br><br>
-    <strong>使用方式：</strong>把 <code>sent_news_mean_5d</code> 與 <code>sent_forum_mean_5d</code>
-    當作兩個獨立訊號源——當它們同向，訊號可信度加倍；當它們分歧（約 {disagree:.0%} 的時點），
-    可能是消息面 vs. 散戶情緒的背離機會。
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ------------------------------------------------------------------
+    # D2. 4-quadrant agreement × forward hit-rate matrix
+    # 把「訊號可信度加倍」這句話從口號變成可驗證的 edge。
+    # ------------------------------------------------------------------
+    st.markdown("##### D2 · 4 象限共識矩陣 · 當新聞 × 論壇同向 vs. 分歧")
+    st.caption(
+        "把樣本依「新聞情緒 ±」× 「論壇情緒 ±」切成 4 個象限，檢驗各象限 5 日後實際上漲率。"
+        "共識 > 單邊 > 分歧 —— 就是所謂「雙印證」的統計基礎。"
+    )
+
+    nf4 = fv[["sent_news_mean_5d", "sent_forum_mean_5d", "up_5"]].dropna().copy()
+    base4 = nf4["up_5"].mean()
+    # 把「正好為 0」當作未表態，略過；正負各自歸類
+    mask_pos_n = nf4["sent_news_mean_5d"] > 0
+    mask_neg_n = nf4["sent_news_mean_5d"] < 0
+    mask_pos_f = nf4["sent_forum_mean_5d"] > 0
+    mask_neg_f = nf4["sent_forum_mean_5d"] < 0
+
+    nf4["quad"] = np.select(
+        [
+            mask_pos_n & mask_pos_f,
+            mask_neg_n & mask_neg_f,
+            mask_pos_n & mask_neg_f,
+            mask_neg_n & mask_pos_f,
+        ],
+        [
+            "共識看多 (news+ / forum+)",
+            "共識看空 (news− / forum−)",
+            "新聞多 / 論壇空",
+            "新聞空 / 論壇多",
+        ],
+        default=None,
+    )
+    quad_df = nf4.dropna(subset=["quad"]).groupby("quad", observed=True).agg(
+        n=("up_5", "size"),
+        hit_rate=("up_5", "mean"),
+    ).reset_index()
+    quad_df["edge_pp"] = (quad_df["hit_rate"] - base4) * 100
+    quad_order = [
+        "共識看多 (news+ / forum+)",
+        "新聞多 / 論壇空",
+        "新聞空 / 論壇多",
+        "共識看空 (news− / forum−)",
+    ]
+    quad_df["quad"] = pd.Categorical(quad_df["quad"], categories=quad_order, ordered=True)
+    quad_df = quad_df.sort_values("quad").reset_index(drop=True)
+
+    # 漸層配色：共識多 → 綠；共識空 → 粉；分歧 → 灰紫
+    def _quad_color(name: str) -> str:
+        if "共識看多" in name: return "#14b8a6"
+        if "共識看空" in name: return "#f472b6"
+        return "#a78bfa"
+    quad_colors = [_quad_color(q) for q in quad_df["quad"].astype(str)]
+
+    fig_d4 = go.Figure()
+    fig_d4.add_trace(go.Bar(
+        x=quad_df["quad"].astype(str), y=quad_df["edge_pp"],
+        marker=dict(color=quad_colors, line=dict(width=0)),
+        text=[f"{e:+.2f}pp<br>up {h:.1%}<br>n={n:,}"
+              for e, h, n in zip(quad_df["edge_pp"], quad_df["hit_rate"], quad_df["n"])],
+        textposition="outside",
+        textfont=dict(size=11, color="#cfe2ee", family="JetBrains Mono"),
+        hovertemplate="<b>%{x}</b><br>up_rate %{customdata[0]:.2%}<br>"
+                      "edge %{y:+.2f}pp<br>n %{customdata[1]:,}<extra></extra>",
+        customdata=np.stack([quad_df["hit_rate"], quad_df["n"]], axis=-1),
+    ))
+    fig_d4.add_hline(y=0, line_dash="dash", line_color="rgba(148,163,184,0.5)")
+    fig_d4.update_layout(**glint_plotly_layout(
+        title=f"新聞 × 論壇 · 4 象限 5 日上漲率 edge · 基準 {base4:.2%}",
+        subtitle="共識看多 = 加倍下注；共識看空 = 避險；分歧 = 降低曝險或等待",
+        height=380, xlabel="象限", ylabel="vs. 基準 (pp)",
+    ), showlegend=False)
+    st.plotly_chart(fig_d4, use_container_width=True)
+
+    # 自動產生文字結論
+    q_cm = quad_df.loc[quad_df["quad"] == "共識看多 (news+ / forum+)"].iloc[0]
+    q_cs = quad_df.loc[quad_df["quad"] == "共識看空 (news− / forum−)"].iloc[0]
+    q_d1 = quad_df.loc[quad_df["quad"] == "新聞多 / 論壇空"].iloc[0]
+    q_d2 = quad_df.loc[quad_df["quad"] == "新聞空 / 論壇多"].iloc[0]
+    st.markdown(f"""
+    <div class="success-box">
+    <strong style="display:inline-flex;align-items:center;gap:6px;">
+    {glint_icon("pin", 15, "#c4b5fd")} 雙印證能放大 edge · 分歧則稀釋訊號</strong>
+    <ul style="margin:8px 0 4px 18px;padding:0;color:#b4ccdf;line-height:1.8;font-size:0.93rem;">
+    <li><strong style="color:#6ee7b7;">共識看多</strong>（n={q_cm["n"]:,}）edge
+    <span class="gl-mono">{q_cm["edge_pp"]:+.2f}pp</span>、勝率 <strong>{q_cm["hit_rate"]:.2%}</strong>
+    —— 當新聞與論壇「同時偏正」，5 日勝率相對基準的偏移最大。</li>
+    <li><strong style="color:#f472b6;">共識看空</strong>（n={q_cs["n"]:,}）edge
+    <span class="gl-mono">{q_cs["edge_pp"]:+.2f}pp</span>、勝率 <strong>{q_cs["hit_rate"]:.2%}</strong>
+    —— 雙負時反而出現 C 節 contrarian 訊號的共鳴：極端情緒對應反彈機會。</li>
+    <li><strong style="color:#a78bfa;">分歧象限</strong>（n={q_d1["n"]+q_d2["n"]:,}）edge
+    <span class="gl-mono">{q_d1["edge_pp"]:+.2f}pp</span> / <span class="gl-mono">{q_d2["edge_pp"]:+.2f}pp</span>
+    —— 當兩個來源看法不一致，訊號強度明顯被稀釋，不建議倚重。</li>
+    </ul>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(148,163,184,0.18);">
+    <strong>實務操作建議</strong>：把 <code>sent_news_mean_5d</code> × <code>sent_forum_mean_5d</code>
+    視為 <strong>AND 邏輯的第二道確認</strong>。當模型給出多頭訊號但兩來源分歧時，
+    降低部位或等待；當模型訊號與「共識看多」同時成立，可放大部位（Phase 3 模型實際上已隱式學到，
+    此節用於驗證其可解釋性）。
+    </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -731,6 +830,6 @@ with st.expander(
 st.divider()
 st.markdown("""
 <div class="page-footer">
-Phase 5B Text & Sentiment Analytics · jieba + SnowNLP · 1.12M articles → 500 kw × 3 window + 11 sent features · v11.5.14 (2026-04-23)
+Phase 5B Text & Sentiment Analytics · jieba + SnowNLP · 1.12M articles → 500 kw × 3 window + 11 sent features · v11.5.17 (2026-04-24)
 </div>
 """, unsafe_allow_html=True)
