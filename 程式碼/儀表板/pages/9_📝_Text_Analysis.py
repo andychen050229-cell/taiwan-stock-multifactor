@@ -65,31 +65,91 @@ fig_dir = figures_dir()
 # ============================================================================
 # Cached data loaders
 # ============================================================================
-_OUTPUTS = Path(__file__).resolve().parent.parent.parent.parent / "outputs"
+def _resolve_outputs_dir() -> Path:
+    """Match utils._project_outputs_dir() semantics.
+
+    Handles both local dev (project_root/outputs) and the Streamlit Cloud
+    shim case where dashboard/app.py does os.chdir(程式碼/儀表板/).
+    """
+    here = Path(__file__).resolve()
+    for candidate in (
+        here.parent.parent.parent.parent / "outputs",   # project_root/outputs (canonical)
+        here.parent.parent.parent / "outputs",          # 程式碼/outputs (legacy)
+        Path.cwd() / "outputs",
+        Path.cwd().parent / "outputs",
+        Path.cwd().parent.parent / "outputs",
+    ):
+        if candidate.exists():
+            return candidate
+    return Path.cwd() / "outputs"
+
+
+_OUTPUTS = _resolve_outputs_dir()
+
+_SENT_COLS = [
+    "trade_date", "label_1", "label_5", "label_20",
+    "sent_polarity_1d", "sent_polarity_5d", "sent_polarity_20d",
+    "sent_pos_neg_spread_5d", "sent_pos_ratio_5d", "sent_neg_ratio_5d",
+    "sent_news_mean_5d", "sent_forum_mean_5d",
+    "sent_volatility_5d", "sent_extreme_ratio_5d", "sent_reversal_5d",
+]
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def load_keywords() -> pd.DataFrame | None:
-    path = _OUTPUTS / "text_keywords.parquet"
-    if not path.exists():
-        return None
-    return pd.read_parquet(path)
+    # text_keywords.parquet is tiny (~9655 rows) and lives in outputs/
+    for candidate in (
+        _OUTPUTS / "text_keywords.parquet",
+        Path.cwd() / "outputs" / "text_keywords.parquet",
+    ):
+        if candidate.exists():
+            return pd.read_parquet(candidate)
+    return None
 
 
 @st.cache_data(ttl=3600, show_spinner="讀取 948K 情緒樣本中…")
 def load_sentiment_panel() -> pd.DataFrame | None:
-    """Load the minimal columns needed for sentiment analytics (~10 cols, ~2s)."""
-    path = _OUTPUTS / "feature_store_final.parquet"
-    if not path.exists():
+    """Load 15 sentiment-related columns with column projection.
+
+    Resolution order:
+      1. Single-file `feature_store_final.parquet` (local dev, 284 MB — gitignored)
+      2. Chunked `fs_chunks/fs_*.parquet` (Streamlit Cloud, 9 quarterly slices)
+      3. Legacy `feature_store.parquet`
+    """
+    df: pd.DataFrame | None = None
+
+    # 1. Single-file feature store
+    single = _OUTPUTS / "feature_store_final.parquet"
+    if single.exists():
+        try:
+            df = pd.read_parquet(single, columns=_SENT_COLS)
+        except Exception:
+            df = None
+
+    # 2. Chunked fallback — sum of all quarters with column projection
+    if df is None:
+        chunk_dir = _OUTPUTS / "fs_chunks"
+        if chunk_dir.exists():
+            parts = sorted(chunk_dir.glob("fs_*.parquet"))
+            if parts:
+                try:
+                    frames = [pd.read_parquet(p, columns=_SENT_COLS) for p in parts]
+                    df = pd.concat(frames, ignore_index=True)
+                except Exception:
+                    df = None
+
+    # 3. Legacy fallback
+    if df is None:
+        legacy = _OUTPUTS / "feature_store.parquet"
+        if legacy.exists():
+            try:
+                df = pd.read_parquet(legacy, columns=_SENT_COLS)
+            except Exception:
+                df = None
+
+    if df is None:
         return None
-    cols = [
-        "trade_date", "label_1", "label_5", "label_20",
-        "sent_polarity_1d", "sent_polarity_5d", "sent_polarity_20d",
-        "sent_pos_neg_spread_5d", "sent_pos_ratio_5d", "sent_neg_ratio_5d",
-        "sent_news_mean_5d", "sent_forum_mean_5d",
-        "sent_volatility_5d", "sent_extreme_ratio_5d", "sent_reversal_5d",
-    ]
-    df = pd.read_parquet(path, columns=cols)
+
     # Binary 'up' labels derived from tri-state {-1, 0, 1}
     for L in (1, 5, 20):
         df[f"up_{L}"] = (df[f"label_{L}"] == 1).astype(np.int8)
@@ -302,7 +362,11 @@ render_section_title("C. 情緒 → 報酬驗證", "Sentiment Quintile → Forwa
 st.caption("把 948K 樣本依 `sent_polarity_5d` 分五桶，檢驗各桶 5 日後實際上漲率是否有系統性偏移。")
 
 if fv is None:
-    st.warning("找不到 `outputs/feature_store_final.parquet`，跳過情緒驗證。")
+    st.warning(
+        "情緒樣本 parquet 未就緒：已掃描 `outputs/feature_store_final.parquet` 與 "
+        "`outputs/fs_chunks/` 皆缺 15 個必要欄位。本地請執行 Phase 2；"
+        "Cloud 請確認 `fs_chunks/fs_*.parquet` 九份切片皆已同步。"
+    )
 else:
     buckets, base5 = sentiment_quintile_edge(fv, "sent_polarity_5d", "up_5")
 
@@ -536,23 +600,20 @@ st.markdown("""
 # Supporting visualizations (collapsed)
 # ============================================================================
 with st.expander(
-    "補充視覺化 · Supporting Visualizations（詞雲 / 平台 / 文本量）",
+    "補充視覺化 · Supporting Visualizations（平台 / 文本量 / Top-30）",
     expanded=False,
     icon=":material/collections:",
 ):
-    st.caption("原始 Phase 5B 輸出 — 適合做簡報與報告引用，不含決策性洞察。")
-
-    st.markdown("##### 詞雲總覽 · 500 selected keywords")
-    png_wc = fig_dir / "text_wordcloud.png"
-    if png_wc.exists():
-        st.image(str(png_wc), use_container_width=True)
-        st.markdown("""
-        <div style="font-size:0.86rem;color:#b4ccdf;line-height:1.65;">
-        頭部詞以半導體電子龍頭（台積電 / 聯發科 / 鴻海 / 群聯 / 大立光）為主 —— 這是
-        stock_text 資料集「點名式」文章的天然後果。事件詞（大火 / 私有化 / deepseek / future）
-        展現 2023–2025 的題材脈絡。詞雲本身只是詞頻熱度圖，<strong>方向性訊號請回到 A / B 兩節</strong>。
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown("""
+    <div style="font-size:0.85rem;color:#94a3b8;line-height:1.7;margin-bottom:10px;
+                border-left:2px solid rgba(148,163,184,0.28);padding-left:12px;">
+    <strong style="color:#cfe2ee;">為何沒有詞雲？</strong>
+    原始詞頻榜上有大量 tokenization artifacts（例：<code>銀上</code>、<code>上銀上</code>、
+    <code>再講</code>、<code>王可立</code>），這類雜訊在頻率排序下會被視覺化放大，
+    反而掩蓋真訊號。上方 A / B 兩節已用 <strong>lift</strong>（方向性）與 <strong>chi²</strong>（顯著性）
+    把可下注的詞篩出來 —— 詞雲在這份 corpus 只會添噪，故移除。
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("##### 資料來源平台分布")
     png_plat = fig_dir / "text_platform_share.png"
