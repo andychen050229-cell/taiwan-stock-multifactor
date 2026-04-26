@@ -528,7 +528,7 @@ def slide_problem(prs):
         {'text': '台股短線是噪聲、', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': 'alpha 在中長線基本面結構', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -0.8},
         {'br': True},
-        {'text': '我們的切點：以 D+20 為視窗、結構化基本面 × 文本 × 籌碼三軸',
+        {'text': '以 D+20 為視窗、三軸結構化訊號驗證 alpha 來源',
          'size': 18, 'color': INK_2},
     ], line_h=1.28)
     rule_divider(slide, 96, 280, color=TEAL)
@@ -830,10 +830,7 @@ def slide_pillars_lopo(prs):
         {'text': 'Risk 為地基、', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.6},
         {'text': '移除 Risk 則 AUC 整體塌陷', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -0.6},
         {'br': True},
-        {'text': 'LOPO ΔAUC：Risk +138.6 bps、Trend +64.9、Val +9.5、Text +8.5；',
-         'size': 18, 'color': INK_2},
-        {'br': True},
-        {'text': 'Chip / Event / Industry 為負貢獻、引入雜訊多於訊息。',
+        {'text': 'Risk × Trend × Text 三元正貢獻；Chip / Event / Industry 引入雜訊多於訊息',
          'size': 18, 'color': INK_2},
     ], line_h=1.30)
     rule_divider(slide, 96, 280, color=TEAL)
@@ -922,7 +919,7 @@ def slide_model_performance(prs):
         {'text': '四項獨立統計檢定一致指向 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.6},
         {'text': 'D+20 alpha 確實存在', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -0.6},
         {'br': True},
-        {'text': '預測強度（AUC）、IC 穩定性（ICIR）、多重檢定（DSR）、選股效益（Top 1%）', 'size': 18, 'color': INK_2},
+        {'text': '四向度交叉驗證 · 同一結論在四 fold 樣本外重複收斂', 'size': 18, 'color': INK_2},
     ], line_h=1.30)
     rule_divider(slide, 96, 280, color=TEAL)
 
@@ -1153,10 +1150,9 @@ def slide_sentiment_ushape(prs):
         {'text': '隔日 +3.2 pp ', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -1.0, 'mono': True},
         {'text': '逆向 edge', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -1.0},
         {'br': True},
-        {'text': 'Q5 樂觀僅 +0.6 pp、', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
-        {'text': '1d / 5d / 20d 三期同向、', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
-        {'text': '半衰期 > 一個月', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
-    ], line_h=1.18)
+        {'text': '兩端極值帶 alpha · 三窗口同向、半衰期 > 一個月',
+         'size': 18, 'color': INK_2},
+    ], line_h=1.30)
     rule_divider(slide, 96, 286)
 
     # Left: U-shape chart (5 quintile bars)
@@ -1274,10 +1270,9 @@ def slide_governance(prs):
         {'text': '9 / 9 治理關卡 ', 'size': 40, 'bold': True, 'color': EMERALD, 'ls': -1.0, 'mono': True},
         {'text': 'PASS', 'size': 40, 'bold': True, 'color': EMERALD, 'ls': -0.8},
         {'br': True},
-        {'text': '結論並非運氣、', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
-        {'text': '並非過擬合、', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
-        {'text': '可獨立稽核', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
-    ], line_h=1.18)
+        {'text': '結論並非運氣、並非過擬合、可獨立稽核',
+         'size': 18, 'color': INK_2},
+    ], line_h=1.30)
     rule_divider(slide, 96, 286)
 
     # LEFT · DSR explainer panel
@@ -1403,7 +1398,7 @@ def slide_equity_curve_main(prs):
         {'text': '+36.8%', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -0.6, 'mono': True},
         {'text': ' vs TAIEX +12.4%', 'size': 26, 'color': INK_2, 'ls': -0.4, 'mono': True},
         {'br': True},
-        {'text': '把模型機率分數化為實單部位、月再平衡、含手續費 0.3% 與滑價 0.1%。',
+        {'text': '機率分數轉實單 · 含手續費 0.3% + 滑價 0.1% 後仍領先大盤 2 倍以上',
          'size': 18, 'color': INK_2},
     ], line_h=1.30)
     rule_divider(slide, 96, 290, color=EMERALD)
@@ -1523,10 +1518,9 @@ def slide_recommendations(prs):
         {'text': '1 – 2 個月重新訓練、', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -1.0},
         {'text': '三大限制邊界', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -1.0},
         {'br': True},
-        {'text': '能落地、', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
-        {'text': '邊界清楚、', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
-        {'text': '節奏可預期', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
-    ], line_h=1.18)
+        {'text': '能落地、邊界清楚、節奏可預期',
+         'size': 18, 'color': INK_2},
+    ], line_h=1.30)
     rule_divider(slide, 96, 286)
 
     # Three columns
