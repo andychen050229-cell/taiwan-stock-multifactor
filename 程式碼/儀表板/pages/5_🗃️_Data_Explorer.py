@@ -65,7 +65,7 @@ render_terminal_hero(
 )
 render_trust_strip([
     ("ROWS",     "948,976 筆",           "blue"),
-    ("SOURCES",  "bda2026 · FinMind",   "cyan"),
+    ("SOURCES",  "核心資料庫 · FinMind",   "cyan"),
     ("FEATURES", "91 / 1,623 候選",      "violet"),
     ("PIT",      "已對齊 · 無洩漏",       "emerald"),
 ])
@@ -91,8 +91,8 @@ st.markdown("""
     ">資料怎麼來? · DATA PIPELINE</div>
     <div style="font-size: 0.95rem; color: #cfe2ee; line-height: 1.85;">
         <strong style="color: #E8F7FC;">這一頁的 94 萬筆資料怎麼產生?</strong><br>
-        ① <strong>教授 bda2026 資料庫</strong>提供 4 張主表(公司基本、股價、財報、文本);<br>
-        ② <strong>FinMind 公開 API</strong>補上 OHLCV、資產負債表、現金流、產業、三大法人等 6 張表;<br>
+        ① <strong>核心研究資料庫</strong>提供 4 張主表(公司基本、股價、財報、文本);<br>
+        ② <strong>FinMind 公開 API</strong>補齊 OHLCV、資產負債表、現金流、產業分類、三大法人等 6 張表;<br>
         ③ 經過 <strong>PIT 合規對齊</strong>(財報按法定申報日延遲)與 <strong>洩漏偵測</strong>;<br>
         ④ 依九大面向建構 1,623 個候選特徵 → 三階段篩選到 91 個生產用特徵;<br>
         ⑤ 使用 <strong>Purged Walk-Forward CV</strong>(訓練集往前擴展 + 20 日 embargo),確保模型評估不偷看未來。<br>
@@ -147,19 +147,20 @@ try:
     st.markdown(f"""
     <div class="insight-box">
     <span style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("calendar", 15, "#22d3ee")} <strong>資料期間 | Period：</strong></span> {fs_info.get('date_range', 'N/A')}<br>
-    <span style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("layers", 15, "#8b5cf6")} <strong>涵蓋公司 | Coverage：</strong></span> 教授 companies 1,932 家名單，其中 <strong>1,930 家在 2023-03~2025-03 期間有交易資料</strong>進入 feature_store（2 支 KY/下市股票於 FinMind 失敗）<br>
-    <span style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("bar-chart", 15, "#10b981")} <strong>資料來源 | Sources：</strong></span> 教授研究型資料庫 <code>bda2026</code>（4 張表）＋ FinMind 公開 API 補充資料（6 張表，已封版）<br>
-    <span style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("target", 15, "#10b981")} <strong>資料模式 | Mode：</strong></span> 固定歷史快照 | Static Historical Snapshot｜<strong>SCOPE v1.0 已凍結</strong>
+    <span style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("layers", 15, "#8b5cf6")} <strong>涵蓋公司 | Coverage：</strong></span> 核心資料庫 1,932 家公司，其中 <strong>1,930 家在 2023-03 ～ 2025-03 期間有交易資料</strong>進入 feature_store（2 支 KY 股 / 下市股票無外部資料來源）<br>
+    <span style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("bar-chart", 15, "#10b981")} <strong>資料來源 | Sources：</strong></span> 核心研究資料庫（4 張主表）＋ FinMind 公開 API 補充資料（6 張表，已封版）<br>
+    <span style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("target", 15, "#10b981")} <strong>資料模式 | Mode：</strong></span> 固定歷史快照 | Static Historical Snapshot｜<strong>資料範圍已凍結</strong>
     </div>
     """, unsafe_allow_html=True)
 
     # ===== Data Source Transparency =====
     st.markdown("### 🔎 資料來源透明宣告 | Data Source Transparency")
-    # v11 §4a — replaced ad-hoc pastel div with the shared `.gl-box-warn` class
-    # so it inherits the dark-glint terminal palette.
+    # v11.5.19 §5 — copy rewritten to user-facing language; designer-perspective
+    # phrasing (「教授提供」「教授未提供」「補教授資料之不足」) replaced with
+    # neutral descriptions of what each table actually contributes.
     st.markdown("""
     <div class="gl-box-warn">
-    <strong>本專案使用兩類資料</strong>：主資料為教授提供之 <code>bda2026</code> 研究型資料庫（4 張表），<strong>輔以 FinMind 公開 API 取得 6 張補充表</strong>以完整支援 8 支柱多因子分析。自 2026-04-19 起依 <code>SCOPE.md</code> v1.0 封版，不再新增任何外部資料。
+    <strong>本系統的資料分為兩塊</strong>：A 為核心研究資料庫（4 張主表，作為樣本主鍵與標籤的依據）；B 為 FinMind 公開 API 取得的 6 張補充表（補齊核心資料庫尚未涵蓋的欄位）。資料範圍已於 2026-04-19 凍結、不再新增任何外部資料、確保結果可被獨立重現。
     </div>
     """, unsafe_allow_html=True)
 
@@ -169,39 +170,39 @@ try:
             {"資料表": "companies", "筆數": "1,932", "用途": "公司基本識別（JOIN key）"},
             {"資料表": "stock_prices", "筆數": "877,699", "用途": "標籤生成、val_估值｜僅 closing_price"},
             {"資料表": "income_stmt", "筆數": "14,968", "用途": "fund_基本面｜僅 6 個損益科目"},
-            {"資料表": "stock_text", "筆數": "1,125,134", "用途": "event_/txt_/sent_｜PTT/Dcard/Mobile01/Yahoo"},
+            {"資料表": "stock_text", "筆數": "1,125,134", "用途": "event_ / txt_ / sent_｜PTT / Dcard / Mobile01 / Yahoo"},
         ])
         # v11 §3 — Glint dark terminal table (replaces raw st.dataframe)
         render_glint_table(
             prof_data,
-            title="A · 教授提供資料庫 (bda2026 · 4 tables)",
+            title="A · 核心研究資料庫（4 張主表）",
             mono_columns=["筆數"],
             accent_columns={"資料表": "cyan"},
         )
 
     with col_b:
         finmind_data = pd.DataFrame([
-            {"檔案": "stock_prices_ohlcv", "FinMind Dataset": "TaiwanStockPrice", "補教授資料之不足": "OHLCV（教授僅收盤價）"},
-            {"檔案": "balance_sheet", "FinMind Dataset": "TaiwanStockBalanceSheet", "補教授資料之不足": "資產負債表（教授未提供）"},
-            {"檔案": "cashflow", "FinMind Dataset": "TaiwanStockCashFlowsStatement", "補教授資料之不足": "現金流量表（教授未提供）"},
-            {"檔案": "industry", "FinMind Dataset": "TaiwanStockInfo", "補教授資料之不足": "產業別（教授 companies 無）"},
-            {"檔案": "institutional_investors", "FinMind Dataset": "TaiwanStockInstitutionalInvestorsBuySell", "補教授資料之不足": "三大法人籌碼（教授未提供）"},
-            {"檔案": "margin_trading", "FinMind Dataset": "TaiwanStockMarginPurchaseShortSale", "補教授資料之不足": "融資融券（教授未提供）— ⚠️ mg_ 支柱已於 2026-04-19 下架，檔案保留作為資料透明之證明"},
+            {"檔案": "stock_prices_ohlcv", "資料集名稱": "TaiwanStockPrice", "補充內容": "完整 OHLCV（核心表僅含收盤價）"},
+            {"檔案": "balance_sheet", "資料集名稱": "TaiwanStockBalanceSheet", "補充內容": "資產負債表（核心庫無此項）"},
+            {"檔案": "cashflow", "資料集名稱": "TaiwanStockCashFlowsStatement", "補充內容": "現金流量表（核心庫無此項）"},
+            {"檔案": "industry", "資料集名稱": "TaiwanStockInfo", "補充內容": "產業分類欄位（核心 companies 表未含）"},
+            {"檔案": "institutional_investors", "資料集名稱": "TaiwanStockInstitutionalInvestorsBuySell", "補充內容": "外資 / 投信 / 自營商三大法人買賣超"},
+            {"檔案": "margin_trading", "資料集名稱": "TaiwanStockMarginPurchaseShortSale", "補充內容": "融資融券交易資料 — ⚠️ 已於 2026-04-19 因覆蓋率不足下架，檔案保留供查驗"},
         ])
         render_glint_table(
             finmind_data,
-            title="B · FinMind 補充資料 (6 tables · sealed)",
-            accent_columns={"檔案": "cyan", "FinMind Dataset": "amber"},
+            title="B · FinMind 補充資料（6 張表 · 已封版）",
+            accent_columns={"檔案": "cyan", "資料集名稱": "amber"},
         )
 
     # v11 §4a — replaced ad-hoc pastel div with shared `.gl-box-danger` class.
     st.markdown("""
     <div class="gl-box-danger">
-    <strong>⚠️ mg_ 融資融券支柱已於 2026-04-19 下架</strong>：FinMind 覆蓋僅 1,136 / 1,932 = 58.8% 公司，其中約 100 支為結構性不可下載（KY 股、創業板、新上市、ETF 非信用交易標的），無法達到 100% 覆蓋。過往範例（G1/G10/G20/G2）亦未使用此特徵。改由 <code>chip_</code>（三大法人）、<code>trend_</code>（技術）、<code>event_</code>（文本）承擔市場結構訊號。parquet 檔案仍保留作為資料透明之證明，詳見 <code>資料來源宣告.md</code> 的 B6 欄位說明。
+    <strong>⚠️ 融資融券（mg_）支柱已於 2026-04-19 下架</strong>：FinMind 公開資料對台股的覆蓋率僅 1,136 / 1,932 = 58.8%，其中約 100 支為結構性不可下載（KY 股、創業板、新上市、非信用交易 ETF 等），無法達到完整覆蓋。本系統改由 <code>chip_</code>（三大法人）、<code>trend_</code>（技術）、<code>event_</code>（文本）共同承擔市場結構訊號；原始 parquet 檔案仍保留供查驗，欄位定義詳見資料目錄文件。
     </div>
     """, unsafe_allow_html=True)
 
-    st.caption("完整資料來源說明請見專案根目錄的 `SCOPE.md` 與 `選用資料集/資料來源宣告.md`。")
+    st.caption("完整資料授權與引用條款請見 `選用資料集/資料來源宣告.md`。")
 
     # ===== Legacy expander kept for pipeline details =====
     with st.expander("資料前處理 Pipeline 說明", expanded=False, icon=":material/menu_book:"):
