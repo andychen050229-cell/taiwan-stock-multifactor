@@ -1693,7 +1693,7 @@ def slide_closing(prs):
     text(slide, 130, 1018, 1300, 30,
          '本研究為 NTU 大數據與商業分析專案課堂成果、不構成任何投資建議',
          size=11, color=INK_4, anchor='middle', mono=True, ls=0.5)
-    text(slide, 1580, 1018, 260, 30, 'APPENDIX · 27 PAGES',
+    text(slide, 1580, 1018, 260, 30, 'APPENDIX · 30 PAGES',
          size=10, bold=True, color=MINT, align='right', anchor='middle', mono=True, ls=1.6)
     return slide
 
@@ -3427,6 +3427,250 @@ def slide_apx_bibliography(prs):
     ], color=ROSE, bg=ROSE_LT)
     return slide
 
+
+# ============================================================
+# A.28 · 工具與技術棧 · Python ecosystem matrix
+# ============================================================
+def slide_apx_tools_stack(prs):
+    slide = add_blank_slide(prs)
+    slide_chrome_appendix(slide, 'Tools · Python Ecosystem', 'A.28',
+                          source='requirements.txt · pyproject.toml · 5 functional groups × 3 libs')
+    eyebrow(slide, 96, 116, 700, 'A.28 · 工具棧 · 15 個核心套件', color=ROSE)
+    rich(slide, 96, 144, 1750, 110, [
+        {'text': 'Python Stack ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': '· Data → ML → NLP → Viz → Governance', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
+    ], line_h=1.18)
+    rule_divider(slide, 96, 268, color=ROSE)
+
+    groups = [
+        ('DATA · 資料層',         NAVY, [
+            ('pandas',  '2.2',  'panel data 主鍵對齊'),
+            ('numpy',   '2.0',  '向量運算 / 統計'),
+            ('duckdb',  '0.10', '本地 OLAP · WAL off'),
+        ]),
+        ('ML · 模型層',          TEAL, [
+            ('xgboost',     '1.7', '★ winner · D+20 AUC 0.6455'),
+            ('lightgbm',    '4.x', '次佳引擎 · D+20 AUC 0.6391'),
+            ('scikit-learn','1.5', 'preprocess / metrics / split'),
+        ]),
+        ('TUNE · 搜尋層',        EMERALD, [
+            ('optuna',  '3.6',  'TPE Sampler · 50 trials'),
+            ('shap',    '0.46', 'tree explainer · top-20 features'),
+            ('joblib',  '1.4',  'model serialization · 6 horizons'),
+        ]),
+        ('NLP · 文本層',         GOLD, [
+            ('jieba',    '0.42', '中文斷詞 · 自定義金融詞典'),
+            ('snownlp',  '0.12', '中文情緒五桶分位'),
+            ('wordcloud','1.9',  '視覺化 · Q1 vs Q5 對比'),
+        ]),
+        ('VIZ + GOV · 服務層',   ROSE, [
+            ('streamlit','1.39', '13 頁互動儀表板'),
+            ('plotly',   '5.24', 'dark-glint chart 語言'),
+            ('matplotlib','3.9', 'static report figures'),
+        ]),
+    ]
+    grid_x, grid_y = 96, 308
+    cw = 350; ch = 360; gap = 12
+    for i, (title, c, libs) in enumerate(groups):
+        cx = grid_x + i*(cw + gap)
+        card(slide, cx, grid_y, cw, ch, top_stripe=c)
+        text(slide, cx+22, grid_y+22, cw-44, 22, title,
+             size=11, bold=True, color=c, mono=True, ls=2.4)
+        for j, (lib, ver, note) in enumerate(libs):
+            ry = grid_y + 70 + j*92
+            rect(slide, cx+22, ry+8, 4, 64, fill=c)
+            text(slide, cx+34, ry, cw-56, 28, lib,
+                 size=18, bold=True, color=NAVY, mono=True, ls=-0.4)
+            text(slide, cx+34, ry+30, 100, 22, f'v{ver}',
+                 size=11, bold=True, color=c, mono=True, ls=0.6)
+            text(slide, cx+34, ry+52, cw-56, 36, note,
+                 size=11, color=INK_2, line_h=1.4)
+
+    takeaway_bar(slide, 96, 700, 1728, 220, 'WHY THIS STACK', [
+        {'text': '純 Python · MIT/Apache 授權 · 全部可在 ', 'size': 15, 'color': INK},
+        {'text': 'Streamlit Cloud / Docker / Conda', 'size': 15, 'bold': True, 'color': NAVY, 'mono': True},
+        {'text': ' 本地或雲端重現；', 'size': 15, 'color': INK},
+        {'br': True},
+        {'text': 'XGBoost + LightGBM 雙引擎並行 · ', 'size': 15, 'color': INK_2},
+        {'text': 'Optuna 150 trials × 6 horizon × engine = 900 次搜尋', 'size': 15, 'bold': True, 'color': TEAL},
+        {'text': '；SHAP 提供個股可解釋性、Streamlit 13 頁將模型結果暴露給研究員與經理人。',
+         'size': 15, 'color': INK_2},
+        {'sp': True},
+        {'text': 'AUDIT', 'size': 12, 'bold': True, 'color': ROSE, 'mono': True, 'ls': 2.0},
+        {'br': True},
+        {'text': '所有依賴版本鎖在 ', 'size': 13, 'color': INK_2},
+        {'text': 'requirements.txt', 'size': 13, 'bold': True, 'color': INK, 'mono': True},
+        {'text': '、commit hash + joblib 同步、', 'size': 13, 'color': INK_2},
+        {'text': '任何一段績效都可從原始資料 → 重現到分數差 < 1e-6。',
+         'size': 13, 'bold': True, 'color': NAVY},
+    ], color=ROSE, bg=ROSE_LT)
+    return slide
+
+
+# ============================================================
+# A.29 · 方法論詳述 · 5 大核心統計方法
+# ============================================================
+def slide_apx_methodology(prs):
+    slide = add_blank_slide(prs)
+    slide_chrome_appendix(slide, 'Methodology · 5 Core Methods', 'A.29',
+                          source='López de Prado (2018) · Bailey & López de Prado (2014) · Lundberg & Lee (2017)')
+    eyebrow(slide, 96, 116, 700, 'A.29 · 方法論 · 公式 + 我們的應用', color=ROSE)
+    rich(slide, 96, 144, 1750, 110, [
+        {'text': 'Method × Application ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': '· 從學術到實證的 1:1 對應', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
+    ], line_h=1.18)
+    rule_divider(slide, 96, 268, color=ROSE)
+
+    methods = [
+        ('01', 'Purged WF-CV',     '時序交叉驗證',      NAVY,
+         'Fold k 之 train ∩ test̂(t±h) = ∅',
+         '4 fold × 20 日 embargo · 防止 D+20 標籤跨期重疊洩漏',
+         'López de Prado (2018) §7.4'),
+        ('02', 'Deflated Sharpe',  '多重檢定校正',      TEAL,
+         'DSR = (SR̂ − E[max SR_n]) · √(T−1) / Φ⁻¹(1−α)',
+         '原始 SR̂ 2.41 → DSR 12.12 · 扣 150 trials skew/kurt 後 p ≪ 0.001',
+         'Bailey & López de Prado (2014)'),
+        ('03', 'LOPO',             '支柱貢獻分析',      EMERALD,
+         'ΔAUC_p = AUC(全 91) − AUC(91 \\ pillar p)',
+         'Risk +138.6 bps · Trend +64.9 · Chip / Event / Industry 共 −49 bps',
+         'Custom · feature ablation'),
+        ('04', 'SHAP TreeExplainer','個股可解釋性',     GOLD,
+         'φ_i(x) = E[f(x) | x_i] − E[f(x)]',
+         'Top 20 全局特徵 · per-stock 解釋 → Streamlit 個股檢視頁',
+         'Lundberg & Lee (2017)'),
+        ('05', 'PSI / KS',         '漂移監控',          ROSE,
+         'PSI = Σ (p_i − q_i) ln(p_i / q_i)',
+         '91 features 月測 · Text PSI 0.13 觸發 WARN · 對策每月詞向量重訓',
+         'Basel III FRTB · industry standard'),
+    ]
+    bar_x, bar_y0 = 96, 308
+    bar_w, bar_h, bgap = 1728, 108, 8
+    for i, (no, name, zh, color, formula, application, ref) in enumerate(methods):
+        by = bar_y0 + i*(bar_h + bgap)
+        card(slide, bar_x, by, bar_w, bar_h, top_stripe=None, line_w=0.5)
+        rect(slide, bar_x, by, 8, bar_h, fill=color)
+        # number + name
+        text(slide, bar_x+30, by+16, 80, 30, no, size=22, bold=True, color=color, mono=True, ls=-0.4)
+        text(slide, bar_x+88, by+20, 220, 24, name,
+             size=14, bold=True, color=color, mono=True, ls=2.0)
+        text(slide, bar_x+88, by+48, 240, 28, zh, size=20, bold=True, color=NAVY)
+        text(slide, bar_x+88, by+82, 360, 22, '↪ ' + ref,
+             size=10, color=INK_3, mono=True, italic=True, ls=0.4)
+        # formula box (left mid)
+        text(slide, bar_x+460, by+16, 100, 18, 'FORMULA',
+             size=9, bold=True, color=INK_3, mono=True, ls=2.0)
+        rect(slide, bar_x+460, by+38, 540, 56, fill=TINT, line=RULE, line_w=0.5)
+        text(slide, bar_x+474, by+38, 510, 56, formula,
+             size=14, bold=True, color=NAVY, mono=True, anchor='middle', ls=-0.2)
+        # application (right)
+        text(slide, bar_x+1024, by+16, 200, 18, 'OUR APPLICATION',
+             size=9, bold=True, color=INK_3, mono=True, ls=2.0)
+        text(slide, bar_x+1024, by+38, 680, 60, application,
+             size=13, color=INK_2, line_h=1.5)
+
+    takeaway_bar(slide, 96, 880, 1728, 100, 'METHOD-TO-EVIDENCE', [
+        {'text': '每個結論都可逆向追溯到一個方法、每個方法都有一篇引用文獻；', 'size': 15, 'color': INK},
+        {'br': True},
+        {'text': '這 5 大方法疊加 = ', 'size': 15, 'color': INK_2},
+        {'text': '從原始資料到 9 / 9 治理關卡 PASS 的審計鏈',
+         'size': 15, 'bold': True, 'color': NAVY},
+        {'text': '。', 'size': 15, 'color': INK_2},
+    ], color=ROSE, bg=ROSE_LT)
+    return slide
+
+
+# ============================================================
+# A.30 · 資料來源 + 延伸文獻
+# ============================================================
+def slide_apx_data_sources_refs(prs):
+    slide = add_blank_slide(prs)
+    slide_chrome_appendix(slide, 'Data Sources & Extended References', 'A.30',
+                          source='TWSE / TPEx · 公開資訊觀測站 · CMoney 文本 · 課程指定資料庫 BDA-2026')
+    eyebrow(slide, 96, 116, 700, 'A.30 · 資料來源 + 延伸期刊文獻', color=ROSE)
+    rich(slide, 96, 144, 1750, 110, [
+        {'text': 'Data Provenance ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': '· 每筆樣本可回溯至公開來源', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
+    ], line_h=1.18)
+    rule_divider(slide, 96, 268, color=ROSE)
+
+    # LEFT: Data Sources (3 cards)
+    text(slide, 96, 296, 600, 22, 'DATA SOURCES · 資料來源',
+         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+    sources = [
+        ('PRICE / VOLUME', NAVY,
+         'TWSE · TPEx · 公開資訊觀測站',
+         '1,930 檔股票 × 505 交易日 · OHLCV + 融資融券',
+         'data/raw/stock_prices.parquet · 4.2 GB'),
+        ('FUNDAMENTALS', TEAL,
+         '財報資料庫 · 季頻',
+         'IFRS 報表三表 · 主鍵 (stock_id, period) · lag 45 天',
+         'data/raw/financial_statements.parquet · 312 MB'),
+        ('TEXT CORPUS', GOLD,
+         'CMoney 新聞 + PTT Stock 論壇',
+         '948K 文本 · T 日 15:00 截止 · 自定義金融詞典 1,521 詞',
+         'data/raw/text/ · 8.7 GB · jieba 斷詞'),
+    ]
+    sx0 = 96; sw = 850; sh = 192; sgap = 12
+    for i, (cat, c, src, body, art) in enumerate(sources):
+        sy = 326 + i*(sh + sgap)
+        card(slide, sx0, sy, sw, sh, top_stripe=c)
+        text(slide, sx0+24, sy+22, sw-48, 22, cat,
+             size=11, bold=True, color=c, mono=True, ls=2.4)
+        text(slide, sx0+24, sy+54, sw-48, 30, src,
+             size=18, bold=True, color=NAVY)
+        text(slide, sx0+24, sy+96, sw-48, 36, body,
+             size=13, color=INK_2, line_h=1.5)
+        text(slide, sx0+24, sy+148, sw-48, 22, '↪ ' + art,
+             size=11, color=INK_3, mono=True, italic=True, ls=0.4)
+
+    # RIGHT: Extended References (4 categories beyond A.27)
+    text(slide, 980, 296, 600, 22, 'EXTENDED REFERENCES · 延伸文獻',
+         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+    ext_refs = [
+        ('TAIWAN MARKET · 台股', VIOLET, [
+            'Lin & Lee (2010). 台股報酬可預測性. 臺大管理論叢 21(1).',
+            '張 (2018). 台灣股市規模效應與動能效應. 中山管理評論 26(2).',
+            'Chen et al. (2022). News Sentiment in TWSE. PJM 30(3).',
+        ]),
+        ('TIME-SERIES VALIDATION', NAVY, [
+            'Cerqueira et al. (2020). Evaluating time series forecasting models. ML 109.',
+            'Hyndman & Athanasopoulos (2021). Forecasting: Principles and Practice (3e).',
+        ]),
+        ('GOVERNANCE · 治理規範', EMERALD, [
+            'Basel III · FRTB (2019). Minimum capital requirements for market risk.',
+            'EU AI Act (2024). High-risk AI systems Article 9 — risk management.',
+        ]),
+        ('DATA & TOOLING', GOLD, [
+            'McKinney (2011). pandas: a Foundational Python Library for DA. PyHPC.',
+            'Akiba et al. (2019). Optuna: A Next-generation Hyperparameter Optimization Framework. KDD.',
+            'BDA-2026 課程資料規範 · 3 月 26 日資料庫快照 (1.3 GB SQL).',
+        ]),
+    ]
+    rx0 = 980; rw = 844; rh = 90; rgap = 8
+    for i, (title, c, refs) in enumerate(ext_refs):
+        ry = 326 + i*(rh + rgap)
+        card(slide, rx0, ry, rw, rh, top_stripe=c, line_w=0.5)
+        text(slide, rx0+22, ry+18, rw-44, 18, title,
+             size=10, bold=True, color=c, mono=True, ls=2.0)
+        for j, r in enumerate(refs[:2]):  # show top 2 per category to fit
+            sy = ry + 38 + j*22
+            text(slide, rx0+22, sy, 16, 18, '·',
+                 size=12, bold=True, color=c, mono=True)
+            text(slide, rx0+38, sy, rw-60, 18, r,
+                 size=10, color=INK_2)
+        if len(refs) > 2:
+            text(slide, rx0+rw-90, ry+rh-22, 80, 18, f'+ {len(refs)-2} more',
+                 size=9, color=INK_4, mono=True, italic=True, align='right', ls=0.4)
+
+    takeaway_bar(slide, 96, 932, 1728, 80, 'PROVENANCE', [
+        {'text': '948,976 筆樣本 · 1,623 候選因子 · 91 篩選後特徵 · 全部', 'size': 14, 'color': INK},
+        {'text': ' SQL 可回溯', 'size': 14, 'bold': True, 'color': NAVY, 'mono': True},
+        {'text': '；本研究遵循 BDA-2026 課程資料規範、所有外部引用標明出處、所有方法論可獨立復現。',
+         'size': 14, 'color': INK_2},
+    ], color=ROSE, bg=ROSE_LT)
+    return slide
+
+
 # ============================================================
 # MAIN
 # ============================================================
@@ -3450,7 +3694,7 @@ def main():
     slide_closing(prs)            # P.11
 
     # Appendix · 27 slides
-    print('Building appendix (27 slides) ...')
+    print('Building appendix (30 slides) ...')
     slide_apx_three_commitments(prs)   # A.01
     slide_apx_problem_deep(prs)        # A.02
     slide_apx_approach_detail(prs)     # A.03
@@ -3478,6 +3722,9 @@ def main():
     slide_apx_signal_decay(prs)        # A.25
     slide_apx_limitations(prs)         # A.26
     slide_apx_bibliography(prs)        # A.27
+    slide_apx_tools_stack(prs)         # A.28 · NEW · Python ecosystem
+    slide_apx_methodology(prs)         # A.29 · NEW · 5 core methods + formulas
+    slide_apx_data_sources_refs(prs)   # A.30 · NEW · data sources + extended refs
 
     out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'deck_full.pptx')
     prs.save(out_path)
