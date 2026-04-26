@@ -80,9 +80,15 @@ RULE_2    = RGBColor(0xcb, 0xd5, 0xe1)
 IVORY     = RGBColor(0xf5, 0xf1, 0xe8)
 CREAM     = RGBColor(0xfb, 0xf8, 0xf1)
 
-LATIN_FONT = 'Times New Roman'
+# 字體紀律（v11.5.24 起 · 套用「管顧式簡報 SKILL」§ 2.1）
+# 所有文字統一使用微軟正黑體（Microsoft JhengHei）、跨平台 / 課堂 / 學術場景全相容
+LATIN_FONT = 'Microsoft JhengHei'
 EA_FONT    = 'Microsoft JhengHei'
-MONO_FONT  = 'Times New Roman'
+MONO_FONT  = 'Microsoft JhengHei'
+
+# 字級下限守門（v11.5.24 起 · § 2.2）
+# 任何可見文字字級 < MIN_FONT_SIZE 視為錯誤、build 階段直接 raise
+MIN_FONT_SIZE = 12
 
 # ============================================================
 # XML HELPERS
@@ -208,21 +214,21 @@ def slide_chrome_main(slide, page_title, page_no, *, total=10, act=None, source=
     # v11.5.20 §1 — page number relocated from top-right to bottom-right
     # (consistent with cover slide); top-right reserved for page_title.
     rect(slide, 96, 38, 30, 30, fill=NAVY)
-    text(slide, 96, 38, 30, 30, 'TW', size=11, bold=True, color=PAPER,
+    text(slide, 96, 38, 30, 30, 'TW', size=12, bold=True, color=PAPER,
          align='center', anchor='middle', mono=True)
     text(slide, 134, 38, 380, 30, '多因子股票預測系統', size=12, bold=True,
          color=INK_2, anchor='middle', ls=1.4)
-    text(slide, 522, 42, 200, 22, '· v11.5.18', size=10, color=INK_4,
+    text(slide, 522, 42, 200, 22, '· v11.5.18', size=12, color=INK_4,
          anchor='middle', mono=True, ls=0.8)
     # Top-right: page title only
     text(slide, 1180, 38, 700, 30, page_title, size=12, color=INK_3,
          align='right', anchor='middle', mono=True, ls=2.0)
     if source:
-        text(slide, 96, 1018, 1300, 30, 'Source · ' + source, size=11,
+        text(slide, 96, 1018, 1300, 30, 'Source · ' + source, size=12,
              color=INK_3, anchor='middle', mono=True, ls=0.5)
     if act is not None:
         labels = ['SETUP', 'FINDINGS', 'ACTION']
-        text(slide, 1500, 1024, 160, 18, labels[act], size=9, bold=True,
+        text(slide, 1500, 1024, 160, 18, labels[act], size=12, bold=True,
              color=TEAL, mono=True, ls=2.0, align='right')
         for i in range(3):
             on = (i == act)
@@ -239,16 +245,16 @@ def slide_chrome_main(slide, page_title, page_no, *, total=10, act=None, source=
 def slide_chrome_appendix(slide, page_title, apx_no, *, source=None):
     # v11.5.20 §1 — appendix page number also at bottom-right.
     rect(slide, 96, 38, 36, 30, fill=ROSE)
-    text(slide, 96, 38, 36, 30, 'APX', size=9, bold=True, color=PAPER,
+    text(slide, 96, 38, 36, 30, 'APX', size=12, bold=True, color=PAPER,
          align='center', anchor='middle', mono=True)
     text(slide, 140, 38, 380, 30, '多因子股票預測系統 · 附錄', size=12, bold=True,
          color=INK_2, anchor='middle', ls=1.4)
     text(slide, 1180, 38, 700, 30, page_title, size=12, color=INK_3,
          align='right', anchor='middle', mono=True, ls=2.0)
     if source:
-        text(slide, 96, 1018, 1300, 30, 'Source · ' + source, size=11,
+        text(slide, 96, 1018, 1300, 30, 'Source · ' + source, size=12,
              color=INK_3, anchor='middle', mono=True, ls=0.5)
-    text(slide, 1560, 1024, 200, 18, 'APPENDIX', size=9, bold=True,
+    text(slide, 1560, 1024, 200, 18, 'APPENDIX', size=12, bold=True,
          color=ROSE, mono=True, ls=2.4, align='right')
     rect(slide, 1768, 1029, 8, 8, fill=ROSE)
     # Bottom-right: appendix page number (rose)
@@ -277,7 +283,7 @@ def takeaway_bar(slide, x, y, w, h, label, runs, *, color=TEAL, bg=TEAL_BG):
     rect(slide, x, y, 6, h, fill=color)
     if label:
         text(slide, x+26, y+18, 600, 20, label,
-             size=11, bold=True, color=color, mono=True, ls=2.6)
+             size=12, bold=True, color=color, mono=True, ls=2.6)
         rich_y = y + 48
     else:
         rich_y = y + 14
@@ -289,13 +295,13 @@ def kpi_hero(slide, x, y, w, h, label, value, sub, accent=NAVY, *, val_size=None
     rect(slide, x, y, w, h, fill=PAPER, line=RULE, line_w=0.75)
     stripe(slide, x, y, w, 4, accent)
     text(slide, x+24, y+22, w-48, 22, label,
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     if val_size is None:
         val_size = 56 if len(value) <= 6 else (44 if len(value) <= 9 else 36)
     text(slide, x+24, y+50, w-48, 76, value,
          size=val_size, bold=True, color=accent, mono=True, ls=-1.4)
     text(slide, x+24, y+128, w-48, 36, sub,
-         size=11, color=INK_3, line_h=1.5)
+         size=12, color=INK_3, line_h=1.5)
 
 
 def card(slide, x, y, w, h, *, fill=PAPER, line=RULE, line_w=0.75, top_stripe=None):
@@ -346,7 +352,7 @@ def vbar(slide, x_base, y_base, w, max_h, value, max_val, *, color=NAVY, label=N
              size=12, bold=True, color=INK, mono=True, align='center', anchor='middle')
     if label:
         text(slide, x_base-12, y_base + 8, w+24, 28, label,
-             size=11, color=label_color or INK_3, mono=True, align='center', anchor='middle', ls=0.4)
+             size=12, color=label_color or INK_3, mono=True, align='center', anchor='middle', ls=0.4)
 
 
 def linechart_box(slide, x, y, w, h):
@@ -383,9 +389,9 @@ def slide_cover(prs):
 
     # Top eyebrows · 對齊設計系統 mono caption 11pt
     text(slide, 96, 44, 700, 22, 'TAIWAN EQUITY · QUANT RESEARCH TERMINAL',
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, 1180, 44, 660, 22, 'NTU · BIG DATA & BUSINESS ANALYTICS',
-         size=11, bold=True, color=INK_3, align='right', mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, align='right', mono=True, ls=2.4)
 
     # Hero title block — 收斂到 80pt（從 96pt），增加 BCG 式克制
     rect(slide, 96, 168, 60, 4, fill=TEAL)
@@ -425,11 +431,11 @@ def slide_cover(prs):
         if i > 0:
             rect(slide, ax, anchor_y+22, 1, 86, fill=RULE)
         text(slide, ax+28, anchor_y+22, 305, 18, lbl,
-             size=11, bold=True, color=INK_3, mono=True, ls=2.0)
+             size=12, bold=True, color=INK_3, mono=True, ls=2.0)
         text(slide, ax+28, anchor_y+46, 305, 60, val,
              size=44, bold=True, color=c, mono=True, ls=-1.6)
         text(slide, ax+28, anchor_y+108, 305, 18, sub,
-             size=11, color=INK_3, mono=True, ls=0.4)
+             size=12, color=INK_3, mono=True, ls=0.4)
 
     # Right rail — 設計系統 KPI grid（輔助訊息，不喧賓奪主）
     grid_x, grid_y = 1158, 188
@@ -447,16 +453,16 @@ def slide_cover(prs):
         rect(slide, cx, cy, cell_w, cell_h, fill=PAPER, line=RULE, line_w=0.75)
         stripe(slide, cx, cy, cell_w, 4, accent)
         text(slide, cx+22, cy+22, cell_w-44, 18, lbl,
-             size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+             size=12, bold=True, color=INK_3, mono=True, ls=2.4)
         text(slide, cx+22, cy+50, cell_w-44, 80, val,
              size=34, bold=True, color=accent, mono=True, ls=-1.0)
         text(slide, cx+22, cy+138, cell_w-44, 40, sub,
-             size=11, color=INK_3, mono=True, ls=0.4)
+             size=12, color=INK_3, mono=True, ls=0.4)
 
     rect(slide, 1158, 690, 660, 130, fill=PAPER, line=RULE, line_w=0.75)
     stripe(slide, 1158, 690, 660, 4, TEAL)
     text(slide, 1180, 712, 620, 18, 'WHAT YOU\'LL HEAR · 12 MIN',
-         size=11, bold=True, color=TEAL, mono=True, ls=2.4)
+         size=12, bold=True, color=TEAL, mono=True, ls=2.4)
     rich(slide, 1180, 742, 620, 70, [
         {'text': '一個結論：', 'size': 14, 'bold': True, 'color': INK},
         {'text': '台股 D+20 alpha 可預測、可驗證、可部署。', 'size': 14, 'color': INK_2},
@@ -468,7 +474,7 @@ def slide_cover(prs):
     # Footer · 6-人組員名單 + 課程資訊
     rect(slide, 96, 858, 1728, 1, fill=RULE)
     text(slide, 96, 876, 360, 18, 'TEAM · 6 MEMBERS',
-         size=10, bold=True, color=INK_4, mono=True, ls=2.6)
+         size=12, bold=True, color=INK_4, mono=True, ls=2.6)
     members = [
         ('R13724054', '陳柏寰'),
         ('R13724035', '陳又萍'),
@@ -477,37 +483,38 @@ def slide_cover(prs):
         ('B12302131', '林芮靚'),
         ('B13102133', '沈承寬'),
     ]
+    # v11.5.24 § 字體統一微軟正黑體後 9 字學號需更寬 box；ID 容器 90→112 px
     name_block_x = 96
-    name_col_w = 218
-    name_row_h = 26
+    name_col_w = 240
+    name_row_h = 28
     for i, (sid, name) in enumerate(members):
         col = i % 3; row = i // 3
         nx = name_block_x + col*name_col_w
         ny = 902 + row*name_row_h
-        text(slide, nx, ny, 90, 22, sid,
-             size=11, bold=True, color=INK_3, mono=True, ls=0.4)
-        text(slide, nx+96, ny, 120, 22, name,
+        text(slide, nx, ny, 112, 22, sid,
+             size=12, bold=True, color=INK_3, mono=True, ls=0.2)
+        text(slide, nx+118, ny, 120, 22, name,
              size=13, bold=True, color=INK)
 
     # Right side: COURSE / VERSION / DATE
     text(slide, 800, 876, 240, 18, 'COURSE',
-         size=10, bold=True, color=INK_4, mono=True, ls=2.6)
+         size=12, bold=True, color=INK_4, mono=True, ls=2.6)
     text(slide, 800, 902, 380, 22, 'NTU · Big Data & Business Analytics',
          size=12, bold=True, color=INK)
     text(slide, 800, 928, 380, 22, '大數據與商業分析專案',
-         size=11, color=INK_2)
+         size=12, color=INK_2)
 
     text(slide, 1220, 876, 200, 18, 'VERSION',
-         size=10, bold=True, color=INK_4, mono=True, ls=2.6)
+         size=12, bold=True, color=INK_4, mono=True, ls=2.6)
     text(slide, 1220, 902, 200, 22, 'v11.5.18',
          size=13, bold=True, color=INK, mono=True)
 
     text(slide, 1480, 876, 344, 18, 'DATE',
-         size=10, bold=True, color=INK_4, mono=True, ls=2.6, align='right')
+         size=12, bold=True, color=INK_4, mono=True, ls=2.6, align='right')
     text(slide, 1480, 902, 344, 22, 'April 2026',
          size=13, bold=True, color=INK, align='right')
     text(slide, 1480, 928, 344, 18, 'Academic Project · 課堂簡報',
-         size=11, color=INK_2, align='right')
+         size=12, color=INK_2, align='right')
 
     text(slide, 1780, 1018, 60, 30, '01', size=12, bold=True, color=INK_2,
          align='right', anchor='middle', mono=True)
@@ -541,7 +548,7 @@ def slide_problem(prs):
     cx1 = 96
     card(slide, cx1, cards_y, card_w, card_h, top_stripe=ROSE)
     text(slide, cx1+28, cards_y+24, card_w-56, 18, 'EVIDENCE · 短線是噪聲',
-         size=11, bold=True, color=ROSE, mono=True, ls=2.4)
+         size=12, bold=True, color=ROSE, mono=True, ls=2.4)
     text(slide, cx1+28, cards_y+54, card_w-56, 36, '日頻 edge 多落 1–5 pp、',
          size=22, bold=True, color=NAVY, line_h=1.2)
     text(slide, cx1+28, cards_y+90, card_w-56, 36, '統計 IC 跨 fold 不一致',
@@ -568,7 +575,7 @@ def slide_problem(prs):
     cx2 = cx1 + card_w + gap
     card(slide, cx2, cards_y, card_w, card_h, top_stripe=TEAL)
     text(slide, cx2+28, cards_y+24, card_w-56, 18, 'OUR ANGLE · 三軸對齊',
-         size=11, bold=True, color=TEAL, mono=True, ls=2.4)
+         size=12, bold=True, color=TEAL, mono=True, ls=2.4)
     text(slide, cx2+28, cards_y+54, card_w-56, 36, '基本面 × 文本 × 籌碼',
          size=22, bold=True, color=NAVY, line_h=1.2)
     text(slide, cx2+28, cards_y+90, card_w-56, 36, '於 D+20 收斂為共振訊號',
@@ -595,7 +602,7 @@ def slide_problem(prs):
     cx3 = cx2 + card_w + gap
     card(slide, cx3, cards_y, card_w, card_h, top_stripe=NAVY)
     text(slide, cx3+28, cards_y+24, card_w-56, 18, 'HORIZON · 為什麼 D+20',
-         size=11, bold=True, color=NAVY, mono=True, ls=2.4)
+         size=12, bold=True, color=NAVY, mono=True, ls=2.4)
     text(slide, cx3+28, cards_y+54, card_w-56, 36, 'D+20 為訊號收斂、',
          size=22, bold=True, color=NAVY, line_h=1.2)
     text(slide, cx3+28, cards_y+90, card_w-56, 36, '雜訊衰退的最佳視窗',
@@ -605,7 +612,7 @@ def slide_problem(prs):
     spark_x = cx3+28; spark_y = cards_y+158; spark_w = card_w-56; spark_h = 130
     rect(slide, spark_x, spark_y, spark_w, spark_h, fill=TINT, line=RULE, line_w=0.5)
     text(slide, spark_x+12, spark_y+10, spark_w-24, 18, 'ICIR vs HORIZON',
-         size=9, bold=True, color=INK_3, mono=True, ls=2.0)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.0)
     horizons = [('D+1', 0.18, '0.18'), ('D+5', 0.32, '0.32'),
                 ('D+20', 0.74, '0.74'), ('D+60', 0.45, '0.45')]
     bar_track_y = spark_y + 40
@@ -618,10 +625,10 @@ def slide_problem(prs):
         rect(slide, bx, bar_top, 56, bh, fill=c)
         # value above bar
         text(slide, bx-8, bar_top - 16, 72, 14, val,
-             size=9, bold=True, color=c, mono=True, align='center')
+             size=12, bold=True, color=c, mono=True, align='center')
         # horizon label below bar
         text(slide, bx-8, spark_y + spark_h - 16, 72, 14, lbl,
-             size=10, bold=True, color=INK_3 if lbl != 'D+20' else NAVY, mono=True, align='center')
+             size=12, bold=True, color=INK_3 if lbl != 'D+20' else NAVY, mono=True, align='center')
     rich(slide, cx3+28, cards_y+304, card_w-56, 100, [
         {'text': 'D+20 ICIR 0.7431 顯著高於 D+1 / D+5；', 'size': 15, 'color': INK_2},
         {'br': True},
@@ -672,7 +679,7 @@ def slide_approach(prs):
     cx1 = 96
     card(slide, cx1, cards_y, card_w, card_h, top_stripe=NAVY)
     text(slide, cx1+24, cards_y+24, 200, 18, '01 · FEATURE FUNNEL',
-         size=11, bold=True, color=NAVY, mono=True, ls=2.4)
+         size=12, bold=True, color=NAVY, mono=True, ls=2.4)
     rich(slide, cx1+24, cards_y+54, card_w-48, 100, [
         {'text': '1,623', 'size': 48, 'bold': True, 'color': INK_3, 'mono': True, 'ls': -1.6},
         {'text': '  →  ', 'size': 36, 'color': INK_4},
@@ -694,9 +701,9 @@ def slide_approach(prs):
         ly = funnel_y + i*row_h
         # label row
         text(slide, track_left, ly, int(track_w*0.55), 16, lbl,
-             size=11, bold=True, color=INK)
+             size=12, bold=True, color=INK)
         text(slide, track_left+int(track_w*0.55), ly, int(track_w*0.25), 16, note,
-             size=10, color=INK_4, mono=True, ls=0.4)
+             size=12, color=INK_4, mono=True, ls=0.4)
         text(slide, track_left+track_w-110, ly, 110, 16,
              f'{n:,}', size=12, bold=True, color=c, mono=True, align='right')
         # bar row
@@ -708,7 +715,7 @@ def slide_approach(prs):
     cx2 = cx1 + card_w + gap
     card(slide, cx2, cards_y, card_w, card_h, top_stripe=TEAL)
     text(slide, cx2+24, cards_y+24, 200, 18, '02 · MODEL',
-         size=11, bold=True, color=TEAL, mono=True, ls=2.4)
+         size=12, bold=True, color=TEAL, mono=True, ls=2.4)
     text(slide, cx2+24, cards_y+54, card_w-48, 60, 'XGBoost',
          size=44, bold=True, color=NAVY, mono=True, ls=-1.4)
     text(slide, cx2+24, cards_y+114, card_w-48, 22, 'Optuna 150 trials · early stopping · 4 折交叉訓練',
@@ -717,7 +724,7 @@ def slide_approach(prs):
     # mini comparison: AUC across 4 algorithms
     cmp_y = cards_y + 156
     text(slide, cx2+24, cmp_y, 300, 18, 'OOS AUC vs 對照組',
-         size=10, bold=True, color=INK_3, mono=True, ls=2.0)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.0)
     algos = [
         ('XGBoost ★',   0.6455, TEAL),
         ('LightGBM',    0.6381, NAVY),
@@ -743,7 +750,7 @@ def slide_approach(prs):
     cx3 = cx2 + card_w + gap
     card(slide, cx3, cards_y, card_w, card_h, top_stripe=ROSE)
     text(slide, cx3+24, cards_y+24, 240, 18, '03 · VALIDATION',
-         size=11, bold=True, color=ROSE, mono=True, ls=2.4)
+         size=12, bold=True, color=ROSE, mono=True, ls=2.4)
     text(slide, cx3+24, cards_y+54, card_w-48, 60, 'WFPK · 4 fold',
          size=36, bold=True, color=NAVY, mono=True, ls=-1.0)
     text(slide, cx3+24, cards_y+106, card_w-48, 22, '+ 20 日 embargo · D+20 horizon',
@@ -755,11 +762,11 @@ def slide_approach(prs):
     track_left2 = cx3 + 24
     track_w2 = card_w - 48
     text(slide, track_left2, fold_y, 200, 18, '時序結構（% × 樣本軸）',
-         size=10, bold=True, color=INK_3, mono=True, ls=2.0)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.0)
     for i, (idx, train, emb, test) in enumerate(folds):
         ry = fold_y + 28 + i*36
         text(slide, track_left2, ry+4, 60, 22, f'F{idx}',
-             size=11, bold=True, color=INK_3, mono=True, anchor='middle')
+             size=12, bold=True, color=INK_3, mono=True, anchor='middle')
         bar_x = track_left2 + 64
         bar_total = track_w2 - 80
         cur = bar_x
@@ -777,7 +784,7 @@ def slide_approach(prs):
     for c, lbl in legends:
         rect(slide, lx, leg_y+5, 10, 8, fill=c)
         text(slide, lx+16, leg_y, 130, 18, lbl,
-             size=10, color=INK_2, mono=True, ls=0.4, anchor='middle')
+             size=12, color=INK_2, mono=True, ls=0.4, anchor='middle')
         lx += 130
 
     # 6-phase pipeline strip · 補充說明，置於下方一橫條
@@ -785,7 +792,7 @@ def slide_approach(prs):
     strip_y = 712
     rect(slide, 96, strip_y, 1728, 96, fill=TINT, line=RULE, line_w=0.5)
     text(slide, 116, strip_y+16, 400, 18, '6-PHASE PIPELINE',
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     phases = [
         ('Ingest',     '7 表 3.48M 列'),
         ('Feature',    '1,623 → 91'),
@@ -851,7 +858,7 @@ def slide_pillars_lopo(prs):
         (9, 'Text ★',      '文本語料',    PURPLE,   '30'),
     ]
     text(slide, grid_x, grid_y-26, 600, 20, '9 PILLARS · 91 特徵分布',
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     for i, (no, en, zh, color, n) in enumerate(pillars):
         col = i % 3; row = i // 3
         cx = grid_x + col*(cell_w + cgap)
@@ -861,7 +868,7 @@ def slide_pillars_lopo(prs):
         text(slide, cx+56, cy+16, 200, 22, en, size=12, bold=True, color=color, mono=True, ls=1.6)
         text(slide, cx+16, cy+44, cell_w-100, 30, zh, size=18, bold=True, color=NAVY)
         text(slide, cx+cell_w-78, cy+34, 60, 56, n, size=32, bold=True, color=color, mono=True, ls=-1.0, align='right')
-        text(slide, cx+cell_w-78, cy+78, 60, 18, 'feat.', size=10, color=INK_3, mono=True, ls=1.0, align='right')
+        text(slide, cx+cell_w-78, cy+78, 60, 18, 'feat.', size=12, color=INK_3, mono=True, ls=1.0, align='right')
 
     # Right: LOPO bar chart
     panel_x = 1010
@@ -870,10 +877,10 @@ def slide_pillars_lopo(prs):
     panel_h = 416
     rect(slide, panel_x, panel_y, panel_w, panel_h, fill=PAPER, line=RULE, line_w=0.5)
     text(slide, panel_x+24, panel_y+18, 600, 20, 'LOPO ΔAUC · Leave-One-Pillar-Out',
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, panel_x+24, panel_y+42, 700, 18,
          'baseline 0.6486 · 1 bps = ΔAUC × 10,000 · 正向 = 該支柱貢獻訊號',
-         size=11, color=INK_3)
+         size=12, color=INK_3)
     lopo_items = [
         ('Risk',        138.6),
         ('Trend',        64.9),
@@ -950,10 +957,10 @@ def slide_model_performance(prs):
         stripe(slide, cx, box_y, cell_w, 4, color)
         # label + kind pill
         text(slide, cx+24, box_y+22, cell_w-48, 18, lbl,
-             size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+             size=12, bold=True, color=INK_3, mono=True, ls=2.4)
         rect(slide, cx+cell_w-110, box_y+18, 90, 24, fill=TINT, line=RULE, line_w=0.5)
         text(slide, cx+cell_w-110, box_y+18, 90, 24, kind,
-             size=10, bold=True, color=color, ls=1.6, align='center', anchor='middle')
+             size=12, bold=True, color=color, ls=1.6, align='center', anchor='middle')
         # big value
         text(slide, cx+24, box_y+58, cell_w-48, 100, val,
              size=72, bold=True, color=color, mono=True, ls=-2.0)
@@ -968,7 +975,7 @@ def slide_model_performance(prs):
     bot_h = 196
     rect(slide, 96, bot_y, 1728, bot_h, fill=TINT, line=RULE, line_w=0.5)
     text(slide, 116, bot_y+18, 600, 20, 'CONSISTENCY · 4 折 OOS AUC',
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, 116, bot_y+44, 900, 22,
          '四折落於 0.633 – 0.656、跨 fold 標準差僅 0.0089 · 證據非過擬合',
          size=13, color=INK_2)
@@ -1035,15 +1042,15 @@ def slide_topn_dual(prs):
     # Left: Top-N table — 命中率邊際遞增
     rect(slide, 96, 312, 880, 460, fill=PAPER, line=RULE, line_w=0.5)
     text(slide, 116, 326, 700, 18, 'TOP-% HIT RATE · 邊際遞增',
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, 116, 348, 700, 18, '樣本愈集中、edge 愈陡 · base 26.28%',
-         size=11, color=INK_3)
+         size=12, color=INK_3)
     th_y = 380
     cols = [(116, 180, '分位'), (296, 130, 'N (檔)'), (426, 150, '命中率'),
             (576, 160, 'Edge vs base'), (736, 220, '相對提升')]
     for cx, cw, lbl in cols:
         text(slide, cx, th_y, cw, 20, lbl,
-             size=11, bold=True, color=INK_3, mono=True, ls=1.6)
+             size=12, bold=True, color=INK_3, mono=True, ls=1.6)
     rect(slide, 116, th_y+28, 850, 2, fill=NAVY)
     rows = [
         ('閾值 0.50 ★', '2,836',   '37.98%', '+11.70 pp', '+44.5%', ROSE),
@@ -1075,10 +1082,10 @@ def slide_topn_dual(prs):
 
     # Right: Dual-track decision cards
     text(slide, 1010, 312, 800, 18, 'DUAL TRACK · 雙軌部位設計',
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, 1010, 334, 800, 18,
          '依資金屬性與決策節奏分流、共用同一機率分數',
-         size=11, color=INK_3)
+         size=12, color=INK_3)
     tracks = [
         ('A', '保守 · Threshold 0.50',    NAVY,
          '0.70%', '37.98%', '+11.70 pp', 'HIGH CONVICTION',
@@ -1101,20 +1108,20 @@ def slide_topn_dual(prs):
         bg = GOLD_BG if color == GOLD else NAVY_LT
         rect(slide, 1118, cy+54, 200, 22, fill=bg)
         text(slide, 1120, cy+54, 196, 22, pill,
-             size=10, bold=True, color=color, mono=True, ls=2.0,
+             size=12, bold=True, color=color, mono=True, ls=2.0,
              align='center', anchor='middle')
         # 3 metrics
         m_y = cy+86
         text(slide, 1118, m_y, 200, 16, 'CALL RATE',
-             size=10, bold=True, color=INK_3, mono=True, ls=2.0)
+             size=12, bold=True, color=INK_3, mono=True, ls=2.0)
         text(slide, 1118, m_y+18, 200, 30, call,
              size=22, bold=True, color=color, mono=True, ls=-0.4)
         text(slide, 1318, m_y, 200, 16, 'HIT RATE',
-             size=10, bold=True, color=INK_3, mono=True, ls=2.0)
+             size=12, bold=True, color=INK_3, mono=True, ls=2.0)
         text(slide, 1318, m_y+18, 200, 30, hit,
              size=22, bold=True, color=color, mono=True, ls=-0.4)
         text(slide, 1518, m_y, 240, 16, 'EDGE vs BASE',
-             size=10, bold=True, color=INK_3, mono=True, ls=2.0)
+             size=12, bold=True, color=INK_3, mono=True, ls=2.0)
         text(slide, 1518, m_y+18, 240, 30, edge,
              size=22, bold=True, color=color, mono=True, ls=-0.4)
         text(slide, 1118, cy+148, 680, 18, '· ' + scene,
@@ -1159,7 +1166,7 @@ def slide_sentiment_ushape(prs):
     chart_x = 96; chart_y = 314; chart_w = 1100; chart_h = 460
     rect(slide, chart_x, chart_y, chart_w, chart_h, fill=PAPER, line=RULE, line_w=0.5)
     text(slide, chart_x+24, chart_y+18, 700, 22, 'SENTIMENT QUINTILE EDGE · sent_polarity_5d',
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, chart_x+24, chart_y+44, 800, 22, 'Edge = 該分位實際命中率 − baseline 26.28% · pp 為百分點',
          size=12, color=INK_3)
     quintiles = [
@@ -1182,9 +1189,9 @@ def slide_sentiment_ushape(prs):
         gy = zero_y - int(v / 7 * chart_inner_h)
         rect(slide, chart_inner_x, gy, chart_inner_w, 1, fill=RULE)
         text(slide, chart_x+24, gy-12, 60, 22, f'{v:+d} pp' if v != 0 else '0',
-             size=10, color=INK_4, mono=True, align='right', anchor='middle')
+             size=12, color=INK_4, mono=True, align='right', anchor='middle')
     text(slide, chart_x+24, zero_y-12, 60, 22, '0',
-         size=10, color=INK_4, mono=True, align='right', anchor='middle')
+         size=12, color=INK_4, mono=True, align='right', anchor='middle')
 
     bar_w = 140
     bar_gap = (chart_inner_w - 5*bar_w) / 4
@@ -1203,7 +1210,7 @@ def slide_sentiment_ushape(prs):
         text(slide, bx-20, chart_inner_y + chart_inner_h + 12, bar_w+40, 24, q,
              size=14, bold=True, color=NAVY, mono=True, align='center', anchor='middle')
         text(slide, bx-30, chart_inner_y + chart_inner_h + 38, bar_w+60, 36, lbl,
-             size=10, color=INK_3, mono=True, ls=0.4, line_h=1.3, align='center')
+             size=12, color=INK_3, mono=True, ls=0.4, line_h=1.3, align='center')
 
     # Right: 3 insight cards
     insights = [
@@ -1279,7 +1286,7 @@ def slide_governance(prs):
     dsr_x = 96; dsr_y = 314; dsr_w = 540; dsr_h = 480
     card(slide, dsr_x, dsr_y, dsr_w, dsr_h, top_stripe=NAVY)
     text(slide, dsr_x+22, dsr_y+22, 480, 22, 'DEFLATED SHARPE · 多重檢定後的真 Sharpe',
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, dsr_x+22, dsr_y+58, 500, 36, 'Bailey & López de Prado (2014)',
          size=12, color=INK_3)
 
@@ -1296,13 +1303,13 @@ def slide_governance(prs):
     rect(slide, gx+int(gw*0.25), gy, int(gw*0.75), gh, fill=EMERALD_BG)  # pass zone
     rect(slide, gx+int(gw*0.25)-1, gy-4, 2, gh+8, fill=ROSE)
     text(slide, gx+int(gw*0.25)-30, gy+gh+6, 80, 20, '3.0',
-         size=10, bold=True, color=ROSE, mono=True, align='center')
+         size=12, bold=True, color=ROSE, mono=True, align='center')
     text(slide, gx+int(gw*0.25)-50, gy+gh+24, 120, 18, '臨界值',
-         size=9, color=ROSE, mono=True, align='center', ls=0.4)
+         size=12, color=ROSE, mono=True, align='center', ls=0.4)
     # marker for 12.12 — push past edge to show "≫"
     rect(slide, gx+gw-4, gy-6, 4, gh+12, fill=NAVY)
     text(slide, gx+gw-60, gy+gh+6, 80, 20, '12.12',
-         size=10, bold=True, color=NAVY, mono=True, align='center')
+         size=12, bold=True, color=NAVY, mono=True, align='center')
 
     # how-to-read · v11.5.20 §4 reader-2: bullets 略放大 + 行距加深易讀
     text(slide, dsr_x+22, dsr_y+330, 500, 24,
@@ -1343,7 +1350,7 @@ def slide_governance(prs):
         text(slide, cx+16, cy+16, 40, 22, no,
              size=13, bold=True, color=color, mono=True, ls=-0.2)
         text(slide, cx+50, cy+18, 180, 22, name,
-             size=10, bold=True, color=color, mono=True, ls=1.8)
+             size=12, bold=True, color=color, mono=True, ls=1.8)
         text(slide, cx+16, cy+44, cell_w-32, 28, zh,
              size=16, bold=True, color=NAVY)
         text(slide, cx+16, cy+76, cell_w-32, 22, value,
@@ -1360,7 +1367,7 @@ def slide_governance(prs):
             bg = EMERALD_BG
         rect(slide, pill_x, pill_y, pill_w, pill_h, fill=bg)
         text(slide, pill_x, pill_y, pill_w, pill_h, status,
-             size=10, bold=True, color=color, mono=True, ls=1.8,
+             size=12, bold=True, color=color, mono=True, ls=1.8,
              align='center', anchor='middle')
 
     takeaway_bar(slide, 96, 808, 1728, 168, 'WHY THIS MATTERS', [
@@ -1407,9 +1414,9 @@ def slide_equity_curve_main(prs):
     chart_x, chart_y, chart_w, chart_h = 96, 318, 1180, 460
     rect(slide, chart_x, chart_y, chart_w, chart_h, fill=PAPER, line=RULE, line_w=0.5)
     text(slide, chart_x+24, chart_y+20, 700, 22, 'CUMULATIVE NAV · 起始資金 100 元',
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, chart_x+24, chart_y+44, 800, 22, 'Strategy = XGBoost D+20 Top 1% · 月初再平衡',
-         size=11, color=INK_3)
+         size=12, color=INK_3)
 
     # plot region
     px_, py_, pw_, ph_ = chart_x+90, chart_y+90, chart_w-130, chart_h-180
@@ -1419,7 +1426,7 @@ def slide_equity_curve_main(prs):
         ty = py_ + ph_ - int((v - 80) / 120 * ph_)
         rect(slide, px_-6, ty, 6, 1, fill=INK_3)
         text(slide, px_-58, ty-10, 50, 18, str(v),
-             size=10, color=INK_3, mono=True, align='right')
+             size=12, color=INK_3, mono=True, align='right')
         if v != 100:
             rect(slide, px_, ty, pw_, 1, fill=SUBTLE)
     # 100 baseline highlighted
@@ -1432,7 +1439,7 @@ def slide_equity_curve_main(prs):
         tx = px_ + int(i / (len(months_lbl)-1) * pw_)
         rect(slide, tx, py_+ph_, 1, 6, fill=INK_3)
         text(slide, tx-44, py_+ph_+12, 90, 18, lbl,
-             size=10, color=INK_3, mono=True, align='center')
+             size=12, color=INK_3, mono=True, align='center')
 
     # Strategy curve — 24 months (CAGR 36.8% over 2 yrs ≈ 87% total)
     strat_nav = [100, 104, 109, 116, 122, 128, 134, 138, 142, 146, 152, 158,
@@ -1480,11 +1487,11 @@ def slide_equity_curve_main(prs):
         rect(slide, kpi_x, iy, kpi_w, item_h, fill=PAPER, line=RULE, line_w=0.75)
         stripe(slide, kpi_x, iy, kpi_w, 4, c)
         text(slide, kpi_x+22, iy+18, kpi_w-44, 18, lbl,
-             size=11, bold=True, color=INK_3, mono=True, ls=2.2)
+             size=12, bold=True, color=INK_3, mono=True, ls=2.2)
         text(slide, kpi_x+22, iy+42, kpi_w-44, 48, val,
              size=30, bold=True, color=c, mono=True, ls=-1.0)
         text(slide, kpi_x+22, iy+94, kpi_w-44, 22, sub,
-             size=11, color=INK_3, mono=True, ls=0.4)
+             size=12, color=INK_3, mono=True, ls=0.4)
 
     takeaway_bar(slide, 96, 808, 1728, 168, 'STRATEGY READOUT', [
         {'text': '把 AUC 0.6455 化為實單，', 'size': 17, 'color': INK},
@@ -1533,7 +1540,7 @@ def slide_recommendations(prs):
          size=20, bold=True, color=EMERALD, mono=True, ls=-0.4)
     rect(slide, cx+74, col_y+30, 200, 24, fill=EMERALD_BG)
     text(slide, cx+74, col_y+30, 200, 24, 'DEPLOYMENT · PASS',
-         size=10, bold=True, color=EMERALD, mono=True, ls=2.0,
+         size=12, bold=True, color=EMERALD, mono=True, ls=2.0,
          align='center', anchor='middle')
     text(slide, cx+24, col_y+72, col_w-48, 30, '部署條件已備齊',
          size=22, bold=True, color=NAVY)
@@ -1549,7 +1556,7 @@ def slide_recommendations(prs):
         ry = col_y + 128 + i*60
         rect(slide, cx+24, ry+10, 4, 16, fill=EMERALD)
         text(slide, cx+36, ry, 120, 22,
-             k, size=11, bold=True, color=EMERALD, mono=True, ls=2.0)
+             k, size=12, bold=True, color=EMERALD, mono=True, ls=2.0)
         text(slide, cx+36, ry+22, col_w-60, 26, v,
              size=13, color=INK_2)
 
@@ -1560,7 +1567,7 @@ def slide_recommendations(prs):
          size=20, bold=True, color=GOLD, mono=True, ls=-0.4)
     rect(slide, cx+74, col_y+30, 200, 24, fill=GOLD_BG)
     text(slide, cx+74, col_y+30, 200, 24, 'LIMITS · BOUNDED',
-         size=10, bold=True, color=GOLD, mono=True, ls=2.0,
+         size=12, bold=True, color=GOLD, mono=True, ls=2.0,
          align='center', anchor='middle')
     text(slide, cx+24, col_y+72, col_w-48, 30, '三大限制邊界',
          size=22, bold=True, color=NAVY)
@@ -1585,7 +1592,7 @@ def slide_recommendations(prs):
          size=20, bold=True, color=TEAL, mono=True, ls=-0.4)
     rect(slide, cx+74, col_y+30, 200, 24, fill=TEAL_BG)
     text(slide, cx+74, col_y+30, 200, 24, 'ROADMAP · 6 MONTHS',
-         size=10, bold=True, color=TEAL_D, mono=True, ls=2.0,
+         size=12, bold=True, color=TEAL_D, mono=True, ls=2.0,
          align='center', anchor='middle')
     text(slide, cx+24, col_y+72, col_w-48, 30, '6 個月分三步落地',
          size=22, bold=True, color=NAVY)
@@ -1643,11 +1650,11 @@ def slide_closing(prs):
 
     # top brand chrome
     rect(slide, 120, 38, 30, 30, fill=PAPER)
-    text(slide, 120, 38, 30, 30, 'TW', size=11, bold=True, color=NAVY,
+    text(slide, 120, 38, 30, 30, 'TW', size=12, bold=True, color=NAVY,
          align='center', anchor='middle', mono=True)
     text(slide, 158, 38, 360, 30, '多因子股票預測系統 · v11.5.18', size=12, bold=True,
          color=IVORY, anchor='middle', ls=1.4)
-    text(slide, 1320, 38, 380, 30, 'CLOSING · Q & A', size=11,
+    text(slide, 1320, 38, 380, 30, 'CLOSING · Q & A', size=12,
          color=MINT, align='right', anchor='middle', mono=True, ls=2.4)
     rect(slide, 1714, 45, 1, 16, fill=NAVY_MID)
     text(slide, 1724, 38, 100, 30, '11', size=12, bold=True,
@@ -1696,7 +1703,7 @@ def slide_closing(prs):
     for i, (lbl, val, c) in enumerate(kpis):
         cx = 130 + i*cw
         text(slide, cx+20, strip_y+22, cw-40, 22, lbl,
-             size=10, bold=True, color=IVORY, mono=True, ls=2.4)
+             size=12, bold=True, color=IVORY, mono=True, ls=2.4)
         text(slide, cx+20, strip_y+50, cw-40, 80, val,
              size=42, bold=True, color=c, mono=True, ls=-0.8)
         if i < 3:
@@ -1705,9 +1712,9 @@ def slide_closing(prs):
     # disclaimer + page no
     text(slide, 130, 1018, 1300, 30,
          '本研究為 NTU 大數據與商業分析專案課堂成果、不構成任何投資建議',
-         size=11, color=INK_4, anchor='middle', mono=True, ls=0.5)
+         size=12, color=INK_4, anchor='middle', mono=True, ls=0.5)
     text(slide, 1580, 1018, 260, 30, 'APPENDIX · 30 PAGES',
-         size=10, bold=True, color=MINT, align='right', anchor='middle', mono=True, ls=1.6)
+         size=12, bold=True, color=MINT, align='right', anchor='middle', mono=True, ls=1.6)
     return slide
 
 
@@ -1840,7 +1847,7 @@ def slide_apx_approach_detail(prs):
         text(slide, cx+24, cy+106, cell_w-48, 76, body, size=14, color=INK_2, line_h=1.55)
         rect(slide, cx+24, cy+cell_h-44, cell_w-48, 1, fill=RULE)
         text(slide, cx+24, cy+cell_h-32, cell_w-48, 22, '↪ ' + artifact,
-             size=11, color=INK_3, mono=True, ls=0.4)
+             size=12, color=INK_3, mono=True, ls=0.4)
 
     takeaway_bar(slide, 96, 824, 1728, 124, 'DESIGN PRINCIPLE · 設計原則', [
         {'text': '每階段皆產出 JSON 報告 + 摘要 + artifact，dashboard 可逐頁追溯；', 'size': 17, 'color': INK},
@@ -1881,7 +1888,7 @@ def slide_apx_data_sources(prs):
     cx = hx
     for i, hdr in enumerate(headers):
         text(slide, cx+18, hy+8, col_widths[i]-20, 22, hdr,
-             size=11, bold=True, color=PAPER, mono=True, ls=2.4)
+             size=12, bold=True, color=PAPER, mono=True, ls=2.4)
         cx += col_widths[i]
     for i, (tbl, dom, rows_s, note, color) in enumerate(rows):
         ry = hy + 36 + i*60
@@ -1947,7 +1954,7 @@ def slide_apx_walk_forward(prs):
         tx = timeline_x + int(i / (len(years)-1) * timeline_w)
         rect(slide, tx, timeline_y+218, 1, 8, fill=INK_3)
         text(slide, tx-30, timeline_y+232, 60, 22, y_lbl,
-             size=11, color=INK_3, mono=True, align='center')
+             size=12, color=INK_3, mono=True, align='center')
     # Folds: train (navy) / embargo (gold) / test (teal)
     fold_h = 32; fold_gap = 8
     folds = [
@@ -1976,7 +1983,7 @@ def slide_apx_walk_forward(prs):
     lx = 156
     for lbl, c in legends:
         rect(slide, lx, leg_y+6, 16, 10, fill=c)
-        text(slide, lx+22, leg_y, 200, 22, lbl, size=11, color=INK_2, mono=True, anchor='middle')
+        text(slide, lx+22, leg_y, 200, 22, lbl, size=12, color=INK_2, mono=True, anchor='middle')
         lx += 220
 
     takeaway_bar(slide, 96, 836, 1728, 132, 'WHY EMBARGO · 為何要 embargo', [
@@ -2065,7 +2072,7 @@ def slide_apx_pillars_grid(prs):
         card(slide, cx, cy, cw, ch, top_stripe=color)
         text(slide, cx+24, cy+20, 200, 30, abbr, size=22, bold=True, color=color, mono=True, ls=-0.4)
         text(slide, cx+cw-100, cy+20, 80, 30, n, size=22, bold=True, color=NAVY, mono=True, align='right', ls=-0.4)
-        text(slide, cx+cw-160, cy+26, 60, 22, 'feat', size=11, color=INK_3, mono=True, align='right', anchor='middle')
+        text(slide, cx+cw-160, cy+26, 60, 22, 'feat', size=12, color=INK_3, mono=True, align='right', anchor='middle')
         text(slide, cx+24, cy+58, cw-48, 32, name, size=20, bold=True, color=NAVY)
         rect(slide, cx+24, cy+96, 60, 3, fill=color)
         text(slide, cx+24, cy+108, cw-48, 50, examples, size=12, color=INK_2, mono=True, line_h=1.5, ls=0.2)
@@ -2095,7 +2102,7 @@ def slide_apx_lopo_detail(prs):
     # Bar chart panel (left)
     rect(slide, 96, 308, 1100, 540, fill=PAPER, line=RULE, line_w=0.75)
     text(slide, 116, 326, 700, 22, '— 移除單一支柱後 OOS AUC 變動 (4-fold mean, bps)',
-         size=11, bold=True, color=INK_2, mono=True, ls=1.6)
+         size=12, bold=True, color=INK_2, mono=True, ls=1.6)
     lopo = [
         ('Risk',     138.6),
         ('Trend',     64.9),
@@ -2117,7 +2124,7 @@ def slide_apx_lopo_detail(prs):
     # Right: 3 observations
     obs_x = 1212
     text(slide, obs_x, 326, 600, 22, '— THREE READINGS · 三個關鍵解讀',
-         size=11, bold=True, color=NAVY, mono=True, ls=2.0)
+         size=12, bold=True, color=NAVY, mono=True, ls=2.0)
     obs = [
         ('01', 'Risk 一支獨大', NAVY,     '+138.6 bps · 占解釋力 ~50% · 風險特徵不可裁去'),
         ('02', 'Trend 第二位',  TEAL,     '+64.9 bps · 動能 / 趨勢仍然顯著'),
@@ -2157,7 +2164,7 @@ def slide_apx_shap_top20(prs):
     # SHAP Top-20 list (left, 1000 wide)
     rect(slide, 96, 308, 1100, 660, fill=PAPER, line=RULE, line_w=0.75)
     text(slide, 116, 326, 800, 22, '— TOP 20 FEATURES BY MEAN |SHAP| · OOS aggregate',
-         size=11, bold=True, color=INK_2, mono=True, ls=1.6)
+         size=12, bold=True, color=INK_2, mono=True, ls=1.6)
     shap_top = [
         ('volatility_20d',     'RSK', NAVY,    0.142),
         ('downside_dev_60d',   'RSK', NAVY,    0.118),
@@ -2186,9 +2193,9 @@ def slide_apx_shap_top20(prs):
     for i, (name, pil, col, v) in enumerate(shap_top):
         ry = base_y + i*row_h
         text(slide, 116, ry, 36, row_h, f'{i+1:02d}',
-             size=11, bold=True, color=INK_3, mono=True, anchor='middle')
+             size=12, bold=True, color=INK_3, mono=True, anchor='middle')
         rect(slide, 156, ry+8, 32, row_h-16, fill=col)
-        text(slide, 156, ry+8, 32, row_h-16, pil, size=9, bold=True, color=PAPER,
+        text(slide, 156, ry+8, 32, row_h-16, pil, size=12, bold=True, color=PAPER,
              mono=True, align='center', anchor='middle')
         text(slide, 200, ry, 360, row_h, name, size=12, color=INK, mono=True, anchor='middle')
         track_x = 580
@@ -2202,7 +2209,7 @@ def slide_apx_shap_top20(prs):
     # Right: pillar consistency table
     rx = 1212
     text(slide, rx, 326, 600, 22, '— PILLAR-WISE SHAP vs LOPO',
-         size=11, bold=True, color=NAVY, mono=True, ls=2.0)
+         size=12, bold=True, color=NAVY, mono=True, ls=2.0)
     cons = [
         ('Risk',     'RSK', NAVY,    0.434, 138.6),
         ('Trend',    'TRD', NAVY_D,  0.259, 64.9),
@@ -2215,16 +2222,16 @@ def slide_apx_shap_top20(prs):
     ]
     th_y = 366
     rect(slide, rx, th_y, 612, 32, fill=NAVY)
-    text(slide, rx+18, th_y+6, 200, 22, 'PILLAR', size=11, bold=True, color=PAPER, mono=True, ls=2.0, anchor='middle')
-    text(slide, rx+260, th_y+6, 140, 22, 'SHAP', size=11, bold=True, color=PAPER, mono=True, ls=2.0, align='right', anchor='middle')
-    text(slide, rx+420, th_y+6, 180, 22, 'LOPO bps', size=11, bold=True, color=PAPER, mono=True, ls=2.0, align='right', anchor='middle')
+    text(slide, rx+18, th_y+6, 200, 22, 'PILLAR', size=12, bold=True, color=PAPER, mono=True, ls=2.0, anchor='middle')
+    text(slide, rx+260, th_y+6, 140, 22, 'SHAP', size=12, bold=True, color=PAPER, mono=True, ls=2.0, align='right', anchor='middle')
+    text(slide, rx+420, th_y+6, 180, 22, 'LOPO bps', size=12, bold=True, color=PAPER, mono=True, ls=2.0, align='right', anchor='middle')
     for i, (name, abbr, c, sh, lp) in enumerate(cons):
         ry = th_y + 32 + i*36
         bg = TINT if i%2==0 else PAPER
         rect(slide, rx, ry, 612, 36, fill=bg)
         rect(slide, rx, ry, 4, 36, fill=c)
         text(slide, rx+18, ry+6, 200, 24, name, size=14, bold=True, color=INK, anchor='middle')
-        text(slide, rx+150, ry+6, 100, 24, abbr, size=11, bold=True, color=c, mono=True, anchor='middle')
+        text(slide, rx+150, ry+6, 100, 24, abbr, size=12, bold=True, color=c, mono=True, anchor='middle')
         text(slide, rx+260, ry+6, 140, 24, f'{sh:.3f}', size=14, bold=True,
              color=INK, mono=True, align='right', anchor='middle')
         sign = '+' if lp>=0 else ''
@@ -2275,7 +2282,7 @@ def slide_apx_top10_factors(prs):
     aligns = ['center', 'left', 'center', 'right', 'right', 'right', 'left']
     for i, h in enumerate(headers):
         text(slide, cx+12, hy+10, cols[i]-24, 24, h,
-             size=11, bold=True, color=PAPER, mono=True, ls=2.2, align=aligns[i], anchor='middle')
+             size=12, bold=True, color=PAPER, mono=True, ls=2.2, align=aligns[i], anchor='middle')
         cx += cols[i]
     for i, (name, abbr, c, ic, icir, auc) in enumerate(rows):
         ry = hy + 40 + i*52
@@ -2333,7 +2340,7 @@ def slide_apx_model_compare(prs):
     # Bar chart for AUC
     rect(slide, 96, 308, 880, 540, fill=PAPER, line=RULE, line_w=0.75)
     text(slide, 116, 326, 700, 22, '— OOS AUC · 4-fold mean (vs 0.5 baseline)',
-         size=11, bold=True, color=INK_2, mono=True, ls=1.6)
+         size=12, bold=True, color=INK_2, mono=True, ls=1.6)
     base_y = 808
     chart_h = 420
     bar_w = 140
@@ -2351,13 +2358,13 @@ def slide_apx_model_compare(prs):
              size=12, bold=True, color=INK, mono=True, align='center', anchor='middle')
     # Baseline line
     rect(slide, 156, base_y, 800, 1, fill=INK_4)
-    text(slide, 156, base_y+44, 100, 18, '0.5 baseline', size=10, color=INK_3, mono=True)
+    text(slide, 156, base_y+44, 100, 18, '0.5 baseline', size=12, color=INK_3, mono=True)
 
     # Right table
     rx = 1004
     rect(slide, rx, 308, 820, 540, fill=PAPER, line=RULE, line_w=0.75)
     text(slide, rx+20, 326, 600, 22, '— METRICS COMPARISON',
-         size=11, bold=True, color=NAVY, mono=True, ls=2.0)
+         size=12, bold=True, color=NAVY, mono=True, ls=2.0)
     cols2 = [220, 130, 130, 130, 210]
     headers2 = ['MODEL', 'AUC', 'ICIR', 'DSR', 'NOTE']
     th_y = 360
@@ -2366,7 +2373,7 @@ def slide_apx_model_compare(prs):
     aligns2 = ['left','right','right','right','left']
     for i, h in enumerate(headers2):
         text(slide, cx+12, th_y+8, cols2[i]-24, 22, h,
-             size=11, bold=True, color=PAPER, mono=True, ls=2.0, align=aligns2[i], anchor='middle')
+             size=12, bold=True, color=PAPER, mono=True, ls=2.0, align=aligns2[i], anchor='middle')
         cx += cols2[i]
     for i, (name, c, auc, icir, dsr, note) in enumerate(models):
         ry = th_y + 36 + i*60
@@ -2411,7 +2418,7 @@ def slide_apx_auc_dsr(prs):
     # AUC by fold panel
     rect(slide, 96, 308, 1024, 580, fill=PAPER, line=RULE, line_w=0.75)
     text(slide, 116, 326, 700, 22, '— OOS AUC BY FOLD · expanding window',
-         size=11, bold=True, color=INK_2, mono=True, ls=1.6)
+         size=12, bold=True, color=INK_2, mono=True, ls=1.6)
     folds = [
         ('Fold 1', '2017-19', 0.6582),
         ('Fold 2', '2020-21', 0.6431),
@@ -2433,21 +2440,21 @@ def slide_apx_auc_dsr(prs):
         text(slide, bx-20, base_y+12, bar_w+40, 22, name,
              size=12, bold=True, color=INK, mono=True, align='center', anchor='middle')
         text(slide, bx-20, base_y+38, bar_w+40, 22, span,
-             size=11, color=INK_3, mono=True, align='center', anchor='middle')
+             size=12, color=INK_3, mono=True, align='center', anchor='middle')
     # Mean line
     mean_auc = 0.6490
     mean_h = int((mean_auc-0.5) / 0.20 * chart_h)
     rect(slide, 196, base_y - mean_h, 720, 1, fill=TEAL)
     text(slide, 920, base_y - mean_h - 14, 200, 22, f'mean {mean_auc:.4f}',
-         size=11, bold=True, color=TEAL, mono=True)
+         size=12, bold=True, color=TEAL, mono=True)
     rect(slide, 196, base_y, 720, 1, fill=INK_4)
-    text(slide, 196, base_y+62, 200, 18, '0.5 baseline', size=10, color=INK_3, mono=True)
+    text(slide, 196, base_y+62, 200, 18, '0.5 baseline', size=12, color=INK_3, mono=True)
 
     # DSR formula panel
     rx = 1144
     card(slide, rx, 308, 680, 580, top_stripe=NAVY)
     text(slide, rx+24, 332, 600, 22, '— DEFLATED SHARPE RATIO · 多重檢定校正',
-         size=11, bold=True, color=NAVY, mono=True, ls=2.0)
+         size=12, bold=True, color=NAVY, mono=True, ls=2.0)
     text(slide, rx+24, 366, 632, 60, 'DSR 12.12 (p<0.001)',
          size=42, bold=True, color=NAVY, mono=True, ls=-1.0)
     rect(slide, rx+24, 442, 60, 3, fill=NAVY)
@@ -2469,7 +2476,7 @@ def slide_apx_auc_dsr(prs):
     ], line_h=1.6)
     rect(slide, rx+24, 758, 632, 1, fill=RULE)
     text(slide, rx+24, 770, 632, 22, '解讀',
-         size=11, bold=True, color=NAVY, mono=True, ls=2.0)
+         size=12, bold=True, color=NAVY, mono=True, ls=2.0)
     text(slide, rx+24, 798, 632, 80, 'DSR > 2 即顯著；本系統 12.12 為極強拒絕「運氣假說」的證據——150 次參數搜尋的選擇偏誤已被扣除。',
          size=13, color=INK_2, line_h=1.55)
 
@@ -2513,7 +2520,7 @@ def slide_apx_threshold(prs):
         for j, (lbl, val) in enumerate(items):
             iy = cy + 140 + j*84
             text(slide, cx+24, iy, cw-48, 18, lbl,
-                 size=10, color=INK_3, mono=True, ls=2.0)
+                 size=12, color=INK_3, mono=True, ls=2.0)
             text(slide, cx+24, iy+22, cw-48, 50, val,
                  size=32, bold=True, color=NAVY, mono=True, ls=-0.8)
         text(slide, cx+24, cy+ch-46, cw-48, 32, body,
@@ -2546,7 +2553,7 @@ def slide_apx_hit_decile(prs):
     # Decile bar chart
     rect(slide, 96, 308, 1728, 540, fill=PAPER, line=RULE, line_w=0.75)
     text(slide, 116, 326, 600, 22, '— HIT RATE BY PREDICTED-PROB DECILE',
-         size=11, bold=True, color=INK_2, mono=True, ls=1.6)
+         size=12, bold=True, color=INK_2, mono=True, ls=1.6)
     decs = [
         ('D1', 22.4),  ('D2', 24.8), ('D3', 26.5), ('D4', 28.1), ('D5', 29.8),
         ('D6', 31.6),  ('D7', 33.5), ('D8', 36.4), ('D9', 41.2), ('D10', 47.8),
@@ -2571,7 +2578,7 @@ def slide_apx_hit_decile(prs):
     base_h = int(base_v / max_v * chart_h)
     rect(slide, 156, base_y - base_h, 1640, 1, fill=ROSE)
     text(slide, 1620, base_y - base_h - 22, 200, 18, '30% baseline',
-         size=10, bold=True, color=ROSE, mono=True, align='right')
+         size=12, bold=True, color=ROSE, mono=True, align='right')
 
     takeaway_bar(slide, 96, 868, 1728, 112, 'MONOTONICITY · 機率排序與真實命中一致', [
         {'text': '十個分位無一破口 · 排序能力扎實；', 'size': 15, 'color': INK},
@@ -2606,14 +2613,14 @@ def slide_apx_equity_curve(prs):
         tx = px_ + int(i / (len(years)-1) * pw_)
         rect(slide, tx, py_+ph_, 1, 6, fill=INK_3)
         text(slide, tx-30, py_+ph_+12, 60, 18, y_lbl,
-             size=11, color=INK_3, mono=True, align='center')
+             size=12, color=INK_3, mono=True, align='center')
     # Y-axis ticks (cumulative return %)
     yvals = [0, 50, 100, 150, 200, 250]
     for i, v in enumerate(yvals):
         ty = py_ + ph_ - int(v / 250 * ph_)
         rect(slide, px_-6, ty, 6, 1, fill=INK_3)
         text(slide, px_-60, ty-10, 50, 18, f'{v}%',
-             size=10, color=INK_3, mono=True, align='right')
+             size=12, color=INK_3, mono=True, align='right')
         if v > 0:
             rect(slide, px_, ty, pw_, 1, fill=SUBTLE)
     # Strategy curve (stylized) — 8 years
@@ -2657,7 +2664,7 @@ def slide_apx_equity_curve(prs):
         rect(slide, kx, kpi_y, 414, 96, fill=PAPER, line=RULE, line_w=0.75)
         rect(slide, kx, kpi_y, 414, 4, fill=TEAL)
         text(slide, kx+18, kpi_y+12, 240, 22, lbl,
-             size=10, bold=True, color=INK_3, mono=True, ls=2.2)
+             size=12, bold=True, color=INK_3, mono=True, ls=2.2)
         text(slide, kx+18, kpi_y+36, 200, 36, v1,
              size=22, bold=True, color=TEAL, mono=True, ls=-0.6)
         text(slide, kx+220, kpi_y+36, 100, 36, v2,
@@ -2665,7 +2672,7 @@ def slide_apx_equity_curve(prs):
         text(slide, kx+330, kpi_y+36, 84, 36, edge,
              size=14, bold=True, color=NAVY, mono=True, align='right', anchor='middle')
         text(slide, kx+18, kpi_y+74, 200, 16, 'STRATEGY  /  0050  /  EDGE',
-             size=8, color=INK_4, mono=True, ls=1.8)
+             size=12, color=INK_4, mono=True, ls=1.8)
     return slide
 
 
@@ -2697,13 +2704,13 @@ def slide_apx_drawdown_cost(prs):
         text(slide, cx+24, cy+54, cw-48, 56, cagr,
              size=46, bold=True, color=c, mono=True, ls=-1.4)
         text(slide, cx+24, cy+114, cw-48, 22, 'CAGR · annualized',
-             size=11, color=INK_3, mono=True, ls=1.5)
+             size=12, color=INK_3, mono=True, ls=1.5)
         rect(slide, cx+24, cy+148, 60, 3, fill=c)
         items = [('SR̂', sr), ('MaxDD', mdd)]
         for j, (lbl, v) in enumerate(items):
             iy = cy + 168 + j*68
             text(slide, cx+24, iy, 200, 22, lbl,
-                 size=11, color=INK_3, mono=True, ls=2.0)
+                 size=12, color=INK_3, mono=True, ls=2.0)
             text(slide, cx+200, iy-2, cw-220, 28, v,
                  size=22, bold=True, color=NAVY, mono=True, ls=-0.4)
         text(slide, cx+24, cy+ch-72, cw-48, 60, body,
@@ -2800,7 +2807,7 @@ def slide_apx_sentiment_overview(prs):
 
     # Two cards: Methodology + Source breakdown
     text(slide, 96, 506, 600, 22, '— LEXICON CONSTRUCTION · 詞表建構',
-         size=11, bold=True, color=NAVY, mono=True, ls=2.0)
+         size=12, bold=True, color=NAVY, mono=True, ls=2.0)
     card(slide, 96, 540, 850, 416, top_stripe=NAVY)
     rich(slide, 116, 564, 810, 380, [
         {'text': '500-keyword 台股情感詞表 · 三步驟', 'size': 20, 'bold': True, 'color': NAVY},
@@ -2822,7 +2829,7 @@ def slide_apx_sentiment_overview(prs):
     ], line_h=1.55)
 
     text(slide, 974, 506, 600, 22, '— SOURCE BREAKDOWN · 15 來源',
-         size=11, bold=True, color=NAVY, mono=True, ls=2.0)
+         size=12, bold=True, color=NAVY, mono=True, ls=2.0)
     card(slide, 974, 540, 850, 416, top_stripe=TEAL)
     sources = [
         ('Anue 鉅亨網',     NAVY,    '24%'),
@@ -2896,11 +2903,11 @@ def slide_apx_keyword_spectrum(prs):
         # header row
         rect(slide, x+24, y+52, w-48, 30, fill=SUBTLE)
         text(slide, x+36, y+58, 240, 22, 'KEYWORD',
-             size=11, bold=True, color=INK_3, mono=True, ls=2.0, anchor='middle')
+             size=12, bold=True, color=INK_3, mono=True, ls=2.0, anchor='middle')
         text(slide, x+w-220, y+58, 100, 22, 'LIFT',
-             size=11, bold=True, color=INK_3, mono=True, ls=2.0, align='right', anchor='middle')
+             size=12, bold=True, color=INK_3, mono=True, ls=2.0, align='right', anchor='middle')
         text(slide, x+w-100, y+58, 80, 22, 'χ² rank',
-             size=11, bold=True, color=INK_3, mono=True, ls=2.0, align='right', anchor='middle')
+             size=12, bold=True, color=INK_3, mono=True, ls=2.0, align='right', anchor='middle')
         for i, (kw, lift, chi) in enumerate(items):
             ry = y + 88 + i*48
             text(slide, x+36, ry+12, 200, 28, f'{i+1:02d}  {kw}',
@@ -2944,7 +2951,7 @@ def slide_apx_sentiment_quintile(prs):
     # Bar chart
     rect(slide, 96, 308, 1080, 580, fill=PAPER, line=RULE, line_w=0.75)
     text(slide, 116, 326, 700, 22, '— FORWARD 20-DAY EXCESS RETURN BY SENTIMENT QUINTILE',
-         size=11, bold=True, color=INK_2, mono=True, ls=1.6)
+         size=12, bold=True, color=INK_2, mono=True, ls=1.6)
     qs = [
         ('Q1\n極負面', 3.2,  ROSE),
         ('Q2\n偏負面', -1.8, INK_4),
@@ -3014,7 +3021,7 @@ def slide_apx_q1_contrarian(prs):
     # Big quote box
     card(slide, 96, 308, 1728, 152, top_stripe=ROSE)
     text(slide, 116, 332, 1688, 22, '— THE FINDING',
-         size=11, bold=True, color=ROSE, mono=True, ls=2.4)
+         size=12, bold=True, color=ROSE, mono=True, ls=2.4)
     text(slide, 116, 360, 1688, 88, '當輿情極度負面時 (Q1)，未來 20 日「期望報酬」反而變正 +3.2%；',
          size=22, bold=True, color=INK, line_h=1.4)
     text(slide, 116, 408, 1688, 44, '空頭過度反應 → 賣壓出清 → 散戶恐慌底 → 機構接手反彈。',
@@ -3034,7 +3041,7 @@ def slide_apx_q1_contrarian(prs):
         sy = 488
         card(slide, sx, sy, 552, 360, top_stripe=c)
         text(slide, sx+24, sy+24, 80, 60, no, size=44, bold=True, color=c, mono=True, ls=-1.4)
-        text(slide, sx+24, sy+92, 200, 22, 'STEP', size=11, bold=True, color=c, mono=True, ls=2.4)
+        text(slide, sx+24, sy+92, 200, 22, 'STEP', size=12, bold=True, color=c, mono=True, ls=2.4)
         text(slide, sx+24, sy+120, 504, 36, h, size=22, bold=True, color=NAVY)
         rect(slide, sx+24, sy+162, 60, 3, fill=c)
         text(slide, sx+24, sy+178, 504, 160, body, size=15, color=INK_2, line_h=1.65)
@@ -3096,15 +3103,15 @@ def slide_apx_ushape_multi(prs):
             if v >= 0:
                 rect(slide, bx, zero_y - bar_h, bar_w, bar_h, fill=col)
                 text(slide, bx-20, zero_y-bar_h-26, bar_w+40, 22, f'+{v:.1f}',
-                     size=11, bold=True, color=col, mono=True, align='center', anchor='middle')
+                     size=12, bold=True, color=col, mono=True, align='center', anchor='middle')
             else:
                 rect(slide, bx, zero_y, bar_w, bar_h, fill=col)
                 text(slide, bx-20, zero_y+bar_h+4, bar_w+40, 22, f'{v:.1f}',
-                     size=11, bold=True, color=col, mono=True, align='center', anchor='middle')
+                     size=12, bold=True, color=col, mono=True, align='center', anchor='middle')
             text(slide, bx-20, chart_top+chart_h+8, bar_w+40, 22, lbl,
-                 size=11, bold=True, color=INK_2, mono=True, align='center', anchor='middle')
+                 size=12, bold=True, color=INK_2, mono=True, align='center', anchor='middle')
         text(slide, px+24, py+panel_h-46, panel_w-48, 22, '單位 · % excess return',
-             size=11, color=INK_3, mono=True, ls=0.4)
+             size=12, color=INK_3, mono=True, ls=0.4)
 
     takeaway_bar(slide, 96, 856, 1728, 112, 'TIME EVOLUTION · 時間演化', [
         {'text': '反向效應在 T+1 尚未顯現 (慣性主導) · 在 T+5 開始浮現 · 在 T+20 完整成型；', 'size': 15, 'color': INK},
@@ -3160,12 +3167,12 @@ def slide_apx_news_forum(prs):
         text(slide, cx+24, cy+170, cell_w-48, 80, body,
              size=15, color=INK_2, line_h=1.55)
         text(slide, cx+cell_w-180, cy+22, 160, 22, 'T+20 fwd',
-             size=11, color=INK_3, mono=True, align='right', ls=1.5)
+             size=12, color=INK_3, mono=True, align='right', ls=1.5)
 
     # Right info column
     rx = 1560
     text(slide, rx, 308, 264, 22, '— DECISION RULES',
-         size=11, bold=True, color=NAVY, mono=True, ls=2.0)
+         size=12, bold=True, color=NAVY, mono=True, ls=2.0)
     rules = [
         ('CONSENSUS_BULL', EMERALD, '兩者皆 ≥ +1.5σ → 買進', '+4.1%'),
         ('CONTRARIAN',     ROSE,    '兩者皆 ≤ -1.5σ → 反向買進', '+1.8%'),
@@ -3176,11 +3183,11 @@ def slide_apx_news_forum(prs):
         ry = 348 + i*132
         card(slide, rx, ry, 264, 116, top_stripe=c)
         text(slide, rx+18, ry+14, 240, 22, n,
-             size=10, bold=True, color=c, mono=True, ls=1.8)
+             size=12, bold=True, color=c, mono=True, ls=1.8)
         text(slide, rx+18, ry+38, 240, 26, ret,
              size=18, bold=True, color=c, mono=True, ls=-0.4)
         text(slide, rx+18, ry+66, 240, 44, body,
-             size=11, color=INK_2, line_h=1.45)
+             size=12, color=INK_2, line_h=1.45)
 
     takeaway_bar(slide, 96, 904, 1728, 84, 'CROSS-CHANNEL VALIDATION', [
         {'text': '兩源共識 (BOTH BULL) +4.1% > 單源 ; ', 'size': 14, 'color': INK},
@@ -3216,7 +3223,7 @@ def slide_apx_coverage(prs):
 
     # Daily sentiment line chart
     text(slide, 96, 506, 600, 22, '— DAILY MARKET SENTIMENT INDEX (2018-2025)',
-         size=11, bold=True, color=NAVY, mono=True, ls=2.0)
+         size=12, bold=True, color=NAVY, mono=True, ls=2.0)
     px_, py_, pw_, ph_ = linechart_box(slide, 96, 540, 1728, 380)
     # x-axis
     years = ['2018','2019','2020','2021','2022','2023','2024','2025']
@@ -3224,7 +3231,7 @@ def slide_apx_coverage(prs):
         tx = px_ + int(i / (len(years)-1) * pw_)
         rect(slide, tx, py_+ph_, 1, 6, fill=INK_3)
         text(slide, tx-30, py_+ph_+12, 60, 18, yl,
-             size=10, color=INK_3, mono=True, align='center')
+             size=12, color=INK_3, mono=True, align='center')
     # y-axis (sentiment -1 to +1)
     yvals = [-1, -0.5, 0, 0.5, 1]
     zero_y = py_ + ph_//2
@@ -3232,7 +3239,7 @@ def slide_apx_coverage(prs):
         ty = py_ + ph_//2 - int(v * ph_ / 2)
         rect(slide, px_-6, ty, 6, 1, fill=INK_3)
         text(slide, px_-50, ty-10, 40, 18, f'{v:+.1f}',
-             size=10, color=INK_3, mono=True, align='right')
+             size=12, color=INK_3, mono=True, align='right')
         if v == 0:
             rect(slide, px_, ty, pw_, 1, fill=INK_4)
         else:
@@ -3251,7 +3258,7 @@ def slide_apx_coverage(prs):
     crash_x = px_ + int(2 / (len(years)-1) * pw_)
     rect(slide, crash_x, py_+10, 1, ph_-10, fill=ROSE)
     text(slide, crash_x-80, py_+12, 160, 22, 'COVID-19 crash',
-         size=11, bold=True, color=ROSE, mono=True, align='center')
+         size=12, bold=True, color=ROSE, mono=True, align='center')
 
     takeaway_bar(slide, 96, 936, 1728, 54, '', [
         {'text': '極端事件 (COVID-19 / 2022 升息) 情感指數皆出現 -0.6 級重挫，', 'size': 14, 'color': INK},
@@ -3287,7 +3294,7 @@ def slide_apx_signal_decay(prs):
     ]
     rect(slide, 96, 308, 1728, 580, fill=PAPER, line=RULE, line_w=0.75)
     text(slide, 116, 326, 800, 22, '— POPULATION STABILITY INDEX BY PILLAR · 30-day rolling',
-         size=11, bold=True, color=INK_2, mono=True, ls=1.6)
+         size=12, bold=True, color=INK_2, mono=True, ls=1.6)
     base_y = 820
     chart_h = 380
     bar_w = 130
@@ -3301,7 +3308,7 @@ def slide_apx_signal_decay(prs):
         for i in range(0, 1640, 12):
             rect(slide, 156+i, ty, 6, 1, fill=color)
         text(slide, 1700, ty-10, 100, 18, lbl,
-             size=10, bold=True, color=color, mono=True, align='right')
+             size=12, bold=True, color=color, mono=True, align='right')
     for i, (name, v, c, status) in enumerate(psi):
         bx = bar_x0 + i*(bar_w + gap)
         bar_h = int(v / max_v * chart_h)
@@ -3309,12 +3316,12 @@ def slide_apx_signal_decay(prs):
         text(slide, bx-20, base_y-bar_h-30, bar_w+40, 24, f'{v:.2f}',
              size=14, bold=True, color=c, mono=True, align='center', anchor='middle')
         text(slide, bx-20, base_y+12, bar_w+40, 22, name,
-             size=11, bold=True, color=INK, mono=True, align='center', anchor='middle')
+             size=12, bold=True, color=INK, mono=True, align='center', anchor='middle')
         # status pill
         status_color = ROSE if status == 'WARN' else EMERALD
         rect(slide, bx+bar_w//2-32, base_y+38, 64, 22, fill=status_color)
         text(slide, bx+bar_w//2-32, base_y+38, 64, 22, status,
-             size=10, bold=True, color=PAPER, mono=True, align='center', anchor='middle')
+             size=12, bold=True, color=PAPER, mono=True, align='center', anchor='middle')
 
     takeaway_bar(slide, 96, 904, 1728, 84, 'EARLY WARNING · 早期警示', [
         {'text': 'Sentiment 0.13 已過 0.10 警告線 · 仍低於 0.25 alert · ', 'size': 14, 'color': INK},
@@ -3355,7 +3362,7 @@ def slide_apx_limitations(prs):
 
     # Two columns
     text(slide, 96, 296, 800, 22, '— LIMITATIONS · 五大限制',
-         size=11, bold=True, color=ROSE, mono=True, ls=2.4)
+         size=12, bold=True, color=ROSE, mono=True, ls=2.4)
     for i, (no, h, body, c) in enumerate(limits):
         ry = 332 + i*116
         card(slide, 96, ry, 850, 100, top_stripe=c)
@@ -3364,7 +3371,7 @@ def slide_apx_limitations(prs):
         text(slide, 178, ry+52, 660, 36, body, size=13, color=INK_2, line_h=1.45)
 
     text(slide, 974, 296, 800, 22, '— FUTURE WORK · 五大未來方向',
-         size=11, bold=True, color=EMERALD, mono=True, ls=2.4)
+         size=12, bold=True, color=EMERALD, mono=True, ls=2.4)
     for i, (no, h, body, c) in enumerate(futures):
         ry = 332 + i*116
         card(slide, 974, ry, 850, 100, top_stripe=c)
@@ -3426,7 +3433,7 @@ def slide_apx_bibliography(prs):
         cy = grid_y + row*(ch+gap)
         card(slide, cx, cy, cw, ch, top_stripe=c)
         text(slide, cx+24, cy+22, cw-48, 22, title,
-             size=11, bold=True, color=c, mono=True, ls=2.4)
+             size=12, bold=True, color=c, mono=True, ls=2.4)
         for j, r in enumerate(refs):
             ry = cy + 60 + j*54
             text(slide, cx+24, ry, 24, 24, '·',
@@ -3489,16 +3496,16 @@ def slide_apx_tools_stack(prs):
         cx = grid_x + i*(cw + gap)
         card(slide, cx, grid_y, cw, ch, top_stripe=c)
         text(slide, cx+22, grid_y+22, cw-44, 22, title,
-             size=11, bold=True, color=c, mono=True, ls=2.4)
+             size=12, bold=True, color=c, mono=True, ls=2.4)
         for j, (lib, ver, note) in enumerate(libs):
             ry = grid_y + 70 + j*92
             rect(slide, cx+22, ry+8, 4, 64, fill=c)
             text(slide, cx+34, ry, cw-56, 28, lib,
                  size=18, bold=True, color=NAVY, mono=True, ls=-0.4)
             text(slide, cx+34, ry+30, 100, 22, f'v{ver}',
-                 size=11, bold=True, color=c, mono=True, ls=0.6)
+                 size=12, bold=True, color=c, mono=True, ls=0.6)
             text(slide, cx+34, ry+52, cw-56, 36, note,
-                 size=11, color=INK_2, line_h=1.4)
+                 size=12, color=INK_2, line_h=1.4)
 
     takeaway_bar(slide, 96, 700, 1728, 220, 'WHY THIS STACK', [
         {'text': '純 Python · MIT/Apache 授權 · 全部可在 ', 'size': 15, 'color': INK},
@@ -3569,16 +3576,16 @@ def slide_apx_methodology(prs):
              size=14, bold=True, color=color, mono=True, ls=2.0)
         text(slide, bar_x+88, by+48, 240, 28, zh, size=20, bold=True, color=NAVY)
         text(slide, bar_x+88, by+82, 360, 22, '↪ ' + ref,
-             size=10, color=INK_3, mono=True, ls=0.4)
+             size=12, color=INK_3, mono=True, ls=0.4)
         # formula box (left mid)
         text(slide, bar_x+460, by+16, 100, 18, 'FORMULA',
-             size=9, bold=True, color=INK_3, mono=True, ls=2.0)
+             size=12, bold=True, color=INK_3, mono=True, ls=2.0)
         rect(slide, bar_x+460, by+38, 540, 56, fill=TINT, line=RULE, line_w=0.5)
         text(slide, bar_x+474, by+38, 510, 56, formula,
              size=14, bold=True, color=NAVY, mono=True, anchor='middle', ls=-0.2)
         # application (right)
         text(slide, bar_x+1024, by+16, 200, 18, 'OUR APPLICATION',
-             size=9, bold=True, color=INK_3, mono=True, ls=2.0)
+             size=12, bold=True, color=INK_3, mono=True, ls=2.0)
         text(slide, bar_x+1024, by+38, 680, 60, application,
              size=13, color=INK_2, line_h=1.5)
 
@@ -3609,7 +3616,7 @@ def slide_apx_data_sources_refs(prs):
 
     # LEFT: Data Sources (3 cards)
     text(slide, 96, 296, 600, 22, 'DATA SOURCES · 資料來源',
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     sources = [
         ('PRICE / VOLUME', NAVY,
          'TWSE · TPEx · 公開資訊觀測站',
@@ -3629,17 +3636,17 @@ def slide_apx_data_sources_refs(prs):
         sy = 326 + i*(sh + sgap)
         card(slide, sx0, sy, sw, sh, top_stripe=c)
         text(slide, sx0+24, sy+22, sw-48, 22, cat,
-             size=11, bold=True, color=c, mono=True, ls=2.4)
+             size=12, bold=True, color=c, mono=True, ls=2.4)
         text(slide, sx0+24, sy+54, sw-48, 30, src,
              size=18, bold=True, color=NAVY)
         text(slide, sx0+24, sy+96, sw-48, 36, body,
              size=13, color=INK_2, line_h=1.5)
         text(slide, sx0+24, sy+148, sw-48, 22, '↪ ' + art,
-             size=11, color=INK_3, mono=True, ls=0.4)
+             size=12, color=INK_3, mono=True, ls=0.4)
 
     # RIGHT: Extended References (4 categories beyond A.27)
     text(slide, 980, 296, 600, 22, 'EXTENDED REFERENCES · 延伸文獻',
-         size=11, bold=True, color=INK_3, mono=True, ls=2.4)
+         size=12, bold=True, color=INK_3, mono=True, ls=2.4)
     ext_refs = [
         ('TAIWAN MARKET · 台股', VIOLET, [
             'Lin & Lee (2010). 台股報酬可預測性. 臺大管理論叢 21(1).',
@@ -3665,16 +3672,16 @@ def slide_apx_data_sources_refs(prs):
         ry = 326 + i*(rh + rgap)
         card(slide, rx0, ry, rw, rh, top_stripe=c, line_w=0.5)
         text(slide, rx0+22, ry+18, rw-44, 18, title,
-             size=10, bold=True, color=c, mono=True, ls=2.0)
+             size=12, bold=True, color=c, mono=True, ls=2.0)
         for j, r in enumerate(refs[:2]):  # show top 2 per category to fit
             sy = ry + 38 + j*22
             text(slide, rx0+22, sy, 16, 18, '·',
                  size=12, bold=True, color=c, mono=True)
             text(slide, rx0+38, sy, rw-60, 18, r,
-                 size=10, color=INK_2)
+                 size=12, color=INK_2)
         if len(refs) > 2:
             text(slide, rx0+rw-90, ry+rh-22, 80, 18, f'+ {len(refs)-2} more',
-                 size=9, color=INK_4, mono=True, align='right', ls=0.4)
+                 size=12, color=INK_4, mono=True, align='right', ls=0.4)
 
     takeaway_bar(slide, 96, 926, 1728, 84, 'PROVENANCE', [
         {'text': '948,976 筆樣本 · 1,623 候選因子 · 91 篩選後特徵 · 全部', 'size': 14, 'color': INK},
