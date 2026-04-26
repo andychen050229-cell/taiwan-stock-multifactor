@@ -196,9 +196,13 @@ try:
         )
 
     # v11 §4a — replaced ad-hoc pastel div with shared `.gl-box-danger` class.
+    # v11.5.19 §6 — CJK line-break discipline: 將「下架原因」與「替代方案」
+    # 拆為兩個段落，避免中文長句被視覺壓縮。
     st.markdown("""
     <div class="gl-box-danger">
-    <strong>⚠️ 融資融券（mg_）支柱已於 2026-04-19 下架</strong>：FinMind 公開資料對台股的覆蓋率僅 1,136 / 1,932 = 58.8%，其中約 100 支為結構性不可下載（KY 股、創業板、新上市、非信用交易 ETF 等），無法達到完整覆蓋。本系統改由 <code>chip_</code>（三大法人）、<code>trend_</code>（技術）、<code>event_</code>（文本）共同承擔市場結構訊號；原始 parquet 檔案仍保留供查驗，欄位定義詳見資料目錄文件。
+    <strong>⚠️ 融資融券（mg_）支柱已於 2026-04-19 下架</strong>：FinMind 公開資料對台股的覆蓋率僅 1,136 / 1,932 = 58.8%，其中約 100 支為結構性不可下載（KY 股、創業板、新上市、非信用交易 ETF 等），無法達到完整覆蓋。
+    <br><br>
+    本系統改由 <code>chip_</code>（三大法人）、<code>trend_</code>（技術）、<code>event_</code>（文本）共同承擔市場結構訊號；原始 parquet 檔案仍保留供查驗，欄位定義詳見資料目錄文件。
     </div>
     """, unsafe_allow_html=True)
 

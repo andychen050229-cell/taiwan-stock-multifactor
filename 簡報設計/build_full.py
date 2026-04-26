@@ -1121,13 +1121,16 @@ def slide_topn_dual(prs):
         text(slide, 1118, cy+170, 680, 18, '· ' + daily,
              size=12, color=INK_2, line_h=1.4)
 
-    takeaway_bar(slide, 96, 792, 1728, 116, 'NET EDGE · 扣 20 bps 交易成本後', [
+    takeaway_bar(slide, 96, 792, 1728, 132, 'NET EDGE · 扣 20 bps 交易成本後', [
         {'text': '0.50 軌 net edge ≈ +11.5 pp、', 'size': 16, 'color': INK},
-        {'text': '0.40 軌 net edge ≈ +2.9 pp、', 'size': 16, 'color': INK},
-        {'br': True},
-        {'text': '兩軌共用同一機率分數，', 'size': 16, 'color': INK_2},
+        {'text': '0.40 軌 net edge ≈ +2.9 pp；', 'size': 16, 'color': INK},
+        {'text': '兩軌共用同一機率分數、', 'size': 16, 'color': INK_2},
         {'text': '差異僅在閾值。', 'size': 16, 'bold': True, 'color': NAVY},
-        {'text': '   本研究為學術成果、不構成任何投資建議。   → 詳 Appendix A.13 / A.14',
+        {'br': True},
+        {'text': '本研究為學術成果、不構成任何投資建議。',
+         'size': 13, 'color': INK_3, 'italic': True},
+        {'sp': True},
+        {'text': '→ 詳 Appendix A.13 / A.14',
          'size': 13, 'color': INK_3, 'italic': True},
     ])
     return slide
@@ -1361,14 +1364,20 @@ def slide_governance(prs):
              size=10, bold=True, color=color, mono=True, ls=1.8,
              align='center', anchor='middle')
 
-    takeaway_bar(slide, 96, 808, 1728, 144, 'WHY THIS MATTERS', [
+    takeaway_bar(slide, 96, 808, 1728, 168, 'WHY THIS MATTERS', [
         {'text': '一句話、', 'size': 17, 'color': INK},
         {'text': 'AUC 0.6455 並非偶然', 'size': 17, 'bold': True, 'color': NAVY},
-        {'text': '——DSR 通過多重檢定、9 / 9 治理關卡全數通過、Text PSI 觸發 WARN 對應 ', 'size': 17, 'color': INK},
+        {'text': '——', 'size': 17, 'color': INK},
+        {'text': 'DSR 通過多重檢定、9 / 9 治理關卡全數通過、', 'size': 17, 'color': INK},
+        {'br': True},
+        {'text': 'Text PSI 觸發 WARN 對應 ', 'size': 17, 'color': INK},
         {'text': '每月詞向量重訓', 'size': 17, 'bold': True, 'color': GOLD},
         {'text': '。', 'size': 17, 'color': INK},
         {'br': True},
-        {'text': '結論已可進入下一頁：拆解哪些因子在驅動這個 AUC。  → A.05 / A.12',
+        {'text': '結論已可進入下一頁：拆解哪些因子在驅動這個 AUC。',
+         'size': 14, 'color': INK_3, 'italic': True},
+        {'sp': True},
+        {'text': '→ A.05 / A.12',
          'size': 14, 'color': INK_3, 'italic': True},
     ])
     return slide
@@ -1476,16 +1485,20 @@ def slide_equity_curve_main(prs):
         text(slide, kpi_x+22, iy+82, kpi_w-44, 22, sub,
              size=11, color=INK_3, mono=True, ls=0.4)
 
-    takeaway_bar(slide, 96, 808, 1728, 144, 'STRATEGY READOUT', [
+    takeaway_bar(slide, 96, 808, 1728, 168, 'STRATEGY READOUT', [
         {'text': '把 AUC 0.6455 化為實單，', 'size': 17, 'color': INK},
         {'text': '24 個月內 100 元 → 188 元、CAGR +36.8%、最大回撤 -14.2%', 'size': 17, 'bold': True, 'color': NAVY},
-        {'text': '；', 'size': 17, 'color': INK},
+        {'text': '。', 'size': 17, 'color': INK},
         {'br': True},
-        {'text': '與 TAIEX 同期 +25% / 回撤 -22.4% 相比，',
+        {'text': '與 TAIEX 同期 +25% / 回撤 -22.4% 相比、',
          'size': 15, 'color': INK_2},
-        {'text': '在等同流動性條件下展現結構性 alpha；',
+        {'text': '在等同流動性條件下展現結構性 alpha。',
          'size': 15, 'bold': True, 'color': EMERALD},
-        {'text': '本研究為學術回測、不構成投資建議。  → 詳 Appendix A.15 / A.16',
+        {'br': True},
+        {'text': '本研究為學術回測、不構成投資建議。',
+         'size': 13, 'color': INK_3, 'italic': True},
+        {'sp': True},
+        {'text': '→ 詳 Appendix A.15 / A.16',
          'size': 13, 'color': INK_3, 'italic': True},
     ])
     return slide
