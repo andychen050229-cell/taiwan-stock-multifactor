@@ -1,0 +1,177 @@
+{
+  "generated_at": "2026-04-20T03:20:14",
+  "source_report": "phase2_report_20260419_152643.json",
+  "method": "fold-AUC CV + engine top-20 Jaccard (代理 check_feature_stability — 因 importance_per_fold 在 Phase 2 runner 序列化時被 pop，改用 fold AUC 一致性)",
+  "horizons": {
+    "D1": {
+      "per_engine_fold_stability": {
+        "lightgbm": {
+          "fold_stability": {
+            "n_folds": 4,
+            "mean_auc": 0.6154,
+            "std_auc": 0.0076,
+            "auc_cv": 0.0124,
+            "min_auc_floor": 0.6041,
+            "relative_range": 0.0262,
+            "stability_score": 0.8759
+          }
+        },
+        "xgboost": {
+          "fold_stability": {
+            "n_folds": 4,
+            "mean_auc": 0.6151,
+            "std_auc": 0.0087,
+            "auc_cv": 0.0141,
+            "min_auc_floor": 0.6026,
+            "relative_range": 0.0325,
+            "stability_score": 0.8587
+          }
+        }
+      },
+      "engine_top_overlap": {
+        "engine_pair_jaccards": [
+          {
+            "pair": "lightgbm ↔ xgboost",
+            "intersection_size": 18,
+            "union_size": 22,
+            "jaccard": 0.8182
+          }
+        ],
+        "consensus_top_features": [
+          "ind_volatility_rel_60d",
+          "risk_drawdown",
+          "risk_market_breadth",
+          "risk_market_ret_20d",
+          "risk_regime_composite",
+          "risk_vol_term_structure",
+          "risk_volatility_regime",
+          "trend_atr_14",
+          "trend_bb_lower_20",
+          "trend_bb_width_20",
+          "trend_macd",
+          "trend_momentum_10",
+          "trend_momentum_5",
+          "trend_rsi_14",
+          "trend_vol_ma_20",
+          "trend_vol_ma_5",
+          "trend_vol_ratio",
+          "trend_volatility_20"
+        ],
+        "n_consensus": 18,
+        "mean_jaccard": 0.8182
+      }
+    },
+    "D5": {
+      "per_engine_fold_stability": {
+        "lightgbm": {
+          "fold_stability": {
+            "n_folds": 4,
+            "mean_auc": 0.6352,
+            "std_auc": 0.0212,
+            "auc_cv": 0.0334,
+            "min_auc_floor": 0.6035,
+            "relative_range": 0.0699,
+            "stability_score": 0.6655
+          }
+        },
+        "xgboost": {
+          "fold_stability": {
+            "n_folds": 4,
+            "mean_auc": 0.6386,
+            "std_auc": 0.0228,
+            "auc_cv": 0.0357,
+            "min_auc_floor": 0.605,
+            "relative_range": 0.0792,
+            "stability_score": 0.6431
+          }
+        }
+      },
+      "engine_top_overlap": {
+        "engine_pair_jaccards": [
+          {
+            "pair": "lightgbm ↔ xgboost",
+            "intersection_size": 17,
+            "union_size": 23,
+            "jaccard": 0.7391
+          }
+        ],
+        "consensus_top_features": [
+          "ind_return_rel_20d",
+          "ind_volatility_rel_60d",
+          "risk_market_breadth",
+          "risk_market_ret_20d",
+          "risk_regime_composite",
+          "risk_vol_term_structure",
+          "risk_volatility_regime",
+          "trend_atr_14",
+          "trend_bb_width_20",
+          "trend_macd",
+          "trend_momentum_10",
+          "trend_momentum_5",
+          "trend_rsi_14",
+          "trend_vol_ma_20",
+          "trend_vol_ma_5",
+          "trend_volatility_20",
+          "val_pe"
+        ],
+        "n_consensus": 17,
+        "mean_jaccard": 0.7391
+      }
+    },
+    "D20": {
+      "per_engine_fold_stability": {
+        "lightgbm": {
+          "fold_stability": {
+            "n_folds": 4,
+            "mean_auc": 0.6391,
+            "std_auc": 0.0107,
+            "auc_cv": 0.0167,
+            "min_auc_floor": 0.6263,
+            "relative_range": 0.0405,
+            "stability_score": 0.8332
+          }
+        },
+        "xgboost": {
+          "fold_stability": {
+            "n_folds": 4,
+            "mean_auc": 0.6455,
+            "std_auc": 0.0053,
+            "auc_cv": 0.0082,
+            "min_auc_floor": 0.6406,
+            "relative_range": 0.0191,
+            "stability_score": 0.9181
+          }
+        }
+      },
+      "engine_top_overlap": {
+        "engine_pair_jaccards": [
+          {
+            "pair": "lightgbm ↔ xgboost",
+            "intersection_size": 13,
+            "union_size": 27,
+            "jaccard": 0.4815
+          }
+        ],
+        "consensus_top_features": [
+          "ind_member_count",
+          "ind_volatility_rel_60d",
+          "risk_market_breadth",
+          "risk_market_ret_20d",
+          "risk_regime_composite",
+          "risk_vol_term_structure",
+          "risk_volatility_regime",
+          "trend_atr_14",
+          "trend_macd",
+          "trend_vol_ma_20",
+          "trend_vol_ma_5",
+          "trend_volatility_20",
+          "val_pe"
+        ],
+        "n_consensus": 13,
+        "mean_jaccard": 0.4815
+      }
+    }
+  },
+  "overall_stability_score": 0.7991,
+  "overall_gate_pass": true
+}

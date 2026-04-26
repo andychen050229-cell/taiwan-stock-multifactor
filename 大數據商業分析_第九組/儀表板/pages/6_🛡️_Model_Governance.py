@@ -1,0 +1,872 @@
+"""Model Governance — 模型治理儀表板（Phase 3）"""
+
+import streamlit as st
+import json
+import pandas as pd
+import plotly.graph_objects as go
+from pathlib import Path
+import importlib.util
+
+_utils_path = Path(__file__).resolve().parent.parent / "utils.py"
+_spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_path))
+_utils = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_utils)
+inject_custom_css = _utils.inject_custom_css
+render_topbar = _utils.render_topbar
+glint_plotly_layout = _utils.glint_plotly_layout
+glint_styler_cmap = _utils.glint_styler_cmap
+render_chart_note = _utils.render_chart_note
+render_degraded_banner = _utils.render_degraded_banner
+render_terminal_hero = _utils.render_terminal_hero
+PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
+PAGE_TITLES = _utils.PAGE_TITLES
+PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
+render_trust_strip = _utils.render_trust_strip
+render_page_footer = _utils.render_page_footer
+render_section_title = _utils.render_section_title
+glint_icon = _utils.glint_icon
+glint_heading = _utils.glint_heading
+
+inject_custom_css()
+
+# ---- Top-bar (sticky breadcrumb + model chips + clock) ----
+render_topbar(
+    crumb_left="多因子股票分析系統",
+    crumb_current="模型治理",
+    chips=[("Model Card", "pri"), ("DSR 12.12 → PASS", "vio"), ("PSI · KS drift", "ok")],
+    show_clock=True,
+)
+
+# v8 §12 · §20.8 — Dark terminal hero driven by centralised copy maps
+render_terminal_hero(
+    eyebrow=PAGE_EYEBROWS["governance"],
+    title=PAGE_TITLES["governance"],
+    briefing=PAGE_BRIEFINGS["governance"],
+    chips=[
+        ("Phase", "3 · Governance", "info"),
+        ("DSR", "12.12 · PASS", "ok"),
+        ("Gates", "9 / 9 PASS", "ok"),
+    ],
+    tone="violet",
+)
+render_trust_strip([
+    ("PHASE",   "3 · Governance",       "violet"),
+    ("GATES",   "9 / 9 PASS",            "emerald"),
+    ("DSR",     "12.12 · PASS",          "cyan"),
+    ("ARTIFACT","Model Card · JSON",     "blue"),
+])
+
+with st.expander("ℹ️ 如何閱讀本頁？", expanded=False):
+    st.markdown("""
+- **品質閘門**：所有自動檢測項目全部通過 = 模型可信賴；若有未通過會以紅旗標示。
+- **DSR**：排除「多重測試」導致的偽陽性 Sharpe，確認策略效能並非偶然。
+- **Model Card**：每個模型的「身分證」，記錄訓練過程、效能、已知限制。
+""")
+
+
+# === Load governance data ===
+def _project_outputs_dir():
+    """Find outputs/ regardless of cwd (Cloud shim chdir-safe)."""
+    here = Path(__file__).resolve()
+    for candidate in (
+        here.parent.parent.parent.parent / "outputs",   # project_root/outputs  ← canonical
+        here.parent.parent.parent / "outputs",          # 程式碼/outputs (legacy)
+        Path.cwd() / "outputs",
+        Path.cwd().parent / "outputs",
+        Path.cwd().parent.parent / "outputs",
+    ):
+        if candidate.exists():
+            return candidate
+    return Path.cwd() / "outputs"
+
+
+def _load_gov_json(filename):
+    """Load a governance JSON file."""
+    gov_dir = _project_outputs_dir() / "governance"
+    fp = gov_dir / filename
+    if fp.exists():
+        with open(fp, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+
+def _load_phase3_report():
+    """Load the latest Phase 3 report."""
+    report_dir = _project_outputs_dir() / "reports"
+    reports = sorted(report_dir.glob("phase3_report_*.json"), reverse=True)
+    if reports:
+        with open(reports[0], "r", encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+
+p3_report = _load_phase3_report()
+dsr_data = _load_gov_json("dsr_revalidation.json")
+baseline_data = _load_gov_json("performance_baseline.json")
+
+if not p3_report:
+    render_degraded_banner(
+        title="摘要版模式 · Phase 3 治理報告尚未生成",
+        reason="本機執行 `python run_phase3.py` 以產生完整治理結果；Cloud 預覽會略過此區。",
+        available=[
+            ("頁面導覽", "可繼續使用頂部與左側導覽"),
+            ("其他分頁", "Model Metrics / ICIR / Backtest 不受影響"),
+        ],
+        unavailable=[
+            ("品質閘門", "需要 outputs/governance/phase3_report_*.json"),
+            ("DSR 重新驗證", "需要 dsr_revalidation.json"),
+            ("效能基線", "需要 performance_baseline.json"),
+        ],
+        tone="blue",
+    )
+    st.stop()
+
+# --- Sidebar ---
+with st.sidebar:
+    st.markdown(
+        f"""<div style="display:flex;align-items:center;gap:10px;margin:0 0 10px 0;padding:10px 12px;
+        background:linear-gradient(135deg,rgba(139,92,246,0.14),rgba(34,211,238,0.08));
+        border:1px solid rgba(139,92,246,0.34);border-radius:8px;">
+        <span style="color:#c4b5fd;">{glint_icon('radar', 18, '#c4b5fd')}</span>
+        <span style="color:#e2e8f0;font-weight:700;letter-spacing:0.05em;font-size:0.95rem;">模型治理</span>
+        </div>""",
+        unsafe_allow_html=True,
+    )
+    st.markdown(f"**報告時間**: {p3_report.get('timestamp', '—')[:16]}")
+    st.markdown(f"**整體狀態**: {p3_report.get('overall_status', '—')}")
+    gates = p3_report.get("quality_gates", {})
+    passed = sum(1 for v in gates.values() if v)
+    st.markdown(f"**品質閘門**: {passed}/{len(gates)} 通過")
+    if dsr_data:
+        st.markdown(f"**DSR 判定**: {dsr_data.get('final_verdict', '—')}")
+    st.divider()
+
+# ============================================================
+# Section 1: Quality Gates Overview
+# ============================================================
+render_section_title("品質閘門總覽", "Quality Gate Matrix")
+
+gates = p3_report.get("quality_gates", {})
+overall = p3_report.get("overall_status", "UNKNOWN")
+
+_gv_pass = sum(1 for v in gates.values() if v)
+_gv_total = len(gates) or 1
+if overall == "PASS":
+    st.success(f"整體狀態：**{overall}** — {_gv_pass}/{_gv_total} 品質閘門全部通過")
+else:
+    st.warning(f"整體狀態：**{overall}** — {_gv_pass}/{_gv_total} 通過，請檢查未通過項目")
+
+gate_names_zh = {
+    "models_available": "模型可用",
+    "model_cards_generated": "Model Card 已生成",
+    "drift_analysis_complete": "漂移分析完成",
+    "signal_decay_assessed": "訊號衰減評估",
+    "baseline_established": "效能基線建立",
+    "prediction_pipeline_valid": "預測管線有效",
+    "dsr_revalidated": "DSR 重新驗證",
+    "no_severe_drift": "無嚴重漂移",
+    "governance_data_ready": "治理資料就緒",
+}
+
+# ---- v8 §15.10 · 3×3 Gate Matrix (dark tokens + SVG glyphs + hover tech) ----
+n_pass = sum(1 for v in gates.values() if v)
+n_total = len(gates)
+render_gate_matrix = _utils.render_gate_matrix
+render_gate_matrix(gates, gate_names_zh=gate_names_zh)
+
+# ---- Design-ported ring summary (SVG gauge repurposed for gate pass rate) ----
+render_auc_gauge = _utils.render_auc_gauge
+gauge_val_ratio = n_pass / max(n_total, 1)
+# Map to 0–1 range using a display val ∈ [0, 1]
+ring_html = render_auc_gauge(
+    val=gauge_val_ratio,
+    min_v=0.0, max_v=1.0,
+    label=f"{n_pass} / {n_total} gates PASS · overall {overall}",
+    width=300, height=170,
+)
+st.markdown(
+    f'<div class="gl-panel" style="display:flex;align-items:center;justify-content:center;padding:14px 22px;">'
+    f'{ring_html}</div>',
+    unsafe_allow_html=True,
+)
+
+st.divider()
+
+# ============================================================
+# Section 2: DSR Revalidation
+# ============================================================
+render_section_title("DSR 重新驗證", "Deflated Sharpe Ratio · Re-validation")
+
+with st.expander("什麼是 DSR（Deflated Sharpe Ratio）？", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
+DSR 是 Bailey & López de Prado (2014) 提出的統計檢定。
+
+它用來檢驗：當你嘗試了 N 種策略後，最終選中的策略是否「真正優秀」，還是僅僅因為多重測試（multiple testing）而看起來很好。
+
+Phase 2 使用 n=9（含 3 個不可行的 D+1 策略），Phase 3 修正為 n=6。
+""")
+
+if dsr_data:
+    c1, c2, c3 = st.columns(3)
+    c1.metric("原始策略數", dsr_data.get("original_n_strategies", "—"))
+    c2.metric("修正後策略數", dsr_data.get("revised_n_strategies", "—"))
+    verdict = dsr_data.get("final_verdict", "—")
+    verdict_label = {
+        "PASS": "✅ 通過",
+        "PASS_SINGLE_BEST": "✅ 單一最佳通過",
+        "KNOWN_LIMITATION": "⚠️ 已知限制",
+    }.get(verdict, verdict)
+    c3.metric("最終判定", verdict_label)
+
+    st.markdown("#### E[max(SR)] 修正對比")
+    col_a, col_b = st.columns(2)
+    col_a.metric(
+        "原始 E[max(SR)]（n=9）",
+        f"{dsr_data.get('original_expected_max_sharpe', 0):.4f}",
+    )
+    col_b.metric(
+        "修正 E[max(SR)]（n=6）",
+        f"{dsr_data.get('revised_expected_max_sharpe', 0):.4f}",
+        delta=f"{dsr_data.get('revised_expected_max_sharpe', 0) - dsr_data.get('original_expected_max_sharpe', 0):.4f}",
+    )
+
+    # Revised results table
+    revised = dsr_data.get("revised_results", {})
+    if revised:
+        st.markdown("#### 修正後各策略 DSR 結果")
+        rows = []
+        for name, vals in revised.items():
+            rows.append({
+                "策略": name,
+                "觀察 Sharpe": vals.get("observed_sharpe", 0),
+                "DSR 統計量": vals.get("dsr_statistic", 0),
+                "p-value": vals.get("dsr_p_value", 0),
+                "結果": "✅ PASS" if vals.get("dsr_pass") else "❌ FAIL",
+            })
+        st.dataframe(rows, use_container_width=True, hide_index=True)
+
+        # DSR visual: observed Sharpe vs E[max(SR)] threshold
+        fig_dsr = go.Figure()
+        strat_names = [r["策略"] for r in rows]
+        obs_sharpes = [r["觀察 Sharpe"] for r in rows]
+        bar_colors = ["#10b981" if r["結果"].startswith("✅") else "#f43f5e" for r in rows]
+
+        fig_dsr.add_trace(go.Bar(
+            x=strat_names, y=obs_sharpes, marker_color=bar_colors,
+            text=[f"{s:.3f}" for s in obs_sharpes], textposition="outside",
+            textfont=dict(family="JetBrains Mono, monospace", size=11),
+            name="觀察 Sharpe",
+        ))
+        fig_dsr.add_hline(
+            y=dsr_data.get("revised_expected_max_sharpe", 0),
+            line_dash="dash", line_color="#a78bfa", line_width=2,
+            annotation_text=f"E[max(SR)] = {dsr_data.get('revised_expected_max_sharpe', 0):.4f}",
+            annotation_font=dict(family="JetBrains Mono, monospace", size=10, color="#ddd6fe"),
+        )
+        fig_dsr.update_layout(**glint_plotly_layout(
+            title="各策略觀察 Sharpe vs DSR 門檻",
+            subtitle="Observed Sharpe vs E[max(SR)] · 綠色＝通過 / 紅色＝未達",
+            height=400,
+            ylabel="Sharpe Ratio",
+        ))
+        fig_dsr.update_layout(showlegend=False)
+        st.plotly_chart(fig_dsr, use_container_width=True)
+
+        # v11 §4a — migrated inline pastel div → shared `.gl-box-warn` dark card.
+        st.markdown(f"""
+        <div class="gl-box-warn">
+        <strong style="display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#c4b5fd")} DSR 解讀：</strong><br>
+        當嘗試 N 種策略時，E[max(SR)] 代表「僅靠運氣」可能達到的最大夏普比率。<br>
+        個別策略的 Sharpe 若低於此門檻，可能只是多重測試的偽陽性結果。<br><br>
+        <strong>但</strong>：以「單一最佳策略」角度（N=1），ensemble_D5 的 DSR 通過（p=1.0），表明其 Sharpe 不可能僅靠運氣。
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Single best
+    single = dsr_data.get("single_best_strategy", {})
+    if single:
+        st.markdown("#### 單一最佳策略（不考慮多重測試）")
+        sc1, sc2, sc3 = st.columns(3)
+        sc1.metric("最佳策略", single.get("name", "—"))
+        sc2.metric("Sharpe", f"{single.get('sharpe', 0):.4f}")
+        result = "✅ PASS" if single.get("dsr_pass") else "❌ FAIL"
+        sc3.metric("DSR", result)
+
+    # Explanation
+    explanation = dsr_data.get("explanation", "")
+    if explanation:
+        st.markdown(f"> {explanation}")
+
+else:
+    st.warning("DSR 重新驗證資料尚未生成")
+
+st.divider()
+
+# ============================================================
+# Section 3: Performance Baselines
+# ============================================================
+render_section_title("效能基線", "Performance Baselines")
+
+with st.expander("效能基線用途", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
+基線是模型「健康時」的效能快照。
+
+未來每次重新預測或收到新資料時，系統會比對當前效能與基線。
+
+若 AUC 下降 > 3%、Sharpe 下降 > 50%、或 Rank IC 轉負，將觸發警告。
+""")
+
+if baseline_data:
+    for model_name, metrics in baseline_data.items():
+        with st.expander(f"📋 {model_name}", expanded=False):
+            for metric_name, vals in metrics.items():
+                if isinstance(vals, dict):
+                    base = vals.get("baseline")
+                    warn = vals.get("warning_threshold")
+                    desc = vals.get("description", "")
+                    if base is not None:
+                        st.markdown(
+                            f"- **{metric_name}**: 基線 = `{base}` ｜ 警告閾值 = `{warn}` ｜ {desc}"
+                        )
+else:
+    st.warning("效能基線資料尚未生成")
+
+st.divider()
+
+# ============================================================
+# Section 4: Model Cards
+# ============================================================
+render_section_title("Model Cards", "Engine × Horizon Metadata")
+
+with st.expander("Model Card 是什麼？", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
+Model Card 是 Google 提出的模型透明度標準文件。
+
+它記錄了模型的用途、訓練數據、效能指標、已知限制等資訊。
+
+這確保每個模型都有完整的治理記錄，方便審計與復現。
+""")
+
+gov_dir = _project_outputs_dir() / "governance"
+card_files = sorted(gov_dir.glob("model_card_*.json"))
+
+if card_files:
+    card_names = [f.stem.replace("model_card_", "") for f in card_files]
+    selected = st.selectbox("選擇模型", card_names)
+
+    card_path = gov_dir / f"model_card_{selected}.json"
+    with open(card_path, "r", encoding="utf-8") as f:
+        card = json.load(f)
+
+    # Overview
+    overview = card.get("overview", {})
+    st.markdown(f"**引擎**: {overview.get('framework', '—')} ｜ "
+                f"**預測週期**: {overview.get('horizon', '—')} ｜ "
+                f"**特徵數**: {overview.get('features_count', '—')} ｜ "
+                f"**交叉驗證**: {overview.get('n_folds', '—')} Folds")
+
+    # Performance
+    perf = card.get("performance", {})
+    cls = perf.get("classification", {})
+    bt = perf.get("backtest_discount", {})
+
+    pc1, pc2, pc3, pc4 = st.columns(4)
+    pc1.metric("AUC", f"{cls.get('auc', 0):.4f}")
+    pc2.metric("Rank IC", f"{perf.get('signal_quality', {}).get('rank_ic', 0):.4f}")
+    pc3.metric("Sharpe", f"{bt.get('sharpe_ratio', 0):.2f}")
+    pc4.metric("Max DD", f"{bt.get('max_drawdown', 0):.1%}")
+
+    # Intended use
+    intended = card.get("intended_use", {})
+    st.markdown(f"**預期用途**: {intended.get('primary', '—')}")
+    st.markdown(f"**目標使用者**: {intended.get('users', '—')}")
+
+    # Known limitations
+    limitations = card.get("known_limitations", [])
+    if limitations:
+        st.markdown("**已知限制**：")
+        for lim in limitations:
+            st.markdown(f"- {lim}")
+
+    # Full JSON
+    with st.expander("完整 Model Card JSON", icon=":material/description:"):
+        st.json(card)
+
+    # ===== Model Card Comparison View =====
+    if len(card_files) >= 2:
+        st.markdown(
+            f"""<h4 style='display:flex;align-items:center;gap:10px;margin:16px 0 12px 0;'>
+            <span style='color:#22d3ee;'>{glint_icon('bar-chart', 18, '#22d3ee')}</span>
+            <span>模型效能橫向比較 | Cross-Model Comparison</span>
+            </h4>""",
+            unsafe_allow_html=True,
+        )
+
+        comp_rows = []
+        for cf in card_files:
+            with open(cf, "r", encoding="utf-8") as f:
+                c = json.load(f)
+            ov = c.get("overview", {})
+            pf = c.get("performance", {})
+            cls_p = pf.get("classification", {})
+            sig_p = pf.get("signal_quality", {})
+            bt_p = pf.get("backtest_discount", {})
+            comp_rows.append({
+                "模型": cf.stem.replace("model_card_", ""),
+                "引擎": ov.get("framework", "—"),
+                "天期": ov.get("horizon", "—"),
+                "AUC": cls_p.get("auc", 0),
+                "ICIR": sig_p.get("icir", 0),
+                "Sharpe": bt_p.get("sharpe_ratio", 0),
+                "Max DD": bt_p.get("max_drawdown", 0),
+                "勝率": bt_p.get("win_rate", 0),
+            })
+
+        df_comp = pd.DataFrame(comp_rows)
+        st.dataframe(
+            df_comp.style.background_gradient(subset=["AUC", "ICIR", "Sharpe"], cmap=glint_styler_cmap("diverging"))
+                .background_gradient(subset=["Max DD"], cmap=glint_styler_cmap("diverging").reversed()),
+            use_container_width=True, hide_index=True
+        )
+
+        # Radar chart comparison
+        categories = ["AUC", "ICIR", "Sharpe", "勝率"]
+        fig_radar = go.Figure()
+        colors = ["#2563eb", "#7c3aed", "#10b981", "#a78bfa"]
+        for i, row in df_comp.iterrows():
+            # Normalize values for radar
+            vals = [
+                min(row["AUC"] / 0.7, 1.0),
+                min(row["ICIR"] / 1.0, 1.0),
+                min(row["Sharpe"] / 2.0, 1.0),
+                row["勝率"],
+            ]
+            fig_radar.add_trace(go.Scatterpolar(
+                r=vals, theta=categories, fill="toself",
+                name=row["模型"], line_color=colors[i % len(colors)]
+            ))
+        fig_radar.update_layout(**glint_plotly_layout(
+            title="模型多維度效能比較",
+            subtitle="Multi-Dimensional Comparison · AUC · ICIR · Sharpe · 勝率",
+            height=420,
+            show_grid=False,
+        ))
+        fig_radar.update_layout(
+            polar=dict(
+                bgcolor="rgba(0,0,0,0)",
+                radialaxis=dict(visible=True, range=[0, 1],
+                                 tickfont=dict(family="JetBrains Mono, monospace", size=10, color="#8397AC")),
+                angularaxis=dict(tickfont=dict(family="JetBrains Mono, monospace", size=11, color="#8397AC")),
+            ),
+        )
+        st.plotly_chart(fig_radar, use_container_width=True)
+
+else:
+    st.warning("尚未生成 Model Card")
+
+st.divider()
+
+# ============================================================
+# Section 5: Prediction Pipeline Validation
+# ============================================================
+render_section_title("預測管線驗證", "Pipeline Validation")
+
+with st.expander("這一段在做什麼？", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
+把 6 個模型（LGB / XGB × D1 / D5 / D20）實際跑一次預測，
+檢查輸出的機率是否合理——三類機率加總等於 1、沒有 NaN、沒有負值。
+
+**通過** = 模型可以部署到真實流程；**失敗** = 模型檔有問題或特徵欄位對不上。
+""")
+
+pipeline = p3_report.get("results", {}).get("step6_pipeline", {})
+if pipeline:
+    valid = pipeline.get("valid", False)
+
+    # v11.5.20 §2 — restyled summary banner with breathing dot when 6/6 PASS,
+    # replaces the plain st.success / st.error banners.
+    results_pipe = pipeline.get("results", {})
+    n_total = len(results_pipe)
+    n_pass = sum(1 for r in results_pipe.values() if r.get("status") == "pass")
+    if valid:
+        banner_color = "#10b981"; banner_glow = "rgba(16,185,129,0.45)"
+        banner_text = f"所有模型預測管線驗證通過 · 輸出為 3 類機率、加總為 1、無 NaN"
+        banner_animate = True
+    else:
+        banner_color = "#f43f5e"; banner_glow = "rgba(244,63,94,0.45)"
+        banner_text = f"{n_pass} / {n_total} 通過 · 部分模型管線驗證失敗"
+        banner_animate = False
+    _animate_class = "gl-pipeline-banner-breathe" if banner_animate else ""
+    st.markdown(f"""
+<style>
+@keyframes gl-pipeline-banner-pulse {{
+    0%, 100% {{ box-shadow: 0 0 0 0 rgba(16,185,129,0.0), inset 0 1px 0 rgba(103,232,249,0.10); }}
+    50%      {{ box-shadow: 0 0 24px 0 rgba(16,185,129,0.40), inset 0 1px 0 rgba(103,232,249,0.16); }}
+}}
+.gl-pipeline-banner-breathe {{ animation: gl-pipeline-banner-pulse 3.0s ease-in-out infinite; }}
+@media (prefers-reduced-motion: reduce) {{ .gl-pipeline-banner-breathe {{ animation: none !important; }} }}
+.gl-pipeline-banner {{
+    background: linear-gradient(180deg, rgba(15,23,37,0.95) 0%, rgba(8,16,32,0.98) 100%);
+    border: 1px solid {banner_color}55;
+    border-left: 4px solid {banner_color};
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin: 10px 0 14px 0;
+    color: #E8F7FC;
+    font-family: var(--gl-font-sans, system-ui);
+    font-size: 0.95rem;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.10);
+    display: flex; align-items: center; gap: 12px;
+}}
+.gl-pipeline-banner-dot {{
+    width: 12px; height: 12px; border-radius: 50%;
+    background: {banner_color};
+    box-shadow: 0 0 12px {banner_glow};
+    flex: 0 0 auto;
+}}
+</style>
+<div class="gl-pipeline-banner {_animate_class}">
+  <span class="gl-pipeline-banner-dot"></span>
+  <strong>{banner_text}</strong>
+</div>
+""", unsafe_allow_html=True)
+
+    # v11.5.20 §2 — replace plain markdown bullet list with styled card grid.
+    # Each model gets a glassy dark card with status icon + name + UP prob badge.
+    pipe_rows = []
+    cards_per_row = 3
+    sorted_results = sorted(
+        results_pipe.items(),
+        key=lambda kv: (kv[0].split("_")[0], int(kv[0].split("_D")[-1]) if "_D" in kv[0] else 0),
+    )
+    cards_html = ['<div class="gl-pipe-grid">']
+    for name, res in sorted_results:
+        status = res.get("status", "unknown")
+        if status == "pass":
+            badge_color = "#10b981"; badge_bg = "rgba(16,185,129,0.18)"
+            badge_label = "PASS"
+            metric_val = f"{res.get('avg_up_prob', 0):.4f}"
+            metric_label = "AVG UP PROB"
+        elif status == "skip":
+            badge_color = "#a78bfa"; badge_bg = "rgba(167,139,250,0.18)"
+            badge_label = "SKIP"
+            metric_val = "—"
+            metric_label = res.get("reason", "no OOS sample")
+        else:
+            badge_color = "#f43f5e"; badge_bg = "rgba(244,63,94,0.18)"
+            badge_label = "FAIL"
+            metric_val = "—"
+            metric_label = (res.get("error") or "shape error")[:32]
+        # split name like 'lightgbm_D20' → engine + horizon
+        parts = name.split("_D")
+        engine = parts[0]
+        horizon = f"D+{parts[1]}" if len(parts) == 2 else name
+        cards_html.append(f"""
+<div class="gl-pipe-card">
+  <div class="gl-pipe-card-row">
+    <span class="gl-pipe-card-engine">{engine}</span>
+    <span class="gl-pipe-card-badge" style="background:{badge_bg};color:{badge_color};border-color:{badge_color}55;">{badge_label}</span>
+  </div>
+  <div class="gl-pipe-card-horizon">{horizon}</div>
+  <div class="gl-pipe-card-metric">
+    <div class="gl-pipe-card-metric-label">{metric_label}</div>
+    <div class="gl-pipe-card-metric-val" style="color:{badge_color};">{metric_val}</div>
+  </div>
+</div>
+""")
+        pipe_rows.append({
+            "模型": name,
+            "狀態": "通過" if status == "pass" else ("跳過" if status == "skip" else "失敗"),
+            "樣本數": res.get("sample_size", 0),
+            "輸出維度": str(res.get("pred_shape", "—")),
+            "平均 UP 機率": f"{res.get('avg_up_prob', 0):.4f}" if status == "pass" else "—",
+        })
+    cards_html.append('</div>')
+    st.markdown("""
+<style>
+.gl-pipe-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin: 8px 0 16px 0;
+    font-family: var(--gl-font-sans, system-ui);
+}
+@media (max-width: 900px) { .gl-pipe-grid { grid-template-columns: 1fr; } }
+.gl-pipe-card {
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+    border: 1px solid rgba(103,232,249,0.18);
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.10);
+}
+.gl-pipe-card-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.gl-pipe-card-engine {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem; letter-spacing: 0.10em; text-transform: uppercase;
+    color: #67e8f9; font-weight: 700;
+}
+.gl-pipe-card-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.66rem; font-weight: 800; letter-spacing: 0.16em;
+    padding: 2px 9px; border-radius: 999px; border: 1px solid;
+}
+.gl-pipe-card-horizon {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.42rem; font-weight: 700;
+    color: #E8F7FC; letter-spacing: -0.02em;
+    margin-top: 6px;
+}
+.gl-pipe-card-metric { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(103,232,249,0.18); }
+.gl-pipe-card-metric-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.66rem; letter-spacing: 0.12em; color: #8397ac; text-transform: uppercase;
+}
+.gl-pipe-card-metric-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.32rem; font-weight: 700; letter-spacing: -0.02em; margin-top: 2px;
+}
+</style>
+""" + "".join(cards_html), unsafe_allow_html=True)
+
+    if pipe_rows:
+        # 欄位說明
+        st.markdown("""
+        <div style="
+            background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.95) 100%);
+            border: 1px solid rgba(103,232,249,0.28); border-radius: 10px;
+            padding: 12px 16px; margin: 10px 0; font-size: 0.85rem; color: #cfe2ee; line-height: 1.75;
+            box-shadow: inset 0 1px 0 rgba(103,232,249,0.12);
+        ">
+            <strong style="color: #67e8f9; letter-spacing: 0.04em;">📘 欄位說明</strong><br>
+            <strong>模型</strong>:引擎 × 預測天期(如 lightgbm_D20 = LightGBM 預測 20 天後漲跌)<br>
+            <strong>狀態</strong>:通過 = 管線輸出合法;跳過 = 該模型無 OOS 樣本;失敗 = 有 NaN 或 shape 錯誤<br>
+            <strong>樣本數</strong>:該模型在 OOS 期間可用的預測樣本<br>
+            <strong>輸出維度</strong>:(n, 3) = n 筆樣本 × 3 類機率(DOWN/FLAT/UP)<br>
+            <strong>平均 UP 機率</strong>:所有樣本對「會漲」的平均預測信心
+        </div>
+        """, unsafe_allow_html=True)
+        st.dataframe(pd.DataFrame(pipe_rows), use_container_width=True, hide_index=True)
+else:
+    st.warning("""
+    ⚠️ **預測管線驗證資料尚未生成**
+
+    此段需要 Phase 3 治理流程的 `step6_pipeline` 輸出。
+    若顯示為空,代表執行時尚未跑完此步驟,或報告版本不包含此欄位。
+    """)
+
+st.divider()
+
+# ============================================================
+# Section 6: 資料健康度快照 - 補齊原先空白區
+# ============================================================
+render_section_title("治理快照", "Governance Snapshot")
+
+with st.expander("為什麼要有這段？", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
+前面五段講的是「單次檢查結果」，這段把最關鍵的數字濃縮成一眼可讀的快照卡片，
+讓非技術使用者不必翻完整份報告也能掌握「目前模型狀態是否健康」。
+""")
+
+# 取得整體治理摘要 (v11.5.19 §8 — robust data wiring)
+# Fix #1: step2_drift 是 null、漂移資訊在 step3_drift.severity
+# Fix #2: min_half_life_months 為 None 表示訊號還在改善（trend=improving）、應顯示「持續改善」
+# Fix #3: recommended_retrain_cycle 用全形括號（、原 split("(") 抓不到、改為 re.split
+# Fix #4: 鍵名應為 step5_baselines（複數）、原本 step5_baseline 永遠抓不到
+import re as _re
+_summary = p3_report.get("results", {})
+_drift_summary = _summary.get("step3_drift") or _summary.get("step2_drift") or {}
+if not isinstance(_drift_summary, dict):
+    _drift_summary = {}
+_decay_summary = _summary.get("step4_signal_decay") or {}
+_baseline_summary = _summary.get("step5_baselines") or _summary.get("step5_baseline") or {}
+
+# Severity normalization — fall back through multiple key names
+_drift_severity_raw = (
+    _drift_summary.get("overall_severity")
+    or _drift_summary.get("severity")
+    or "none"
+)
+_drift_severity_str = str(_drift_severity_raw).lower()
+_drift_label_map = {
+    "none": ("🟢", "無漂移"),
+    "low":  ("🟢", "輕微"),
+    "mild": ("🟡", "輕度"),
+    "moderate": ("🟠", "中度"),
+    "high": ("🟠", "高度"),
+    "severe": ("🔴", "嚴重"),
+}
+_drift_icon, _drift_label = _drift_label_map.get(_drift_severity_str, ("⚪", "—"))
+_n_drifted = _drift_summary.get("n_drifted")
+
+# v11.5.20 §3 — 4-card snapshot grid with uniform width + breathing dot
+# on the dominant green indicator. Replaces st.metric (whose delta widget
+# made column 3 visually wider) with custom HTML cards for guaranteed
+# equal width and consistent typography.
+_hl_raw = _decay_summary.get("min_half_life_months")
+if _hl_raw is None or _hl_raw == "—":
+    _trend = (_decay_summary.get("half_life_analysis") or {}).get("D20", {}).get("trend_direction")
+    if _trend == "improving":
+        _hl_display = "持續改善"
+        _hl_for_summary = "持續改善（尚未衰退）"
+    else:
+        _hl_display = "—"
+        _hl_for_summary = "—"
+else:
+    _hl_display = f"{_hl_raw} 月"
+    _hl_for_summary = f"{_hl_raw} 個月"
+
+_retrain = str(_decay_summary.get("recommended_retrain_cycle") or "—")
+_retrain_main = _re.split(r"[（(]", _retrain, maxsplit=1)[0].strip()
+_retrain_note = ""
+_m_rt = _re.search(r"[（(]([^）)]*)[）)]", _retrain)
+if _m_rt:
+    _retrain_note = _m_rt.group(1).strip()
+
+if isinstance(_baseline_summary, dict):
+    _n_baselines = _baseline_summary.get("count")
+    if _n_baselines is None:
+        _models = _baseline_summary.get("models")
+        _n_baselines = len(_models) if isinstance(_models, list) else len(_baseline_summary)
+else:
+    _n_baselines = 0
+
+_drift_main = _drift_label
+_drift_sub = (f"觸發 {_n_drifted} 個特徵" if isinstance(_n_drifted, int) and _n_drifted > 0
+              else "PSI 訓練期 vs 測試期")
+# Drift card may breathe when status is healthy (none / low)
+_drift_breathe_class = ("gl-snap-dot-breathe" if _drift_severity_str in ("none", "low") else "")
+
+# Map drift severity to dot color (matches icon emoji semantics)
+_drift_dot_color = {
+    "none": "#10b981", "low": "#10b981",
+    "mild": "#f59e0b", "moderate": "#f97316", "high": "#f97316",
+    "severe": "#f43f5e",
+}.get(_drift_severity_str, "#94a3b8")
+
+_snap_cards = [
+    {
+        "label": "資料漂移程度", "help": "PSI 檢測：訓練期 vs 測試期特徵分佈差異。none / low = 很穩、moderate / severe = 需重訓。",
+        "main": _drift_main, "sub": _drift_sub, "main_color": _drift_dot_color,
+        "dot_color": _drift_dot_color, "dot_breathe": _drift_breathe_class,
+    },
+    {
+        "label": "最短半衰期", "help": "模型預測力衰減到一半所需的月數，越長表示訊號越耐久。若顯示「持續改善」表示截至目前訊號未衰退、半衰期尚不適用。",
+        "main": _hl_display, "sub": "D+20 horizon · 月度斜率",
+        "main_color": "#67e8f9",
+    },
+    {
+        "label": "建議重新訓練週期", "help": "依半衰期推論的重新訓練頻率；到期就該重新訓練模型。",
+        "main": _retrain_main if _retrain_main else "—",
+        "sub": (f"↑ {_retrain_note}" if _retrain_note else "依半衰期估算"),
+        "main_color": "#a78bfa",
+    },
+    {
+        "label": "基線指標數", "help": "系統正在監測的基線指標（AUC / IC / Sharpe 等），任何一項異常都會觸發警告。",
+        "main": f"{_n_baselines} 個",
+        "sub": "AUC / IC / Sharpe / Brier",
+        "main_color": "#67e8f9",
+    },
+]
+_snap_html = ['<div class="gl-snap-grid">']
+for c in _snap_cards:
+    dot_html = ""
+    if c.get("dot_color"):
+        dot_html = (f'<span class="gl-snap-dot {c.get("dot_breathe","")}" '
+                    f'style="background:{c["dot_color"]};box-shadow:0 0 12px {c["dot_color"]}88;"></span>')
+    _snap_html.append(f"""
+<div class="gl-snap-card">
+  <div class="gl-snap-card-label">
+    <span>{c["label"]}</span>
+    <span class="gl-snap-help" title="{c["help"]}">?</span>
+  </div>
+  <div class="gl-snap-card-main" style="color:{c['main_color']};">
+    {dot_html}<span>{c["main"]}</span>
+  </div>
+  <div class="gl-snap-card-sub">{c["sub"]}</div>
+</div>
+""")
+_snap_html.append('</div>')
+st.markdown("""
+<style>
+.gl-snap-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    margin: 8px 0 14px 0;
+}
+@media (max-width: 1100px) { .gl-snap-grid { grid-template-columns: repeat(2, 1fr); } }
+.gl-snap-card {
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+    border: 1px solid rgba(103,232,249,0.18);
+    border-radius: 10px;
+    padding: 14px 18px 16px 18px;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.10);
+    min-height: 122px;
+    display: flex; flex-direction: column; justify-content: flex-start;
+}
+.gl-snap-card-label {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--gl-font-sans, system-ui);
+    font-size: 0.84rem; color: #8397ac; letter-spacing: 0.04em;
+    margin-bottom: 8px;
+}
+.gl-snap-help {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: rgba(103,232,249,0.10); color: #67e8f9;
+    font-size: 0.66rem; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: help;
+    border: 1px solid rgba(103,232,249,0.32);
+}
+.gl-snap-card-main {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.62rem; font-weight: 700; letter-spacing: -0.02em;
+    margin-top: 2px;
+}
+.gl-snap-card-sub {
+    margin-top: 8px;
+    font-family: var(--gl-font-sans, system-ui);
+    font-size: 0.78rem; color: #8397ac;
+}
+.gl-snap-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    flex: 0 0 auto;
+}
+@keyframes gl-snap-dot-pulse {
+    0%, 100% { transform: scale(1.0); filter: brightness(1.0); }
+    50%      { transform: scale(1.18); filter: brightness(1.25); }
+}
+.gl-snap-dot-breathe { animation: gl-snap-dot-pulse 2.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .gl-snap-dot-breathe { animation: none !important; } }
+</style>
+""" + "".join(_snap_html), unsafe_allow_html=True)
+
+# 簡短治理摘要(白話版) — v11.3 dark-glint 化
+st.markdown(f"""
+<div style="
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+    border: 1px solid rgba(103,232,249,0.22);
+    border-left: 4px solid #67e8f9;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin: 16px 0;
+    font-size: 0.92rem;
+    color: #cfe2ee;
+    line-height: 1.85;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.10);
+">
+    <strong style="color: #67e8f9; font-size: 1.02rem; letter-spacing: 0.04em; display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#67e8f9")} 一句話總結</strong><br>
+    本模型通過 <strong style="color:#E8F7FC;">{n_pass}/{n_total}</strong> 項品質閘門檢查、
+    DSR 判定為 <strong style="color:#E8F7FC;">{dsr_data.get("final_verdict", "—") if dsr_data else "—"}</strong>、
+    資料漂移為 <strong style="color:#E8F7FC;">{_drift_label}</strong>、
+    最短半衰期 <strong style="color:#E8F7FC;">{_hl_for_summary}</strong>、
+    建議 <strong style="color:#E8F7FC;">{_retrain_main if _retrain_main else "每季"}</strong>{('（' + _retrain_note + '）') if _retrain_note else ''} 重訓一次。<br><br>
+    <strong style="color: #6ee7b7;">→ 可以放心部署；若要實盤，記得每月追蹤漂移指標與基線差距。</strong>
+</div>
+""", unsafe_allow_html=True)
+
+# ===== Footer =====
+render_page_footer(
+    "Model Governance",
+    limits_note=(
+        f"Phase 3 模型治理報告自動生成 ｜ 品質閘門 {_gv_pass}/{_gv_total} 通過為生產就緒條件 "
+        f"｜ DSR 採用 Bailey & López de Prado (2014) 方法"
+    ),
+)

@@ -1,0 +1,76 @@
+{
+  "phase": "Phase 3 — prediction_pipeline gate revalidation",
+  "timestamp": "2026-04-26T11:20:12.928554",
+  "env": "dev",
+  "source_joblib_dir": "C:\\Users\\user\\Desktop\\大數據與商業分析專案\\outputs\\models",
+  "feature_store": "feature_store_final.parquet",
+  "results": {
+    "lightgbm_D1": {
+      "status": "pass",
+      "sample_size": 20,
+      "pred_shape": [
+        20,
+        3
+      ],
+      "avg_up_prob": 0.3828,
+      "n_features": 91
+    },
+    "lightgbm_D20": {
+      "status": "pass",
+      "sample_size": 20,
+      "pred_shape": [
+        20,
+        3
+      ],
+      "avg_up_prob": 0.3421,
+      "n_features": 91
+    },
+    "lightgbm_D5": {
+      "status": "pass",
+      "sample_size": 20,
+      "pred_shape": [
+        20,
+        3
+      ],
+      "avg_up_prob": 0.3444,
+      "n_features": 91
+    },
+    "xgboost_D1": {
+      "status": "pass",
+      "sample_size": 20,
+      "pred_shape": [
+        20,
+        3
+      ],
+      "avg_up_prob": 0.4335,
+      "n_features": 91
+    },
+    "xgboost_D20": {
+      "status": "pass",
+      "sample_size": 20,
+      "pred_shape": [
+        20,
+        3
+      ],
+      "avg_up_prob": 0.3742,
+      "n_features": 91
+    },
+    "xgboost_D5": {
+      "status": "pass",
+      "sample_size": 20,
+      "pred_shape": [
+        20,
+        3
+      ],
+      "avg_up_prob": 0.4142,
+      "n_features": 91
+    }
+  },
+  "summary": {
+    "models_tested": 6,
+    "models_pass": 6,
+    "models_fail": 0,
+    "prediction_pipeline_valid": true
+  },
+  "note": "Rebuilt joblib (2026-04-20 03:07–03:10) regenerated against the current 91-feature schema; feature naming drift (event_news_count_*  →  event_mention_cnt_*) resolved."
+}

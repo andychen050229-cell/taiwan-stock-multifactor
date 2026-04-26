@@ -1,0 +1,523 @@
+{
+  "phase": "Phase 1 — 資料地基 + 特徵工程",
+  "timestamp": "2026-04-26T23:06:33.856673",
+  "env": "dev",
+  "results": {
+    "has_ohlcv": true,
+    "profiles": {
+      "companies": {
+        "name": "companies",
+        "rows": "1932",
+        "cols": "3",
+        "memory_mb": "0.3898954391479492",
+        "dtypes": "{dtype('O'): 3}",
+        "null_pct": "{'company_id': 0.0, 'company_name': 0.0, 'short_name': 0.0}",
+        "duplicated_rows": "0"
+      },
+      "stock_prices": {
+        "name": "stock_prices",
+        "rows": "955405",
+        "cols": "10",
+        "memory_mb": "114.81019973754883",
+        "dtypes": "{dtype('float64'): 5, dtype('int64'): 2, dtype('<M8[ns]'): 1, Int64Dtype(): 1, dtype('O'): 1}",
+        "null_pct": "{'trade_date': 0.0, 'company_id': 0.0, 'volume': 0.0, 'trading_value': 0.0, 'open_price': 0.0, 'high_price': 0.0, 'low_price': 0.0, 'closing_price': 0.0, 'spread': 0.0, 'turnover': 0.0}",
+        "duplicated_rows": "0"
+      },
+      "income_stmt": {
+        "name": "income_stmt",
+        "rows": "14968",
+        "cols": "12",
+        "memory_mb": "9.234403610229492",
+        "dtypes": "{dtype('O'): 12}",
+        "null_pct": "{'id': 0.0, 'company_id': 0.0, 'fiscal_year': 0.0, 'fiscal_quarter': 0.0, 'period_start': 0.0, 'period_end': 0.0, 'revenue': 2.1178514163548905, 'cost_of_revenue': 2.251469802244789, 'operating_income': 2.0777659005879205, 'net_income': 0.5879208979155532, 'total_comprehensive_income': 0.5879208979155532, 'eps': 23.750668091929448}",
+        "duplicated_rows": "0"
+      },
+      "stock_text": {
+        "name": "stock_text",
+        "rows": "1125134",
+        "cols": "9",
+        "memory_mb": "653.9864501953125",
+        "dtypes": "{dtype('O'): 9}",
+        "null_pct": "{'no': 0.0, 'id': 0.0, 'p_type': 0.0, 's_name': 0.0, 's_area_name': 0.0, 'post_time': 0.0, 'title': 0.0, 'author': 0.5821528813456887, 'content_type': 51.683621684172735}",
+        "duplicated_rows": "0"
+      },
+      "balance_sheet": {
+        "name": "balance_sheet",
+        "rows": "1375390",
+        "cols": "5",
+        "memory_mb": "358.71921730041504",
+        "dtypes": "{dtype('O'): 4, dtype('float64'): 1}",
+        "null_pct": "{'date': 0.0, 'stock_id': 0.0, 'type': 0.0, 'value': 0.0, 'origin_name': 0.0}",
+        "duplicated_rows": "0"
+      },
+      "cashflow": {
+        "name": "cashflow",
+        "rows": "352958",
+        "cols": "5",
+        "memory_mb": "93.27055263519287",
+        "dtypes": "{dtype('O'): 4, dtype('float64'): 1}",
+        "null_pct": "{'date': 0.0, 'stock_id': 0.0, 'type': 0.0, 'value': 0.0, 'origin_name': 0.0}",
+        "duplicated_rows": "0"
+      },
+      "industry": {
+        "name": "industry",
+        "rows": "1932",
+        "cols": "6",
+        "memory_mb": "0.515233039855957",
+        "dtypes": "{dtype('O'): 4, Int32Dtype(): 1, dtype('<M8[ns]'): 1}",
+        "null_pct": "{'company_id': 0.0, 'stock_name': 0.0, 'industry_category': 0.0, 'industry_code': 0.0, 'listing_type': 0.0, 'info_date': 0.0}",
+        "duplicated_rows": "0"
+      },
+      "institutional_investors": {
+        "name": "institutional_investors",
+        "rows": "855980",
+        "cols": "12",
+        "memory_mb": "115.10577201843262",
+        "dtypes": "{dtype('float64'): 10, dtype('O'): 1, dtype('<M8[ns]'): 1}",
+        "null_pct": "{'company_id': 0.0, 'trade_date': 0.0, 'foreign_buy': 0.00023365031893268534, 'foreign_sell': 0.00023365031893268534, 'foreign_net': 0.0, 'trust_buy': 0.00023365031893268534, 'trust_sell': 0.00023365031893268534, 'trust_net': 0.0, 'dealer_buy': 0.00023365031893268534, 'dealer_sell': 0.00023365031893268534, 'dealer_net': 0.0, 'all_inst_net': 0.0}",
+        "duplicated_rows": "0"
+      },
+      "margin_trading": {
+        "name": "margin_trading",
+        "rows": "566095",
+        "cols": "19",
+        "memory_mb": "106.354567527771",
+        "dtypes": "{dtype('int64'): 15, dtype('float64'): 2, dtype('<M8[ns]'): 1, dtype('O'): 1}",
+        "null_pct": "{'company_id': 0.0, 'trade_date': 0.0, 'margin_buy': 0.0, 'margin_sell': 0.0, 'margin_balance': 0.0, 'margin_balance_prev': 0.0, 'margin_repay': 0.0, 'margin_limit': 0.0, 'margin_change': 0.0, 'margin_use_rate': 9.117374292300761, 'short_buy': 0.0, 'short_sell': 0.0, 'short_balance': 0.0, 'short_balance_prev': 0.0, 'short_repay': 0.0, 'short_limit': 0.0, 'short_change': 0.0, 'margin_short_ratio': 35.24514436622828, 'offset_loan_short': 0.0}",
+        "duplicated_rows": "0"
+      }
+    },
+    "ex_dividend_verification": {
+      "steps": {
+        "step1_gap_detection": {
+          "total_big_gaps": 15741,
+          "likely_limit_moves": 15101,
+          "suspicious_gaps": 640,
+          "pass": false
+        },
+        "step2_yahoo_checklist": {
+          "tickers_to_verify": [
+            "1231",
+            "1235",
+            "1236",
+            "1294",
+            "1295",
+            "1342",
+            "1402",
+            "1423",
+            "1436",
+            "1441",
+            "1445",
+            "1512",
+            "1516",
+            "1519",
+            "1538",
+            "1539",
+            "1563",
+            "1615",
+            "1727",
+            "1734"
+          ],
+          "count": 20,
+          "note": "需手動比對 Yahoo Finance 收盤價"
+        },
+        "step3_rsi_anomaly": {
+          "anomaly_count": 135974,
+          "pass": false
+        },
+        "step4_continuity": {
+          "tickers_with_gaps": 20,
+          "max_gap_days": 294,
+          "details": [
+            {
+              "ticker": "1435",
+              "max_gap_days": 160,
+              "n_records": 315
+            },
+            {
+              "ticker": "2724",
+              "max_gap_days": 16,
+              "n_records": 422
+            },
+            {
+              "ticker": "2740",
+              "max_gap_days": 17,
+              "n_records": 264
+            },
+            {
+              "ticker": "2752",
+              "max_gap_days": 18,
+              "n_records": 432
+            },
+            {
+              "ticker": "2941",
+              "max_gap_days": 19,
+              "n_records": 432
+            },
+            {
+              "ticker": "2948",
+              "max_gap_days": 17,
+              "n_records": 451
+            },
+            {
+              "ticker": "2949",
+              "max_gap_days": 18,
+              "n_records": 478
+            },
+            {
+              "ticker": "3067",
+              "max_gap_days": 19,
+              "n_records": 430
+            },
+            {
+              "ticker": "3191",
+              "max_gap_days": 19,
+              "n_records": 470
+            },
+            {
+              "ticker": "3332",
+              "max_gap_days": 16,
+              "n_records": 374
+            }
+          ],
+          "pass": true
+        },
+        "step5_manual_sample": {
+          "sample_tickers": [
+            "5227",
+            "6952",
+            "8930",
+            "4402",
+            "2354",
+            "2609",
+            "6214",
+            "2312",
+            "5465",
+            "2633",
+            "1796",
+            "6728",
+            "3122",
+            "2480",
+            "5274",
+            "6727",
+            "1468",
+            "6735",
+            "3128",
+            "3552",
+            "6179",
+            "9927",
+            "4530",
+            "3014",
+            "4105",
+            "6751",
+            "8069",
+            "2417",
+            "2406",
+            "6830",
+            "7712",
+            "2472",
+            "6217",
+            "2233",
+            "1434",
+            "2495",
+            "4973",
+            "6574",
+            "4943",
+            "911622",
+            "6873",
+            "6844",
+            "2850",
+            "2009",
+            "1524",
+            "2820",
+            "5381",
+            "9960",
+            "3060",
+            "4528"
+          ],
+          "count": 50,
+          "note": "從 1930 支股票中隨機抽 50 支，需人工抽驗除權息日還原"
+        }
+      },
+      "suspicious_records": [
+        {
+          "company_id": "1231",
+          "trade_date": "2024-08-05T00:00:00",
+          "closing_price": 98.5,
+          "_daily_return": -0.16170212765957448
+        },
+        {
+          "company_id": "1235",
+          "trade_date": "2023-08-30T00:00:00",
+          "closing_price": 73.4,
+          "_daily_return": -0.136470588235294
+        },
+        {
+          "company_id": "1236",
+          "trade_date": "2023-10-11T00:00:00",
+          "closing_price": 23.0,
+          "_daily_return": 0.11650485436893199
+        },
+        {
+          "company_id": "1294",
+          "trade_date": "2023-04-12T00:00:00",
+          "closing_price": 58.1,
+          "_daily_return": 0.11516314779270642
+        },
+        {
+          "company_id": "1294",
+          "trade_date": "2023-07-05T00:00:00",
+          "closing_price": 118.0,
+          "_daily_return": 0.1132075471698113
+        },
+        {
+          "company_id": "1294",
+          "trade_date": "2023-07-12T00:00:00",
+          "closing_price": 103.5,
+          "_daily_return": -0.11158798283261806
+        },
+        {
+          "company_id": "1294",
+          "trade_date": "2024-02-05T00:00:00",
+          "closing_price": 136.0,
+          "_daily_return": 0.13807531380753146
+        },
+        {
+          "company_id": "1294",
+          "trade_date": "2024-03-11T00:00:00",
+          "closing_price": 170.0,
+          "_daily_return": 0.1333333333333333
+        },
+        {
+          "company_id": "1294",
+          "trade_date": "2024-04-01T00:00:00",
+          "closing_price": 228.5,
+          "_daily_return": 0.18393782383419688
+        },
+        {
+          "company_id": "1294",
+          "trade_date": "2024-04-03T00:00:00",
+          "closing_price": 273.0,
+          "_daily_return": 0.1351351351351351
+        },
+        {
+          "company_id": "1294",
+          "trade_date": "2024-04-10T00:00:00",
+          "closing_price": 249.5,
+          "_daily_return": -0.1120996441281139
+        },
+        {
+          "company_id": "1294",
+          "trade_date": "2024-04-17T00:00:00",
+          "closing_price": 228.5,
+          "_daily_return": 0.10922330097087385
+        },
+        {
+          "company_id": "1294",
+          "trade_date": "2024-06-06T00:00:00",
+          "closing_price": 202.5,
+          "_daily_return": -0.20588235294117652
+        },
+        {
+          "company_id": "1294",
+          "trade_date": "2024-09-26T00:00:00",
+          "closing_price": 126.5,
+          "_daily_return": -0.1394557823129252
+        },
+        {
+          "company_id": "1295",
+          "trade_date": "2024-08-12T00:00:00",
+          "closing_price": 85.0,
+          "_daily_return": 0.1643835616438356
+        },
+        {
+          "company_id": "1342",
+          "trade_date": "2024-07-17T00:00:00",
+          "closing_price": 103.0,
+          "_daily_return": -0.10822510822510822
+        },
+        {
+          "company_id": "1402",
+          "trade_date": "2024-07-18T00:00:00",
+          "closing_price": 32.9,
+          "_daily_return": -0.11796246648793562
+        },
+        {
+          "company_id": "1423",
+          "trade_date": "2023-10-23T00:00:00",
+          "closing_price": 29.55,
+          "_daily_return": 0.24683544303797467
+        },
+        {
+          "company_id": "1436",
+          "trade_date": "2024-07-26T00:00:00",
+          "closing_price": 163.5,
+          "_daily_return": -0.10899182561307907
+        },
+        {
+          "company_id": "1441",
+          "trade_date": "2023-08-29T00:00:00",
+          "closing_price": 12.6,
+          "_daily_return": 0.6492146596858639
+        }
+      ],
+      "summary": {
+        "overall_pass": false,
+        "total_tickers": 1930,
+        "total_records": 948976,
+        "suspicious_count": 136614
+      }
+    },
+    "price_quality": {
+      "total_records": 948976,
+      "total_tickers": 1930,
+      "date_range": "2023-03-01 00:00:00 ~ 2025-03-31 00:00:00",
+      "null_pct": {
+        "closing_price": "0.09%"
+      },
+      "tickers_below_min_days": 2,
+      "min_trading_days_threshold": 60,
+      "zero_volume_records": 858,
+      "zero_volume_pct": "0.09%",
+      "negative_prices": 0,
+      "duplicate_rows": 0
+    },
+    "text_after_processing": {
+      "rows": 583401,
+      "content_types": {
+        "main": 36539,
+        "reply": 856,
+        "r_reply": 27
+      }
+    },
+    "financial_validation": {
+      "total_records": 14968,
+      "total_companies": 1896,
+      "quarter_coverage": {
+        "(2023, 1)": 1805,
+        "(2023, 2)": 1883,
+        "(2023, 3)": 1832,
+        "(2023, 4)": 1895,
+        "(2024, 1)": 1871,
+        "(2024, 2)": 1891,
+        "(2024, 3)": 1896,
+        "(2024, 4)": 1895
+      },
+      "null_pct_sq": {
+        "revenue_sq": "3.2%",
+        "cost_of_revenue_sq": "3.4%",
+        "operating_income_sq": "3.2%",
+        "net_income_sq": "1.7%",
+        "total_comprehensive_income_sq": "1.7%",
+        "gross_margin_sq": "3.4%",
+        "operating_margin_sq": "3.3%",
+        "net_margin_sq": "3.3%"
+      },
+      "extreme_gross_margin": 9,
+      "zero_revenue_sq": 10,
+      "pit_coverage": "14968/14968 (100.0%)",
+      "overall_pass": "True"
+    },
+    "balance_sheet_quality": {
+      "total_records": 17033,
+      "total_companies": 1896,
+      "total_assets_coverage": "17033/17033 (100.0%)",
+      "stockholders_equity_coverage": "17033/17033 (100.0%)",
+      "total_liabilities_coverage": "16664/17033 (97.8%)",
+      "accounting_equation_violations": 37,
+      "accounting_equation_violation_pct": 0.22,
+      "accounting_equation_check": "PASS"
+    },
+    "label_validation": {
+      "checks": {
+        "label_1_balance": {
+          "min_class_pct": "31.8%",
+          "balanced": "True"
+        },
+        "label_1_coverage": "99.6%",
+        "label_5_balance": {
+          "min_class_pct": "29.8%",
+          "balanced": "True"
+        },
+        "label_5_coverage": "98.8%",
+        "label_20_balance": {
+          "min_class_pct": "27.5%",
+          "balanced": "True"
+        },
+        "label_20_coverage": "95.8%"
+      },
+      "distributions": {
+        "label_1": {
+          "-1.0": 0.3493,
+          "0.0": 0.333,
+          "1.0": 0.3178
+        },
+        "label_5": {
+          "-1.0": 0.3163,
+          "0.0": 0.3855,
+          "1.0": 0.2982
+        },
+        "label_20": {
+          "-1.0": 0.2767,
+          "0.0": 0.4478,
+          "1.0": 0.2755
+        }
+      },
+      "warnings": [],
+      "overall_pass": true
+    },
+    "feature_store": {
+      "rows": 948976,
+      "cols": 91,
+      "feature_count": 75,
+      "feature_count_by_pillar": {
+        "trend": 25,
+        "fund": 18,
+        "val": 5,
+        "event": 7,
+        "risk": 6,
+        "chip": 10,
+        "ind": 4
+      },
+      "memory_mb": "700.5"
+    },
+    "leakage_detection": {
+      "check1": {
+        "check": "future_column_scan",
+        "pass": true,
+        "suspicious_columns": [],
+        "total_columns_scanned": 91
+      },
+      "check2": {
+        "check": "timestamp_verification",
+        "status": "deferred",
+        "note": "Will run after feature engineering with label alignment"
+      },
+      "check3": {
+        "check": "distribution_shift",
+        "status": "deferred",
+        "note": "Will run after train/test split"
+      },
+      "check4": {
+        "check": "label_correlation",
+        "status": "deferred",
+        "note": "Will run after label engineering (Phase 2)"
+      },
+      "summary": {
+        "overall_pass": true,
+        "checks_run": 1,
+        "checks_deferred": 3,
+        "total_checks": 4
+      }
+    }
+  },
+  "quality_gates": {
+    "ex_dividend_pass": false,
+    "leakage_check1_pass": true,
+    "financial_validation_pass": "True",
+    "label_validation_pass": true,
+    "price_quality_pass": true,
+    "feature_store_valid": true
+  },
+  "overall_status": "NEEDS REVIEW"
+}

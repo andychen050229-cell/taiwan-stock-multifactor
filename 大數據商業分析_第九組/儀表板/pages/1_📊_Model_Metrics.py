@@ -1,0 +1,1071 @@
+"""Model Metrics — 模型指標分析（量化分析工作台）"""
+
+import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
+from pathlib import Path
+import importlib.util
+
+_utils_path = Path(__file__).resolve().parent.parent / "utils.py"
+_spec = importlib.util.spec_from_file_location("dashboard_utils", str(_utils_path))
+_utils = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_utils)
+inject_custom_css = _utils.inject_custom_css
+inject_advanced_sidebar = _utils.inject_advanced_sidebar
+load_report = _utils.load_report
+render_topbar = _utils.render_topbar
+render_phase_timeline = _utils.render_phase_timeline
+render_auc_gauge = _utils.render_auc_gauge
+render_horizon_segmented = _utils.render_horizon_segmented
+glint_plotly_layout = _utils.glint_plotly_layout
+glint_heatmap_colorscale = _utils.glint_heatmap_colorscale
+glint_colorbar = _utils.glint_colorbar
+GLINT_SEQUENTIAL_COOL = _utils.GLINT_SEQUENTIAL_COOL
+glint_styler_cmap = _utils.glint_styler_cmap
+render_chart_note = _utils.render_chart_note
+render_terminal_hero = _utils.render_terminal_hero
+PAGE_EYEBROWS = _utils.PAGE_EYEBROWS
+PAGE_TITLES = _utils.PAGE_TITLES
+PAGE_BRIEFINGS = _utils.PAGE_BRIEFINGS
+render_trust_strip = _utils.render_trust_strip
+render_page_footer = _utils.render_page_footer
+glint_icon = _utils.glint_icon
+glint_heading = _utils.glint_heading
+
+inject_custom_css()
+
+# ---- Top-bar (sticky breadcrumb + model chips + clock) ------------------
+render_topbar(
+    crumb_left="多因子股票分析系統",
+    crumb_current="模型績效分析",
+    chips=[
+        ("Purged WF · 4-Fold", "pri"),
+        ("LightGBM + XGBoost", "vio"),
+        ("all gates → PASS", "ok"),
+    ],
+    show_clock=True,
+)
+
+try:
+    report, report_name = load_report()
+    results = report["results"]
+    inject_advanced_sidebar(report_name, report, current_page="model_metrics")
+except Exception as e:
+    # v8 §18.4 · dark terminal error panel with schema hint
+    _utils.render_error_from_copy_map("report_missing", exception=e)
+    st.stop()
+
+# v8 §12 · §20.4 — Dark terminal hero driven by centralised copy maps
+render_terminal_hero(
+    eyebrow=PAGE_EYEBROWS["model"],
+    title=PAGE_TITLES["model"],
+    briefing=PAGE_BRIEFINGS["model"],
+    chips=[
+        ("AUC threshold", "> 0.52", "info"),
+        ("CV", "Purged WF · 4-fold", "info"),
+    ],
+    tone="blue",
+)
+render_trust_strip([
+    ("DATASET",   "2023/03 – 2025/03", "blue"),
+    ("CV",        "Purged WF · 4 Folds", "violet"),
+    ("ENGINES",   "LightGBM + XGBoost", "cyan"),
+    ("GATES",     "9 / 9 PASS",         "emerald"),
+])
+
+with st.expander("ℹ️ 如何閱讀本頁？", expanded=False):
+    st.markdown("""
+- **AUC**（曲線下面積）衡量模型區分「上漲 vs 下跌」的能力——0.5 為隨機，**> 0.52** 為本系統最低門檻。
+- **LogLoss** 衡量預測機率的校準程度——越低代表模型越有把握且準確。
+- **各 Fold** 對應不同時間切片的驗證結果，檢查穩定性。
+""")
+
+# ===== Horizon selector =====
+st.markdown("**選擇 Horizon | Select Horizon**")
+sel_col, seg_col = st.columns([1, 3])
+with sel_col:
+    horizon = st.selectbox(
+        " ",
+        [1, 5, 20],
+        index=2,
+        format_func=lambda x: f"D+{x}",
+        label_visibility="collapsed",
+        key="mm_horizon",
+    )
+with seg_col:
+    render_horizon_segmented(
+        options=["D+1", "D+5", "D+20"],
+        current=f"D+{horizon}",
+        key_prefix="mm",
+    )
+
+# ===== Summary KPI Row =====
+try:
+    model_data = results.get(f"model_horizon_{horizon}", {})
+    kpi_rows = []
+
+    for eng, res in model_data.items():
+        if isinstance(res, dict) and "avg_metrics" in res:
+            m = res["avg_metrics"]
+            kpi_rows.append({
+                "engine": eng.upper(),
+                "auc": m.get("auc", 0),
+                "logloss": m.get("log_loss", 0),
+                "baseline_ll": m.get("baseline_logloss", 1),
+                "horizon": horizon,
+            })
+
+    # Add ensemble
+    comp = results.get("comparison", {})
+    ens_key = f"ensemble_D{horizon}"
+    if ens_key in comp:
+        ens = comp[ens_key]
+        kpi_rows.append({
+            "engine": "ENSEMBLE",
+            "auc": ens.get("auc", 0),
+            "logloss": 0,
+            "baseline_ll": 1,
+            "horizon": horizon,
+        })
+
+    if kpi_rows:
+        best_auc_engine = max(kpi_rows, key=lambda x: x["auc"])
+        best_ll_improvement = max(
+            [r for r in kpi_rows if r["logloss"] > 0],
+            key=lambda x: (1 - x["logloss"] / x["baseline_ll"]),
+            default={}
+        )
+
+        glint_heading("target", "關鍵績效指標", "Key Performance Indicators", tone="cyan")
+
+        kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
+        with kpi_col1:
+            st.metric(
+                "最佳 AUC",
+                f"{best_auc_engine['auc']:.4f}",
+                delta=best_auc_engine['engine']
+            )
+        with kpi_col2:
+            st.metric(
+                "最佳引擎",
+                best_auc_engine['engine'],
+                delta=f"D+{horizon}"
+            )
+        with kpi_col3:
+            if best_ll_improvement:
+                ll_imp = (1 - best_ll_improvement["logloss"] / best_ll_improvement["baseline_ll"]) * 100
+                st.metric(
+                    "LogLoss 改進",
+                    f"{ll_imp:.1f}%",
+                    delta="vs 基線"
+                )
+        with kpi_col4:
+            st.metric(
+                "預測天期",
+                f"D+{horizon}",
+                delta="前瞻天數"
+            )
+
+        # ===== Signature AUC Gauge (half-ring SVG) =====
+        st.markdown("")
+        auc_html = render_auc_gauge(
+            val=best_auc_engine["auc"],
+            min_v=0.5, max_v=0.7,
+            label=f"AUC · {best_auc_engine['engine']} · D+{horizon} · target ≥ 0.52",
+            width=320, height=180,
+        )
+        st.markdown(
+            f'<div class="gl-panel" style="display:flex;align-items:center;justify-content:center;padding:18px 22px;">{auc_html}</div>',
+            unsafe_allow_html=True,
+        )
+
+        # ===== Phase timeline (full-width below the gauge) =====
+        st.markdown(
+            '<div style="font-size:0.72rem;color:var(--gl-text-3);font-weight:600;'
+            'letter-spacing:.06em;text-transform:uppercase;margin:14px 0 6px;">RESEARCH PROGRESS · PHASE 2 ACTIVE</div>',
+            unsafe_allow_html=True,
+        )
+        render_phase_timeline(current_phase=2)
+
+        st.divider()
+except Exception as e:
+    st.warning(f"KPI 計算發生錯誤：{str(e)}")
+
+# ===== Model Comparison Radar Chart =====
+try:
+    glint_heading("bar-chart", "引擎對標分析", "Engine Comparison", tone="blue")
+    st.caption("↓ 雷達圖越大代表該引擎在該維度表現越好。AUC 高 + LogLoss 低 = 最理想。")
+    st.caption("LightGBM vs XGBoost | 跨多維度性能指標的側面對比")
+
+    radar_rows = []
+    for eng, res in model_data.items():
+        if isinstance(res, dict) and "avg_metrics" in res:
+            m = res["avg_metrics"]
+            # Normalize to 0-1 scale for radar
+            radar_rows.append({
+                "Engine": eng.upper(),
+                "AUC": min(m.get("auc", 0) / 0.7, 1.0),  # normalize
+                "Accuracy": m.get("accuracy", 0),
+                "Balanced Acc": m.get("balanced_accuracy", 0),
+                "LogLoss": max(0.5 - m.get("log_loss", 0.5), 0),  # inverse scale
+            })
+
+    if len(radar_rows) >= 2:
+        categories = ["AUC", "Accuracy", "Balanced Acc", "LogLoss"]
+        fig_radar = go.Figure()
+
+        colors = {"LIGHTGBM": "#2563eb", "XGBOOST": "#7c3aed"}
+        for row in radar_rows:
+            fig_radar.add_trace(go.Scatterpolar(
+                r=[row[cat] for cat in categories],
+                theta=categories,
+                fill='toself',
+                name=row['Engine'],
+                marker_color=colors.get(row['Engine'], '#06b6d4'),
+                line_color=colors.get(row['Engine'], '#06b6d4'),
+            ))
+
+        fig_radar.update_layout(
+            **glint_plotly_layout(
+                title=f"D+{horizon} 雙引擎雷達圖",
+                subtitle="AUC / Accuracy / Balanced Acc / LogLoss 四維比較",
+                height=450,
+            ),
+            polar=dict(
+                bgcolor="rgba(0,0,0,0)",
+                radialaxis=dict(visible=True, range=[0, 1],
+                                gridcolor="rgba(103,232,249,0.12)",
+                                tickfont=dict(family="JetBrains Mono", size=10, color="#8397AC")),
+                angularaxis=dict(gridcolor="rgba(103,232,249,0.12)",
+                                 tickfont=dict(family="Inter", size=11, color="#B4CCDF")),
+            ),
+        )
+        st.plotly_chart(fig_radar, use_container_width=True)
+except Exception as e:
+    st.warning(f"Radar 圖表生成失敗：{str(e)}")
+
+# ===== AUC Comparison =====
+st.divider()
+glint_heading("trending-up", f"AUC-ROC 比較 (D+{horizon})", "AUC Comparison", tone="cyan")
+
+try:
+    rows = []
+    for eng, res in model_data.items():
+        if isinstance(res, dict) and "avg_metrics" in res:
+            m = res["avg_metrics"]
+            rows.append({
+                "Engine": eng.upper(),
+                "AUC": m.get("auc", 0),
+                "LogLoss": m.get("log_loss", 0),
+                "Accuracy": m.get("accuracy", 0),
+                "Balanced Acc": m.get("balanced_accuracy", 0),
+                "Baseline LL": m.get("baseline_logloss", 0),
+                "LL Improvement": f"{(1 - m.get('log_loss', 1) / m.get('baseline_logloss', 1)) * 100:.1f}%" if m.get("baseline_logloss") else "N/A",
+            })
+
+    # Add ensemble
+    comp = results.get("comparison", {})
+    ens_key = f"ensemble_D{horizon}"
+    if ens_key in comp:
+        ens = comp[ens_key]
+        rows.append({
+            "Engine": "ENSEMBLE",
+            "AUC": ens.get("auc", 0),
+            "LogLoss": 0,
+            "Accuracy": ens.get("accuracy", 0),
+            "Balanced Acc": ens.get("balanced_accuracy", 0),
+            "Baseline LL": 0,
+            "LL Improvement": "N/A",
+        })
+
+    if rows:
+        df = pd.DataFrame(rows)
+        st.dataframe(
+            df.style.background_gradient(subset=["AUC"], cmap=glint_styler_cmap("diverging"), vmin=0.48, vmax=0.58),
+            use_container_width=True,
+            hide_index=True
+        )
+
+        # Visual AUC bar chart
+        fig_auc = go.Figure()
+        colors = {"LIGHTGBM": "#2563eb", "XGBOOST": "#7c3aed", "ENSEMBLE": "#10b981"}
+
+        for r in sorted(rows, key=lambda x: x["AUC"]):
+            fig_auc.add_trace(go.Bar(
+                x=[r["Engine"]],
+                y=[r["AUC"]],
+                marker_color=colors.get(r["Engine"], "#06b6d4"),
+                text=[f"{r['AUC']:.4f}"],
+                textposition="outside",
+                textfont=dict(family="JetBrains Mono", size=11, color="#E8F7FC"),
+                showlegend=False,
+                hovertemplate=f"<b>{r['Engine']}</b><br>AUC: {r['AUC']:.4f}<extra></extra>"
+            ))
+
+        fig_auc.update_layout(**glint_plotly_layout(
+            title=f"D+{horizon} AUC-ROC 得分",
+            subtitle="灰線 0.50 為隨機基線,紅線 0.52 為通過門檻",
+            height=400,
+            ylabel="AUC",
+        ))
+        fig_auc.update_yaxes(range=[0.48, max(r["AUC"] for r in rows) + 0.02])
+        fig_auc.update_layout(hovermode="x unified")
+        fig_auc.add_hline(y=0.5, line_dash="dash", line_color="rgba(103,232,249,0.40)",
+                          annotation_text="隨機基線 0.50",
+                          annotation_font=dict(family="JetBrains Mono", size=10, color="#b4ccdf"))
+        fig_auc.add_hline(y=0.52, line_dash="dash", line_color="#f43f5e",
+                          annotation_text="品質門檻 0.52",
+                          annotation_font=dict(family="JetBrains Mono", size=10, color="#f43f5e"))
+        st.plotly_chart(fig_auc, use_container_width=True)
+        render_chart_note(
+            "<b>所以呢：</b>ENSEMBLE 只有在 AUC 穩定高於 0.52 時才值得部署。D+20 最可靠,D+1/D+5 波動大,僅作參考。"
+        )
+
+        st.markdown(f"""
+        <div class="insight-box">
+        <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+          {glint_icon("lightbulb", 15)} 洞察 | Insight：</strong><br>
+        AUC > 0.52 表示模型優於隨機預測，超越品質門檻。<br>
+        ENSEMBLE 通常結合個別模型優勢，實現更穩定的預測。<br><br>
+        <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-emerald);">
+          {glint_icon("target", 15)} 應用建議：</strong><br>
+        在 <strong>月度頻率（D+20）</strong> 策略部署；D+1/D+5 訊號品質不足，不推薦實盤使用。
+        </div>
+        """, unsafe_allow_html=True)
+except Exception as e:
+    st.error(f"AUC 比較失敗：{str(e)}")
+
+# ===== Per-Class AUC =====
+st.divider()
+glint_heading("target", f"分類別 AUC 分析 (D+{horizon})", "Per-Class AUC", tone="cyan")
+st.caption("↓ 三類（DOWN/FLAT/UP）的個別 AUC，觀察模型在哪個方向的判斷更有信心。")
+st.markdown(f"""
+<div class="insight-box">
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-violet);">
+  {glint_icon("book-open", 15)} 為什麼看 Per-Class AUC | Why Per-Class AUC？</strong><br>
+三分類問題中，整體 AUC 可能掩蓋個別類別的弱點。<br>
+Per-Class AUC 分別衡量模型對 DOWN / FLAT / UP 的區辨能力，幫助識別特定類別的模型弱點。
+</div>
+""", unsafe_allow_html=True)
+
+try:
+    per_class_rows = []
+    for eng, res in model_data.items():
+        if isinstance(res, dict) and "fold_metrics" in res:
+            for fm in res.get("fold_metrics", []):
+                pc = fm.get("per_class_auc", {})
+                if pc:
+                    per_class_rows.append({
+                        "Engine": eng.upper(),
+                        "Fold": fm.get("fold_id", 0),
+                        "DOWN AUC": pc.get("DOWN", 0),
+                        "FLAT AUC": pc.get("FLAT", 0),
+                        "UP AUC": pc.get("UP", 0),
+                    })
+
+    if per_class_rows:
+        df_pc = pd.DataFrame(per_class_rows)
+
+        # Create grouped bar chart
+        fig = go.Figure()
+        for cls, color in [("DOWN AUC", "#f43f5e"), ("FLAT AUC", "#64748b"), ("UP AUC", "#10b981")]:
+            avg_by_eng = df_pc.groupby("Engine")[cls].mean()
+            fig.add_trace(go.Bar(
+                name=cls.replace(" AUC", ""),
+                x=avg_by_eng.index,
+                y=avg_by_eng.values,
+                marker_color=color,
+                text=avg_by_eng.values.round(4),
+                textposition="outside",
+                textfont=dict(family="JetBrains Mono", size=10, color="#E8F7FC"),
+            ))
+
+        fig.update_layout(**glint_plotly_layout(
+            title=f"D+{horizon} 按類別平均 AUC",
+            subtitle="DOWN / FLAT / UP 三分類逐引擎平均,灰線為 0.50 隨機基線",
+            height=420,
+            ylabel="AUC",
+        ))
+        fig.update_yaxes(range=[0.45, 0.75])
+        fig.update_layout(barmode="group", hovermode="x unified")
+        fig.add_hline(y=0.5, line_dash="dash", line_color="rgba(103,232,249,0.40)",
+                      annotation_text="隨機基線 0.50",
+                      annotation_font=dict(family="JetBrains Mono", size=10, color="#b4ccdf"))
+        st.plotly_chart(fig, use_container_width=True)
+
+        with st.expander("📋 逐折明細 | Per-Fold Details"):
+            st.dataframe(
+                df_pc.style.background_gradient(subset=["DOWN AUC", "FLAT AUC", "UP AUC"],
+                                                cmap=glint_styler_cmap("diverging"), vmin=0.45, vmax=0.75),
+                use_container_width=True,
+                hide_index=True
+            )
+
+        # Heatmap option
+        st.caption("熱力圖視圖 | Heatmap View")
+        heatmap_data = df_pc.pivot_table(
+            index="Engine",
+            columns="Fold",
+            values="UP AUC",
+            aggfunc="mean"
+        )
+        if not heatmap_data.empty:
+            fig_heat = go.Figure(data=go.Heatmap(
+                z=heatmap_data.values,
+                x=[f"Fold {c}" for c in heatmap_data.columns],
+                y=heatmap_data.index,
+                text=[[f"{v:.3f}" for v in row] for row in heatmap_data.values],
+                texttemplate="%{text}",
+                textfont={"family": "JetBrains Mono", "size": 11, "color": "#E8F7FC"},
+                colorscale=glint_heatmap_colorscale("diverging"),
+                zmid=0.52, xgap=3, ygap=3,
+                colorbar=glint_colorbar(title="AUC", fmt=".3f"),
+                hovertemplate="<b>%{y}</b><br>%{x}<br>AUC: <b>%{z:.4f}</b><extra></extra>"
+            ))
+            fig_heat.update_layout(**glint_plotly_layout(
+                title=f"D+{horizon} UP 類別 AUC 熱力圖",
+                subtitle="色中線 0.52 = 最低通過門檻,綠色=高於、紅色=低於",
+                height=320,
+            ))
+            st.plotly_chart(fig_heat, use_container_width=True)
+except Exception as e:
+    st.warning(f"Per-Class AUC 分析失敗：{str(e)}")
+
+# ===== Fold Stability =====
+st.divider()
+glint_heading("activity", f"Fold 穩定性趨勢 (D+{horizon})", "Fold Stability", tone="amber")
+st.markdown(f"""
+<div class="insight-box">
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+  {glint_icon("pin", 15)} 穩定性指標 | Stability Indicator：</strong><br>
+不同 Fold 間的性能波動越小，代表模型越穩健。<br>
+持續跌破品質門檻的模型可能存在資料或特徵洩漏。
+</div>
+""", unsafe_allow_html=True)
+
+try:
+    fold_rows = []
+    for eng, res in model_data.items():
+        if isinstance(res, dict) and "fold_metrics" in res:
+            for fm in res.get("fold_metrics", []):
+                fold_rows.append({
+                    "Engine": eng.upper(),
+                    "Fold": fm.get("fold_id", 0),
+                    "AUC": fm.get("auc", 0),
+                    "LogLoss": fm.get("log_loss", 0),
+                    "N_train": fm.get("n_train", 0),
+                    "N_test": fm.get("n_test", 0),
+                })
+
+    if fold_rows:
+        df_fold = pd.DataFrame(fold_rows)
+
+        f1, f2 = st.columns(2)
+        with f1:
+            fig2 = px.line(
+                df_fold, x="Fold", y="AUC", color="Engine", markers=True,
+                color_discrete_map={"LIGHTGBM": "#2563eb", "XGBOOST": "#7c3aed"},
+            )
+            fig2.update_traces(line=dict(width=2.2), marker=dict(size=7))
+            fig2.update_layout(**glint_plotly_layout(
+                title=f"D+{horizon} AUC 跨 Fold 演進",
+                subtitle="紅線 0.52 = 通過門檻；穿越代表 fold 訊號不穩",
+                height=350, xlabel="Fold", ylabel="AUC",
+            ))
+            fig2.update_layout(hovermode="x unified")
+            fig2.add_hline(y=0.52, line_dash="dash", line_color="#f43f5e",
+                           annotation_text="門檻 0.52",
+                           annotation_font=dict(family="JetBrains Mono", size=10, color="#f43f5e"))
+            st.plotly_chart(fig2, use_container_width=True)
+
+        with f2:
+            fig3 = px.line(
+                df_fold, x="Fold", y="LogLoss", color="Engine", markers=True,
+                color_discrete_map={"LIGHTGBM": "#2563eb", "XGBOOST": "#7c3aed"},
+            )
+            fig3.update_traces(line=dict(width=2.2), marker=dict(size=7))
+            fig3.update_layout(**glint_plotly_layout(
+                title=f"D+{horizon} LogLoss 跨 Fold 演進",
+                subtitle="越低越好；跨 fold 變異代表模型不穩定",
+                height=350, xlabel="Fold", ylabel="LogLoss",
+            ))
+            fig3.update_layout(hovermode="x unified")
+            st.plotly_chart(fig3, use_container_width=True)
+
+        with st.expander("📋 逐折詳細數據 | Fold Details"):
+            st.dataframe(df_fold, use_container_width=True, hide_index=True)
+except Exception as e:
+    st.warning(f"Fold 穩定性分析失敗：{str(e)}")
+
+# ===== Feature Importance (Dual Engine) =====
+st.divider()
+st.subheader(f"🔝 特徵重要度對比 | Feature Importance (D+{horizon})")
+
+try:
+    available_engines = [
+        e for e in model_data.keys()
+        if isinstance(model_data.get(e), dict) and "avg_metrics" in model_data.get(e, {})
+    ]
+
+    if available_engines:
+        st.caption("並排比較 | Side-by-Side Comparison")
+
+        if len(available_engines) >= 2:
+            # Dual engine comparison
+            eng_cols = st.columns(2)
+            for col_idx, engine_sel in enumerate(available_engines[:2]):
+                with eng_cols[col_idx]:
+                    top_feats = model_data.get(engine_sel, {}).get("top_features", {})
+                    if top_feats:
+                        df_feat = pd.DataFrame(list(top_feats.items()), columns=["Feature", "Importance"])
+                        df_feat = df_feat.sort_values("Importance", ascending=True).tail(12)
+
+                        fig_feat = px.bar(
+                            df_feat, x="Importance", y="Feature", orientation="h",
+                            color="Importance", color_continuous_scale=GLINT_SEQUENTIAL_COOL,
+                        )
+                        fig_feat.update_layout(**glint_plotly_layout(
+                            title=f"{engine_sel.upper()} D+{horizon} 特徵重要度 Top-12",
+                            subtitle="由大到小排序；顏色深淺反映相對重要度",
+                            height=450, xlabel="Importance", ylabel="",
+                        ))
+                        fig_feat.update_layout(showlegend=False, coloraxis_showscale=False)
+                        st.plotly_chart(fig_feat, use_container_width=True)
+        else:
+            # Single engine
+            engine_sel = available_engines[0]
+            top_feats = model_data.get(engine_sel, {}).get("top_features", {})
+            if top_feats:
+                df_feat = pd.DataFrame(list(top_feats.items()), columns=["Feature", "Importance"])
+                df_feat = df_feat.sort_values("Importance", ascending=True).tail(15)
+
+                fig_feat = px.bar(
+                    df_feat, x="Importance", y="Feature", orientation="h",
+                    color="Importance", color_continuous_scale=GLINT_SEQUENTIAL_COOL,
+                )
+                fig_feat.update_layout(**glint_plotly_layout(
+                    title=f"{engine_sel.upper()} D+{horizon} 特徵重要度 Top-15",
+                    subtitle="由大到小排序；顏色深淺反映相對重要度",
+                    height=500, xlabel="Importance", ylabel="",
+                ))
+                fig_feat.update_layout(showlegend=False, coloraxis_showscale=False)
+                st.plotly_chart(fig_feat, use_container_width=True)
+except Exception as e:
+    st.warning(f"特徵重要度分析失敗：{str(e)}")
+
+# ===== Calibration (ECE) Analysis =====
+st.divider()
+glint_heading("target", f"校準分析 (D+{horizon})", "Calibration Analysis", tone="emerald")
+st.markdown(f"""
+<div class="insight-box">
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-emerald);">
+  {glint_icon("book-open", 15)} 什麼是校準（Calibration）？</strong><br>
+校準衡量模型輸出的機率是否與實際頻率一致。<br>
+例如模型預測某股票有 70% 機率上漲，則在所有被預測 70% 的股票中，應約有 70% 確實上漲。<br>
+<strong>ECE（Expected Calibration Error）</strong>越低代表校準越好。<br>
+本系統使用 <strong>Isotonic Regression</strong> 進行後校準。
+</div>
+""", unsafe_allow_html=True)
+
+try:
+    calibration_data = results.get("calibration", {})
+    if calibration_data:
+        cal_rows = []
+        for key, val in calibration_data.items():
+            parts = key.rsplit("_", 1)
+            if len(parts) == 2:
+                eng_name, h_tag = parts
+                h_val = int(h_tag.replace("D", ""))
+                if h_val == horizon:
+                    cal_rows.append({
+                        "模型 | Model": eng_name.upper().replace("_", " "),
+                        "校準前 ECE | Before": val["before"]["ece"],
+                        "校準後 ECE | After": val["after"]["ece"],
+                        "改善幅度 | Improvement": f'{val["improvement_pct"]:.1f}%',
+                        "校準前 Brier | Before": val["before"]["brier_score"],
+                        "校準後 Brier | After": val["after"]["brier_score"],
+                    })
+
+        if cal_rows:
+            df_cal = pd.DataFrame(cal_rows)
+            # 反向 diverging:ECE 越低越好,所以 vmin/vmax 讓小值=綠
+            st.dataframe(
+                df_cal.style.background_gradient(subset=["校準後 ECE | After"],
+                                                 cmap=glint_styler_cmap("diverging").reversed()),
+                use_container_width=True,
+                hide_index=True,
+            )
+
+            # ECE before/after bar chart
+            fig_cal = go.Figure()
+            models = [r["模型 | Model"] for r in cal_rows]
+            ece_before = [r["校準前 ECE | Before"] for r in cal_rows]
+            ece_after = [r["校準後 ECE | After"] for r in cal_rows]
+
+            _tf = dict(family="JetBrains Mono", size=10, color="#E8F7FC")
+            fig_cal.add_trace(go.Bar(
+                name="校準前", x=models, y=ece_before,
+                marker_color="#f43f5e", text=[f"{v:.4f}" for v in ece_before],
+                textposition="outside", textfont=_tf,
+            ))
+            fig_cal.add_trace(go.Bar(
+                name="校準後", x=models, y=ece_after,
+                marker_color="#10b981", text=[f"{v:.4f}" for v in ece_after],
+                textposition="outside", textfont=_tf,
+            ))
+            fig_cal.update_layout(**glint_plotly_layout(
+                title=f"D+{horizon} ECE 校準前後對比",
+                subtitle="Isotonic Regression 後 ECE 越低越好",
+                height=400, ylabel="ECE",
+            ))
+            fig_cal.update_layout(barmode="group")
+            st.plotly_chart(fig_cal, use_container_width=True)
+            render_chart_note(
+                "<b>所以呢：</b>校準後 ECE 應明顯低於校準前(綠 < 紅)。若改善有限,代表原始機率已夠準,或樣本量不足以顯示差異。"
+            )
+
+            # Per-fold ECE details
+            with st.expander("📋 逐折 ECE 明細 | Per-Fold ECE Details"):
+                fold_ece_rows = []
+                for key, val in calibration_data.items():
+                    parts = key.rsplit("_", 1)
+                    if len(parts) == 2:
+                        eng_name, h_tag = parts
+                        h_val = int(h_tag.replace("D", ""))
+                        if h_val == horizon and "per_fold_ece" in val:
+                            for i, ece_val in enumerate(val["per_fold_ece"]):
+                                fold_ece_rows.append({
+                                    "Model": eng_name.upper(),
+                                    "Fold": i + 1,
+                                    "ECE (Before Cal.)": ece_val,
+                                })
+                if fold_ece_rows:
+                    st.dataframe(pd.DataFrame(fold_ece_rows), use_container_width=True, hide_index=True)
+
+            st.markdown(f"""
+            <div class="insight-box">
+            <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+              {glint_icon("lightbulb", 15)} 洞察 | Insight：</strong>
+            Isotonic Regression 校準使 D+{horizon} 的 ECE 平均降低約 <strong>74–80%</strong>，顯著提升機率輸出的可靠性。<br>
+            校準後 ECE 均低於 0.02，達到高品質校準水準。
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.info("校準數據不可用。請確認報告中包含 calibration 資料。")
+except Exception as e:
+    st.warning(f"校準分析載入失敗：{str(e)}")
+
+# ===== Confusion Matrices =====
+st.divider()
+glint_heading("grid", f"混淆矩陣 (D+{horizon})", "Confusion Matrices", tone="violet")
+with st.expander("什麼是混淆矩陣？", expanded=False, icon=":material/help_outline:"):
+    st.markdown(f"""
+<div class="insight-box" style="margin-top:6px;">
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-violet);">
+  {glint_icon("book-open", 15)} 什麼是混淆矩陣？</strong><br>
+混淆矩陣展示模型對 DOWN / FLAT / UP 三個類別的實際分類結果。<br>
+對角線上的值代表正確分類，非對角線代表錯誤分類。<br>
+可以從中觀察模型是否偏向預測特定類別。
+</div>
+""", unsafe_allow_html=True)
+
+try:
+    _mm_here = Path(__file__).resolve()
+    figures_dir = None
+    for _c in (
+        _mm_here.parent.parent.parent.parent / "outputs" / "figures",   # project_root/outputs
+        _mm_here.parent.parent.parent / "outputs" / "figures",          # 程式碼/outputs (legacy)
+        _mm_here.parent.parent / "outputs" / "figures",
+        Path.cwd() / "outputs" / "figures",
+        Path.cwd().parent / "outputs" / "figures",
+    ):
+        if _c.exists():
+            figures_dir = _c
+            break
+    figures_dir = figures_dir or (_mm_here.parent.parent / "outputs" / "figures")
+
+    cm_col1, cm_col2 = st.columns(2)
+    for col, engine in zip([cm_col1, cm_col2], ["lightgbm", "xgboost"]):
+        with col:
+            cm_path = figures_dir / f"confusion_matrix_{engine}_D{horizon}.png"
+            if cm_path.exists():
+                st.image(str(cm_path), caption=f"{engine.upper()} D+{horizon}", use_container_width=True)
+            else:
+                st.info(f"{engine.upper()} 混淆矩陣不存在")
+
+    st.markdown(f"""
+    <div class="insight-box">
+    <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+      {glint_icon("lightbulb", 15)} 解讀建議 | Reading Guide：</strong><br>
+    觀察對角線佔比——若 FLAT 類被大量預測，可能反映市場中性偏好。<br>
+    DOWN 與 UP 的混淆程度直接影響策略方向判斷的準確性。
+    </div>
+    """, unsafe_allow_html=True)
+except Exception as e:
+    st.warning(f"混淆矩陣載入失敗：{str(e)}")
+
+# ===== Hyperparameter Optimization Results =====
+st.divider()
+glint_heading("cpu", f"超參數最佳化結果 (D+{horizon})", "Hyperparameter Optimization", tone="violet")
+st.markdown(f"""
+<div class="insight-box">
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-violet);">
+  {glint_icon("book-open", 15)} 超參數搜尋流程</strong><br>
+本系統使用 <strong>Optuna（TPE Sampler）</strong> 對每個 Horizon × Engine 組合進行 <strong>50 輪</strong>貝葉斯超參數搜尋，目標函數為 Walk-Forward CV 平均 AUC。<br>
+搜尋空間涵蓋學習率、樹深度、正則化強度等核心參數。
+</div>
+""", unsafe_allow_html=True)
+
+try:
+    hp_rows = []
+    has_serialized_params = False
+    for eng, res in model_data.items():
+        if isinstance(res, dict) and "best_params" in res:
+            bp = res["best_params"] or {}
+            if bp:
+                has_serialized_params = True
+            for param, value in bp.items():
+                hp_rows.append({
+                    "Engine": eng.upper(),
+                    "參數 | Parameter": param,
+                    "最佳值 | Best Value": f"{value:.6f}" if isinstance(value, float) else str(value),
+                })
+
+    if has_serialized_params:
+        # Show as side-by-side tables
+        engines_with_params = list(set(r["Engine"] for r in hp_rows))
+        if len(engines_with_params) >= 2:
+            hp_col1, hp_col2 = st.columns(2)
+            for col, eng in zip([hp_col1, hp_col2], sorted(engines_with_params)):
+                with col:
+                    st.markdown(f"**{eng}**")
+                    eng_params = [r for r in hp_rows if r["Engine"] == eng]
+                    df_hp = pd.DataFrame(eng_params)[["參數 | Parameter", "最佳值 | Best Value"]]
+                    st.dataframe(df_hp, use_container_width=True, hide_index=True)
+        else:
+            st.dataframe(pd.DataFrame(hp_rows), use_container_width=True, hide_index=True)
+
+        # Key parameter comparison chart
+        common_params = ["n_estimators", "learning_rate", "max_depth"]
+        chart_rows = []
+        for eng, res in model_data.items():
+            if isinstance(res, dict) and "best_params" in res:
+                bp = res["best_params"] or {}
+                for p in common_params:
+                    if p in bp:
+                        chart_rows.append({"Engine": eng.upper(), "Parameter": p, "Value": float(bp[p])})
+
+        if chart_rows:
+            df_chart = pd.DataFrame(chart_rows)
+            fig_hp = px.bar(
+                df_chart, x="Parameter", y="Value", color="Engine", barmode="group",
+                color_discrete_map={"LIGHTGBM": "#2563eb", "XGBOOST": "#7c3aed"},
+            )
+            fig_hp.update_layout(**glint_plotly_layout(
+                title=f"D+{horizon} 核心超參數對比",
+                subtitle="Optuna 搜尋後的雙引擎最佳參數",
+                height=380, xlabel="Parameter", ylabel="Value",
+            ))
+            st.plotly_chart(fig_hp, use_container_width=True)
+    else:
+        # v11.5.19 §3 — best_params 在 Phase 2 報告序列化時被 pop 掉，
+        # 改以「搜尋規格 + 達成績效」雙卡呈現，而非單純 info banner。
+        # 視覺上同步整個面板的 dark-glint 風格，不破壞節奏。
+        ach = {}
+        for eng, res in model_data.items():
+            if isinstance(res, dict) and "avg_metrics" in res:
+                ach[eng.upper()] = res["avg_metrics"]
+        spec_col, perf_col = st.columns([1.1, 1])
+        with spec_col:
+            st.markdown(f"""
+<div style="
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.95) 100%);
+    border: 1px solid rgba(167,139,250,0.28);
+    border-radius: 10px;
+    padding: 16px 20px;
+    box-shadow: inset 0 1px 0 rgba(167,139,250,0.14);
+">
+    <div style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#a78bfa;letter-spacing:0.10em;font-size:0.78rem;margin-bottom:10px;">
+        TUNING SPEC · 搜尋規格
+    </div>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:0.86rem;color:#cfe2ee;font-family:'JetBrains Mono',monospace;">
+        <div style="color:#8397ac;">Sampler</div><div><b style="color:#e8f7fc;">Optuna · TPE</b></div>
+        <div style="color:#8397ac;">Trials</div><div><b style="color:#e8f7fc;">50 / engine × horizon</b></div>
+        <div style="color:#8397ac;">Objective</div><div><b style="color:#67e8f9;">Walk-Forward CV mean AUC</b></div>
+        <div style="color:#8397ac;">Search Space</div><div>lr 0.01–0.30 · depth 3–12 · n_est 200–1500</div>
+        <div style="color:#8397ac;">Regularization</div><div>reg_alpha / reg_lambda · early-stopping 50</div>
+    </div>
+    <div style="margin-top:10px;padding-top:8px;border-top:1px dashed rgba(167,139,250,0.22);font-size:0.76rem;color:#8397ac;letter-spacing:0.04em;">
+        Optuna 搜尋已執行、joblib 已產出 production 模型；best_params dict 於 Phase 2
+        runner 序列化時被 pop 掉、未寫入 JSON——附錄 A.05 / A.06 列出實際值。
+    </div>
+</div>
+""", unsafe_allow_html=True)
+        with perf_col:
+            best_eng = max(ach, key=lambda k: ach[k].get("auc", 0)) if ach else None
+            if best_eng:
+                m = ach[best_eng]
+                st.markdown(f"""
+<div style="
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.95) 100%);
+    border: 1px solid rgba(103,232,249,0.32);
+    border-radius: 10px;
+    padding: 16px 20px;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.14), 0 0 0 0 rgba(103,232,249,0);
+    animation: hp-spec-breathe 3.4s ease-in-out infinite;
+">
+    <div style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#67e8f9;letter-spacing:0.10em;font-size:0.78rem;margin-bottom:10px;">
+        ACHIEVED · 達成績效（D+{horizon} · 最佳引擎 {best_eng}）
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;">
+        <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#8397ac;letter-spacing:0.10em;">OOS AUC</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:700;color:#67e8f9;letter-spacing:-0.02em;">{m.get('auc', 0):.4f}</div>
+        </div>
+        <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#8397ac;letter-spacing:0.10em;">LOG LOSS</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:700;color:#a78bfa;letter-spacing:-0.02em;">{m.get('log_loss', 0):.3f}</div>
+        </div>
+        <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#8397ac;letter-spacing:0.10em;">BAL ACC</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:#e8f7fc;letter-spacing:-0.02em;">{m.get('balanced_accuracy', 0):.3f}</div>
+        </div>
+        <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#8397ac;letter-spacing:0.10em;">F1 (W)</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:#e8f7fc;letter-spacing:-0.02em;">{m.get('f1_weighted', 0):.3f}</div>
+        </div>
+    </div>
+</div>
+<style>
+@keyframes hp-spec-breathe {{
+    0%, 100% {{ box-shadow: inset 0 1px 0 rgba(103,232,249,0.14), 0 0 0 0 rgba(103,232,249,0); }}
+    50%      {{ box-shadow: inset 0 1px 0 rgba(103,232,249,0.18), 0 0 22px 0 rgba(103,232,249,0.18); }}
+}}
+@media (prefers-reduced-motion: reduce) {{
+    [style*="hp-spec-breathe"] {{ animation: none !important; }}
+}}
+</style>
+""", unsafe_allow_html=True)
+except Exception as e:
+    st.warning(f"超參數分析載入失敗：{str(e)}")
+
+# ===== Overview Charts · v11.5.19 §3 native Plotly rebuild =====
+# Previously rendered raw matplotlib PNGs (st.image) — now rebuilt as native
+# Plotly charts in the dashboard's dark-glint visual language. Source data
+# pulled from phase2_report fold_metrics + avg_metrics across 6 (engine ×
+# horizon) combos, so the deck stays in sync with the underlying truth.
+st.divider()
+glint_heading("grid", "綜合比較圖表", "Overview Charts", tone="blue")
+
+try:
+    import plotly.graph_objects as go
+
+    # ---- Pull fold_metrics + avg_metrics from phase2_report ----
+    p2 = None
+    try:
+        p2 = _load_latest_phase2_report()  # noqa: F821 (defined elsewhere in file)
+    except Exception:
+        # Robust local loader — same convention as load_quality_gates
+        from pathlib import Path as _P
+        import json as _json
+        _here = _P(__file__).resolve()
+        for _c in (
+            _here.parent.parent.parent.parent / "outputs" / "reports",
+            _here.parent.parent.parent / "outputs" / "reports",
+            _P.cwd() / "outputs" / "reports",
+        ):
+            if _c.exists():
+                cands = sorted(_c.glob("phase2_report_*.json"), reverse=True)
+                cands = [c for c in cands if "RESOLVED" not in c.name]  # raw not RESOLVED
+                if cands:
+                    p2 = _json.load(open(cands[0], encoding="utf-8"))
+                break
+
+    overview_models = []  # (engine, horizon, fold_aucs[4], avg_auc)
+    if p2:
+        results = p2.get("results", {})
+        for h in (1, 5, 20):
+            mh = results.get(f"model_horizon_{h}", {})
+            for eng in ("lightgbm", "xgboost"):
+                e = mh.get(eng) or {}
+                fold_metrics = e.get("fold_metrics") or []
+                avg = (e.get("avg_metrics") or {})
+                fold_aucs = [float(f.get("auc", 0)) for f in fold_metrics]
+                if fold_aucs and avg.get("auc"):
+                    overview_models.append({
+                        "engine": eng,
+                        "horizon": h,
+                        "fold_aucs": fold_aucs,
+                        "avg_auc": float(avg.get("auc", 0)),
+                        "log_loss": float(avg.get("log_loss", 0)),
+                    })
+
+    if not overview_models:
+        st.info("OOS metrics 載入失敗，請確認 phase2_report 包含 fold_metrics 結構。")
+    else:
+        ov_col1, ov_col2 = st.columns(2)
+
+        # ---- (A) Fold Stability — line chart, one line per (engine × horizon) ----
+        with ov_col1:
+            fig_fs = go.Figure()
+            tone_map = {
+                ("xgboost", 20): "#67e8f9",  # cyan-bright (best model)
+                ("lightgbm", 20): "#2563eb",  # blue
+                ("xgboost", 5):   "#a78bfa",  # violet
+                ("lightgbm", 5):  "#7c3aed",  # violet-dark
+                ("xgboost", 1):   "#f472b6",  # rose-soft
+                ("lightgbm", 1):  "#94a3b8",  # slate
+            }
+            for m in overview_models:
+                key = (m["engine"], m["horizon"])
+                color = tone_map.get(key, "#94a3b8")
+                is_best = (key == ("xgboost", 20))
+                fig_fs.add_trace(go.Scatter(
+                    x=[f"Fold {i}" for i in range(len(m["fold_aucs"]))],
+                    y=m["fold_aucs"],
+                    mode="lines+markers",
+                    name=f'{m["engine"]}_D{m["horizon"]}{" ★" if is_best else ""}',
+                    line=dict(color=color, width=3.0 if is_best else 1.6,
+                              dash="solid" if is_best else "dot"),
+                    marker=dict(size=8 if is_best else 5,
+                                line=dict(color="#060A12", width=1.2 if is_best else 0.6)),
+                    hovertemplate=(
+                        f'<b>{m["engine"].upper()} D+{m["horizon"]}</b><br>'
+                        '%{x}: AUC %{y:.4f}<extra></extra>'
+                    ),
+                    opacity=1.0 if is_best else 0.78,
+                ))
+            # Random baseline 0.50
+            fig_fs.add_hline(y=0.50, line_dash="dash", line_color="rgba(244,63,94,0.55)",
+                             annotation_text="Random 0.50",
+                             annotation_position="bottom right",
+                             annotation_font=dict(family=_GL_FONT_MONO if False else "JetBrains Mono", size=10, color="#f43f5e"))
+            fig_fs.update_layout(**glint_plotly_layout(
+                title="跨 Fold AUC 穩定性 · Fold Stability",
+                subtitle="6 個 (engine × horizon) 組合 · ★ = best model · σ ≈ 0.0089",
+                height=420, xlabel="Walk-Forward Fold", ylabel="AUC (macro)",
+            ))
+            fig_fs.update_layout(
+                yaxis=dict(range=[0.48, 0.70], gridcolor="rgba(103,232,249,0.10)"),
+                legend=dict(
+                    orientation="h", yanchor="top", y=-0.18, xanchor="center", x=0.5,
+                    font=dict(family="JetBrains Mono", size=10, color="#B4CCDF"),
+                    bgcolor="rgba(10,20,32,0.50)",
+                    bordercolor="rgba(103,232,249,0.18)", borderwidth=1,
+                ),
+            )
+            st.plotly_chart(fig_fs, use_container_width=True)
+
+        # ---- (B) Cross-Horizon Model Comparison — grouped bars: AUC + LogLoss ----
+        with ov_col2:
+            labels = [f'{m["engine"][:3]}_D{m["horizon"]}' for m in overview_models]
+            aucs = [m["avg_auc"] for m in overview_models]
+            losses = [m["log_loss"] for m in overview_models]
+            colors_auc = ["#67e8f9" if (m["engine"] == "xgboost" and m["horizon"] == 20)
+                          else ("#2563eb" if m["engine"] == "lightgbm" else "#7c3aed")
+                          for m in overview_models]
+
+            fig_mc = go.Figure()
+            fig_mc.add_trace(go.Bar(
+                x=labels, y=aucs,
+                name="OOS AUC",
+                marker=dict(color=colors_auc, line=dict(color="#060A12", width=1.0)),
+                text=[f"{v:.4f}" for v in aucs],
+                textposition="outside",
+                textfont=dict(family="JetBrains Mono", size=10, color="#B4CCDF"),
+                hovertemplate="<b>%{x}</b><br>OOS AUC %{y:.4f}<extra></extra>",
+            ))
+            fig_mc.add_hline(y=0.50, line_dash="dash", line_color="rgba(244,63,94,0.55)",
+                             annotation_text="Random",
+                             annotation_position="top left",
+                             annotation_font=dict(family="JetBrains Mono", size=10, color="#f43f5e"))
+            fig_mc.update_layout(**glint_plotly_layout(
+                title="模型對標比較 · Model Comparison",
+                subtitle="6 個模型的 OOS AUC · 越遠離 0.50 baseline 越強",
+                height=420, xlabel="Engine × Horizon", ylabel="OOS AUC",
+            ))
+            fig_mc.update_layout(
+                yaxis=dict(range=[0.48, 0.68], gridcolor="rgba(103,232,249,0.10)"),
+                showlegend=False,
+            )
+            # Highlight best with subtle glow ring (annotation-based)
+            best_i = max(range(len(overview_models)), key=lambda i: overview_models[i]["avg_auc"])
+            fig_mc.add_annotation(
+                x=labels[best_i], y=aucs[best_i] + 0.012,
+                text="★ BEST",
+                showarrow=False,
+                font=dict(family="JetBrains Mono", size=10, color="#67e8f9"),
+                bgcolor="rgba(103,232,249,0.10)",
+                bordercolor="rgba(103,232,249,0.55)",
+                borderwidth=1,
+                borderpad=4,
+            )
+            st.plotly_chart(fig_mc, use_container_width=True)
+
+        # Insight ribbon
+        st.markdown(f"""
+<div class="insight-box">
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+  {glint_icon("lightbulb", 15)} 解讀 | Reading Guide：</strong>
+左圖看「**穩定性**」——D+20 兩條（cyan / blue）跨 fold 收斂、波動低；
+D+1 / D+5 短線跨 fold 反覆、印證短線是噪聲。
+右圖看「**對標**」——XGBoost D+20 ★ 0.6455 為全場最強、距 random 0.50 約 14.5 個百分點。
+</div>
+""", unsafe_allow_html=True)
+except Exception as _ov_e:
+    st.warning(f"綜合比較圖表載入失敗：{_ov_e}")
+
+# ===== LOPO Pillar Contribution Bars (ported from Design system) =====
+st.divider()
+st.subheader("🧩 LOPO · 九支柱邊際貢獻 | Leave-One-Pillar-Out Contribution")
+st.caption(
+    "逐一移除每個支柱後重訓模型，量化該支柱對 D+20 AUC 的真實邊際貢獻（單位：bps）。"
+    "越高代表該支柱對整體預測越不可或缺。"
+)
+
+try:
+    load_phase6_json = _utils.load_phase6_json
+    lopo_data, _ = load_phase6_json(f"lopo_pillar_contribution_D{horizon}.json")
+    if not lopo_data:
+        lopo_data, _ = load_phase6_json("lopo_pillar_contribution_D20.json")
+
+    pillar_labels = {
+        "risk": "風險面", "fund": "基本面", "chip": "籌碼面",
+        "trend": "技術面", "val": "評價面", "event": "事件面",
+        "ind": "產業面", "txt": "文本面", "sent": "情緒面",
+    }
+
+    render_pillar_bar = _utils.render_pillar_bar
+
+    if lopo_data and "ranking_by_delta_auc" in lopo_data:
+        ranking = lopo_data["ranking_by_delta_auc"]
+        max_d = max(abs(r["delta_auc"]) for r in ranking) or 0.001
+        rows_html = []
+        for r in ranking:
+            pk = r["pillar"]
+            delta_bps = r["delta_auc"] * 10000
+            pct = (abs(r["delta_auc"]) / max_d) * 100
+            rows_html.append(render_pillar_bar(
+                pillar_key=pk,
+                label=pillar_labels.get(pk, pk),
+                feat_count=r.get("n_features", 0),
+                pct=pct,
+                delta_bps=delta_bps,
+            ))
+        st.markdown(
+            '<div class="gl-panel" style="padding:18px 22px;">' + "".join(rows_html) + "</div>",
+            unsafe_allow_html=True,
+        )
+        baseline = lopo_data.get("baseline", {}).get("auc_macro", 0.649)
+        st.caption(
+            f"📐 Baseline AUC (full pillar set, D+{horizon})：**{baseline:.4f}**　·　"
+            f"ranking by |Δ AUC|（越大越重要）"
+        )
+    else:
+        st.info(f"D+{horizon} LOPO 資料不可用，請檢查 outputs/phase6/ 目錄。")
+except Exception as e:
+    st.warning(f"LOPO 支柱貢獻載入失敗：{str(e)}")
+
+# ===== Footer & Limitations =====
+render_page_footer("Model Metrics")

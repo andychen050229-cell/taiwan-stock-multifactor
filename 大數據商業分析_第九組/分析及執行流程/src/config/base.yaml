@@ -1,0 +1,206 @@
+# 股市趨勢預測導向決策輔助系統 — 基礎設定檔
+random_seed: 42
+
+project:
+  name: "stock_prediction_system"
+  version: "0.1.0"
+  description: "股市趨勢預測導向決策輔助系統 — Phase 1 資料地基"
+
+data:
+  parquet_dir: "選用資料集/parquet"
+  # === 資料來源分類（依 SCOPE.md v1.0 封版，2026-04-19 起不再新增）===
+  #
+  # A. 教授提供研究型資料庫 bda2026（主資料）：
+  #    A1 companies、A2 stock_prices、A3 income_stmt、A4 stock_text
+  #
+  # B. FinMind 公開 API 補充（6 張表，已封版）：
+  #    B1 stock_prices_ohlcv、B2 balance_sheet、B3 cashflow、
+  #    B4 industry、B5 institutional_investors、B6 margin_trading
+  #
+  # 詳見：SCOPE.md、選用資料集/資料來源宣告.md
+  tables:
+    # --- A. 教授提供（bda2026）---
+    companies: "companies.parquet"                               # A1 公司基本資料
+    stock_prices: "stock_prices.parquet"                         # A2 每日收盤價（僅 closing_price）
+    income_stmt: "income_stmt.parquet"                           # A3 損益表季報（6 科目）
+    stock_text: "stock_text.parquet"                             # A4 財經文章 1.12M 筆
+    stock_text_lite: "stock_text_lite.parquet"                   # A4 精簡版（title only）
+
+    # --- B. FinMind 補充（封版，不再新增）---
+    balance_sheet: "balance_sheet.parquet"                       # B2 資產負債表（FinMind TaiwanStockBalanceSheet）
+    cashflow: "cashflow.parquet"                                 # B3 現金流量表（FinMind TaiwanStockCashFlowsStatement）
+    industry: "industry.parquet"                                 # B4 產業分類（FinMind TaiwanStockInfo）
+    institutional_investors: "institutional_investors.parquet"   # B5 三大法人籌碼（FinMind TaiwanStockInstitutionalInvestorsBuySell）
+    margin_trading: "margin_trading.parquet"                     # B6 融資融券（FinMind TaiwanStockMarginPurchaseShortSale）
+  ohlcv: "stock_prices_ohlcv.parquet"                            # B1 OHLCV 補齊檔（FinMind TaiwanStockPrice）
+  date_range:
+    start: "2023-03-01"
+    end: "2025-03-31"
+
+preprocessing:
+  stock_prices:
+    ffill_max_days: 5
+    min_trading_days: 60
+    price_change_alert_pct: 9.5  # 接近漲跌停 ±10%
+  ex_dividend:
+    verification_steps: 5
+    max_gap_tolerance_pct: 0.5
+    rsi_anomaly_window: 14
+    rsi_anomaly_threshold: 10  # RSI 一日變化 > 10 視為異常
+  text:
+    min_length: 10
+    minhash_num_perm: 128
+    minhash_threshold: 0.8  # Jaccard 相似度 > 0.8 視為重複
+    max_duplicate_rate: 0.30
+  financial:
+    pit_deadlines:        # 台灣 IFRS 法定申報期限（保守估計）
+      Q1: "05-15"         # Q1 → 5/15
+      Q2: "08-14"         # Q2 → 8/14
+      Q3: "11-14"         # Q3 → 11/14
+      Q4: "+1-03-31"      # Q4 → 隔年 3/31
+  leakage_detection:
+    future_keyword_patterns:
+      - "future_"
+      - "_forward"
+      - "_next"
+      - "_tomorrow"
+    max_train_test_psi: 0.25  # PSI > 0.25 表示分佈飄移
+
+features:
+  pillars:
+    - name: "趨勢與價格"
+      prefix: "trend_"
+    - name: "基本面"
+      prefix: "fund_"
+    - name: "估值"
+      prefix: "val_"
+    - name: "事件與敘事"
+      prefix: "event_"
+    - name: "風險與機制"
+      prefix: "risk_"
+  selection:
+    mi_threshold_percentile: 60    # 保留前 60% 特徵（約 26 個），避免過度篩選
+    # Phase 5B 新增：文本特徵匯入後 candidate 會從 ~50 暴增到 ~1600；用硬上限鎖住 VIF 成本
+    mi_top_n: 150
+    vif_max: 10
+    rfecv_min_features: 20
+    # Phase 5A 新增：相關係數前置過濾（|corr|>0.95 視為冗餘）
+    enable_corr_prefilter: true
+    corr_max_prefilter: 0.95
+    # Phase 5B-fix（2026-04-19 14:15）：分層 MI 配額
+    # 背景：首跑時 txt_(1521 個) + sent_(11 個) 數量主導，top-150 by MI 幾乎全是文本特徵，
+    #       trend/fund 被擠出 → D+20 IC 從 +0.14 崩到 -0.004。配額依 Stage 2.5 IC summary 各
+    #       支柱 STRONG 數量（橫跨 3 horizons）粗略分配，預留 30 給 txt 讓它在控制比例內參賽。
+    pillar_quotas:
+      trend_: 40    # IC summary: 12+13+21=46 STRONG（最強支柱）
+      fund_: 30     # IC summary: 12+12+12=36 STRONG
+      val_: 12      # IC summary: 3+3+3=9 STRONG（val_ps IC 強）
+      ind_: 10      # IC summary: 3+3+3=9 STRONG
+      event_: 8     # IC summary: 0+0+3=3 STRONG，h20 翻正
+      risk_: 8      # IC summary: 1+1+2=4 STRONG，IR 高
+      chip_: 5      # IC summary: 0 STRONG（多 REJECT），保留少量觀察用
+      sent_: 7      # IC summary: 0+0+3=3 STRONG（sent_polarity_20d IC=+0.022）
+      txt_: 30      # IC summary: 0 STRONG / 14 WEAK，留 20% 配額讓 MI 從 1521 個挑最佳
+      topic_: 0     # 目前未產出，保留欄位
+      # 合計：40+30+12+10+8+8+5+7+30+0 = 150
+
+labeling:
+  thresholds:
+    1: 0.005              # D+1: ±0.5%
+    5: 0.015              # D+5: ±1.5%
+    20: 0.040             # D+20: ±4.0%
+  use_dynamic_threshold: false
+  vol_window: 60
+
+ohlcv_fetch:
+  batch_size: 50
+  rate_limit_per_hour: 580   # with token (600 max, 留餘量)
+  rate_limit_no_token: 280   # without token (300 max)
+  max_retries: 3
+  delay_between_stocks: 0.3
+
+model:
+  # Phase 2 主力模型
+  engines:
+    - "lightgbm"
+    - "xgboost"
+  horizons: [1, 5, 20]  # D+1, D+5, D+20
+  quality_gate_auc: 0.52
+  # Optuna 超參數搜尋
+  optuna:
+    n_trials: 50
+    timeout: 600         # 每個 horizon 最多 10 分鐘
+    early_stopping_rounds: 50
+  # LightGBM 預設參數（Optuna 會覆寫）
+  lightgbm:
+    objective: "multiclass"
+    num_class: 3
+    metric: "multi_logloss"
+    verbosity: -1
+    n_estimators: 500
+    learning_rate: 0.05
+    num_leaves: 63
+    max_depth: 8
+    min_child_samples: 50
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+  # XGBoost 預設參數
+  xgboost:
+    objective: "multi:softprob"
+    num_class: 3
+    eval_metric: "mlogloss"
+    verbosity: 0
+    n_estimators: 500
+    learning_rate: 0.05
+    max_depth: 6
+    min_child_weight: 50
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+
+backtest:
+  # 資料約 503 交易日，用 expanding window
+  mode: "expanding"       # expanding | rolling
+  initial_train_days: 252 # 初始訓練期 = 1 年
+  test_window: 63         # 測試期 = 1 季
+  step: 63                # 每季重新訓練
+  embargo: 20             # 防止標籤洩漏的緩衝天數
+  min_samples: 1000
+  # 策略參數
+  strategy:
+    top_k_pct: 0.1        # 買入前 10% 的股票
+    rebalance: "fold"     # 每個 fold 重新調整
+    position_weight: "equal"  # equal | score_weighted
+
+cost_model:
+  standard:
+    commission: 0.001425
+    discount: 1.0
+    tax: 0.003
+    slippage: 0.001
+  discount:
+    commission: 0.001425
+    discount: 0.28
+    tax: 0.003
+    slippage: 0.0005
+  conservative:
+    commission: 0.001425
+    discount: 1.0
+    tax: 0.003
+    slippage: 0.002
+
+logging:
+  level: "INFO"
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level:<8} | {module}:{function}:{line} | {message}"
+  rotation: "10 MB"
+  retention: "30 days"
+
+paths:
+  logs: "logs"
+  outputs: "outputs"
+  figures: "outputs/figures"
+  mlruns: "outputs/mlruns"
+  reports: "outputs/reports"

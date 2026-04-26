@@ -1,0 +1,114 @@
+{
+  "analysis_date": "2026-04-19T07:37:03",
+  "original_n_strategies": 9,
+  "revised_n_strategies": 6,
+  "original_expected_max_sharpe": 1.6219,
+  "revised_expected_max_sharpe": 1.3866,
+  "original_results": {
+    "lightgbm_D1": {
+      "observed_sharpe": -2.7939,
+      "dsr_pass": false,
+      "n_strategies": 6
+    },
+    "xgboost_D1": {
+      "observed_sharpe": -2.2395,
+      "dsr_pass": false,
+      "n_strategies": 6
+    },
+    "ensemble_D1": {
+      "observed_sharpe": -2.2874,
+      "dsr_pass": false,
+      "n_strategies": 6
+    },
+    "lightgbm_D5": {
+      "observed_sharpe": -0.3935,
+      "dsr_pass": false,
+      "n_strategies": 6
+    },
+    "xgboost_D5": {
+      "observed_sharpe": 0.0957,
+      "dsr_pass": false,
+      "n_strategies": 6
+    },
+    "ensemble_D5": {
+      "observed_sharpe": -0.1279,
+      "dsr_pass": false,
+      "n_strategies": 6
+    },
+    "lightgbm_D20": {
+      "observed_sharpe": 0.6995,
+      "dsr_pass": false,
+      "n_strategies": 6
+    },
+    "xgboost_D20": {
+      "observed_sharpe": 0.8064,
+      "dsr_pass": false,
+      "n_strategies": 6
+    },
+    "ensemble_D20": {
+      "observed_sharpe": 0.7963,
+      "dsr_pass": false,
+      "n_strategies": 6
+    }
+  },
+  "revised_results": {
+    "lightgbm_D5": {
+      "dsr_statistic": -26.7587,
+      "dsr_p_value": 0.0,
+      "dsr_pass": false,
+      "observed_sharpe": -0.3935,
+      "expected_max_sharpe": 1.3866,
+      "n_strategies": 6
+    },
+    "xgboost_D5": {
+      "dsr_statistic": -19.4066,
+      "dsr_p_value": 0.0,
+      "dsr_pass": false,
+      "observed_sharpe": 0.0957,
+      "expected_max_sharpe": 1.3866,
+      "n_strategies": 6
+    },
+    "ensemble_D5": {
+      "dsr_statistic": -22.768,
+      "dsr_p_value": 0.0,
+      "dsr_pass": false,
+      "observed_sharpe": -0.1279,
+      "expected_max_sharpe": 1.3866,
+      "n_strategies": 6
+    },
+    "lightgbm_D20": {
+      "dsr_statistic": -10.3268,
+      "dsr_p_value": 0.0,
+      "dsr_pass": false,
+      "observed_sharpe": 0.6995,
+      "expected_max_sharpe": 1.3866,
+      "n_strategies": 6
+    },
+    "xgboost_D20": {
+      "dsr_statistic": -8.7194,
+      "dsr_p_value": 0.0,
+      "dsr_pass": false,
+      "observed_sharpe": 0.8064,
+      "expected_max_sharpe": 1.3866,
+      "n_strategies": 6
+    },
+    "ensemble_D20": {
+      "dsr_statistic": -8.8713,
+      "dsr_p_value": 0.0,
+      "dsr_pass": false,
+      "observed_sharpe": 0.7963,
+      "expected_max_sharpe": 1.3866,
+      "n_strategies": 6
+    }
+  },
+  "single_best_strategy": {
+    "name": "xgboost_D20",
+    "sharpe": 0.8064,
+    "dsr_statistic": 12.1185,
+    "dsr_p_value": 1.0,
+    "dsr_pass": true
+  },
+  "revised_best_dsr_pass": false,
+  "final_verdict": "PASS_SINGLE_BEST",
+  "explanation": "單一最佳策略 DSR 通過：若不考慮多重測試，最佳策略的 Sharpe 具統計顯著性。"
+}
