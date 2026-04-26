@@ -1309,22 +1309,22 @@ def slide_governance(prs):
     text(slide, gx+gw-60, gy+gh+6, 80, 20, '12.12',
          size=10, bold=True, color=NAVY, mono=True, align='center')
 
-    # how-to-read
-    text(slide, dsr_x+22, dsr_y+332, 500, 24,
+    # how-to-read · v11.5.20 §4 reader-2: bullets 略放大 + 行距加深易讀
+    text(slide, dsr_x+22, dsr_y+330, 500, 24,
          '實作流程',
-         size=11, bold=True, color=NAVY, mono=True, ls=2.0)
+         size=12, bold=True, color=NAVY, mono=True, ls=2.0)
     bullets = [
         ('150 trials', '掃 hyperparameter / threshold'),
         ('skew、kurt 校正', '修正非常態分佈高估'),
         ('多重檢定 deflate', 'p 值降至 < 0.001'),
     ]
     for i, (k, v) in enumerate(bullets):
-        by = dsr_y+360+i*36
-        rect(slide, dsr_x+22, by+8, 6, 6, fill=NAVY)
-        text(slide, dsr_x+38, by, 200, 22, k,
-             size=13, bold=True, color=NAVY, mono=True, ls=-0.2)
-        text(slide, dsr_x+186, by, 360, 22, v,
-             size=12, color=INK_2, line_h=1.4)
+        by = dsr_y+362+i*38
+        rect(slide, dsr_x+22, by+9, 6, 6, fill=NAVY)
+        text(slide, dsr_x+38, by, 220, 22, k,
+             size=14, bold=True, color=NAVY, mono=True, ls=-0.2)
+        text(slide, dsr_x+200, by, 350, 22, v,
+             size=13, color=INK_2, line_h=1.4)
 
     # RIGHT · 9 gates in compact 3x3 grid (current status: 9 / 9 PASS · pipeline revalidated 2026-04-26)
     gates = [

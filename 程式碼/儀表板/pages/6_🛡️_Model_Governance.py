@@ -197,9 +197,8 @@ st.divider()
 # ============================================================
 render_section_title("DSR 重新驗證", "Deflated Sharpe Ratio · Re-validation")
 
-st.info("""
-**什麼是 DSR（Deflated Sharpe Ratio）？**
-
+with st.expander("什麼是 DSR（Deflated Sharpe Ratio）？", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
 DSR 是 Bailey & López de Prado (2014) 提出的統計檢定。
 
 它用來檢驗：當你嘗試了 N 種策略後，最終選中的策略是否「真正優秀」，還是僅僅因為多重測試（multiple testing）而看起來很好。
@@ -308,9 +307,8 @@ st.divider()
 # ============================================================
 render_section_title("效能基線", "Performance Baselines")
 
-st.info("""
-**效能基線用途**
-
+with st.expander("效能基線用途", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
 基線是模型「健康時」的效能快照。
 
 未來每次重新預測或收到新資料時，系統會比對當前效能與基線。
@@ -340,9 +338,8 @@ st.divider()
 # ============================================================
 render_section_title("Model Cards", "Engine × Horizon Metadata")
 
-st.info("""
-**Model Card 是什麼？**
-
+with st.expander("Model Card 是什麼？", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
 Model Card 是 Google 提出的模型透明度標準文件。
 
 它記錄了模型的用途、訓練數據、效能指標、已知限制等資訊。
@@ -474,29 +471,109 @@ st.divider()
 # ============================================================
 render_section_title("預測管線驗證", "Pipeline Validation")
 
-st.info("""
-**這一段在做什麼?**
+with st.expander("這一段在做什麼？", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
+把 6 個模型（LGB / XGB × D1 / D5 / D20）實際跑一次預測，
+檢查輸出的機率是否合理——三類機率加總等於 1、沒有 NaN、沒有負值。
 
-把 6 個模型(LGB/XGB × D1/D5/D20)實際跑一次預測,
-檢查輸出的機率是否合理 — 三類機率加總等於 1、沒有 NaN、沒有負值。
-通過 = 模型可以部署到真實流程;失敗 = 模型檔有問題或特徵欄位對不上。
+**通過** = 模型可以部署到真實流程；**失敗** = 模型檔有問題或特徵欄位對不上。
 """)
 
 pipeline = p3_report.get("results", {}).get("step6_pipeline", {})
 if pipeline:
     valid = pipeline.get("valid", False)
-    if valid:
-        st.success("所有模型預測管線驗證通過:輸出為 3 類機率、加總為 1、無 NaN")
-    else:
-        st.error("部分模型預測管線驗證失敗")
 
+    # v11.5.20 §2 — restyled summary banner with breathing dot when 6/6 PASS,
+    # replaces the plain st.success / st.error banners.
     results_pipe = pipeline.get("results", {})
+    n_total = len(results_pipe)
+    n_pass = sum(1 for r in results_pipe.values() if r.get("status") == "pass")
+    if valid:
+        banner_color = "#10b981"; banner_glow = "rgba(16,185,129,0.45)"
+        banner_text = f"所有模型預測管線驗證通過 · 輸出為 3 類機率、加總為 1、無 NaN"
+        banner_animate = True
+    else:
+        banner_color = "#f43f5e"; banner_glow = "rgba(244,63,94,0.45)"
+        banner_text = f"{n_pass} / {n_total} 通過 · 部分模型管線驗證失敗"
+        banner_animate = False
+    _animate_class = "gl-pipeline-banner-breathe" if banner_animate else ""
+    st.markdown(f"""
+<style>
+@keyframes gl-pipeline-banner-pulse {{
+    0%, 100% {{ box-shadow: 0 0 0 0 rgba(16,185,129,0.0), inset 0 1px 0 rgba(103,232,249,0.10); }}
+    50%      {{ box-shadow: 0 0 24px 0 rgba(16,185,129,0.40), inset 0 1px 0 rgba(103,232,249,0.16); }}
+}}
+.gl-pipeline-banner-breathe {{ animation: gl-pipeline-banner-pulse 3.0s ease-in-out infinite; }}
+@media (prefers-reduced-motion: reduce) {{ .gl-pipeline-banner-breathe {{ animation: none !important; }} }}
+.gl-pipeline-banner {{
+    background: linear-gradient(180deg, rgba(15,23,37,0.95) 0%, rgba(8,16,32,0.98) 100%);
+    border: 1px solid {banner_color}55;
+    border-left: 4px solid {banner_color};
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin: 10px 0 14px 0;
+    color: #E8F7FC;
+    font-family: var(--gl-font-sans, system-ui);
+    font-size: 0.95rem;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.10);
+    display: flex; align-items: center; gap: 12px;
+}}
+.gl-pipeline-banner-dot {{
+    width: 12px; height: 12px; border-radius: 50%;
+    background: {banner_color};
+    box-shadow: 0 0 12px {banner_glow};
+    flex: 0 0 auto;
+}}
+</style>
+<div class="gl-pipeline-banner {_animate_class}">
+  <span class="gl-pipeline-banner-dot"></span>
+  <strong>{banner_text}</strong>
+</div>
+""", unsafe_allow_html=True)
+
+    # v11.5.20 §2 — replace plain markdown bullet list with styled card grid.
+    # Each model gets a glassy dark card with status icon + name + UP prob badge.
     pipe_rows = []
-    for name, res in results_pipe.items():
+    cards_per_row = 3
+    sorted_results = sorted(
+        results_pipe.items(),
+        key=lambda kv: (kv[0].split("_")[0], int(kv[0].split("_D")[-1]) if "_D" in kv[0] else 0),
+    )
+    cards_html = ['<div class="gl-pipe-grid">']
+    for name, res in sorted_results:
         status = res.get("status", "unknown")
-        icon = "✅" if status == "pass" else ("⏭️" if status == "skip" else "❌")
-        detail = f"avg UP prob = {res.get('avg_up_prob', 0):.4f}" if status == "pass" else res.get("reason", res.get("error", ""))
-        st.markdown(f"{icon} **{name}**: {detail}")
+        if status == "pass":
+            badge_color = "#10b981"; badge_bg = "rgba(16,185,129,0.18)"
+            badge_label = "PASS"
+            metric_val = f"{res.get('avg_up_prob', 0):.4f}"
+            metric_label = "AVG UP PROB"
+        elif status == "skip":
+            badge_color = "#a78bfa"; badge_bg = "rgba(167,139,250,0.18)"
+            badge_label = "SKIP"
+            metric_val = "—"
+            metric_label = res.get("reason", "no OOS sample")
+        else:
+            badge_color = "#f43f5e"; badge_bg = "rgba(244,63,94,0.18)"
+            badge_label = "FAIL"
+            metric_val = "—"
+            metric_label = (res.get("error") or "shape error")[:32]
+        # split name like 'lightgbm_D20' → engine + horizon
+        parts = name.split("_D")
+        engine = parts[0]
+        horizon = f"D+{parts[1]}" if len(parts) == 2 else name
+        cards_html.append(f"""
+<div class="gl-pipe-card">
+  <div class="gl-pipe-card-row">
+    <span class="gl-pipe-card-engine">{engine}</span>
+    <span class="gl-pipe-card-badge" style="background:{badge_bg};color:{badge_color};border-color:{badge_color}55;">{badge_label}</span>
+  </div>
+  <div class="gl-pipe-card-horizon">{horizon}</div>
+  <div class="gl-pipe-card-metric">
+    <div class="gl-pipe-card-metric-label">{metric_label}</div>
+    <div class="gl-pipe-card-metric-val" style="color:{badge_color};">{metric_val}</div>
+  </div>
+</div>
+""")
         pipe_rows.append({
             "模型": name,
             "狀態": "通過" if status == "pass" else ("跳過" if status == "skip" else "失敗"),
@@ -504,6 +581,50 @@ if pipeline:
             "輸出維度": str(res.get("pred_shape", "—")),
             "平均 UP 機率": f"{res.get('avg_up_prob', 0):.4f}" if status == "pass" else "—",
         })
+    cards_html.append('</div>')
+    st.markdown("""
+<style>
+.gl-pipe-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin: 8px 0 16px 0;
+    font-family: var(--gl-font-sans, system-ui);
+}
+@media (max-width: 900px) { .gl-pipe-grid { grid-template-columns: 1fr; } }
+.gl-pipe-card {
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+    border: 1px solid rgba(103,232,249,0.18);
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.10);
+}
+.gl-pipe-card-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.gl-pipe-card-engine {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem; letter-spacing: 0.10em; text-transform: uppercase;
+    color: #67e8f9; font-weight: 700;
+}
+.gl-pipe-card-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.66rem; font-weight: 800; letter-spacing: 0.16em;
+    padding: 2px 9px; border-radius: 999px; border: 1px solid;
+}
+.gl-pipe-card-horizon {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.42rem; font-weight: 700;
+    color: #E8F7FC; letter-spacing: -0.02em;
+    margin-top: 6px;
+}
+.gl-pipe-card-metric { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(103,232,249,0.18); }
+.gl-pipe-card-metric-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.66rem; letter-spacing: 0.12em; color: #8397ac; text-transform: uppercase;
+}
+.gl-pipe-card-metric-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.32rem; font-weight: 700; letter-spacing: -0.02em; margin-top: 2px;
+}
+</style>
+""" + "".join(cards_html), unsafe_allow_html=True)
 
     if pipe_rows:
         # 欄位說明
@@ -538,10 +659,9 @@ st.divider()
 # ============================================================
 render_section_title("治理快照", "Governance Snapshot")
 
-st.info("""
-**為什麼要有這段?**
-
-前面五段講的是「單次檢查結果」,這段把最關鍵的數字濃縮成一眼可讀的快照卡片,
+with st.expander("為什麼要有這段？", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
+前面五段講的是「單次檢查結果」，這段把最關鍵的數字濃縮成一眼可讀的快照卡片，
 讓非技術使用者不必翻完整份報告也能掌握「目前模型狀態是否健康」。
 """)
 
@@ -576,52 +696,147 @@ _drift_label_map = {
 _drift_icon, _drift_label = _drift_label_map.get(_drift_severity_str, ("⚪", "—"))
 _n_drifted = _drift_summary.get("n_drifted")
 
-snap_c1, snap_c2, snap_c3, snap_c4 = st.columns(4)
-with snap_c1:
-    _drift_display = f"{_drift_icon} {_drift_label}"
-    if isinstance(_n_drifted, int) and _n_drifted > 0:
-        _drift_display = f"{_drift_icon} {_drift_label}（{_n_drifted}）"
-    st.metric("資料漂移程度", _drift_display,
-              help="PSI 檢測：訓練期 vs 測試期特徵分佈差異。none/low = 很穩、moderate/severe = 需重訓。括號內為觸發漂移的特徵數。")
-with snap_c2:
-    _hl_raw = _decay_summary.get("min_half_life_months")
-    # When None, the signal hasn't decayed enough to estimate half-life —
-    # check the trend direction to decide whether this is good or bad.
-    if _hl_raw is None or _hl_raw == "—":
-        _trend = (_decay_summary.get("half_life_analysis") or {}).get("D20", {}).get("trend_direction")
-        if _trend == "improving":
-            _hl_display = "持續改善"
-            _hl_for_summary = "持續改善（尚未衰退）"
-        else:
-            _hl_display = "—"
-            _hl_for_summary = "—"
+# v11.5.20 §3 — 4-card snapshot grid with uniform width + breathing dot
+# on the dominant green indicator. Replaces st.metric (whose delta widget
+# made column 3 visually wider) with custom HTML cards for guaranteed
+# equal width and consistent typography.
+_hl_raw = _decay_summary.get("min_half_life_months")
+if _hl_raw is None or _hl_raw == "—":
+    _trend = (_decay_summary.get("half_life_analysis") or {}).get("D20", {}).get("trend_direction")
+    if _trend == "improving":
+        _hl_display = "持續改善"
+        _hl_for_summary = "持續改善（尚未衰退）"
     else:
-        _hl_display = f"{_hl_raw} 月"
-        _hl_for_summary = f"{_hl_raw} 個月"
-    st.metric("最短半衰期", _hl_display,
-              help="模型預測力衰減到一半所需的月數，越長表示訊號越耐久。若顯示「持續改善」表示截至目前訊號未衰退、半衰期尚不適用。")
-with snap_c3:
-    _retrain = str(_decay_summary.get("recommended_retrain_cycle") or "—")
-    # 同時處理半形 () 與全形（）
-    _retrain_main = _re.split(r"[（(]", _retrain, maxsplit=1)[0].strip()
-    _retrain_note = ""
-    _m = _re.search(r"[（(]([^）)]*)[）)]", _retrain)
-    if _m:
-        _retrain_note = _m.group(1).strip()
-    st.metric("建議重訓週期", _retrain_main if _retrain_main else "—",
-              delta=(_retrain_note or None), delta_color="off",
-              help="依半衰期推論的重訓頻率；到期就該重新訓練模型。括號內標註信號強度脈絡。")
-with snap_c4:
-    # step5_baselines 結構：{models: [...], count: N}
-    if isinstance(_baseline_summary, dict):
-        _n_baselines = _baseline_summary.get("count")
-        if _n_baselines is None:
-            _models = _baseline_summary.get("models")
-            _n_baselines = len(_models) if isinstance(_models, list) else len(_baseline_summary)
-    else:
-        _n_baselines = 0
-    st.metric("基線指標數", f"{_n_baselines} 個",
-              help="系統正在監測的基線指標（AUC / IC / Sharpe 等），任何一項異常都會觸發警告。")
+        _hl_display = "—"
+        _hl_for_summary = "—"
+else:
+    _hl_display = f"{_hl_raw} 月"
+    _hl_for_summary = f"{_hl_raw} 個月"
+
+_retrain = str(_decay_summary.get("recommended_retrain_cycle") or "—")
+_retrain_main = _re.split(r"[（(]", _retrain, maxsplit=1)[0].strip()
+_retrain_note = ""
+_m_rt = _re.search(r"[（(]([^）)]*)[）)]", _retrain)
+if _m_rt:
+    _retrain_note = _m_rt.group(1).strip()
+
+if isinstance(_baseline_summary, dict):
+    _n_baselines = _baseline_summary.get("count")
+    if _n_baselines is None:
+        _models = _baseline_summary.get("models")
+        _n_baselines = len(_models) if isinstance(_models, list) else len(_baseline_summary)
+else:
+    _n_baselines = 0
+
+_drift_main = _drift_label
+_drift_sub = (f"觸發 {_n_drifted} 個特徵" if isinstance(_n_drifted, int) and _n_drifted > 0
+              else "PSI 訓練期 vs 測試期")
+# Drift card may breathe when status is healthy (none / low)
+_drift_breathe_class = ("gl-snap-dot-breathe" if _drift_severity_str in ("none", "low") else "")
+
+# Map drift severity to dot color (matches icon emoji semantics)
+_drift_dot_color = {
+    "none": "#10b981", "low": "#10b981",
+    "mild": "#f59e0b", "moderate": "#f97316", "high": "#f97316",
+    "severe": "#f43f5e",
+}.get(_drift_severity_str, "#94a3b8")
+
+_snap_cards = [
+    {
+        "label": "資料漂移程度", "help": "PSI 檢測：訓練期 vs 測試期特徵分佈差異。none / low = 很穩、moderate / severe = 需重訓。",
+        "main": _drift_main, "sub": _drift_sub, "main_color": _drift_dot_color,
+        "dot_color": _drift_dot_color, "dot_breathe": _drift_breathe_class,
+    },
+    {
+        "label": "最短半衰期", "help": "模型預測力衰減到一半所需的月數，越長表示訊號越耐久。若顯示「持續改善」表示截至目前訊號未衰退、半衰期尚不適用。",
+        "main": _hl_display, "sub": "D+20 horizon · 月度斜率",
+        "main_color": "#67e8f9",
+    },
+    {
+        "label": "建議重新訓練週期", "help": "依半衰期推論的重新訓練頻率；到期就該重新訓練模型。",
+        "main": _retrain_main if _retrain_main else "—",
+        "sub": (f"↑ {_retrain_note}" if _retrain_note else "依半衰期估算"),
+        "main_color": "#a78bfa",
+    },
+    {
+        "label": "基線指標數", "help": "系統正在監測的基線指標（AUC / IC / Sharpe 等），任何一項異常都會觸發警告。",
+        "main": f"{_n_baselines} 個",
+        "sub": "AUC / IC / Sharpe / Brier",
+        "main_color": "#67e8f9",
+    },
+]
+_snap_html = ['<div class="gl-snap-grid">']
+for c in _snap_cards:
+    dot_html = ""
+    if c.get("dot_color"):
+        dot_html = (f'<span class="gl-snap-dot {c.get("dot_breathe","")}" '
+                    f'style="background:{c["dot_color"]};box-shadow:0 0 12px {c["dot_color"]}88;"></span>')
+    _snap_html.append(f"""
+<div class="gl-snap-card">
+  <div class="gl-snap-card-label">
+    <span>{c["label"]}</span>
+    <span class="gl-snap-help" title="{c["help"]}">?</span>
+  </div>
+  <div class="gl-snap-card-main" style="color:{c['main_color']};">
+    {dot_html}<span>{c["main"]}</span>
+  </div>
+  <div class="gl-snap-card-sub">{c["sub"]}</div>
+</div>
+""")
+_snap_html.append('</div>')
+st.markdown("""
+<style>
+.gl-snap-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    margin: 8px 0 14px 0;
+}
+@media (max-width: 1100px) { .gl-snap-grid { grid-template-columns: repeat(2, 1fr); } }
+.gl-snap-card {
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.96) 100%);
+    border: 1px solid rgba(103,232,249,0.18);
+    border-radius: 10px;
+    padding: 14px 18px 16px 18px;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.10);
+    min-height: 122px;
+    display: flex; flex-direction: column; justify-content: flex-start;
+}
+.gl-snap-card-label {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--gl-font-sans, system-ui);
+    font-size: 0.84rem; color: #8397ac; letter-spacing: 0.04em;
+    margin-bottom: 8px;
+}
+.gl-snap-help {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: rgba(103,232,249,0.10); color: #67e8f9;
+    font-size: 0.66rem; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: help;
+    border: 1px solid rgba(103,232,249,0.32);
+}
+.gl-snap-card-main {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.62rem; font-weight: 700; letter-spacing: -0.02em;
+    margin-top: 2px;
+}
+.gl-snap-card-sub {
+    margin-top: 8px;
+    font-family: var(--gl-font-sans, system-ui);
+    font-size: 0.78rem; color: #8397ac;
+}
+.gl-snap-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    flex: 0 0 auto;
+}
+@keyframes gl-snap-dot-pulse {
+    0%, 100% { transform: scale(1.0); filter: brightness(1.0); }
+    50%      { transform: scale(1.18); filter: brightness(1.25); }
+}
+.gl-snap-dot-breathe { animation: gl-snap-dot-pulse 2.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .gl-snap-dot-breathe { animation: none !important; } }
+</style>
+""" + "".join(_snap_html), unsafe_allow_html=True)
 
 # 簡短治理摘要(白話版) — v11.3 dark-glint 化
 st.markdown(f"""

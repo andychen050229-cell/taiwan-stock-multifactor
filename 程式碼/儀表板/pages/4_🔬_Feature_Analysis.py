@@ -502,9 +502,8 @@ st.divider()
 st.subheader("🔍 SHAP 可解釋性分析 | SHAP Interpretability")
 st.caption("SHAP 值量化每個特徵對模型預測結果的邊際貢獻 | Feature-level model interpretability")
 
-st.info("""
-**SHAP（SHapley Additive exPlanations）是什麼？**
-
+with st.expander("SHAP（SHapley Additive exPlanations）是什麼？", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
 SHAP 值量化每個特徵對模型預測的貢獻程度。
 
 圖中每個點代表一筆資料，橫軸為 SHAP 值大小（正值 = 推升預測，負值 = 壓低預測）。

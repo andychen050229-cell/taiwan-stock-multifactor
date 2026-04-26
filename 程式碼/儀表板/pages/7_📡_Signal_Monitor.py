@@ -135,12 +135,11 @@ with st.sidebar:
 # ============================================================
 render_section_title("資料漂移偵測", "Feature Drift · PSI / KS")
 
-st.info("""
-**PSI（Population Stability Index）是什麼？**
-
+with st.expander("PSI（Population Stability Index）是什麼？", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
 PSI 衡量特徵分佈在「參考期」與「當前期」之間的變化程度。
 
-PSI < 0.1 = 穩定，0.1~0.2 = 輕微偏移，> 0.2 = 顯著偏移。
+PSI < 0.1 = 穩定，0.1 ~ 0.2 = 輕微偏移，> 0.2 = 顯著偏移。
 
 搭配 KS 檢定（Kolmogorov-Smirnov）做雙重確認。
 
@@ -306,12 +305,11 @@ st.divider()
 # ============================================================
 render_section_title("訊號穩定性分析", "Signal Stability · Half-Life")
 
-st.info("""
-**ICIR（Information Coefficient Information Ratio）是什麼？**
-
+with st.expander("ICIR（Information Coefficient Information Ratio）是什麼？", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
 ICIR = Mean(IC) / Std(IC)，衡量訊號的穩定程度。
 
-ICIR > 0.5 = 強訊號（可靠），0.2~0.5 = 中等訊號，< 0.2 = 弱訊號。
+ICIR > 0.5 = 強訊號（可靠），0.2 ~ 0.5 = 中等訊號，< 0.2 = 弱訊號。
 
 強訊號意味著模型的預測能力在不同時間段表現一致。
 """)

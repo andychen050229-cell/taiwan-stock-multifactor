@@ -101,12 +101,11 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.info("""
-**如何閱讀本頁？**
-
+with st.expander("如何閱讀本頁？", expanded=False, icon=":material/help_outline:"):
+    st.markdown("""
 本頁展示系統的資料基礎設施。
 
-Feature Store 的規模與品質、Walk-Forward 交叉驗證的時間切割方式，以及 7 項品質門檻（Quality Gates）的通過狀態。
+Feature Store 的規模與品質、Walk-Forward 交叉驗證的時間切割方式，以及 9 項品質門檻（Quality Gates）的通過狀態。
 
 所有門檻需全數通過才代表模型輸出可信。
 """)
