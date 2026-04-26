@@ -89,7 +89,16 @@ streamlit run 程式碼/儀表板/app.py
 
 ```
 ├── README.md
-├── SCOPE.md                        # 專案紅線（資料來源 / 功能 / 時間 / 資源）
+├── 專案說明/                        # 所有總覽 / 沿革 / 規範 MD 集中於此
+│   ├── SCOPE.md                    # 專案紅線（資料來源 / 功能 / 時間 / 資源）
+│   ├── 📁_資料夾結構總覽.md
+│   ├── 檔案沿革.md
+│   ├── 專案完整概況_系統導讀與使用指南.md
+│   ├── 系統設計手冊.md
+│   ├── 網站設計概念與架構.md
+│   ├── Claude-Design-設計系統.md
+│   ├── 簡報內容詳述_供_Claude_Design_優化.md
+│   └── 簡報製作嚴格要求_管顧風格規範.md
 ├── 程式碼/
 │   ├── 執行Phase1_資料工程.py       # Phase 1 入口
 │   ├── 執行Phase2_模型訓練.py        # Phase 2 入口
@@ -183,7 +192,7 @@ Model Card 生成、PSI + KS 資料漂移、信號衰減分析、績效基線建
 - [FinMind 開放金融資料](https://finmindtrade.com/) — OHLCV + 損益表 + 資產負債表 + 現金流量表 + 產業 + 籌碼
 - 教授資料庫 `bda2026_backup_20260326.sql` — `companies` / `stock_prices` / `income_stmt` / `stock_text`（1.12M 篇文章）
 
-> 詳見 [`SCOPE.md`](./SCOPE.md) — 本專案「資料來源紅線」，自 2026-04-19 起封版。
+> 詳見 [`專案說明/SCOPE.md`](./專案說明/SCOPE.md) — 本專案「資料來源紅線」，自 2026-04-19 起封版。
 
 ## 技術棧
 
