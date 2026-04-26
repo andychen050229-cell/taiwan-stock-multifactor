@@ -545,31 +545,83 @@ st.info("""
 讓非技術使用者不必翻完整份報告也能掌握「目前模型狀態是否健康」。
 """)
 
-# 取得整體治理摘要
+# 取得整體治理摘要 (v11.5.19 §8 — robust data wiring)
+# Fix #1: step2_drift 是 null、漂移資訊在 step3_drift.severity
+# Fix #2: min_half_life_months 為 None 表示訊號還在改善（trend=improving）、應顯示「持續改善」
+# Fix #3: recommended_retrain_cycle 用全形括號（、原 split("(") 抓不到、改為 re.split
+# Fix #4: 鍵名應為 step5_baselines（複數）、原本 step5_baseline 永遠抓不到
+import re as _re
 _summary = p3_report.get("results", {})
-_drift_summary = _summary.get("step2_drift", {})
-_decay_summary = _summary.get("step4_signal_decay", {})
-_baseline_summary = _summary.get("step5_baseline", {})
+_drift_summary = _summary.get("step3_drift") or _summary.get("step2_drift") or {}
+if not isinstance(_drift_summary, dict):
+    _drift_summary = {}
+_decay_summary = _summary.get("step4_signal_decay") or {}
+_baseline_summary = _summary.get("step5_baselines") or _summary.get("step5_baseline") or {}
+
+# Severity normalization — fall back through multiple key names
+_drift_severity_raw = (
+    _drift_summary.get("overall_severity")
+    or _drift_summary.get("severity")
+    or "none"
+)
+_drift_severity_str = str(_drift_severity_raw).lower()
+_drift_label_map = {
+    "none": ("🟢", "無漂移"),
+    "low":  ("🟢", "輕微"),
+    "mild": ("🟡", "輕度"),
+    "moderate": ("🟠", "中度"),
+    "high": ("🟠", "高度"),
+    "severe": ("🔴", "嚴重"),
+}
+_drift_icon, _drift_label = _drift_label_map.get(_drift_severity_str, ("⚪", "—"))
+_n_drifted = _drift_summary.get("n_drifted")
 
 snap_c1, snap_c2, snap_c3, snap_c4 = st.columns(4)
 with snap_c1:
-    _drift_severity = _drift_summary.get("overall_severity", "—")
-    _drift_icon = {"none": "🟢", "mild": "🟡", "moderate": "🟠", "severe": "🔴"}.get(str(_drift_severity).lower(), "⚪")
-    st.metric("資料漂移程度", f"{_drift_icon} {_drift_severity}",
-              help="PSI 檢測:訓練期 vs 測試期特徵分佈差異。none = 很穩、severe = 需重訓。")
+    _drift_display = f"{_drift_icon} {_drift_label}"
+    if isinstance(_n_drifted, int) and _n_drifted > 0:
+        _drift_display = f"{_drift_icon} {_drift_label}（{_n_drifted}）"
+    st.metric("資料漂移程度", _drift_display,
+              help="PSI 檢測：訓練期 vs 測試期特徵分佈差異。none/low = 很穩、moderate/severe = 需重訓。括號內為觸發漂移的特徵數。")
 with snap_c2:
-    _hl = _decay_summary.get("min_half_life_months", "—")
-    st.metric("最短半衰期", f"{_hl} 月" if _hl != "—" else "—",
-              help="模型預測力衰減到一半所需的月數,越長 = 訊號越耐久。")
+    _hl_raw = _decay_summary.get("min_half_life_months")
+    # When None, the signal hasn't decayed enough to estimate half-life —
+    # check the trend direction to decide whether this is good or bad.
+    if _hl_raw is None or _hl_raw == "—":
+        _trend = (_decay_summary.get("half_life_analysis") or {}).get("D20", {}).get("trend_direction")
+        if _trend == "improving":
+            _hl_display = "持續改善"
+            _hl_for_summary = "持續改善（尚未衰退）"
+        else:
+            _hl_display = "—"
+            _hl_for_summary = "—"
+    else:
+        _hl_display = f"{_hl_raw} 月"
+        _hl_for_summary = f"{_hl_raw} 個月"
+    st.metric("最短半衰期", _hl_display,
+              help="模型預測力衰減到一半所需的月數，越長表示訊號越耐久。若顯示「持續改善」表示截至目前訊號未衰退、半衰期尚不適用。")
 with snap_c3:
-    _retrain = _decay_summary.get("recommended_retrain_cycle", "—")
-    _retrain_short = str(_retrain).split("(")[0].strip() if "(" in str(_retrain) else str(_retrain)
-    st.metric("建議重訓週期", _retrain_short,
-              help="依據半衰期推論的重訓頻率。到期就該重新訓練模型。")
+    _retrain = str(_decay_summary.get("recommended_retrain_cycle") or "—")
+    # 同時處理半形 () 與全形（）
+    _retrain_main = _re.split(r"[（(]", _retrain, maxsplit=1)[0].strip()
+    _retrain_note = ""
+    _m = _re.search(r"[（(]([^）)]*)[）)]", _retrain)
+    if _m:
+        _retrain_note = _m.group(1).strip()
+    st.metric("建議重訓週期", _retrain_main if _retrain_main else "—",
+              delta=(_retrain_note or None), delta_color="off",
+              help="依半衰期推論的重訓頻率；到期就該重新訓練模型。括號內標註信號強度脈絡。")
 with snap_c4:
-    _n_baselines = len(_baseline_summary) if isinstance(_baseline_summary, dict) else 0
+    # step5_baselines 結構：{models: [...], count: N}
+    if isinstance(_baseline_summary, dict):
+        _n_baselines = _baseline_summary.get("count")
+        if _n_baselines is None:
+            _models = _baseline_summary.get("models")
+            _n_baselines = len(_models) if isinstance(_models, list) else len(_baseline_summary)
+    else:
+        _n_baselines = 0
     st.metric("基線指標數", f"{_n_baselines} 個",
-              help="系統正在監測的基線指標(AUC/IC/Sharpe 等),任何一項異常都會觸發警告。")
+              help="系統正在監測的基線指標（AUC / IC / Sharpe 等），任何一項異常都會觸發警告。")
 
 # 簡短治理摘要(白話版) — v11.3 dark-glint 化
 st.markdown(f"""
@@ -588,10 +640,10 @@ st.markdown(f"""
     <strong style="color: #67e8f9; font-size: 1.02rem; letter-spacing: 0.04em; display:inline-flex;align-items:center;gap:6px;">{glint_icon("pin", 15, "#67e8f9")} 一句話總結</strong><br>
     本模型通過 <strong style="color:#E8F7FC;">{n_pass}/{n_total}</strong> 項品質閘門檢查、
     DSR 判定為 <strong style="color:#E8F7FC;">{dsr_data.get("final_verdict", "—") if dsr_data else "—"}</strong>、
-    資料漂移為 <strong style="color:#E8F7FC;">{_drift_severity}</strong>,
-    最短半衰期 <strong style="color:#E8F7FC;">{_hl}</strong> 個月,
-    建議 <strong style="color:#E8F7FC;">{_retrain_short if _retrain != "—" else "每季"}</strong> 重訓一次。<br><br>
-    <strong style="color: #6ee7b7;">→ 可以放心部署;若要實盤,記得每月追蹤漂移指標與基線差距。</strong>
+    資料漂移為 <strong style="color:#E8F7FC;">{_drift_label}</strong>、
+    最短半衰期 <strong style="color:#E8F7FC;">{_hl_for_summary}</strong>、
+    建議 <strong style="color:#E8F7FC;">{_retrain_main if _retrain_main else "每季"}</strong>{('（' + _retrain_note + '）') if _retrain_note else ''} 重訓一次。<br><br>
+    <strong style="color: #6ee7b7;">→ 可以放心部署；若要實盤，記得每月追蹤漂移指標與基線差距。</strong>
 </div>
 """, unsafe_allow_html=True)
 

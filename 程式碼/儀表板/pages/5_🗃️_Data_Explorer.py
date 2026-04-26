@@ -438,9 +438,33 @@ try:
             _glow = "rgba(244,63,94,0.45)"
             _label_color = "#fecaca"
 
+        # v11.5.19 §7 — Breathing-light effect when all gates pass (100%).
+        # When pass_rate == 1.0 we layer a subtle pulse animation on both the
+        # outer track (border glow) and the inner fill (text-shadow + box-shadow),
+        # making the "all green" state feel alive without being noisy.
+        _breathe_class = "gl-gates-bar-breathe" if pass_rate == 1.0 else ""
         st.markdown(f"""
+        <style>
+        @keyframes gl-gates-bar-pulse {{
+            0%, 100% {{ box-shadow: inset 0 1px 0 rgba(103,232,249,0.14),
+                                    0 0 0 0 rgba(16,185,129,0.0),
+                                    0 2px 10px rgba(2,6,23,0.32); }}
+            50%      {{ box-shadow: inset 0 1px 0 rgba(103,232,249,0.18),
+                                    0 0 28px 0 rgba(16,185,129,0.45),
+                                    0 2px 10px rgba(2,6,23,0.32); }}
+        }}
+        @keyframes gl-gates-fill-pulse {{
+            0%, 100% {{ filter: brightness(1.00) saturate(1.00); }}
+            50%      {{ filter: brightness(1.10) saturate(1.15); }}
+        }}
+        .gl-gates-bar-breathe {{ animation: gl-gates-bar-pulse 3.0s ease-in-out infinite; }}
+        .gl-gates-bar-breathe > div {{ animation: gl-gates-fill-pulse 3.0s ease-in-out infinite; }}
+        @media (prefers-reduced-motion: reduce) {{
+            .gl-gates-bar-breathe, .gl-gates-bar-breathe > div {{ animation: none !important; }}
+        }}
+        </style>
         <div style="margin: 20px 0;">
-          <div style="
+          <div class="{_breathe_class}" style="
               background: linear-gradient(180deg, rgba(10,20,32,0.95), rgba(15,23,37,0.95));
               border: 1px solid rgba(103,232,249,0.24);
               border-radius: 10px; height: 34px; overflow: hidden; padding: 2px;
@@ -513,7 +537,33 @@ try:
             xaxis=dict(visible=False),
             yaxis=dict(visible=False),
         )
+        # v11.5.19 §7 — wrap gauge in a breathing-light container when all
+        # gates pass; subtle radial bloom around the dial draws the eye
+        # without competing with the live gauge needle.
+        if pass_rate == 1.0:
+            st.markdown("""
+            <style>
+            @keyframes gl-gauge-breathe {
+                0%, 100% { box-shadow: inset 0 0 0 0 rgba(16,185,129,0.0),
+                                       0 0 0 0 rgba(103,232,249,0.0); }
+                50%      { box-shadow: inset 0 0 36px 0 rgba(16,185,129,0.16),
+                                       inset 0 0 0 1px rgba(103,232,249,0.18),
+                                       0 0 24px 0 rgba(16,185,129,0.18); }
+            }
+            .gl-gauge-breathe-wrap {
+                border-radius: 14px;
+                padding: 2px;
+                animation: gl-gauge-breathe 3.6s ease-in-out infinite;
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .gl-gauge-breathe-wrap { animation: none !important; }
+            }
+            </style>
+            <div class="gl-gauge-breathe-wrap">
+            """, unsafe_allow_html=True)
         st.plotly_chart(fig_gate, use_container_width=True)
+        if pass_rate == 1.0:
+            st.markdown("</div>", unsafe_allow_html=True)
 
 except Exception as e:
     st.warning(f"品質門控分析失敗：{str(e)}")
