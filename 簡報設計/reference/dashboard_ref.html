@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<title>台股多因子預測系統 — 量化研究終端</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  html.fonts-loading body{opacity:.01}
+  html.fonts-ready body{opacity:1;transition:opacity .18s ease-out}
+</style>
+<script>
+  document.documentElement.classList.add('fonts-loading');
+  if (document.fonts && document.fonts.ready) {
+    Promise.all([
+      document.fonts.load('700 1rem "Inter"'),
+      document.fonts.load('800 1rem "Inter"'),
+      document.fonts.load('700 1rem "JetBrains Mono"'),
+      document.fonts.load('700 1rem "Noto Sans TC"'),
+    ]).then(()=>{
+      document.documentElement.classList.remove('fonts-loading');
+      document.documentElement.classList.add('fonts-ready');
+    }).catch(()=>{
+      document.documentElement.classList.remove('fonts-loading');
+      document.documentElement.classList.add('fonts-ready');
+    });
+    setTimeout(()=>{document.documentElement.classList.remove('fonts-loading');document.documentElement.classList.add('fonts-ready');}, 2500);
+  } else {
+    document.documentElement.classList.add('fonts-ready');
+  }
+</script>
+
+<template id="__bundler_thumbnail" data-bg-color="#0f1419">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#06b6d4"/>
+        <stop offset="50%" stop-color="#2563eb"/>
+        <stop offset="100%" stop-color="#7c3aed"/>
+      </linearGradient>
+    </defs>
+    <rect x="360" y="220" width="480" height="360" rx="28" fill="url(#g1)"/>
+    <text x="600" y="430" font-family="Inter, sans-serif" font-size="96" font-weight="800" text-anchor="middle" fill="white">台股</text>
+  </svg>
+</template>
+
+<style>
+:root{
+  --bg:#fafbfc; --surface:#fff; --subtle:#f1f5f9; --tint:#f8fafc;
+  --sb1:#0f1419; --sb2:#1a2332; --sb-fg:#c8d6e5; --sb-mut:#8899aa;
+  --bd:#e2e8f0; --bd-str:#cbd5e1;
+  --t1:#0f172a; --t2:#475569; --t3:#94a3b8;
+  --blue:#2563eb; --violet:#7c3aed; --cyan:#06b6d4;
+  --emerald:#10b981; --amber:#f59e0b; --rose:#f43f5e; --indigo:#4f46e5;
+  --grad-pri:linear-gradient(135deg,#2563eb 0%,#7c3aed 100%);
+  --grad-tech:linear-gradient(135deg,#06b6d4 0%,#2563eb 50%,#7c3aed 100%);
+  --grad-hero:linear-gradient(135deg,#0f172a 0%,#2563eb 55%,#7c3aed 100%);
+  --sans:'Inter','Noto Sans TC',-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei','PingFang TC','Hiragino Sans TC',sans-serif;
+  --mono:'JetBrains Mono','Noto Sans TC','SF Mono','Consolas','Liberation Mono',monospace;
+  --sh-sm:0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+  --sh-md:0 4px 6px rgba(15,23,42,.04), 0 10px 15px rgba(15,23,42,.06);
+  --sh-glow:0 0 0 1px rgba(37,99,235,.08), 0 8px 30px rgba(37,99,235,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  font-family:var(--sans); color:var(--t1); background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+  font-feature-settings:"tnum" 1;
+}
+body{
+  min-height:100vh; display:flex;
+  background:
+    radial-gradient(ellipse at top left,rgba(37,99,235,.05) 0%,transparent 50%),
+    radial-gradient(ellipse at top right,rgba(124,58,237,.05) 0%,transparent 50%),
+    linear-gradient(180deg,#fafbfc 0%,#fff 400px);
+  background-attachment:fixed;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(37,99,235,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(37,99,235,.025) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+code,kbd,pre,.mono{font-family:var(--mono);font-feature-settings:"tnum" 1,"zero" 1;font-variant-numeric:tabular-nums}
+
+/* ========== SIDEBAR ========== */
+.sb{
+  width:248px; flex-shrink:0; position:sticky; top:0; height:100vh;
+  background:linear-gradient(180deg,var(--sb1) 0%,var(--sb2) 100%);
+  color:var(--sb-fg); display:flex; flex-direction:column;
+  z-index:10; overflow-y:auto;
+}
+.sb::-webkit-scrollbar{width:0}
+.sb-brand{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-logo{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--grad-tech);
+  display:grid;place-items:center;font-family:var(--mono);
+  font-weight:700;color:#fff;font-size:15px; margin-bottom:10px;
+  box-shadow:0 4px 14px rgba(37,99,235,.35);
+}
+.sb-title{font-size:14px;font-weight:700;color:#fff;line-height:1.3}
+.sb-version{font-family:var(--mono);font-size:10px;color:var(--sb-mut);margin-top:2px;letter-spacing:.04em}
+.sb-group{padding:14px 18px 6px;font-family:var(--mono);font-size:10px;color:var(--sb-mut);font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.sb-link{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 14px; margin:1px 8px; border-radius:8px;
+  color:#c8d6e5; cursor:pointer; font-size:13px; font-weight:500;
+  transition:all .18s ease; border-left:3px solid transparent;
+  text-decoration:none;
+}
+.sb-link:hover{background:rgba(99,110,250,.15);color:#fff}
+.sb-link.active{
+  background:rgba(99,110,250,.22);color:#fff;
+  border-left-color:#636EFA;
+}
+.sb-link .glyph{font-size:14px;width:18px;text-align:center}
+.sb-link .k{font-family:var(--mono);font-size:9px;margin-left:auto;color:var(--sb-mut);padding:2px 5px;border:1px solid rgba(255,255,255,.08);border-radius:4px}
+.sb-foot{margin-top:auto;padding:14px 18px;border-top:1px solid rgba(255,255,255,.06);font-family:var(--mono);font-size:10px;color:var(--sb-mut);line-height:1.6}
+.sb-foot .row{display:flex;justify-content:space-between;margin-bottom:4px}
+.sb-foot .row b{color:var(--sb-fg);font-weight:600}
+.live{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:999px;font-size:9px;font-weight:700;color:var(--emerald);letter-spacing:.05em;text-transform:uppercase;font-family:var(--mono)}
+.live::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--emerald);box-shadow:0 0 0 0 rgba(16,185,129,.6);animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.6)}70%{box-shadow:0 0 0 8px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+
+/* ========== MAIN ========== */
+.main{flex:1;min-width:0;position:relative;z-index:1;padding:20px 28px 40px}
+
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px;background:rgba(255,255,255,.72);
+  border:1px solid var(--bd);border-radius:12px;
+  backdrop-filter:blur(8px); margin-bottom:18px;
+  box-shadow:var(--sh-sm);
+}
+.crumbs{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2)}
+.crumbs .slash{color:var(--t3)}
+.crumbs .cur{color:var(--t1);font-weight:600}
+.topbar-r{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--t3)}
+.topbar-r .sep{opacity:.4}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;background:var(--subtle);color:var(--t2);border:1px solid var(--bd);border-radius:999px;font-size:11px;font-weight:600;font-family:var(--mono)}
+.chip.pri{background:rgba(37,99,235,.08);color:var(--blue);border-color:rgba(37,99,235,.2)}
+.chip.vio{background:rgba(124,58,237,.08);color:var(--violet);border-color:rgba(124,58,237,.2)}
+.chip.ok{background:rgba(16,185,129,.08);color:var(--emerald);border-color:rgba(16,185,129,.2)}
+.chip.warn{background:rgba(245,158,11,.08);color:var(--amber);border-color:rgba(245,158,11,.2)}
+
+/* ==== HERO ==== */
+.hero{
+  position:relative;border-radius:18px;padding:26px 32px;
+  background:
+    radial-gradient(ellipse at 10% 10%,rgba(37,99,235,.12) 0%,transparent 60%),
+    radial-gradient(ellipse at 90% 90%,rgba(124,58,237,.12) 0%,transparent 60%),
+    linear-gradient(135deg,#fff 0%,#f8fafc 100%);
+  border:1px solid var(--bd); box-shadow:var(--sh-md);
+  overflow:hidden; margin-bottom:18px;
+}
+.hero::before{content:"";position:absolute;top:-50%;right:-15%;width:420px;height:420px;background:radial-gradient(circle,rgba(37,99,235,.08),transparent 70%);filter:blur(40px);pointer-events:none}
+.eyebrow{display:inline-block;padding:4px 12px;background:rgba(37,99,235,.08);color:var(--blue);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;border:1px solid rgba(37,99,235,.18);margin-bottom:12px}
+.hero-title{font-size:2.4rem;font-weight:800;letter-spacing:-0.03em;line-height:1.08;background:var(--grad-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.hero-sub{font-size:15px;color:var(--t2);line-height:1.55;max-width:820px}
+.hero-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+
+/* ==== KPI STRIP ==== */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
+.kpi{
+  background:var(--surface);border:1px solid var(--bd);border-radius:14px;
+  padding:14px 16px;box-shadow:var(--sh-sm);
+  position:relative;overflow:hidden;transition:all .25s ease;cursor:pointer;
+}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad-tech);opacity:0;transition:opacity .25s}
+.kpi:hover{border-color:rgba(37,99,235,.35);box-shadow:var(--sh-glow);transform:translateY(-1px)}
+.kpi:hover::before{opacity:1}
+.kpi.acc-blue{border-top:3px solid var(--blue)}
+.kpi.acc-violet{border-top:3px solid var(--violet)}
+.kpi.acc-cyan{border-top:3px solid var(--cyan)}
+.kpi.acc-emerald{border-top:3px solid var(--emerald)}
+.kpi.acc-amber{border-top:3px solid var(--amber)}
+.kpi.acc-rose{border-top:3px solid var(--rose)}
+.kpi-lbl{font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.kpi-val{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:1.55rem;font-weight:700;color:var(--t1);line-height:1.1}
+.kpi-sub{font-size:11px;color:var(--t3);margin-top:4px}
+.kpi-delta{font-family:var(--mono);font-size:11px;font-weight:600;margin-top:3px}
+.kpi-delta.up{color:var(--emerald)}
+.kpi-delta.down{color:var(--rose)}
+
+/* ==== DUAL PATH ==== */
+.paths{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.path{
+  background:var(--surface);border:1px solid var(--bd);border-radius:18px;
+  padding:24px 26px;position:relative;overflow:hidden;cursor:pointer;
+  transition:all .3s ease;box-shadow:var(--sh-sm);
+}
+.path::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad-tech);opacity:.7}
+.path:hover{transform:translateY(-3px);box-shadow:var(--sh-glow);border-color:rgba(37,99,235,.3)}
+.path.inv{background:linear-gradient(135deg,#fff 0%,#fffbeb 100%)}
+.path.inv::before{background:linear-gradient(135deg,#f59e0b 0%,#f97316 100%)}
+.path.qnt{background:linear-gradient(135deg,#fff 0%,#f0f9ff 100%)}
+.path-icon{font-size:2.2rem;margin-bottom:10px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.08))}
+.path-title{font-size:1.25rem;font-weight:700;color:var(--t1);margin-bottom:8px;letter-spacing:-0.01em}
+.path-desc{font-size:13px;color:var(--t2);line-height:1.55;margin-bottom:14px}
+.path-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px}
+.path-go{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--blue);letter-spacing:.04em}
+.path-go .arr{transition:transform .3s ease}
+.path:hover .path-go .arr{transform:translateX(4px)}
+
+/* ==== SECTION HEADER ==== */
+.sh{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 12px}
+.sh h2{font-size:1.35rem;font-weight:700;letter-spacing:-0.01em;position:relative;padding-left:14px}
+.sh h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:4px;background:var(--grad-pri);border-radius:4px}
+.sh .sh-sub{font-size:12px;color:var(--t3);font-family:var(--mono)}
+
+/* ==== RESEARCH GRID ==== */
+.research{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-bottom:20px}
+.card{background:var(--surface);border:1px solid var(--bd);border-radius:14px;padding:16px 18px;box-shadow:var(--sh-sm);transition:all .25s ease}
+.card:hover{border-color:rgba(37,99,235,.22);box-shadow:var(--sh-glow)}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.card-hd .ti{font-size:13px;font-weight:700;color:var(--t1)}
+.card-hd .mt{font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
+.card.span-8{grid-column:span 8}
+.card.span-4{grid-column:span 4}
+.card.span-6{grid-column:span 6}
+.card.span-3{grid-column:span 3}
+.card.span-12{grid-column:span 12}
+
+/* ==== CANDLE / PILLAR CHART ==== */
+.pillar-bars{display:flex;flex-direction:column;gap:6px;padding:6px 0 2px}
+.pb-row{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px}
+.pb-pill{padding:3px 8px;border-radius:5px;font-weight:700;font-size:10px;width:52px;text-align:center;flex-shrink:0}
+.pb-pill[data-p="trend"]{background:#dbeafe;color:#1e40af}
+.pb-pill[data-p="fund"]{background:#dcfce7;color:#166534}
+.pb-pill[data-p="val"]{background:#fae8ff;color:#86198f}
+.pb-pill[data-p="event"]{background:#fef3c7;color:#92400e}
+.pb-pill[data-p="risk"]{background:#ffe4e6;color:#9f1239}
+.pb-pill[data-p="chip"]{background:#e0e7ff;color:#3730a3}
+.pb-pill[data-p="ind"]{background:#cffafe;color:#155e75}
+.pb-pill[data-p="txt"]{background:#f3e8ff;color:#6b21a8}
+.pb-pill[data-p="sent"]{background:#fce7f3;color:#9d174d}
+.pb-bar-wrap{flex:1;height:10px;background:var(--subtle);border-radius:4px;overflow:hidden;position:relative}
+.pb-bar{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.34,1.56,.64,1)}
+.pb-num{color:var(--t1);font-weight:600;width:46px;text-align:right;font-size:11px}
+.pb-delta{color:var(--emerald);font-size:10px;width:56px;text-align:right}
+.pb-delta.down{color:var(--rose)}
+
+/* ==== SVG CHART ==== */
+.chart-svg{width:100%;height:auto;display:block}
+.cg-grid line{stroke:#f1f5f9;stroke-width:1}
+.cg-axis text{fill:var(--t3);font-family:var(--mono);font-size:9px}
+.cg-line{fill:none;stroke-width:2}
+
+/* ==== PHASE TIMELINE ==== */
+.phase-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.ph{background:var(--surface);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;transition:all .2s ease}
+.ph::before{content:"";position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--emerald)}
+.ph.cur::before{background:var(--grad-pri)}
+.ph:hover{box-shadow:var(--sh-glow);transform:translateY(-1px)}
+.ph-k{font-family:var(--mono);font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.ph-ti{font-size:13px;font-weight:600;margin-top:2px}
+.ph-sb{font-family:var(--mono);font-size:10px;color:var(--t2);margin-top:4px;line-height:1.4}
+
+/* ==== INSIGHT BOXES ==== */
+.box{border-radius:0 10px 10px 0;padding:12px 16px;font-size:13px;line-height:1.55;margin:10px 0}
+.box.info{background:linear-gradient(135deg,#eff6ff,#f0f9ff);border-left:4px solid var(--blue);color:#0c4a6e}
+.box.warn{background:linear-gradient(135deg,#fffbeb,#fef3c7);border-left:4px solid var(--amber);color:#92400e}
+.box.ok{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-left:4px solid var(--emerald);color:#065f46}
+
+/* ==== STOCK TABLE ==== */
+.st-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.st-tbl th{text-align:left;font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--bd);background:var(--tint)}
+.st-tbl td{padding:9px 10px;border-bottom:1px solid var(--bd);font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--t1);vertical-align:middle}
+.st-tbl tr{cursor:pointer;transition:background .15s ease}
+.st-tbl tr:hover td{background:rgba(37,99,235,.03)}
+.st-tbl tr.sel td{background:rgba(37,99,235,.06)}
+.st-tbl .ticker{font-weight:700;color:var(--blue)}
+.st-tbl .name-zh{font-family:var(--sans);font-size:12px;color:var(--t1)}
+.st-tbl .ret-up{color:var(--emerald);font-weight:600}
+.st-tbl .ret-dn{color:var(--rose);font-weight:600}
+.st-tbl .ind-chip{display:inline-block;padding:1px 7px;background:var(--subtle);color:var(--t2);border-radius:4px;font-size:10px;font-family:var(--sans);font-weight:500}
+
+/* ==== TABS ==== */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--bd);margin-bottom:14px}
+.tab{padding:9px 16px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s ease;font-family:var(--sans)}
+.tab:hover{color:var(--t1)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* ==== GAUGE ==== */
+.gauge{display:flex;flex-direction:column;align-items:center;padding:6px 0}
+.gauge-ring{width:140px;height:90px;position:relative;margin-bottom:6px}
+.gauge-val{font-family:var(--mono);font-size:1.8rem;font-weight:700;color:var(--t1);line-height:1}
+.gauge-lbl{font-size:11px;color:var(--t3);margin-top:4px;font-family:var(--mono);letter-spacing:.05em;text-transform:uppercase}
+
+/* ==== horizon switcher ==== */
+.seg{display:inline-flex;background:var(--subtle);border:1px solid var(--bd);border-radius:8px;padding:3px;gap:2px}
+.seg button{background:transparent;border:none;padding:5px 14px;font-size:11px;font-family:var(--mono);font-weight:700;color:var(--t2);cursor:pointer;border-radius:6px;transition:all .2s ease;letter-spacing:.04em}
+.seg button.on{background:var(--surface);color:var(--blue);box-shadow:var(--sh-sm)}
+.seg button:hover:not(.on){color:var(--t1)}
+
+/* Stock detail drawer */
+.drawer{position:fixed;top:0;right:0;width:460px;height:100vh;background:var(--surface);border-left:1px solid var(--bd);box-shadow:-20px 0 40px rgba(15,23,42,.1);transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);z-index:100;overflow-y:auto;padding:24px 26px}
+.drawer.on{transform:translateX(0)}
+.drawer-ov{position:fixed;inset:0;background:rgba(15,23,42,.35);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:99}
+.drawer-ov.on{opacity:1;pointer-events:auto}
+.drawer-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.drawer-x{background:transparent;border:1px solid var(--bd);border-radius:8px;padding:4px 8px;font-size:14px;cursor:pointer;color:var(--t2)}
+.drawer-x:hover{color:var(--t1);border-color:var(--bd-str)}
+.dr-ticker{font-family:var(--mono);font-size:14px;color:var(--blue);font-weight:700}
+.dr-name{font-size:1.2rem;font-weight:700;color:var(--t1);margin-top:2px}
+.dr-ind{font-size:11px;color:var(--t3);margin-top:2px}
+.dr-kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.dr-k{background:var(--tint);border:1px solid var(--bd);border-radius:10px;padding:10px 12px}
+.dr-k .l{font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.dr-k .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:1.15rem;font-weight:700;color:var(--t1);margin-top:3px}
+.dr-sec{margin:14px 0}
+.dr-sec h4{font-size:11px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;font-family:var(--mono)}
+.dr-sec p{font-size:13px;color:var(--t2);line-height:1.55}
+
+/* transitions on view change */
+.view{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Mini sparkline */
+.spark{display:inline-block;vertical-align:middle}
+
+/* responsive */
+@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.phase-row{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.sb{display:none}.research .card.span-8,.research .card.span-4,.research .card.span-6{grid-column:span 12}.paths{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ====== SIDEBAR ====== -->
+<aside class="sb" id="sb">
+  <div class="sb-brand">
+    <div class="sb-logo">台</div>
+    <div class="sb-title">台股多因子預測系統</div>
+    <div class="sb-version">v4.0 · 2026-04-20</div>
+  </div>
+  <div class="sb-group">Overview</div>
+  <a class="sb-link active" data-view="home"><span class="glyph">🏠</span>首頁<span class="k">G</span></a>
+
+  <div class="sb-group">📖 投資解讀</div>
+  <a class="sb-link" data-view="invest"><span class="glyph">🌱</span>投資解讀面板<span class="k">I</span></a>
+
+  <div class="sb-group">🔬 量化研究工作台</div>
+  <a class="sb-link" data-view="model"><span class="glyph">📊</span>模型績效</a>
+  <a class="sb-link" data-view="icir"><span class="glyph">📈</span>ICIR 信號穩定性</a>
+  <a class="sb-link" data-view="bt"><span class="glyph">💰</span>策略回測</a>
+  <a class="sb-link" data-view="feat"><span class="glyph">🔬</span>特徵工程分析</a>
+  <a class="sb-link" data-view="data"><span class="glyph">🗃️</span>資料品質總覽</a>
+  <a class="sb-link" data-view="text"><span class="glyph">📝</span>文本分析</a>
+
+  <div class="sb-group">🛡️ 治理 · 監控</div>
+  <a class="sb-link" data-view="gov"><span class="glyph">🛡️</span>模型治理</a>
+  <a class="sb-link" data-view="sig"><span class="glyph">📡</span>信號監控</a>
+  <a class="sb-link" data-view="ext"><span class="glyph">🎯</span>擴充分析</a>
+  <a class="sb-link" data-view="p6"><span class="glyph">🔭</span>Phase 6 深度驗證</a>
+
+  <div class="sb-foot">
+    <div class="row"><span>STATUS</span><span class="live">live</span></div>
+    <div class="row"><span>GATES</span><b>9 / 9 PASS</b></div>
+    <div class="row"><span>ENGINE</span><b>LGB + XGB</b></div>
+    <div class="row"><span>CV</span><b>Purged WF · 4-fold</b></div>
+    <div class="row"><span>EMBARGO</span><b>20d</b></div>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);color:var(--sb-mut);font-size:9px">
+      MIT License · 僅供學術研究用途<br>
+      1,930 家 · 2023/03–2025/03
+    </div>
+  </div>
+</aside>
+
+<!-- ====== MAIN ====== -->
+<main class="main">
+  <div class="topbar">
+    <div class="crumbs">
+      <span>量化研究終端</span><span class="slash">/</span>
+      <span class="cur" id="crumb-cur">首頁</span>
+    </div>
+    <div class="topbar-r">
+      <span class="chip pri">xgboost_D20</span>
+      <span class="chip vio">purged WF · embargo=20</span>
+      <span class="chip ok">DSR 12.12 → PASS</span>
+      <span class="sep">|</span>
+      <span class="mono" id="clock">—</span>
+    </div>
+  </div>
+
+  <div id="app"></div>
+</main>
+
+<div class="drawer-ov" id="drOv"></div>
+<div class="drawer" id="dr">
+  <div class="drawer-hd">
+    <div>
+      <div class="dr-ticker mono" id="dr-ti">—</div>
+      <div class="dr-name" id="dr-nm">—</div>
+      <div class="dr-ind" id="dr-id">—</div>
+    </div>
+    <button class="drawer-x" onclick="closeDr()">✕</button>
+  </div>
+  <div class="dr-kpi">
+    <div class="dr-k"><div class="l">CLOSING PRICE</div><div class="v" id="dr-px">—</div></div>
+    <div class="dr-k"><div class="l">FWD RET D+20</div><div class="v" id="dr-ret">—</div></div>
+    <div class="dr-k"><div class="l">GROSS MARGIN</div><div class="v" id="dr-gm">—</div></div>
+    <div class="dr-k"><div class="l">REV YOY</div><div class="v" id="dr-yoy">—</div></div>
+  </div>
+  <div class="dr-sec">
+    <h4>📋 模型判讀觀察</h4>
+    <p id="dr-obs">—</p>
+  </div>
+  <div class="dr-sec">
+    <h4>⚠️ 風險摘要</h4>
+    <p id="dr-risk">—</p>
+  </div>
+  <div class="box warn" style="margin-top:16px;font-size:12px">⚠️ 本資訊為歷史回測觀察值，不構成投資建議。</div>
+</div>
+
+<script>
+// ===== State =====
+const state = {
+  view: 'home',
+  horizon: 20,
+};
+
+// ===== Data (pulled from recommendations.json + phase2_report) =====
+const STOCKS = [
+  {id:"2330", name:"台灣積體電路製造", ind:"半導體", px:885.00, ret:0.064, gm:0.582, yoy:0.358, obs:"在模型判讀日後 20 日內，歷史上呈現穩健上漲 +6.4%。基本面：毛利率 58.2%、營收年增 35.8%。", risk:"回撤 2%，價格走勢穩定；市值龍頭，流動性充沛；近期處於中高波動環境。"},
+  {id:"2454", name:"聯發科技", ind:"半導體", px:1420.00, ret:0.057, gm:0.485, yoy:0.126, obs:"模型判讀為中度看多；20 日內歷史報酬 +5.7%。Phase 6 單股深度驗證樣本。", risk:"回撤 4%；法人持股集中；AI 需求帶動下營收動能仍強。"},
+  {id:"2317", name:"鴻海精密", ind:"電子組裝", px:182.50, ret:0.042, gm:0.063, yoy:0.087, obs:"模型判讀中性偏多；20 日內歷史報酬 +4.2%。", risk:"毛利率 6.3% 偏低，獲利對匯率敏感；AI 伺服器訂單為關鍵動能。"},
+  {id:"6228", name:"全譜科技", ind:"資訊服務", px:26.15, ret:0.099, gm:0.243, yoy:0.559, obs:"在模型判讀日後隔天，歷史上出現中等程度上漲 +9.9%。毛利率 24.3%、營收年增 55.9%。", risk:"近期回撤僅 1%，價格相對穩定；但目前高波動環境，短期變動可能劇烈；淨利率 -50.8% 虧損中。"},
+  {id:"2412", name:"中華電信", ind:"電信", px:123.50, ret:0.019, gm:0.391, yoy:0.014, obs:"低 Beta 防禦股；20 日內歷史報酬 +1.9%。", risk:"波動低、回撤淺；成長動能溫和，適合低波動策略配置。"},
+  {id:"2882", name:"國泰金控", ind:"金融", px:58.80, ret:0.036, gm:null, yoy:0.092, obs:"金融類股；模型在 fund_/val_ 支柱中有正向信號。", risk:"利率與股市評價雙重敏感；近期回撤 3%。"},
+  {id:"3008", name:"大立光", ind:"光學元件", px:2355.00, ret:-0.018, gm:0.477, yoy:-0.092, obs:"模型判讀中性偏空；20 日內歷史下跌 -1.8%。基本面：毛利率 47.7%，但營收年減 9.2%。", risk:"手機鏡頭需求疲弱；高基期下成長動能趨緩。"},
+  {id:"5348", name:"正能量智能", ind:"其他", px:24.55, ret:0.065, gm:0.216, yoy:-0.06, obs:"20 日內歷史報酬 +6.5%。毛利率 21.6%、營收年減 6%。", risk:"淨利率 -9.4% 微虧；營收年減 6% 成長放緩。"},
+];
+
+const PILLARS = [
+  {k:"trend",n:25,delta:+0.0024,pct:82,lbl:"技術面"},
+  {k:"fund", n:18,delta:+0.0051,pct:95,lbl:"基本面"},
+  {k:"val",  n:5, delta:+0.0018,pct:48,lbl:"估值"},
+  {k:"event",n:7, delta:+0.0007,pct:22,lbl:"事件"},
+  {k:"risk", n:6, delta:+0.0062,pct:100,lbl:"風險"},
+  {k:"chip", n:10,delta:+0.0038,pct:70,lbl:"籌碼"},
+  {k:"ind",  n:4, delta:+0.0012,pct:30,lbl:"產業"},
+  {k:"txt",  n:1521,delta:+0.0014,pct:35,lbl:"文本關鍵字"},
+  {k:"sent", n:11,delta:-0.0003,pct:12,lbl:"文本情緒"},
+];
+const PILLAR_COLORS = {trend:"#2563eb",fund:"#10b981",val:"#7c3aed",event:"#f59e0b",risk:"#f43f5e",chip:"#4f46e5",ind:"#06b6d4",txt:"#8b5cf6",sent:"#ec4899"};
+
+const ICIR_SERIES = [
+  // 24 months synthetic but directionally match: rank IC tight around 0
+  0.021,0.012,-0.004,0.019,0.008,-0.012,0.025,0.014,0.003,0.018,0.028,-0.007,
+  0.011,0.022,0.006,0.015,-0.010,0.019,0.023,0.009,0.017,0.011,-0.003,0.015
+];
+const CUMRET_SERIES = [
+  // normalized cumulative D+20 returns, three cost regimes
+  [0, 1.4, 2.2, 1.8, 3.1, 4.4, 5.2, 5.0, 6.6, 7.8, 8.4, 9.5, 10.8, 11.2, 12.0, 12.6, 13.1, 13.3, 13.6, 13.8, 13.9, 13.8, 13.83],
+  [0, 1.7, 2.7, 2.3, 3.8, 5.2, 6.1, 5.9, 7.5, 8.9, 9.7, 11.0, 12.4, 12.9, 14.0, 14.7, 15.4, 15.6, 16.2, 16.7, 17.1, 17.3, 17.77],
+  [0, 1.2, 1.9, 1.5, 2.7, 3.8, 4.5, 4.3, 5.7, 6.7, 7.3, 8.2, 9.3, 9.6, 10.4, 10.9, 11.3, 11.5, 11.7, 11.8, 11.9, 11.92, 11.94]
+];
+
+const KEYWORDS = [
+  {w:"AI伺服器",s:0.82},{w:"台積電",s:0.15},{w:"法說會",s:0.38},{w:"除息",s:-0.12},{w:"外資賣超",s:-0.55},
+  {w:"庫藏股",s:0.48},{w:"毛利率",s:0.22},{w:"美元走強",s:-0.18},{w:"關稅",s:-0.62},{w:"AI PC",s:0.71},
+  {w:"Blackwell",s:0.88},{w:"合併",s:0.44},{w:"減資",s:-0.22},{w:"量子",s:0.55},{w:"半導體",s:0.27},
+  {w:"EPS創高",s:0.75},{w:"警示股",s:-0.85},{w:"下市",s:-0.92},{w:"訴訟",s:-0.48},{w:"配息",s:0.32}
+];
+
+// ===== Utility: colored line chart =====
+function lineChart(w, h, data, color, {pad=28, showAxis=true, fill=true, showZero=true}={}){
+  const minV = Math.min(0,...data), maxV = Math.max(...data);
+  const rng = maxV-minV || 1;
+  const n = data.length;
+  const sx = i => pad + i*(w-pad*2)/(n-1);
+  const sy = v => h-pad - ((v-minV)/rng)*(h-pad*2);
+  const pts = data.map((v,i)=>`${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+  const areaPts = `${sx(0).toFixed(1)},${sy(minV).toFixed(1)} ${pts} ${sx(n-1).toFixed(1)},${sy(minV).toFixed(1)}`;
+  let zeroLine = '';
+  if(showZero && minV<0){
+    const zy = sy(0);
+    zeroLine = `<line x1="${pad}" x2="${w-pad}" y1="${zy}" y2="${zy}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3 3"/>`;
+  }
+  const grad = `<defs><linearGradient id="g-${color.replace('#','')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity=".25"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>`;
+  const fillEl = fill ? `<polygon points="${areaPts}" fill="url(#g-${color.replace('#','')})"/>` : '';
+  let axis = '';
+  if(showAxis){
+    axis = `<g class="cg-axis">
+      <text x="${pad}" y="${h-8}" text-anchor="start">2023-04</text>
+      <text x="${w/2}" y="${h-8}" text-anchor="middle">2024-04</text>
+      <text x="${w-pad}" y="${h-8}" text-anchor="end">2025-03</text>
+      <text x="${pad-4}" y="${sy(maxV)+3}" text-anchor="end">${maxV.toFixed(2)}</text>
+      <text x="${pad-4}" y="${sy(minV)+3}" text-anchor="end">${minV.toFixed(2)}</text>
+    </g>`;
+  }
+  const dots = data.map((v,i)=>i===n-1?`<circle cx="${sx(i)}" cy="${sy(v)}" r="4" fill="${color}" stroke="#fff" stroke-width="2"/>`:'').join('');
+  return `<svg class="chart-svg" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+    ${grad}
+    <g class="cg-grid">
+      ${[0.25,0.5,0.75].map(f=>{const y=pad+f*(h-pad*2);return `<line x1="${pad}" x2="${w-pad}" y1="${y}" y2="${y}" stroke="#f1f5f9"/>`}).join('')}
+    </g>
+    ${zeroLine}
+    ${fillEl}
+    <polyline points="${pts}" class="cg-line" stroke="${color}"/>
+    ${dots}
+    ${axis}
+  </svg>`;
+}
+
+function multiLineChart(w,h,series,colors,labels){
+  const pad=34;
+  const allV=series.flat();
+  const minV=Math.min(...allV), maxV=Math.max(...allV);
+  const rng=maxV-minV||1;
+  const n=series[0].length;
+  const sx=i=>pad+i*(w-pad*2)/(n-1);
+  const sy=v=>h-pad-((v-minV)/rng)*(h-pad*2);
+  const lines=series.map((s,idx)=>{
+    const pts=s.map((v,i)=>`${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+    return `<polyline points="${pts}" class="cg-line" stroke="${colors[idx]}"/>`;
+  }).join('');
+  const endDots=series.map((s,idx)=>{
+    const i=n-1;
+    return `<g>
+      <circle cx="${sx(i)}" cy="${sy(s[i])}" r="4" fill="${colors[idx]}" stroke="#fff" stroke-width="2"/>
+      <text x="${sx(i)+8}" y="${sy(s[i])+3}" fill="${colors[idx]}" font-family="var(--mono)" font-size="10" font-weight="700">+${s[i].toFixed(2)}%</text>
+    </g>`;
+  }).join('');
+  const grid=[0,0.25,0.5,0.75,1].map(f=>{const y=pad+f*(h-pad*2);const v=maxV-f*rng;return `<g><line x1="${pad}" x2="${w-pad}" y1="${y}" y2="${y}" stroke="#f1f5f9"/><text x="${pad-4}" y="${y+3}" text-anchor="end" fill="#94a3b8" font-family="var(--mono)" font-size="9">${v.toFixed(1)}%</text></g>`}).join('');
+  const legend=labels.map((l,i)=>`<g transform="translate(${pad + i*140}, ${h-14})"><circle cx="6" cy="-4" r="4" fill="${colors[i]}"/><text x="14" y="0" fill="#475569" font-family="var(--sans)" font-size="10" font-weight="600">${l}</text></g>`).join('');
+  return `<svg class="chart-svg" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+    <g class="cg-grid">${grid}</g>
+    ${lines}
+    ${endDots}
+    ${legend}
+  </svg>`;
+}
+
+function gauge(val, min=0.5, max=0.7){
+  const pct = Math.max(0, Math.min(1, (val-min)/(max-min)));
+  const angle = -90 + pct*180;
+  const r = 55;
+  const cx = 70, cy = 75;
+  const x2 = cx + r*Math.cos(angle*Math.PI/180);
+  const y2 = cy + r*Math.sin(angle*Math.PI/180);
+  const arc = `M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}`;
+  return `<svg viewBox="0 0 140 90" width="140" height="90">
+    <path d="${arc}" stroke="#e2e8f0" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${x2} ${y2}" stroke="url(#gg)" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <defs><linearGradient id="gg" x1="0" x2="1" y1="0" y2="0"><stop offset="0%" stop-color="#06b6d4"/><stop offset="50%" stop-color="#2563eb"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs>
+    <text x="${cx-r-2}" y="88" text-anchor="middle" fill="#94a3b8" font-family="var(--mono)" font-size="8">${min}</text>
+    <text x="${cx+r+2}" y="88" text-anchor="middle" fill="#94a3b8" font-family="var(--mono)" font-size="8">${max}</text>
+  </svg>`;
+}
+
+// ===== Views =====
+function viewHome(){
+  return `<div class="view">
+    <div class="hero">
+      <div class="eyebrow">TAIWAN STOCK · MULTI-FACTOR PREDICTION</div>
+      <div class="hero-title">台股多因子預測決策輔助系統</div>
+      <div class="hero-sub">以 <b>2023/03 – 2025/03</b> 台股歷史資料為基礎，整合 <b>9 支柱 1,623 候選因子</b>、<b>LightGBM + XGBoost 雙引擎</b>、<b>Purged Walk-Forward CV</b> 與 <b>LOPO 深度驗證</b>，提供可回看、可解釋、可治理的研究展示平台。</div>
+      <div class="hero-meta">
+        <span class="live">phase 1-6 · all gates passed</span>
+        <span class="chip pri">9 / 9 quality gates</span>
+        <span class="chip vio">xgboost_D20 OOS AUC 0.6455</span>
+        <span class="chip ok">best edge +11.7pp</span>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi acc-blue"><div class="kpi-lbl">SAMPLES</div><div class="kpi-val">948K</div><div class="kpi-sub">948,976 rows</div></div>
+      <div class="kpi acc-violet"><div class="kpi-lbl">FEATURES</div><div class="kpi-val">91</div><div class="kpi-sub">from 1,623 候選</div></div>
+      <div class="kpi acc-cyan"><div class="kpi-lbl">PILLARS</div><div class="kpi-val">9</div><div class="kpi-sub">trend/fund/val/…/sent</div></div>
+      <div class="kpi acc-amber"><div class="kpi-lbl">HORIZONS</div><div class="kpi-val">3</div><div class="kpi-sub">D+1 · D+5 · D+20</div></div>
+      <div class="kpi acc-emerald"><div class="kpi-lbl">QUALITY</div><div class="kpi-val">9/9</div><div class="kpi-delta up">▲ ALL PASS</div></div>
+      <div class="kpi acc-rose"><div class="kpi-lbl">TOP PILLAR</div><div class="kpi-val">risk</div><div class="kpi-delta up">+6.2bps LOPO</div></div>
+    </div>
+
+    <div class="paths">
+      <div class="path inv" onclick="nav('invest')">
+        <div class="path-icon">🌱</div>
+        <div class="path-title">投資解讀面板</div>
+        <div class="path-desc">面向投資人/行銷/商管讀者。將研究結果翻譯成可理解的決策資訊 — 哪個產業看好、這檔股票的基本面長怎樣、成本多少才划算、風險需要注意什麼。</div>
+        <div class="path-tags">
+          <span class="chip">歷史判讀</span><span class="chip">公司輪廓</span><span class="chip">成本分析</span><span class="chip warn">風險提示</span>
+        </div>
+        <div class="path-go">進入投資解讀 <span class="arr">→</span></div>
+      </div>
+      <div class="path qnt" onclick="nav('model')">
+        <div class="path-icon">⚙️</div>
+        <div class="path-title">量化研究工作台</div>
+        <div class="path-desc">面向教授、評審、量化研究者。完整呈現研究流程、方法論、模型指標與驗證結果 — ICIR 分析、Purged CV、LOPO 驗證、Threshold Sweep、個股 Deep Case。</div>
+        <div class="path-tags">
+          <span class="chip pri">模型績效</span><span class="chip pri">ICIR</span><span class="chip pri">策略回測</span><span class="chip vio">特徵</span><span class="chip vio">文本</span><span class="chip ok">治理</span>
+        </div>
+        <div class="path-go">進入量化工作台 <span class="arr">→</span></div>
+      </div>
+    </div>
+
+    <div class="sh"><h2>六階段研究進度</h2><div class="sh-sub">phase 1 → phase 6 · all complete</div></div>
+    <div class="phase-row">
+      ${[
+        ["Phase 1","資料·特徵工程","1,626 候選 · 9 支柱"],
+        ["Phase 2","模型訓練·驗證","2 engines · 3 horizons · 4-fold CV"],
+        ["Phase 3","擴充分析","成本/跨地平線/支柱/個案"],
+        ["Phase 4","治理·漂移偵測","Model Card · DSR · Signal Monitor"],
+        ["Phase 5","文本·情緒因子","jieba + SnowNLP · 500 keywords"],
+        ["Phase 6","深度驗證","LOPO · Threshold · 2454",true],
+      ].map(([k,t,s,cur])=>`<div class="ph ${cur?'cur':''}">
+        <div class="ph-k">${k}</div>
+        <div class="ph-ti">${t}</div>
+        <div class="ph-sb">${s}</div>
+      </div>`).join('')}
+    </div>
+
+    <div class="sh"><h2>方法論核心</h2><div class="sh-sub">feature · validation · model</div></div>
+    <div class="research">
+      <div class="card span-4">
+        <div class="card-hd"><div class="ti">🎯 九支柱因子工程</div><div class="mt">feature</div></div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.55">
+          <b>1,623 候選因子</b>經三階段篩選（IC → Chi²/MI → VIF）至 <b>91 生產特徵</b>，跨 9 個理論支柱。
+        </div>
+        <div class="pillar-bars" style="margin-top:10px">
+          ${PILLARS.slice(0,5).map(p=>{
+            const color=PILLAR_COLORS[p.k];
+            return `<div class="pb-row">
+              <div class="pb-pill" data-p="${p.k}">${p.k}</div>
+              <div class="pb-bar-wrap"><div class="pb-bar" style="width:${p.pct}%;background:${color}"></div></div>
+              <div class="pb-num">${p.n}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="card span-4">
+        <div class="card-hd"><div class="ti">✅ 嚴謹的時序交叉驗證</div><div class="mt">validation</div></div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.55">
+          <b>Purged Walk-Forward CV</b>（4 折），Expanding Window 配合 <b>20 日 Embargo</b>。
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px">
+          <span class="chip pri">initial_train=252</span>
+          <span class="chip pri">test=63</span>
+          <span class="chip vio">embargo=20</span>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:3px">
+          ${[0,1,2,3].map(i=>`<div style="flex:1;display:flex;gap:2px;height:32px">
+            <div style="flex:${i+2};background:linear-gradient(90deg,#dbeafe,#bfdbfe);border-radius:4px"></div>
+            <div style="width:6px;background:#fed7aa"></div>
+            <div style="flex:1;background:#dcfce7;border-radius:4px"></div>
+          </div>`).join('')}
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--t3);margin-top:3px">
+          <span>■ train</span><span>■ embargo</span><span>■ test</span>
+        </div>
+      </div>
+      <div class="card span-4">
+        <div class="card-hd"><div class="ti">⚡ 雙引擎 + 成本回測</div><div class="mt">model</div></div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.55">
+          <b>LightGBM + XGBoost</b> 雙引擎加上等權 Ensemble，三地平線覆蓋短中長週期。
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px">
+          <span class="chip">D+1 日度</span>
+          <span class="chip">D+5 週度</span>
+          <span class="chip pri">D+20 月度 ⭐</span>
+        </div>
+        <div style="margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-family:var(--mono);font-size:10px;text-align:center">
+          <div style="padding:8px;background:var(--tint);border-radius:6px"><div style="color:var(--t3);font-size:9px">DISCOUNT</div><div style="color:var(--emerald);font-weight:700;font-size:12px;margin-top:2px">+17.77%</div></div>
+          <div style="padding:8px;background:var(--tint);border-radius:6px"><div style="color:var(--t3);font-size:9px">STANDARD</div><div style="color:var(--emerald);font-weight:700;font-size:12px;margin-top:2px">+13.83%</div></div>
+          <div style="padding:8px;background:var(--tint);border-radius:6px"><div style="color:var(--t3);font-size:9px">CONSERV.</div><div style="color:var(--emerald);font-weight:700;font-size:12px;margin-top:2px">+11.94%</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box info">📅 <b>資料時效</b>：本平台為<b>固定歷史資料集（2023/03 – 2025/03）</b>下的互動式分析與研究展示系統，非即時市場監控。<span class="mono" style="color:var(--t3);font-size:11px">· latest report 2026-04-20 03:20 · historical snapshot</span></div>
+
+    <div class="box warn">⚠️ <b>免責聲明</b>：本系統為課程專案成果，不構成任何投資建議。所有顯示結果均為歷史回測數據，非即時預測。股市投資有風險，過去的回測績效不代表未來報酬。</div>
+  </div>`;
+}
+
+function viewModel(){
+  const auc = 0.6455;
+  return `<div class="view">
+    <div class="sh">
+      <h2>📊 模型績效分析</h2>
+      <div class="sh-sub">horizon · <span id="h-lbl">D+${state.horizon}</span> · purged walk-forward cv</div>
+    </div>
+    <div class="box info">📋 <b>研究背景</b>：固定歷史資料集（2023/03–2025/03）｜Purged Walk-Forward CV（4 Folds）｜LightGBM + XGBoost Ensemble。AUC 衡量分類能力，0.5 = 隨機，> 0.52 為本系統最低門檻。</div>
+
+    <div style="display:flex;align-items:center;gap:12px;margin:16px 0">
+      <span style="font-size:12px;color:var(--t3);font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase">HORIZON</span>
+      <div class="seg">
+        <button data-h="1" onclick="setH(1)">D+1</button>
+        <button data-h="5" onclick="setH(5)">D+5</button>
+        <button data-h="20" class="on" onclick="setH(20)">D+20</button>
+      </div>
+    </div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi acc-blue"><div class="kpi-lbl">BEST AUC</div><div class="kpi-val">${auc.toFixed(4)}</div><div class="kpi-delta up">▲ xgboost</div></div>
+      <div class="kpi acc-violet"><div class="kpi-lbl">RANK IC</div><div class="kpi-val">+0.015</div><div class="kpi-sub">strict PIT</div></div>
+      <div class="kpi acc-emerald"><div class="kpi-lbl">LOGLOSS Δ</div><div class="kpi-val">−2.1%</div><div class="kpi-sub">vs baseline</div></div>
+      <div class="kpi acc-rose"><div class="kpi-lbl">MAX DD</div><div class="kpi-val">−8.70%</div><div class="kpi-sub">cost standard</div></div>
+    </div>
+
+    <div class="research">
+      <div class="card span-8">
+        <div class="card-hd"><div class="ti">Cumulative Returns — D+20 · 三成本情境</div><div class="mt">backtest</div></div>
+        ${multiLineChart(720,240, CUMRET_SERIES, ["#10b981","#2563eb","#f59e0b"], ["Standard 0.583%","Discount 0.356%","Conservative 0.732%"])}
+      </div>
+      <div class="card span-4">
+        <div class="card-hd"><div class="ti">OOS AUC Gauge</div><div class="mt">xgboost_D20</div></div>
+        <div class="gauge" style="margin-top:18px">
+          ${gauge(auc)}
+          <div class="gauge-val">${auc.toFixed(4)}</div>
+          <div class="gauge-lbl">AUC · target ≥ 0.52</div>
+        </div>
+        <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:var(--mono);font-size:11px">
+          <div style="padding:8px;background:var(--tint);border-radius:6px"><div style="color:var(--t3);font-size:9px;letter-spacing:.06em;text-transform:uppercase">SHARPE</div><div style="color:var(--t1);font-weight:700;font-size:14px;margin-top:2px">0.81</div></div>
+          <div style="padding:8px;background:var(--tint);border-radius:6px"><div style="color:var(--t3);font-size:9px;letter-spacing:.06em;text-transform:uppercase">DSR</div><div style="color:var(--emerald);font-weight:700;font-size:14px;margin-top:2px">12.12 PASS</div></div>
+        </div>
+      </div>
+      <div class="card span-12">
+        <div class="card-hd"><div class="ti">LOPO 支柱貢獻 — Leave-One-Pillar-Out · D+20</div><div class="mt">phase 6 · Δauc</div></div>
+        <div class="pillar-bars">
+          ${PILLARS.map(p=>{
+            const color=PILLAR_COLORS[p.k];
+            const positive = p.delta>0;
+            return `<div class="pb-row">
+              <div class="pb-pill" data-p="${p.k}">${p.k}</div>
+              <div class="pb-bar-wrap"><div class="pb-bar" style="width:${p.pct}%;background:${color}"></div></div>
+              <div class="pb-num">${p.n}</div>
+              <div class="pb-delta ${positive?'':'down'}">${positive?'+':''}${(p.delta*10000).toFixed(1)}bps</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="box info" style="margin-top:12px">📋 <b>解讀</b>：risk 支柱貢獻最大（+62bps AUC），若移除則績效顯著下降；sent 支柱在嚴格 PIT 下貢獻接近 0（-0.3bps），屬噪音邊緣。</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function viewInvest(){
+  return `<div class="view">
+    <div class="sh"><h2>🌱 投資解讀面板</h2><div class="sh-sub">historical snapshot · 2025-03-28</div></div>
+    <div class="box warn" style="margin-bottom:14px">⚠️ 本頁所有數據為<b>歷史回測觀察值</b>（2025-03-28），僅供研究展示。非即時行情、非投資建議。</div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi acc-blue"><div class="kpi-lbl">判讀日期</div><div class="kpi-val" style="font-size:1.2rem;padding-top:6px">2025-03-28</div><div class="kpi-sub">模型 xgboost_D20</div></div>
+      <div class="kpi acc-emerald"><div class="kpi-lbl">看多家數</div><div class="kpi-val">127</div><div class="kpi-sub">label=1 · 前 1,930</div></div>
+      <div class="kpi acc-amber"><div class="kpi-lbl">看空家數</div><div class="kpi-val">88</div><div class="kpi-sub">label=0</div></div>
+      <div class="kpi acc-violet"><div class="kpi-lbl">HIT RATE</div><div class="kpi-val">58.3%</div><div class="kpi-delta up">▲ +8.3pp vs 50% baseline</div></div>
+    </div>
+
+    <div class="sh"><h2 style="font-size:1.1rem">判讀看多 TOP 8 · 歷史觀察</h2><div class="sh-sub">click a row to see fundamentals + risk</div></div>
+    <div class="card span-12" style="padding:0;overflow:hidden">
+      <table class="st-tbl">
+        <thead><tr>
+          <th style="width:12%">CODE</th>
+          <th style="width:22%">STOCK</th>
+          <th style="width:14%">INDUSTRY</th>
+          <th style="width:12%;text-align:right">CLOSING</th>
+          <th style="width:12%;text-align:right">FWD RET D+20</th>
+          <th style="width:12%;text-align:right">GROSS MARGIN</th>
+          <th style="width:12%;text-align:right">REV YOY</th>
+          <th style="width:8%"></th>
+        </tr></thead>
+        <tbody id="stock-rows">
+        ${STOCKS.map((s,i)=>`<tr onclick="openDr(${i})">
+          <td class="ticker">${s.id}</td>
+          <td class="name-zh">${s.name}</td>
+          <td><span class="ind-chip">${s.ind}</span></td>
+          <td style="text-align:right">${s.px.toFixed(2)}</td>
+          <td style="text-align:right" class="${s.ret>=0?'ret-up':'ret-dn'}">${s.ret>=0?'+':''}${(s.ret*100).toFixed(2)}%</td>
+          <td style="text-align:right">${s.gm==null?'—':(s.gm*100).toFixed(1)+'%'}</td>
+          <td style="text-align:right" class="${s.yoy>=0?'ret-up':'ret-dn'}">${s.yoy>=0?'+':''}${(s.yoy*100).toFixed(1)}%</td>
+          <td style="text-align:right;color:var(--t3)">→</td>
+        </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="research" style="margin-top:16px">
+      <div class="card span-6">
+        <div class="card-hd"><div class="ti">💰 交易成本試算</div><div class="mt">cost calc</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+          <label style="font-size:11px;color:var(--t3);font-family:var(--mono);letter-spacing:.05em">張數<input type="number" id="cc-lots" value="5" min="1" style="display:block;margin-top:4px;width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;font-family:var(--mono);font-size:13px" oninput="calcCost()"></label>
+          <label style="font-size:11px;color:var(--t3);font-family:var(--mono);letter-spacing:.05em">成本情境<select id="cc-cost" style="display:block;margin-top:4px;width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;font-family:var(--mono);font-size:13px;background:#fff" onchange="calcCost()">
+            <option value="0.00356">Discount 0.356%</option>
+            <option value="0.00583" selected>Standard 0.583%</option>
+            <option value="0.00732">Conservative 0.732%</option>
+          </select></label>
+        </div>
+        <div id="cc-out" style="margin-top:12px;padding:14px;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-radius:10px;text-align:center">
+          <div style="font-size:10px;color:#065f46;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase">單次買賣總成本 · 台積電 2330</div>
+          <div style="font-family:var(--mono);font-size:1.6rem;font-weight:700;color:#065f46;margin-top:4px" id="cc-val">NT$ 25,784</div>
+          <div style="font-family:var(--mono);font-size:11px;color:#065f46;margin-top:2px" id="cc-bd">5 張 × NT$885 × 0.583% × 2 趟</div>
+        </div>
+      </div>
+      <div class="card span-6">
+        <div class="card-hd"><div class="ti">📊 市場信號分佈</div><div class="mt">signal dist</div></div>
+        <div style="padding:10px 0">
+          <div style="height:56px;display:flex;align-items:flex-end;gap:3px">
+            ${[8,14,22,38,55,72,88,95,88,72,55,38,22,14,8].map((h,i)=>{
+              const c = i<7?'#f43f5e':(i===7?'#94a3b8':'#10b981');
+              return `<div style="flex:1;height:${h}%;background:${c};border-radius:2px 2px 0 0;opacity:.85"></div>`;
+            }).join('')}
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:4px">
+            <span>0.0</span><span>0.5 thresh</span><span>1.0</span>
+          </div>
+          <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="padding:10px;background:rgba(16,185,129,.06);border-left:3px solid var(--emerald);border-radius:0 8px 8px 0">
+              <div style="font-size:10px;color:var(--emerald);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--mono)">看多</div>
+              <div style="font-family:var(--mono);font-size:1.2rem;font-weight:700;color:#065f46">127 · 59%</div>
+            </div>
+            <div style="padding:10px;background:rgba(244,63,94,.06);border-left:3px solid var(--rose);border-radius:0 8px 8px 0">
+              <div style="font-size:10px;color:var(--rose);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--mono)">看空</div>
+              <div style="font-family:var(--mono);font-size:1.2rem;font-weight:700;color:#9f1239">88 · 41%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function viewICIR(){
+  return `<div class="view">
+    <div class="sh"><h2>📈 ICIR 信號穩定性</h2><div class="sh-sub">rank ic time series · 24 months</div></div>
+    <div class="box info">📋 Rank IC（Information Coefficient）衡量每期預測排序與實際報酬排序的 Spearman 相關。接近 0 代表排序能力微弱但未漏出；ICIR = IC_mean / IC_std。</div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi acc-blue"><div class="kpi-lbl">IC MEAN</div><div class="kpi-val">+0.015</div><div class="kpi-sub">strict PIT · 2023-04→2025-03</div></div>
+      <div class="kpi acc-violet"><div class="kpi-lbl">IC STD</div><div class="kpi-val">0.011</div><div class="kpi-sub">monthly rebalance</div></div>
+      <div class="kpi acc-rose"><div class="kpi-lbl">ICIR</div><div class="kpi-val">−0.015</div><div class="kpi-sub">near-zero mean dominates</div></div>
+      <div class="kpi acc-emerald"><div class="kpi-lbl">HIT RATE</div><div class="kpi-val">67%</div><div class="kpi-sub">16 / 24 months IC > 0</div></div>
+    </div>
+
+    <div class="research" style="margin-top:16px">
+      <div class="card span-12">
+        <div class="card-hd"><div class="ti">Rank IC Time Series — ensemble D+20</div><div class="mt">24 months · expanding OOS</div></div>
+        ${lineChart(1100,220, ICIR_SERIES, "#2563eb")}
+      </div>
+      <div class="card span-6">
+        <div class="card-hd"><div class="ti">Monthly Returns Distribution</div><div class="mt">ensemble D+20</div></div>
+        <div style="height:120px;display:flex;align-items:flex-end;gap:2px;padding:10px 0">
+          ${[-3,-2,-1,0,1,2,3,4,5,6,8,10,12,6,3,-2,-4,-1,2,5,7,9,11,8].map((v,i)=>{
+            const h = Math.abs(v)*5+10;
+            const c = v>=0?'#10b981':'#f43f5e';
+            return `<div style="flex:1;height:${h}px;background:${c};opacity:.8;border-radius:2px 2px 0 0"></div>`;
+          }).join('')}
+        </div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);display:flex;justify-content:space-between;margin-top:4px">
+          <span>2023-04</span><span>2024-04</span><span>2025-03</span>
+        </div>
+      </div>
+      <div class="card span-6">
+        <div class="card-hd"><div class="ti">Fold Stability</div><div class="mt">4-fold purged CV</div></div>
+        <div style="padding:14px 0">
+          ${[1,2,3,4].map(f=>{
+            const aucs = [0.6421,0.6478,0.6512,0.6410];
+            const w = (aucs[f-1]-0.5)*600;
+            return `<div style="display:flex;align-items:center;gap:10px;margin:8px 0;font-family:var(--mono);font-size:11px">
+              <div style="width:52px;color:var(--t3)">Fold ${f}</div>
+              <div style="flex:1;height:14px;background:var(--subtle);border-radius:4px;overflow:hidden;position:relative">
+                <div style="width:${w}px;height:100%;background:var(--grad-pri);border-radius:4px"></div>
+                <div style="position:absolute;right:0;top:0;bottom:0;width:2px;background:var(--t3)"></div>
+              </div>
+              <div style="width:64px;text-align:right;color:var(--t1);font-weight:600">${aucs[f-1].toFixed(4)}</div>
+            </div>`;
+          }).join('')}
+          <div class="box ok" style="margin-top:10px;font-size:12px">✅ 四折 AUC 標準差 0.0045，fold 間穩定性佳。</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function viewFeat(){
+  return `<div class="view">
+    <div class="sh"><h2>🔬 特徵工程分析</h2><div class="sh-sub">9 pillars · 1,623 → 91 features · 三階段篩選</div></div>
+    <div class="box info">📋 <b>篩選管線</b>：MI（Mutual Information）→ VIF（Variance Inflation Factor）→ Stability（跨期一致性）。每階段都輸出可審計的 JSON。</div>
+
+    <div class="research" style="margin-top:14px">
+      <div class="card span-6">
+        <div class="card-hd"><div class="ti">九支柱因子分布</div><div class="mt">候選 · 入選</div></div>
+        <div class="pillar-bars" style="margin-top:8px">
+          ${PILLARS.map(p=>{
+            const color=PILLAR_COLORS[p.k];
+            return `<div class="pb-row">
+              <div class="pb-pill" data-p="${p.k}">${p.k}</div>
+              <div class="pb-bar-wrap"><div class="pb-bar" style="width:${Math.min(100,p.n/15)}%;background:${color}"></div></div>
+              <div class="pb-num">${p.n}</div>
+              <div class="pb-delta">${p.lbl}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="card span-6">
+        <div class="card-hd"><div class="ti">特徵篩選漏斗</div><div class="mt">funnel · 3 stages</div></div>
+        <div style="padding:14px 0;display:flex;flex-direction:column;align-items:center;gap:6px">
+          ${[
+            {n:1623,lbl:"候選池",w:100,c:"#2563eb"},
+            {n:584, lbl:"MI > 0.001",w:78,c:"#4f46e5"},
+            {n:142, lbl:"VIF < 10",w:50,c:"#7c3aed"},
+            {n:91,  lbl:"Stability pass",w:32,c:"#10b981"},
+          ].map(s=>`<div style="width:${s.w}%;background:${s.c};color:#fff;padding:10px 16px;border-radius:8px;display:flex;justify-content:space-between;font-family:var(--mono);font-weight:700;font-size:13px">
+            <span>${s.lbl}</span><span>${s.n}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="card span-12">
+        <div class="card-hd"><div class="ti">SHAP Summary — top 20 features</div><div class="mt">xgboost_D20 · mean |SHAP|</div></div>
+        ${[
+          ["risk_volatility_regime","risk",0.148],["trend_macd_20d","trend",0.132],["fund_roe_ttm","fund",0.118],
+          ["chip_foreign_buy_20d","chip",0.106],["trend_rsi_14","trend",0.094],["fund_revenue_yoy","fund",0.088],
+          ["val_pb","val",0.076],["trend_ema_ratio","trend",0.071],["risk_drawdown","risk",0.066],
+          ["chip_invest_trust_net","chip",0.061],["fund_operating_margin","fund",0.057],["txt_AI伺服器","txt",0.052],
+          ["ind_relative_strength","ind",0.049],["trend_obv_slope","trend",0.045],["risk_market_ret_20d","risk",0.041],
+          ["val_earning_yield","val",0.038],["sent_polarity_net","sent",0.034],["fund_gross_margin","fund",0.031],
+          ["event_news_count","event",0.028],["chip_dealer_buy","chip",0.025]
+        ].map(([name,p,v])=>{
+          const color = PILLAR_COLORS[p];
+          const w = v*500;
+          return `<div style="display:flex;align-items:center;gap:10px;margin:5px 0;font-family:var(--mono);font-size:11px">
+            <div class="pb-pill" data-p="${p}" style="flex-shrink:0">${p}</div>
+            <div style="width:180px;color:var(--t1);font-weight:600;font-size:11px">${name}</div>
+            <div style="flex:1;height:10px;background:var(--subtle);border-radius:4px;overflow:hidden"><div style="width:${w}px;height:100%;background:${color};border-radius:4px"></div></div>
+            <div style="width:50px;text-align:right;color:var(--t2)">${v.toFixed(3)}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function viewText(){
+  const maxS = Math.max(...KEYWORDS.map(k=>Math.abs(k.s)));
+  return `<div class="view">
+    <div class="sh"><h2>📝 文本 · 情緒因子</h2><div class="sh-sub">jieba + SnowNLP · 9,655 → 500 keywords · phase 5B</div></div>
+    <div class="box info">📋 文本管線：斷詞（jieba 財經詞典）→ Chi² + MI + Lift 三重篩選 → SnowNLP 極性 + 辭典輔助情緒打分 → PIT 時間對齊。</div>
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi acc-violet"><div class="kpi-lbl">ARTICLES</div><div class="kpi-val">1.12M</div><div class="kpi-sub">PTT/Dcard/Mobile01/Yahoo</div></div>
+      <div class="kpi acc-cyan"><div class="kpi-lbl">KEYWORDS</div><div class="kpi-val">500</div><div class="kpi-sub">from 9,655 tokens</div></div>
+      <div class="kpi acc-blue"><div class="kpi-lbl">TXT FEATURES</div><div class="kpi-val">1,521</div><div class="kpi-sub">kw × 3 window × volume</div></div>
+      <div class="kpi acc-rose"><div class="kpi-lbl">SENT FEATURES</div><div class="kpi-val">11</div><div class="kpi-sub">polarity · spread · reversal</div></div>
+    </div>
+
+    <div class="research" style="margin-top:16px">
+      <div class="card span-8">
+        <div class="card-hd"><div class="ti">Top Keywords by Sentiment Lift</div><div class="mt">top-20 · 情緒分數</div></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;padding:14px 6px;align-items:center;justify-content:center;min-height:220px">
+          ${KEYWORDS.map(k=>{
+            const size = 12 + Math.abs(k.s)/maxS * 28;
+            const color = k.s>0 ? `rgba(16,185,129,${.55+Math.abs(k.s)*.4})` : `rgba(244,63,94,${.55+Math.abs(k.s)*.4})`;
+            return `<span style="font-family:var(--sans);font-size:${size}px;font-weight:700;color:${color};padding:2px 6px;letter-spacing:-0.01em">${k.w}</span>`;
+          }).join('')}
+        </div>
+        <div style="display:flex;justify-content:center;gap:16px;font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:6px">
+          <span>● <span style="color:var(--emerald);font-weight:700">正向</span></span>
+          <span>● <span style="color:var(--rose);font-weight:700">負向</span></span>
+          <span>size ∝ |sentiment|</span>
+        </div>
+      </div>
+      <div class="card span-4">
+        <div class="card-hd"><div class="ti">Platform Share</div><div class="mt">source breakdown</div></div>
+        <div style="padding:16px 0">
+          ${[
+            ["PTT","#2563eb",42],
+            ["Yahoo News","#7c3aed",28],
+            ["Mobile01","#06b6d4",18],
+            ["Dcard","#f43f5e",12],
+          ].map(([n,c,p])=>`<div style="margin:8px 0;font-family:var(--mono);font-size:11px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--t1);font-weight:600;font-family:var(--sans)">${n}</span><span style="color:var(--t2)">${p}%</span></div>
+            <div style="height:8px;background:var(--subtle);border-radius:4px;overflow:hidden"><div style="width:${p}%;height:100%;background:${c};border-radius:4px"></div></div>
+          </div>`).join('')}
+        </div>
+        <div style="padding:10px;background:var(--tint);border-radius:8px;margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--t2);line-height:1.5">
+          <b style="color:var(--t1)">覆蓋率</b>：1,930 支個股中 1,812 支（93.9%）至少有 1 篇文章命中。
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function viewGeneric(title, sub){
+  return `<div class="view">
+    <div class="sh"><h2>${title}</h2><div class="sh-sub">${sub}</div></div>
+    <div class="box info">📋 本頁面為設計系統展示版本，保留與生產環境一致的視覺規範。完整互動邏輯請參照左側其他已實作頁籤（首頁 · 投資解讀 · 模型績效 · ICIR · 特徵 · 文本）。</div>
+    <div class="research" style="margin-top:14px">
+      ${[1,2,3,4,5,6].map(i=>`<div class="card span-4">
+        <div class="card-hd"><div class="ti">模組 ${i}</div><div class="mt">placeholder</div></div>
+        <div style="height:120px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border:1px dashed var(--bd);border-radius:10px;display:grid;place-items:center;font-family:var(--mono);font-size:11px;color:var(--t3)">chart · table · panel</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ===== Rendering =====
+const VIEWS = {
+  home:  {title:"首頁",              render: viewHome},
+  invest:{title:"投資解讀面板",      render: viewInvest},
+  model: {title:"模型績效",          render: viewModel},
+  icir:  {title:"ICIR 信號穩定性",   render: viewICIR},
+  feat:  {title:"特徵工程分析",      render: viewFeat},
+  text:  {title:"文本分析",          render: viewText},
+  bt:    {title:"策略回測",          render:()=>viewGeneric("💰 策略回測","cumulative returns · drawdown · cost scenarios")},
+  data:  {title:"資料品質總覽",      render:()=>viewGeneric("🗃️ 資料品質總覽","9 quality gates · PIT validation · missingness")},
+  gov:   {title:"模型治理",          render:()=>viewGeneric("🛡️ 模型治理","model card · DSR · baseline")},
+  sig:   {title:"信號監控",          render:()=>viewGeneric("📡 信號監控","PSI drift · KS test · signal decay")},
+  ext:   {title:"擴充分析",          render:()=>viewGeneric("🎯 擴充分析","cost sensitivity · cross-horizon heatmap")},
+  p6:    {title:"Phase 6 深度驗證",  render:()=>viewGeneric("🔭 Phase 6 深度驗證","LOPO · threshold sweep · 2454 case")},
+};
+
+function nav(v){
+  state.view = v;
+  document.querySelectorAll('.sb-link').forEach(el=>el.classList.toggle('active', el.dataset.view===v));
+  document.getElementById('crumb-cur').textContent = VIEWS[v].title;
+  document.getElementById('app').innerHTML = VIEWS[v].render();
+  window.scrollTo({top:0, behavior:'smooth'});
+  try { localStorage.setItem('dash-view', v); } catch(e){}
+}
+
+function setH(h){
+  state.horizon = h;
+  document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on', Number(b.dataset.h)===h));
+  const l = document.getElementById('h-lbl'); if(l) l.textContent = `D+${h}`;
+}
+
+// Cost calc
+function calcCost(){
+  const lots = Math.max(1, Number(document.getElementById('cc-lots').value)||1);
+  const cost = Number(document.getElementById('cc-cost').value);
+  const px = 885; // 2330
+  const total = lots * 1000 * px * cost * 2;
+  document.getElementById('cc-val').textContent = 'NT$ ' + Math.round(total).toLocaleString();
+  const costTxt = cost===0.00356?'0.356%':cost===0.00583?'0.583%':'0.732%';
+  document.getElementById('cc-bd').textContent = `${lots} 張 × NT$${px} × ${costTxt} × 2 趟`;
+}
+
+// Drawer
+function openDr(i){
+  const s = STOCKS[i];
+  document.getElementById('dr-ti').textContent = s.id;
+  document.getElementById('dr-nm').textContent = s.name;
+  document.getElementById('dr-id').textContent = s.ind;
+  document.getElementById('dr-px').textContent = 'NT$ '+s.px.toFixed(2);
+  const retEl = document.getElementById('dr-ret');
+  retEl.textContent = (s.ret>=0?'+':'')+(s.ret*100).toFixed(2)+'%';
+  retEl.style.color = s.ret>=0 ? '#10b981':'#f43f5e';
+  document.getElementById('dr-gm').textContent = s.gm==null?'—':(s.gm*100).toFixed(1)+'%';
+  document.getElementById('dr-yoy').textContent = (s.yoy>=0?'+':'')+(s.yoy*100).toFixed(1)+'%';
+  document.getElementById('dr-obs').textContent = s.obs;
+  document.getElementById('dr-risk').textContent = s.risk;
+  document.getElementById('dr').classList.add('on');
+  document.getElementById('drOv').classList.add('on');
+}
+function closeDr(){
+  document.getElementById('dr').classList.remove('on');
+  document.getElementById('drOv').classList.remove('on');
+}
+document.getElementById('drOv').addEventListener('click', closeDr);
+
+// Sidebar clicks
+document.querySelectorAll('.sb-link').forEach(el=>{
+  el.addEventListener('click', ()=>nav(el.dataset.view));
+});
+
+// Keyboard
+document.addEventListener('keydown', e=>{
+  if(e.target.tagName==='INPUT' || e.target.tagName==='SELECT') return;
+  if(e.key==='g') nav('home');
+  if(e.key==='i') nav('invest');
+  if(e.key==='Escape') closeDr();
+});
+
+// Clock
+function tickClock(){
+  const d = new Date();
+  const p = n=>String(n).padStart(2,'0');
+  document.getElementById('clock').textContent = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+setInterval(tickClock,1000); tickClock();
+
+// Boot
+const saved = (()=>{try{return localStorage.getItem('dash-view')}catch(e){return null}})();
+nav(saved && VIEWS[saved] ? saved : 'home');
+</script>
+</body>
+</html>

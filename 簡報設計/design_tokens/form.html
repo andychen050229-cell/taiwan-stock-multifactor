@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-TW"><head><meta charset="utf-8"><title>Form Controls</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+body{padding:18px 24px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.f{display:flex;flex-direction:column;gap:6px}
+label{font-family:var(--mono);font-size:10px;color:var(--gl-text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:700}
+input,select{font-family:var(--sans);font-size:13px;padding:9px 12px;border:1px solid var(--gl-border-str);border-radius:8px;background:#fff;color:var(--gl-text);outline:none;transition:all .2s}
+input:focus,select:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.12)}
+.slider-wrap{display:flex;flex-direction:column;gap:8px}
+.sl-track{height:4px;background:var(--gl-subtle);border-radius:999px;position:relative}
+.sl-fill{position:absolute;left:0;top:0;height:100%;width:65%;background:linear-gradient(90deg,#2563eb,#7c3aed);border-radius:999px}
+.sl-thumb{position:absolute;left:65%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;background:#fff;border:2px solid #2563eb;border-radius:50%;box-shadow:var(--gl-shadow-sm)}
+.sl-val{font-family:var(--mono);font-size:11px;color:var(--gl-text-2);align-self:flex-end}
+.seg{display:inline-flex;background:var(--gl-subtle);border-radius:8px;padding:3px}
+.seg button{padding:6px 14px;border:none;background:transparent;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--gl-text-2);border-radius:6px;cursor:pointer}
+.seg button.on{background:#fff;color:var(--gl-text);box-shadow:var(--gl-shadow-sm)}
+</style></head><body>
+<div class="f"><label>股票代號</label><input value="2330 台積電"></div>
+<div class="f"><label>Embargo (天)</label><select><option>20 天 · 標準</option></select></div>
+<div class="f"><label>信心門檻</label>
+  <div class="slider-wrap"><div class="sl-track"><div class="sl-fill"></div><div class="sl-thumb"></div></div><div class="sl-val">0.65</div></div>
+</div>
+<div class="f"><label>時間窗格</label>
+  <div class="seg"><button>1M</button><button class="on">3M</button><button>6M</button><button>YTD</button><button>ALL</button></div>
+</div>
+</body></html>

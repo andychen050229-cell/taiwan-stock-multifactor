@@ -1,0 +1,182 @@
+/* ==========================================================================
+   台股多因子預測系統 — Design Tokens
+   glint-light theme · light canvas with dark sidebar accent
+   Source of truth: 程式碼/儀表板/utils.py → inject_custom_css()
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+    /* ---- Canvas ---- */
+    --gl-bg:          #fafbfc;
+    --gl-surface:     #ffffff;
+    --gl-subtle:      #f1f5f9;
+    --gl-tint:        #f8fafc;
+    --gl-overlay:     rgba(255, 255, 255, 0.72);
+
+    /* ---- Sidebar (dark accent zone) ---- */
+    --gl-sidebar-1:   #0f1419;
+    --gl-sidebar-2:   #1a2332;
+    --gl-sidebar-fg:  #c8d6e5;
+    --gl-sidebar-mut: #8899aa;
+
+    /* ---- Borders ---- */
+    --gl-border:      #e2e8f0;
+    --gl-border-str:  #cbd5e1;
+
+    /* ---- Text ---- */
+    --gl-text:        #0f172a;   /* primary */
+    --gl-text-2:      #475569;   /* secondary */
+    --gl-text-3:      #94a3b8;   /* tertiary / caption */
+
+    /* ---- Accents (signal palette) ---- */
+    --gl-blue:        #2563eb;
+    --gl-violet:      #7c3aed;
+    --gl-cyan:        #06b6d4;
+    --gl-emerald:     #10b981;
+    --gl-amber:       #f59e0b;
+    --gl-rose:        #f43f5e;
+    --gl-indigo:      #4f46e5;
+    --gl-streamlit:   #636EFA;   /* Streamlit theme primary */
+
+    /* ---- Gradients ---- */
+    --gl-grad-pri:    linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    --gl-grad-tech:   linear-gradient(135deg, #06b6d4 0%, #2563eb 50%, #7c3aed 100%);
+    --gl-grad-ok:     linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+    --gl-grad-warm:   linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%);
+    --gl-grad-hero-title: linear-gradient(135deg, #0f172a 0%, #2563eb 55%, #7c3aed 100%);
+
+    /* ---- Typography ---- */
+    --gl-font-sans:   'Inter', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                       'Microsoft JhengHei', 'PingFang TC', 'Hiragino Sans TC', sans-serif;
+    --gl-font-mono:   'JetBrains Mono', 'Noto Sans TC', 'SF Mono', 'Consolas', 'Liberation Mono', monospace;
+
+    /* ---- Type scale ---- */
+    --gl-fs-hero:     2.6rem;    /* hero title */
+    --gl-fs-h1:       2.1rem;
+    --gl-fs-h2:       1.5rem;
+    --gl-fs-h3:       1.15rem;
+    --gl-fs-body:     0.95rem;
+    --gl-fs-caption:  0.82rem;
+    --gl-fs-micro:    0.72rem;   /* kpi labels, eyebrows */
+    --gl-fs-kpi:      2.0rem;    /* custom KPI numeric value */
+    --gl-fs-metric:   1.7rem;    /* stMetric numeric */
+
+    --gl-lh-tight:    1.1;
+    --gl-lh-body:     1.6;
+
+    --gl-ls-tight:    -0.03em;   /* hero */
+    --gl-ls-h:        -0.01em;
+    --gl-ls-label:    0.06em;    /* uppercase labels */
+    --gl-ls-eyebrow:  0.10em;    /* ALL-CAPS eyebrows */
+
+    /* ---- Radii ---- */
+    --gl-r-pill:      999px;
+    --gl-r-xs:        6px;
+    --gl-r-sm:        8px;
+    --gl-r-md:        10px;
+    --gl-r-lg:        14px;
+    --gl-r-xl:        18px;
+
+    /* ---- Spacing ---- */
+    --gl-space-1:     4px;
+    --gl-space-2:     8px;
+    --gl-space-3:     12px;
+    --gl-space-4:     16px;
+    --gl-space-5:     20px;
+    --gl-space-6:     24px;
+    --gl-space-8:     32px;
+    --gl-space-10:    40px;
+
+    /* ---- Shadows ---- */
+    --gl-shadow-sm:   0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+    --gl-shadow-md:   0 4px 6px rgba(15,23,42,.04), 0 10px 15px rgba(15,23,42,.06);
+    --gl-shadow-lg:   0 10px 15px rgba(15,23,42,.06), 0 20px 25px rgba(15,23,42,.08);
+    --gl-shadow-glow: 0 0 0 1px rgba(37,99,235,.08), 0 8px 30px rgba(37,99,235,.12);
+
+    /* ---- Motion ---- */
+    --gl-ease:        cubic-bezier(.4,0,.2,1);
+    --gl-dur:         .25s;
+
+    /* ---- Tech grid background ---- */
+    --gl-grid-size:   40px;
+    --gl-grid-color:  rgba(37,99,235,0.025);
+}
+
+/* ==========================================================================
+   Base element styling (semantic)
+   ========================================================================== */
+
+html, body {
+    font-family: var(--gl-font-sans);
+    color: var(--gl-text);
+    background:
+        radial-gradient(ellipse at top left,  rgba(37,99,235,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at top right, rgba(124,58,237,0.05) 0%, transparent 50%),
+        linear-gradient(180deg, var(--gl-bg) 0%, #ffffff 400px);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* Tech grid overlay */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(var(--gl-grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--gl-grid-color) 1px, transparent 1px);
+    background-size: var(--gl-grid-size) var(--gl-grid-size);
+    pointer-events: none;
+    z-index: 0;
+}
+body > * { position: relative; z-index: 1; }
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--gl-font-sans);
+    color: var(--gl-text);
+    letter-spacing: var(--gl-ls-h);
+    line-height: var(--gl-lh-tight);
+}
+h1 { font-weight: 800; font-size: var(--gl-fs-h1); letter-spacing: var(--gl-ls-tight); }
+h2 { font-weight: 700; font-size: var(--gl-fs-h2); }
+h3 { font-weight: 600; font-size: var(--gl-fs-h3); }
+
+p, li { font-size: var(--gl-fs-body); line-height: var(--gl-lh-body); color: var(--gl-text-2); }
+
+code, kbd, pre, .gl-mono {
+    font-family: var(--gl-font-mono);
+    font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+/* Utility — tabular numerics */
+.gl-num {
+    font-family: var(--gl-font-mono);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Hero gradient title (mixin-style class) */
+.gl-title-gradient {
+    background: var(--gl-grad-hero-title);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    letter-spacing: var(--gl-ls-tight);
+}
+
+/* Eyebrow / uppercase label */
+.gl-eyebrow {
+    display: inline-block;
+    font-family: var(--gl-font-mono);
+    font-size: var(--gl-fs-micro);
+    font-weight: 700;
+    letter-spacing: var(--gl-ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--gl-blue);
+    background: rgba(37,99,235,0.08);
+    border: 1px solid rgba(37,99,235,0.18);
+    padding: 4px 12px;
+    border-radius: var(--gl-r-pill);
+}

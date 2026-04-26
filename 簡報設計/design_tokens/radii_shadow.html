@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-TW"><head><meta charset="utf-8"><title>Radii & Shadow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+body{padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.section-lbl{font-family:var(--mono);font-size:10px;color:var(--gl-text-3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px}
+.row{display:flex;gap:12px;align-items:flex-end}
+.r{width:60px;height:60px;background:#fff;border:1px solid var(--gl-border)}
+.lab{font-family:var(--mono);font-size:10px;color:var(--gl-text-3);margin-top:6px;text-align:center}
+.shadow-row{display:flex;gap:16px}
+.sh{width:90px;height:60px;border-radius:12px;background:#fff}
+.sh-sm{box-shadow:var(--gl-shadow-sm)}
+.sh-md{box-shadow:var(--gl-shadow-md)}
+.sh-glow{box-shadow:var(--gl-shadow-glow)}
+</style></head><body>
+<div>
+  <div class="section-lbl">Radius</div>
+  <div class="row">
+    <div><div class="r" style="border-radius:6px"></div><div class="lab">sm · 6</div></div>
+    <div><div class="r" style="border-radius:10px"></div><div class="lab">md · 10</div></div>
+    <div><div class="r" style="border-radius:14px"></div><div class="lab">lg · 14</div></div>
+    <div><div class="r" style="border-radius:20px"></div><div class="lab">xl · 20</div></div>
+    <div><div class="r" style="border-radius:999px;width:90px"></div><div class="lab">pill</div></div>
+  </div>
+</div>
+<div>
+  <div class="section-lbl">Elevation</div>
+  <div class="shadow-row">
+    <div><div class="sh sh-sm"></div><div class="lab">shadow-sm</div></div>
+    <div><div class="sh sh-md"></div><div class="lab">shadow-md</div></div>
+    <div><div class="sh sh-glow"></div><div class="lab">shadow-glow</div></div>
+  </div>
+</div>
+</body></html>

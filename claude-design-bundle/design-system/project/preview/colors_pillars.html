@@ -1,0 +1,31 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<style>
+.pillar {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 12px; border-radius: 10px;
+  border: 1px solid var(--gl-border);
+  background: var(--gl-surface);
+}
+.pill {
+  display: inline-flex; align-items: center;
+  padding: 4px 12px; border-radius: 6px;
+  font-family: var(--gl-font-mono); font-size: 12px; font-weight: 600;
+  width: fit-content;
+}
+.meta { font-family: var(--gl-font-mono); font-size: 10px; color: var(--gl-text-3); }
+.wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+</style>
+</head><body>
+<div class="wrap">
+  <div class="pillar"><span class="pill" style="background:#dbeafe;color:#1e40af">trend</span><div class="meta">25 · 技術面 MA/RSI/MACD</div></div>
+  <div class="pillar"><span class="pill" style="background:#dcfce7;color:#166534">fund</span><div class="meta">18 · ROE/ROA/YoY</div></div>
+  <div class="pillar"><span class="pill" style="background:#fae8ff;color:#86198f">val</span><div class="meta">5 · P/B · EV/EBITDA</div></div>
+  <div class="pillar"><span class="pill" style="background:#fef3c7;color:#92400e">event</span><div class="meta">7 · 新聞事件</div></div>
+  <div class="pillar"><span class="pill" style="background:#ffe4e6;color:#9f1239">risk</span><div class="meta">6 · 波動 · regime</div></div>
+  <div class="pillar"><span class="pill" style="background:#e0e7ff;color:#3730a3">chip</span><div class="meta">10 · 籌碼 · 三大法人</div></div>
+  <div class="pillar"><span class="pill" style="background:#cffafe;color:#155e75">ind</span><div class="meta">4 · 產業中性化</div></div>
+  <div class="pillar"><span class="pill" style="background:#f3e8ff;color:#6b21a8">txt</span><div class="meta">1,521 · keyword × window</div></div>
+  <div class="pillar"><span class="pill" style="background:#fce7f3;color:#9d174d">sent</span><div class="meta">11 · polarity / spread</div></div>
+</div>
+</body></html>

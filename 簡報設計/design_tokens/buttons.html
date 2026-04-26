@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-TW"><head><meta charset="utf-8"><title>Buttons</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+body{padding:24px;display:flex;flex-direction:column;gap:14px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button{font-family:var(--sans);font-weight:600;font-size:13px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px}
+.btn-pri{background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,0.25)}
+.btn-sec{background:#fff;color:var(--gl-text);border:1px solid var(--gl-border-str)}
+.btn-ghost{background:transparent;color:var(--gl-blue)}
+.btn-danger{background:#f43f5e;color:#fff}
+.btn-tech{background:#06b6d4;color:#fff}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px}
+.btn-lg{padding:14px 24px;font-size:15px;border-radius:12px}
+.lab{font-family:var(--mono);font-size:10px;color:var(--gl-text-3);letter-spacing:0.08em;text-transform:uppercase;min-width:72px}
+.ico{width:14px;height:14px}
+</style></head><body>
+<div class="row"><span class="lab">primary</span>
+  <button class="btn-pri">執行分析 →</button>
+  <button class="btn-pri btn-sm">Submit</button>
+  <button class="btn-pri btn-lg">開始預測</button>
+</div>
+<div class="row"><span class="lab">secondary</span>
+  <button class="btn-sec">取消</button>
+  <button class="btn-sec"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>匯出 CSV</button>
+  <button class="btn-ghost">了解更多 ›</button>
+</div>
+<div class="row"><span class="lab">signal</span>
+  <button class="btn-tech">Live Data</button>
+  <button class="btn-danger">刪除 Phase 5</button>
+</div>
+</body></html>

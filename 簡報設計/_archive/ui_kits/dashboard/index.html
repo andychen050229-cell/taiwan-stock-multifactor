@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<title>Dashboard UI Kit — 台股多因子預測系統</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fafbfc; --surface:#fff; --subtle:#f1f5f9; --tint:#f8fafc;
+  --sb1:#0f1419; --sb2:#1a2332; --sb-fg:#c8d6e5; --sb-mut:#8899aa;
+  --bd:#e2e8f0; --bd-str:#cbd5e1;
+  --t1:#0f172a; --t2:#475569; --t3:#94a3b8;
+  --blue:#2563eb; --violet:#7c3aed; --cyan:#06b6d4;
+  --emerald:#10b981; --amber:#f59e0b; --rose:#f43f5e; --indigo:#4f46e5;
+  --grad-pri:linear-gradient(135deg,#2563eb 0%,#7c3aed 100%);
+  --grad-tech:linear-gradient(135deg,#06b6d4 0%,#2563eb 50%,#7c3aed 100%);
+  --grad-hero:linear-gradient(135deg,#0f172a 0%,#2563eb 55%,#7c3aed 100%);
+  --sans:'Inter','Noto Sans TC',-apple-system,sans-serif;
+  --mono:'JetBrains Mono','Noto Sans TC',monospace;
+  --sh-sm:0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+  --sh-md:0 4px 6px rgba(15,23,42,.04), 0 10px 15px rgba(15,23,42,.06);
+  --sh-glow:0 0 0 1px rgba(37,99,235,.08), 0 8px 30px rgba(37,99,235,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:var(--sans);color:var(--t1);background:var(--bg);-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1}
+body{min-height:100vh;display:flex;background:radial-gradient(ellipse at top left,rgba(37,99,235,.05),transparent 50%),radial-gradient(ellipse at top right,rgba(124,58,237,.05),transparent 50%),linear-gradient(180deg,#fafbfc,#fff 400px);background-attachment:fixed}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(37,99,235,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(37,99,235,.025) 1px,transparent 1px);background-size:40px 40px}
+.mono,code{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.sb{width:248px;flex-shrink:0;position:sticky;top:0;height:100vh;background:linear-gradient(180deg,var(--sb1),var(--sb2));color:var(--sb-fg);display:flex;flex-direction:column;z-index:10;overflow-y:auto}
+.sb-brand{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-logo{width:36px;height:36px;border-radius:9px;background:var(--grad-tech);display:grid;place-items:center;font-family:var(--mono);font-weight:700;color:#fff;font-size:15px;margin-bottom:10px;box-shadow:0 4px 14px rgba(37,99,235,.35)}
+.sb-title{font-size:14px;font-weight:700;color:#fff;line-height:1.3}
+.sb-version{font-family:var(--mono);font-size:10px;color:var(--sb-mut);margin-top:2px;letter-spacing:.04em}
+.sb-group{padding:14px 18px 6px;font-family:var(--mono);font-size:10px;color:var(--sb-mut);font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.sb-link{display:flex;align-items:center;gap:10px;padding:8px 14px;margin:1px 8px;border-radius:8px;color:#c8d6e5;cursor:pointer;font-size:13px;font-weight:500;transition:all .18s;border-left:3px solid transparent}
+.sb-link:hover{background:rgba(99,110,250,.15);color:#fff}
+.sb-link.active{background:rgba(99,110,250,.22);color:#fff;border-left-color:#636EFA}
+.sb-link .glyph{font-size:14px;width:18px;text-align:center}
+.sb-link .k{font-family:var(--mono);font-size:9px;margin-left:auto;color:var(--sb-mut);padding:2px 5px;border:1px solid rgba(255,255,255,.08);border-radius:4px}
+.sb-foot{margin-top:auto;padding:14px 18px;border-top:1px solid rgba(255,255,255,.06);font-family:var(--mono);font-size:10px;color:var(--sb-mut);line-height:1.6}
+.sb-foot .row{display:flex;justify-content:space-between;margin-bottom:4px}
+.sb-foot .row b{color:var(--sb-fg);font-weight:600}
+.live{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:999px;font-size:9px;font-weight:700;color:var(--emerald);letter-spacing:.05em;text-transform:uppercase;font-family:var(--mono)}
+.live::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--emerald);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.main{flex:1;min-width:0;position:relative;z-index:1;padding:20px 28px 40px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:rgba(255,255,255,.72);border:1px solid var(--bd);border-radius:12px;backdrop-filter:blur(8px);margin-bottom:18px;box-shadow:var(--sh-sm)}
+.crumbs{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2)}
+.crumbs .slash{color:var(--t3)}
+.crumbs .cur{color:var(--t1);font-weight:600}
+.topbar-r{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--t3)}
+.topbar-r .sep{opacity:.4}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;background:var(--subtle);color:var(--t2);border:1px solid var(--bd);border-radius:999px;font-size:11px;font-weight:600;font-family:var(--mono)}
+.chip.pri{background:rgba(37,99,235,.08);color:var(--blue);border-color:rgba(37,99,235,.2)}
+.chip.vio{background:rgba(124,58,237,.08);color:var(--violet);border-color:rgba(124,58,237,.2)}
+.chip.ok{background:rgba(16,185,129,.08);color:var(--emerald);border-color:rgba(16,185,129,.2)}
+.chip.warn{background:rgba(245,158,11,.08);color:var(--amber);border-color:rgba(245,158,11,.2)}
+
+.hero{position:relative;border-radius:18px;padding:26px 32px;background:radial-gradient(ellipse at 10% 10%,rgba(37,99,235,.12),transparent 60%),radial-gradient(ellipse at 90% 90%,rgba(124,58,237,.12),transparent 60%),linear-gradient(135deg,#fff,#f8fafc);border:1px solid var(--bd);box-shadow:var(--sh-md);overflow:hidden;margin-bottom:18px}
+.eyebrow{display:inline-block;padding:4px 12px;background:rgba(37,99,235,.08);color:var(--blue);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;border:1px solid rgba(37,99,235,.18);margin-bottom:12px}
+.hero-title{font-size:2.4rem;font-weight:800;letter-spacing:-.03em;line-height:1.08;background:var(--grad-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.hero-sub{font-size:15px;color:var(--t2);line-height:1.55;max-width:820px}
+.hero-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;box-shadow:var(--sh-sm);transition:all .25s;cursor:pointer}
+.kpi:hover{border-color:rgba(37,99,235,.35);box-shadow:var(--sh-glow);transform:translateY(-1px)}
+.kpi.acc-blue{border-top:3px solid var(--blue)}
+.kpi.acc-violet{border-top:3px solid var(--violet)}
+.kpi.acc-cyan{border-top:3px solid var(--cyan)}
+.kpi.acc-emerald{border-top:3px solid var(--emerald)}
+.kpi.acc-amber{border-top:3px solid var(--amber)}
+.kpi.acc-rose{border-top:3px solid var(--rose)}
+.kpi-lbl{font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.kpi-val{font-size:1.55rem;font-weight:700;color:var(--t1);line-height:1.1}
+.kpi-sub{font-size:11px;color:var(--t3);margin-top:4px}
+.kpi-delta{font-family:var(--mono);font-size:11px;font-weight:600;margin-top:3px}
+.kpi-delta.up{color:var(--emerald)}.kpi-delta.down{color:var(--rose)}
+
+.sh{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 12px}
+.sh h2{font-size:1.35rem;font-weight:700;letter-spacing:-.01em;position:relative;padding-left:14px}
+.sh h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:4px;background:var(--grad-pri);border-radius:4px}
+.sh .sh-sub{font-size:12px;color:var(--t3);font-family:var(--mono)}
+
+.research{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-bottom:20px}
+.card{background:var(--surface);border:1px solid var(--bd);border-radius:14px;padding:16px 18px;box-shadow:var(--sh-sm);transition:all .25s}
+.card:hover{border-color:rgba(37,99,235,.22);box-shadow:var(--sh-glow)}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.card-hd .ti{font-size:13px;font-weight:700;color:var(--t1)}
+.card-hd .mt{font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
+.card.span-8{grid-column:span 8}.card.span-4{grid-column:span 4}
+.card.span-6{grid-column:span 6}.card.span-12{grid-column:span 12}
+
+.pillar-bars{display:flex;flex-direction:column;gap:6px;padding:6px 0 2px}
+.pb-row{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px}
+.pb-pill{padding:3px 8px;border-radius:5px;font-weight:700;font-size:10px;width:52px;text-align:center}
+.pb-pill[data-p="trend"]{background:#dbeafe;color:#1e40af}
+.pb-pill[data-p="fund"]{background:#dcfce7;color:#166534}
+.pb-pill[data-p="val"]{background:#fae8ff;color:#86198f}
+.pb-pill[data-p="event"]{background:#fef3c7;color:#92400e}
+.pb-pill[data-p="risk"]{background:#ffe4e6;color:#9f1239}
+.pb-pill[data-p="chip"]{background:#e0e7ff;color:#3730a3}
+.pb-pill[data-p="txt"]{background:#f3e8ff;color:#6b21a8}
+.pb-bar-wrap{flex:1;height:10px;background:var(--subtle);border-radius:4px;overflow:hidden}
+.pb-bar{height:100%;border-radius:4px}
+.pb-num{color:var(--t1);font-weight:600;width:60px;text-align:right}
+.pb-delta{color:var(--emerald);width:56px;text-align:right;font-size:10px}
+.pb-delta.down{color:var(--rose)}
+
+.chart-svg{width:100%;height:auto;display:block}
+.cg-grid line{stroke:#f1f5f9;stroke-width:1}
+.cg-axis text{fill:var(--t3);font-family:var(--mono);font-size:9px}
+.cg-line{fill:none;stroke-width:2}
+
+.phase-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.ph{background:var(--surface);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden}
+.ph::before{content:"";position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--emerald)}
+.ph.cur::before{background:var(--grad-pri)}
+.ph-k{font-family:var(--mono);font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.ph-ti{font-size:13px;font-weight:600;margin-top:2px}
+.ph-sb{font-family:var(--mono);font-size:10px;color:var(--t2);margin-top:4px;line-height:1.4}
+
+.box{border-radius:0 10px 10px 0;padding:12px 16px;font-size:13px;line-height:1.55;margin:10px 0}
+.box.info{background:linear-gradient(135deg,#eff6ff,#f0f9ff);border-left:4px solid var(--blue);color:#0c4a6e}
+.box.warn{background:linear-gradient(135deg,#fffbeb,#fef3c7);border-left:4px solid var(--amber);color:#92400e}
+.box.ok{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-left:4px solid var(--emerald);color:#065f46}
+
+.st-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.st-tbl th{text-align:left;font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--bd);background:var(--tint)}
+.st-tbl td{padding:9px 10px;border-bottom:1px solid var(--bd);font-family:var(--mono);color:var(--t1)}
+.st-tbl tr{cursor:pointer}
+.st-tbl tr:hover td{background:rgba(37,99,235,.03)}
+.st-tbl .ticker{font-weight:700;color:var(--blue)}
+.st-tbl .name-zh{font-family:var(--sans)}
+.st-tbl .ret-up{color:var(--emerald);font-weight:600}
+.st-tbl .ret-dn{color:var(--rose);font-weight:600}
+.st-tbl .ind-chip{display:inline-block;padding:1px 7px;background:var(--subtle);color:var(--t2);border-radius:4px;font-size:10px;font-family:var(--sans);font-weight:500}
+
+.gauge{display:flex;flex-direction:column;align-items:center;padding:6px 0}
+.gauge-ring{width:140px;height:90px;position:relative;margin-bottom:6px}
+.gauge-val{font-family:var(--mono);font-size:1.8rem;font-weight:700;color:var(--t1);line-height:1}
+.gauge-lbl{font-size:11px;color:var(--t3);margin-top:4px;font-family:var(--mono);letter-spacing:.05em;text-transform:uppercase}
+
+.seg{display:inline-flex;background:var(--subtle);border:1px solid var(--bd);border-radius:8px;padding:3px;gap:2px}
+.seg button{background:transparent;border:none;padding:5px 14px;font-size:11px;font-family:var(--mono);font-weight:700;color:var(--t2);cursor:pointer;border-radius:6px}
+.seg button.on{background:var(--surface);color:var(--blue);box-shadow:var(--sh-sm)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="Chrome.jsx"></script>
+<script type="text/babel" src="DataViz.jsx"></script>
+<script type="text/babel">
+const { useState } = React;
+const { Sidebar, Topbar, Hero, KpiCard, PillarBars, LineChart, PhaseTimeline, InsightBox, StockTable, Gauge, Card, Segmented } = window.DashboardKit;
+
+const PILLARS = [
+  { pillar: 'trend',  value: 0.0412, delta:  0.009, color: '#2563eb' },
+  { pillar: 'fund',   value: 0.0334, delta:  0.007, color: '#10b981' },
+  { pillar: 'risk',   value: 0.0298, delta:  0.011, color: '#4f46e5' },
+  { pillar: 'val',    value: 0.0221, delta: -0.002, color: '#f59e0b' },
+  { pillar: 'txt',    value: 0.0184, delta:  0.004, color: '#7c3aed' },
+  { pillar: 'chip',   value: 0.0156, delta: -0.001, color: '#6366f1' },
+  { pillar: 'event',  value: 0.0132, delta:  0.003, color: '#ec4899' },
+];
+
+const EQUITY = {
+  strategy: Array.from({length:24},(_,i)=>[`M${i+1}`, 100 * Math.pow(1.027,i) + Math.sin(i/3)*4]),
+  bench:    Array.from({length:24},(_,i)=>[`M${i+1}`, 100 * Math.pow(1.010,i) + Math.cos(i/4)*3]),
+};
+
+const STOCKS = [
+  { ticker: '2330', name: '台積電',     industry: '半導體', score: 0.918, ret:  8.42 },
+  { ticker: '2454', name: '聯發科',     industry: '半導體', score: 0.876, ret:  5.31 },
+  { ticker: '2317', name: '鴻海',       industry: '電子',   score: 0.812, ret:  3.88 },
+  { ticker: '2882', name: '國泰金',     industry: '金融',   score: 0.741, ret:  2.10 },
+  { ticker: '1301', name: '台塑',       industry: '塑化',   score: 0.688, ret: -1.24 },
+  { ticker: '2412', name: '中華電',     industry: '電信',   score: 0.654, ret:  0.92 },
+];
+
+const PHASES = [
+  { key:'p1', title: '資料整合',   sub: '948,976 樣本' },
+  { key:'p2', title: '特徵工程',   sub: '1,623 → 91' },
+  { key:'p3', title: '模型建構',   sub: 'LGB + XGB' },
+  { key:'p4', title: '策略回測',   sub: 'CAGR +36.8%' },
+  { key:'p5', title: '治理監控',   sub: 'PSI / KS' },
+  { key:'p6', title: '深度驗證 ★', sub: 'AUC 0.6455' },
+];
+
+function HomeView() {
+  const [horizon, setHorizon] = useState('D20');
+  return (
+    <div>
+      <Hero
+        eyebrow="Phase 6 · Deep Validation · PASS"
+        title="台股多因子預測系統 v11.5.17"
+        sub="948,976 筆個股×交易日樣本，9 支柱 1,623 候選因子，XGBoost + LightGBM 雙引擎與 Purged Walk-Forward CV。OOS AUC 0.6455，Top 1% 命中率 36.81%（Edge +10.53 pp）。"
+        meta={[
+          { label: '1,930 家' },
+          { label: '2023/03 – 2025/03' },
+          { label: '91 精選特徵', tone: 'pri' },
+          { label: '9 / 9 GATES PASS', tone: 'ok' },
+          { label: 'DSR 12.12', tone: 'vio' },
+        ]}
+      />
+      <div className="kpi-grid">
+        <KpiCard accent="emerald" label="年化 CAGR"  value="+36.81%" sub="XGBoost D+20"        delta={{dir:'up', text:'vs. TAIEX +12.4%'}} />
+        <KpiCard accent="blue"    label="AUC (純價)" value="0.6455"  sub="xgboost_D20 · 4-fold" />
+        <KpiCard accent="violet"  label="勝率"       value="60.6%"   sub="Phase 6 · 嚴格驗證" />
+        <KpiCard accent="cyan"    label="Sharpe"     value="0.81"    sub="OOS · daily" />
+        <KpiCard accent="rose"    label="最大回撤"    value="−18.3%"  sub="2024-08 shock"     delta={{dir:'down', text:'復原 42d'}}/>
+        <KpiCard accent="amber"   label="DSR"        value="12.12"   sub="多重測試校正 PASS" />
+      </div>
+      <div className="sh"><h2>模型績效總覽</h2><span className="sh-sub">xgboost_D20 · 2023–2025</span></div>
+      <div className="research">
+        <Card title="9 支柱 LOPO 貢獻 (IC)" meta="LOPO · Δ" span={6} actions={<Segmented options={[{value:'D5',label:'D+5'},{value:'D20',label:'D+20'},{value:'D60',label:'D+60'}]} value={horizon} onChange={setHorizon}/>}>
+          <PillarBars data={PILLARS} />
+        </Card>
+        <Card title="Equity Curve (OOS)" meta="vs. TAIEX" span={6}>
+          <LineChart series={[{label:'Strategy', points: EQUITY.strategy},{label:'TAIEX', points: EQUITY.bench}]} />
+        </Card>
+        <Card title="專案 6 階段" span={12}>
+          <PhaseTimeline phases={PHASES} current="p6" />
+        </Card>
+        <Card title="Top 名單 · 當期模型輸出" meta="D+20 預測" span={8}>
+          <StockTable rows={STOCKS} />
+        </Card>
+        <Card title="模型信心度" span={4}>
+          <div style={{display:'flex',gap:12}}>
+            <Gauge value={0.6455} max={1} label="AUC" color="#2563eb" />
+            <Gauge value={12.12} max={15} label="DSR" color="#7c3aed" />
+          </div>
+          <InsightBox tone="ok">✓ 通過 9/9 driver + reality gates，無前視偏差。</InsightBox>
+          <InsightBox tone="warn">⚠ 2024-08 shock 期間回撤 −18.3%，已觸發 risk_pillar 熔斷。</InsightBox>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [view, setView] = useState('home');
+  const crumbs = { home:'首頁', invest:'投資解讀', model:'模型績效', icir:'ICIR 信號穩定性', bt:'策略回測', feat:'特徵工程分析', gov:'模型治理', sig:'信號監控', p6:'Phase 6 深度驗證' };
+  return (
+    <>
+      <Sidebar active={view} onNav={setView} />
+      <main className="main">
+        <Topbar crumb={crumbs[view] || '首頁'} chips={[
+          {label:'xgboost_D20', tone:'pri'},
+          {label:'purged WF · embargo=20', tone:'vio'},
+          {label:'DSR 12.12 → PASS', tone:'ok'},
+        ]} />
+        {view === 'home' ? <HomeView/> : (
+          <div className="hero" style={{textAlign:'center',padding:60}}>
+            <h1 className="hero-title" style={{fontSize:'1.8rem'}}>{crumbs[view]}</h1>
+            <p className="hero-sub" style={{margin:'0 auto'}}>此分頁在 UI kit 中以首頁代表。實際網站共 13 個分頁，所有元件樣式延續相同設計系統。</p>
+          </div>
+        )}
+      </main>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

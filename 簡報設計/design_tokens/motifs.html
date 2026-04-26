@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-TW"><head><meta charset="utf-8"><title>Motifs & Texture</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+body{padding:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.tile{height:110px;border-radius:12px;border:1px solid var(--gl-border);position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:10px 12px}
+.tile .t{font-family:var(--mono);font-size:10px;color:var(--gl-text);background:rgba(255,255,255,0.85);padding:2px 8px;border-radius:6px;letter-spacing:0.04em}
+.grid-bg{background:
+  linear-gradient(#e2e8f0 1px,transparent 1px) 0 0/24px 24px,
+  linear-gradient(90deg,#e2e8f0 1px,transparent 1px) 0 0/24px 24px,#fafbfc}
+.dot-bg{background:radial-gradient(#cbd5e1 1.2px,transparent 1.2px) 0 0/16px 16px,#fafbfc}
+.tech-bg{background:
+  radial-gradient(ellipse at top left,rgba(37,99,235,0.15),transparent 55%),
+  radial-gradient(ellipse at bottom right,rgba(124,58,237,0.14),transparent 55%),#fff}
+.glow-bg{background:linear-gradient(135deg,rgba(6,182,212,0.12),rgba(124,58,237,0.12)),#fff}
+.gradient-bg{background:var(--gl-grad-tech)}
+.dark-bg{background:linear-gradient(180deg,#0f1419,#1a2332)}
+.dark-bg .t{background:rgba(15,20,25,0.7);color:#fff;border:1px solid rgba(255,255,255,0.1)}
+</style></head><body>
+<div class="tile grid-bg"><span class="t">data grid</span></div>
+<div class="tile dot-bg"><span class="t">dot matrix</span></div>
+<div class="tile tech-bg"><span class="t">tech halo</span></div>
+<div class="tile glow-bg"><span class="t">soft glow</span></div>
+<div class="tile gradient-bg"><span class="t">signature gradient</span></div>
+<div class="tile dark-bg"><span class="t">sidebar · dark</span></div>
+</body></html>

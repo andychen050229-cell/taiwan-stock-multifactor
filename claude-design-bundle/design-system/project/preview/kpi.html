@@ -1,0 +1,23 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<style>
+.grid-k { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 10px; }
+.kpi {
+  background: var(--gl-surface); border: 1px solid var(--gl-border);
+  border-radius: 14px; padding: 14px 18px; box-shadow: var(--gl-shadow-sm);
+  position: relative;
+}
+.kpi.blue   { border-top: 3px solid #2563eb; }
+.kpi.violet { border-top: 3px solid #7c3aed; }
+.kpi.emer   { border-top: 3px solid #10b981; }
+.kpi .lbl { font-size: 11px; color: var(--gl-text-3); font-weight:600; text-transform:uppercase; letter-spacing:0.08em; }
+.kpi .val { font-family: var(--gl-font-mono); font-variant-numeric: tabular-nums; font-size: 26px; font-weight: 700; color: var(--gl-text); margin-top: 4px; line-height: 1.1; }
+.kpi .sub { font-size: 11px; color: var(--gl-text-3); margin-top: 4px; }
+.kpi .delta { font-family: var(--gl-font-mono); font-size: 12px; font-weight: 600; margin-top: 4px; color: #10b981; }
+</style></head><body>
+<div class="grid-k">
+  <div class="kpi blue"><div class="lbl">SAMPLES</div><div class="val">948K</div><div class="sub">948,976 rows</div></div>
+  <div class="kpi violet"><div class="lbl">FEATURES</div><div class="val">91</div><div class="sub">from 1,626 candidates</div></div>
+  <div class="kpi emer"><div class="lbl">QUALITY</div><div class="val">9/9</div><div class="delta">▲ ALL PASS</div><div class="sub">Phase 2 quality gates</div></div>
+</div>
+</body></html>

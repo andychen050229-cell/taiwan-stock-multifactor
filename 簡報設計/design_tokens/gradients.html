@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-TW"><head><meta charset="utf-8"><title>Gradients</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+.wrap{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gr{border:1px solid var(--gl-border);border-radius:10px;overflow:hidden}
+.bar{height:48px}
+.meta{padding:8px 12px;background:#fff;display:flex;justify-content:space-between;align-items:center}
+.name{font-size:12px;font-weight:700}
+.def{font-family:var(--mono);font-size:10px;color:var(--gl-text-3)}
+</style></head><body>
+<div class="wrap">
+  <div class="gr"><div class="bar" style="background:linear-gradient(135deg,#2563eb 0%,#7c3aed 100%)"></div><div class="meta"><span class="name">grad-pri</span><span class="def">blue → violet</span></div></div>
+  <div class="gr"><div class="bar" style="background:linear-gradient(135deg,#06b6d4 0%,#2563eb 50%,#7c3aed 100%)"></div><div class="meta"><span class="name">grad-tech</span><span class="def">cyan · blue · violet</span></div></div>
+  <div class="gr"><div class="bar" style="background:linear-gradient(135deg,#0f172a 0%,#2563eb 55%,#7c3aed 100%)"></div><div class="meta"><span class="name">grad-hero-title</span><span class="def">slate → blue → violet · clip-text only</span></div></div>
+  <div class="gr"><div class="bar" style="background:linear-gradient(135deg,#10b981 0%,#06b6d4 100%)"></div><div class="meta"><span class="name">grad-ok</span><span class="def">emerald → cyan</span></div></div>
+  <div class="gr"><div class="bar" style="background:linear-gradient(135deg,#f59e0b 0%,#f43f5e 100%)"></div><div class="meta"><span class="name">grad-warm</span><span class="def">amber → rose</span></div></div>
+  <div class="gr"><div class="bar" style="background:#fff;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:800;font-size:26px;letter-spacing:-0.03em;background:linear-gradient(135deg,#0f172a 0%,#2563eb 55%,#7c3aed 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Hero · clip-text</div><div class="meta"><span class="name">用於 Hero 標題</span><span class="def">唯一 clip-text 使用地點</span></div></div>
+</div>
+</body></html>

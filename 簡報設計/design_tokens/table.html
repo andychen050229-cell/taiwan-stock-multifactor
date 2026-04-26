@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-TW"><head><meta charset="utf-8"><title>Data Table</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+body{padding:16px 20px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:#f8fafc}
+th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;color:var(--gl-text-3);padding:10px 12px;text-align:left;border-bottom:1px solid var(--gl-border)}
+th.r,td.r{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+td{padding:10px 12px;border-bottom:1px solid var(--gl-subtle)}
+tr:last-child td{border-bottom:none}
+.pillar{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;font-family:var(--mono);font-size:10px;font-weight:700}
+.p-trend{background:rgba(37,99,235,0.1);color:#1d4ed8}
+.p-fund{background:rgba(16,185,129,0.1);color:#065f46}
+.p-risk{background:rgba(79,70,229,0.1);color:#4338ca}
+.p-val{background:rgba(245,158,11,0.1);color:#92400e}
+.up{color:#10b981;font-weight:700}
+.down{color:#f43f5e;font-weight:700}
+</style></head><body>
+<table>
+  <thead><tr><th>#</th><th>Factor</th><th>Pillar</th><th class="r">IC</th><th class="r">ICIR</th><th class="r">Δ LOPO</th></tr></thead>
+  <tbody>
+    <tr><td class="r">01</td><td>mom_20d_zsec</td><td><span class="pillar p-trend">trend</span></td><td class="r">0.0412</td><td class="r">0.48</td><td class="r down">−0.009</td></tr>
+    <tr><td class="r">02</td><td>roe_ttm_rank</td><td><span class="pillar p-fund">fund</span></td><td class="r">0.0334</td><td class="r">0.41</td><td class="r down">−0.007</td></tr>
+    <tr><td class="r">03</td><td>vol_skew_60d ★</td><td><span class="pillar p-risk">risk</span></td><td class="r">0.0298</td><td class="r">0.52</td><td class="r down">−0.011</td></tr>
+    <tr><td class="r">04</td><td>ev_ebitda_inv</td><td><span class="pillar p-val">val</span></td><td class="r">0.0221</td><td class="r">0.29</td><td class="r up">+0.002</td></tr>
+  </tbody>
+</table>
+</body></html>

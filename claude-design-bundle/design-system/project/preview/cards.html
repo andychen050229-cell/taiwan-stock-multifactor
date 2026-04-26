@@ -1,0 +1,30 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<style>
+.row-c { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 10px; }
+.path {
+  background: var(--gl-surface); border: 1px solid var(--gl-border);
+  border-radius: 18px; padding: 18px; position: relative; overflow: hidden;
+  box-shadow: var(--gl-shadow-sm); min-height: 140px;
+}
+.path::before { content:""; position:absolute; top:0; left:0; right:0; height:4px; background: linear-gradient(135deg,#06b6d4,#2563eb,#7c3aed); opacity:.7; }
+.path.beg { background: linear-gradient(135deg,#ffffff,#fffbeb); }
+.path.beg::before { background: linear-gradient(135deg,#f59e0b,#f97316); }
+.path.adv { background: linear-gradient(135deg,#ffffff,#f0f9ff); }
+.icon { font-size: 28px; margin-bottom: 6px; }
+.ti { font-size: 16px; font-weight: 700; color: var(--gl-text); }
+.ds { font-size: 12px; color: var(--gl-text-2); line-height: 1.5; margin-top: 4px; }
+</style></head><body>
+<div class="row-c">
+  <div class="path beg">
+    <div class="icon">🌱</div>
+    <div class="ti">投資解讀面板</div>
+    <div class="ds">面向投資人/行銷/商管讀者。將研究結果翻譯成可理解的決策資訊。</div>
+  </div>
+  <div class="path adv">
+    <div class="icon">⚙️</div>
+    <div class="ti">量化研究工作台</div>
+    <div class="ds">面向教授、評審、量化研究者。完整呈現 ICIR、Purged CV、LOPO。</div>
+  </div>
+</div>
+</body></html>

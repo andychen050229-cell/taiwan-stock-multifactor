@@ -1,0 +1,15 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<style>
+.chip { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-family:var(--gl-font-mono); font-size:12px; font-weight:600; border:1px solid var(--gl-border); background:var(--gl-subtle); color:var(--gl-text-2); }
+.chip.primary{background:rgba(37,99,235,.08);color:#2563eb;border-color:rgba(37,99,235,.2);}
+.chip.violet{background:rgba(124,58,237,.08);color:#7c3aed;border-color:rgba(124,58,237,.2);}
+.chip.ok{background:rgba(16,185,129,.08);color:#10b981;border-color:rgba(16,185,129,.2);}
+.chip.warn{background:rgba(245,158,11,.08);color:#f59e0b;border-color:rgba(245,158,11,.2);}
+.chip.danger{background:rgba(244,63,94,.08);color:#f43f5e;border-color:rgba(244,63,94,.2);}
+.r{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+</style></head><body style="padding:16px;">
+<div class="r"><span class="chip">default</span><span class="chip primary">primary</span><span class="chip violet">violet</span><span class="chip ok">ok</span><span class="chip warn">warn</span><span class="chip danger">danger</span></div>
+<div class="r"><span class="chip primary">initial_train=252</span><span class="chip primary">test=63</span><span class="chip violet">embargo=20</span></div>
+<div class="r"><span class="chip ok">9 / 9 quality gates</span><span class="chip violet">xgboost_D20 AUC 0.649</span><span class="chip ok">best edge +11.7pp</span></div>
+</body></html>

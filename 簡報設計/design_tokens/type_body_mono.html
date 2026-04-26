@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-TW"><head><meta charset="utf-8"><title>Type · Body & Mono</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+body{padding:16px 24px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.col{display:flex;flex-direction:column;gap:6px}
+.lab{font-family:var(--mono);font-size:10px;color:var(--gl-text-3);letter-spacing:0.08em;text-transform:uppercase}
+.body-1{font-size:15px;color:var(--gl-text);line-height:1.6}
+.body-2{font-size:13px;color:var(--gl-text-2)}
+.caption{font-size:11px;color:var(--gl-text-3)}
+.mono-lg{font-family:var(--mono);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--gl-text)}
+.mono-md{font-family:var(--mono);font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--gl-text-2)}
+.mono-sm{font-family:var(--mono);font-size:11px;color:var(--gl-text-3);letter-spacing:0.04em}
+</style></head><body>
+<div class="col">
+  <span class="lab">body · 0.95rem</span>
+  <div class="body-1">以 2023/03–2025/03 台股歷史為基礎。</div>
+  <span class="lab">caption · 0.82rem</span>
+  <div class="body-2">整合 9 支柱 1,623 候選因子與雙引擎模型。</div>
+  <span class="lab">micro · 0.72rem</span>
+  <div class="caption">Source: outputs/reports/phase2_report.json</div>
+</div>
+<div class="col">
+  <span class="lab">mono · kpi 2.0rem</span>
+  <div class="mono-lg">+36.81%</div>
+  <span class="lab">mono · metric 1.0rem</span>
+  <div class="mono-md">AUC 0.6455 · IC 0.0254</div>
+  <span class="lab">mono · micro</span>
+  <div class="mono-sm">xgboost_D20 · embargo=20 · 4-fold</div>
+</div>
+</body></html>

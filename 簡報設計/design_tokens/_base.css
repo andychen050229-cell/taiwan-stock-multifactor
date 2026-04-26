@@ -1,0 +1,28 @@
+/* Preview card shell — fills the Design System tab.
+   Each card ~700×150, white surface, minimal chrome. */
+:root {
+  --gl-bg:#fafbfc; --gl-surface:#fff; --gl-subtle:#f1f5f9; --gl-tint:#f8fafc;
+  --gl-border:#e2e8f0; --gl-border-str:#cbd5e1;
+  --gl-text:#0f172a; --gl-text-2:#475569; --gl-text-3:#94a3b8;
+  --gl-blue:#2563eb; --gl-violet:#7c3aed; --gl-cyan:#06b6d4;
+  --gl-emerald:#10b981; --gl-amber:#f59e0b; --gl-rose:#f43f5e; --gl-indigo:#4f46e5;
+  --gl-grad-pri:linear-gradient(135deg,#2563eb 0%,#7c3aed 100%);
+  --gl-grad-tech:linear-gradient(135deg,#06b6d4 0%,#2563eb 50%,#7c3aed 100%);
+  --gl-grad-hero-title:linear-gradient(135deg,#0f172a 0%,#2563eb 55%,#7c3aed 100%);
+  --sans:'Inter','Noto Sans TC',-apple-system,'Microsoft JhengHei','PingFang TC',sans-serif;
+  --mono:'JetBrains Mono','Noto Sans TC','SF Mono','Consolas',monospace;
+  --gl-shadow-sm:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06);
+  --gl-shadow-md:0 4px 6px rgba(15,23,42,.04),0 10px 15px rgba(15,23,42,.06);
+  --gl-shadow-glow:0 0 0 1px rgba(37,99,235,.08),0 8px 30px rgba(37,99,235,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  font-family:var(--sans);color:var(--gl-text);background:var(--gl-bg);
+  -webkit-font-smoothing:antialiased;
+}
+body{padding:20px;font-size:14px;line-height:1.5}
+.mono,code{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.col{display:flex;flex-direction:column;gap:10px}
+.eyebrow{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gl-text-3)}
+.hint{font-size:11px;color:var(--gl-text-3);font-family:var(--mono)}

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-TW"><head><meta charset="utf-8"><title>KPI Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+body{padding:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;background:var(--gl-bg)}
+.kpi{background:#fff;border:1px solid var(--gl-border);border-radius:14px;padding:14px 16px;box-shadow:var(--gl-shadow-sm)}
+.kpi .l{font-family:var(--mono);font-size:10px;color:var(--gl-text-3);text-transform:uppercase;letter-spacing:0.08em}
+.kpi .v{font-family:var(--mono);font-size:28px;font-weight:800;margin-top:6px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:11px;color:var(--gl-text-2);margin-top:4px;display:flex;align-items:center;gap:4px}
+.up{color:#10b981}
+.down{color:#f43f5e}
+.g-pri{background:linear-gradient(135deg,#2563eb 0%,#7c3aed 100%);color:#fff;border:none}
+.g-pri .l{color:rgba(255,255,255,0.75)}
+.g-pri .d{color:rgba(255,255,255,0.85)}
+</style></head><body>
+<div class="kpi"><div class="l">年化報酬 CAGR</div><div class="v up">+36.81%</div><div class="d up">↑ vs. TAIEX +12.4%</div></div>
+<div class="kpi"><div class="l">勝率 Hit Rate</div><div class="v">60.6%</div><div class="d">Phase 6 · 嚴格驗證</div></div>
+<div class="kpi g-pri"><div class="l">AUC (純價)</div><div class="v">0.6455</div><div class="d">xgboost_D20 · 4-fold</div></div>
+<div class="kpi"><div class="l">最大回撤 MDD</div><div class="v down">−18.3%</div><div class="d">2024-08 shock · 復原 42d</div></div>
+</body></html>

@@ -1,0 +1,15 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_base.css">
+<style>
+.btn { border-radius:10px; font-family:var(--gl-font-sans); font-weight:600; font-size:14px; padding:10px 18px; border:1px solid var(--gl-border); background:#fff; color:var(--gl-text); cursor:pointer; transition:all .25s; }
+.btn:hover { border-color: rgba(37,99,235,0.35); box-shadow: 0 0 0 1px rgba(37,99,235,.08), 0 8px 30px rgba(37,99,235,.12); }
+.btn.primary { background:linear-gradient(135deg,#2563eb,#7c3aed); color:#fff; border:1px solid transparent; box-shadow: 0 4px 14px rgba(37,99,235,.25); }
+.btn.primary:hover { box-shadow: 0 6px 20px rgba(37,99,235,.35); transform: translateY(-1px); }
+.r { display:flex; gap:10px; margin:8px 0; flex-wrap:wrap; }
+</style></head><body style="padding:16px;">
+<div class="r">
+  <button class="btn primary">🌱 &nbsp; 進入投資解讀面板</button>
+  <button class="btn">⚙️ &nbsp; 進入量化研究工作台</button>
+</div>
+<div style="font-family:var(--gl-font-mono);font-size:10px;color:var(--gl-text-3);margin-top:4px;">primary · grad-primary · shadow 0 4px 14px rgba(37,99,235,.25) → hover 0 6px 20px + translateY(-1px)</div>
+</body></html>

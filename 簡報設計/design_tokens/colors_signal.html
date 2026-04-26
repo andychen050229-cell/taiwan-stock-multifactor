@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-TW"><head><meta charset="utf-8"><title>Colors · Signal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sw{border:1px solid var(--gl-border);border-radius:10px;overflow:hidden}
+.sw .chip{height:50px;display:flex;align-items:flex-end;padding:8px 10px;color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase}
+.sw .meta{padding:8px 10px;background:#fff}
+.sw .name{font-size:12px;font-weight:700}
+.sw .hex{font-family:var(--mono);font-size:10px;color:var(--gl-text-3);margin-top:2px}
+</style></head><body>
+<div class="swatches">
+  <div class="sw"><div class="chip" style="background:#2563eb">primary</div><div class="meta"><div class="name">blue</div><div class="hex">#2563EB · link · CTA</div></div></div>
+  <div class="sw"><div class="chip" style="background:#7c3aed">secondary</div><div class="meta"><div class="name">violet</div><div class="hex">#7C3AED · gradient end</div></div></div>
+  <div class="sw"><div class="chip" style="background:#06b6d4">tech</div><div class="meta"><div class="name">cyan</div><div class="hex">#06B6D4 · live · data</div></div></div>
+  <div class="sw"><div class="chip" style="background:#10b981">success</div><div class="meta"><div class="name">emerald</div><div class="hex">#10B981 · PASS · up</div></div></div>
+  <div class="sw"><div class="chip" style="background:#f59e0b">warn</div><div class="meta"><div class="name">amber</div><div class="hex">#F59E0B · watch</div></div></div>
+  <div class="sw"><div class="chip" style="background:#f43f5e">danger</div><div class="meta"><div class="name">rose</div><div class="hex">#F43F5E · FAIL · down</div></div></div>
+  <div class="sw"><div class="chip" style="background:#4f46e5">accent</div><div class="meta"><div class="name">indigo</div><div class="hex">#4F46E5 · tertiary</div></div></div>
+  <div class="sw"><div class="chip" style="background:#636EFA">streamlit</div><div class="meta"><div class="name">streamlit</div><div class="hex">#636EFA · plotly theme</div></div></div>
+</div>
+</body></html>
