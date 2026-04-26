@@ -1,0 +1,287 @@
+================================================================================
+台股多因子預測系統 v11.5.18 · 專案完整說明
+NTU 大數據與商業分析專案 · 第九組
+================================================================================
+
+R13724054 陳柏寰｜R13724035 陳又萍｜R13724051 謝瑞洋
+R13724056 李泰坤｜B12302131 林芮靚｜B13102133 沈承寬
+
+
+================================================================================
+專案總覽
+================================================================================
+
+我們做的是一套針對台股的多因子量化研究系統。一句話結論：D+20——
+也就是預測 20 個交易日後股價方向——是台股多因子預測從研究走向部署
+的可行切入點。
+
+整套系統涵蓋了從原始資料擷取、特徵工程、模型訓練、回測驗證、文本
+情緒分析到上線治理的完整生命週期。最終做到 OOS AUC 0.6455、DSR
+12.12 通過多重檢定、Top 1% 命中率 36.81% (比基準高 10.53 個百分
+點)、24 個月回測 CAGR +36.8%、9 道治理關卡全數通過。
+
+技術上覆蓋 1,930 檔上市櫃公司、505 個交易日 (2023/03 ~ 2025/03)、
+948,976 筆樣本、1,623 個候選因子篩到 91 個進場特徵；搭配 13 頁
+Streamlit 互動儀表板、研究員與投資經理人可即時切換查看各層分析。
+
+整套系統按 6 個 Phase 拆解。以下逐 Phase 說明我們做了什麼、產出
+了什麼、結果是什麼。
+
+
+================================================================================
+Phase 1 · 資料工程 (Data Engineering)
+================================================================================
+
+【做了什麼】
+1. 從教師端取得四張核心研究資料庫主表：companies (1,932 家公司)、
+   stock_prices (877K 筆股價、僅含收盤價)、income_stmt (14,968 筆
+   損益)、stock_text (1.12M 筆文本來自 PTT/Dcard/Mobile01/Yahoo)。
+
+2. 用 FinMind 公開 API 抓取 6 張補充資料：完整 OHLCV (TaiwanStock
+   Price)、資產負債表、現金流量表、產業分類、三大法人買賣超、融資
+   融券。把核心庫沒有的欄位補齊。
+
+3. 把 10 張表用 (stock_id, date) 主鍵對齊、跑 Walk-Forward 嚴格
+   時序紀律：財報 lag 45 天 (法定申報日)、文本只取 T 日下午 3 點
+   前——也就是 point-in-time 規範全面落地、forward-looking bias
+   從源頭阻斷。
+
+4. 跑洩漏偵測 (leakage scanner)、排除任何「未來資訊滲入訓練集」的
+   特徵；接著輸出 feature store。
+
+【產出了什麼】
+・feature_store_final.parquet — 整合特徵倉儲、948,976 筆 × 1,623
+  欄位、278 MB
+・phase1_report.json — 7 表 ETL 紀錄、各表筆數、缺失值、PIT 對齊
+  結果
+
+【結果是什麼】
+948,976 筆樣本完整落地、零洩漏、point-in-time 規範通過品質閘。
+
+
+================================================================================
+Phase 2 · 模型訓練 (Model Training)
+================================================================================
+
+【做了什麼】
+1. 三層特徵漏斗篩選：
+   - Corr ≤ 0.85 砍掉高度共線、從 1,623 降到 870
+   - MI top-K 互資訊保留資訊量最高的、降到 287
+   - VIF < 5 加業務檢查、收斂到 91 個進場特徵 (保留率 5.6%)
+
+2. 雙引擎並行：XGBoost 跟 LightGBM、各跑 3 個 horizon (D+1、D+5、
+   D+20)、共 6 個模型。Optuna 跑 150 trials 做貝葉斯超參數搜尋、
+   加 early stopping、4 折交叉訓練。
+
+3. 驗證用 Walk-Forward Purged K-Fold (簡稱 WFPK)、加 20 日 embargo
+   ——也就是訓練尾端跟測試開頭之間隔 20 天的真空期。這個 embargo
+   是 D+20 標籤跨期的關鍵防護。
+
+4. 跑特徵穩定性測試：cross-fold IC、特徵 Jaccard 相似度。
+
+【產出了什麼】
+・phase2_report.json — 6 個模型的 fold metrics、avg metrics、
+  best params
+・feature_ic_summary.json + .csv — 91 個特徵跨 fold 的 IC 統計
+・feature_stability_backfill.json — fold AUC 一致性 0.7991
+・lopo_pillar_contribution_D20.json — 9 支柱 LOPO 結果
+・44 張視覺化圖表：confusion matrix × 6、feature importance × 6、
+  SHAP × 6、IC time series × 3、fold stability、model comparison
+
+【結果是什麼】
+最佳模型 XGBoost D+20、OOS AUC 0.6455、跨 4 折標準差只有 0.0089
+——四折分別是 0.6481 / 0.6463 / 0.6332 / 0.6543，全部都遠超過
+random baseline 的 0.5。對照組裡 LightGBM 0.6381、Random Forest
+0.6168、Logistic 0.5874——非線性是關鍵 (Logistic 跟 XGBoost 之間
+差了 0.06 的 AUC)。
+
+
+================================================================================
+Phase 3 · 分析擴充與治理 (Analytics + Governance)
+================================================================================
+
+【做了什麼】
+1. 跑 Deflated Sharpe Ratio (DSR) 多重檢定校正：依 Bailey & López
+   de Prado 2014 的方法、扣掉 150 trials 變異膨脹、skew/kurt 非
+   常態修正、sample size 校正。
+
+2. 設 9 道治理關卡 (governance gates)：
+   01 DSR (Deflated Sharpe)
+   02 Worst Fold AUC (最差折表現)
+   03 Embargo (時序隔離)
+   04 Leakage (洩漏掃描)
+   05 PSI Drift (FRTB 漂移指標)
+   06 KS Test (訓練 vs 測試分佈)
+   07 Lineage (可回溯 SQL)
+   08 Repro (可重現性)
+   09 Pipeline (線上預測流水)
+
+3. 產 Model Card：每個 horizon × engine 組合的元資料、用途、訓練
+   數據、效能指標、已知限制。
+
+4. 跑漂移分析 (drift report)、訊號衰減分析 (signal decay)、效能
+   基線 (baseline)。
+
+【產出了什麼】
+・phase3_report_RESOLVED.json — 9/9 治理關卡 PASS 的最終狀態
+・phase3_pipeline_revalidation.json — 6/6 模型線上預測流水驗證通過
+・治理目錄下 8 份 JSON：drift_report、dsr_revalidation、
+  performance_baseline、signal_decay_report、model_card × 4
+・14 張圖表：phase3_case_study、cost_sensitivity_heatmap、
+  cross_horizon_heatmap、pillar_contribution、cumulative_returns
+  × 3、drawdown × 3、monthly_returns × 3
+
+【結果是什麼】
+原始 Sharpe Ratio 2.41、deflate 後得到 DSR 12.12、遠超過統計顯著
+門檻 3.0、p 值降至小於 0.001。9 道治理關卡全數 PASS——其中 Text
+PSI 因為語言演化 (像 deepseek、矽光子這種新詞) 觸發 WARN、對策是
+每月重新訓練詞向量；線上預測流水關卡早期因欄位漂移失敗、後來在
+2026-04-26 重驗 6 個 horizon × 引擎組合、6/6 全部通過。
+
+
+================================================================================
+Phase 5B · 文本與情緒分析 (NLP)
+================================================================================
+
+【做了什麼】
+1. 文本斷詞：用 jieba 加自定義金融詞典 (1,521 詞) 處理 1,125,134
+   筆原始文本。
+
+2. 關鍵字特徵萃取：用 Lift × χ² 檢定篩選有預測力的關鍵字、得到
+   500 個生產用 keyword、對應 1,521 個 txt_ 特徵。
+
+3. 情緒特徵 (sent_)：用 SnowNLP 加金融語料修正、把每篇文本評為
+   情緒分數、再依 5 日移動平均合成 sent_polarity_5d 等特徵。
+
+4. 把文本日頻訊號跟價格、財報、籌碼日頻訊號在 (stock_id, date)
+   主鍵上對齊；跑 IC 驗證確認文本訊號跟未來報酬的相關性。
+
+5. 整合特徵：把 event_、txt_、sent_ 三類文本特徵跟其他 6 支柱
+   合併、進入 feature store 漏斗篩選。
+
+【產出了什麼】
+・text_features.parquet — 1,521 個 txt_ + 11 個 sent_ 特徵
+・text_keywords.parquet — 500 個關鍵字 lift 表
+・text_tokens_lite.parquet — 斷詞後的精簡 tokens
+・6 張圖表：text coverage heatmap、platform share、sentiment
+  distribution、top keywords、volume over time、wordcloud
+
+【結果是什麼】
+文本支柱貢獻 LOPO +8.5 bps、特徵數量 30 個 (9 支柱裡最多)——
+說明文本訊號分散在很多向量上、並非單一強因子。最有趣的發現是
+散戶情緒呈反向 U 型：Q1 最悲觀那一桶隔日命中率比基準高出 3.2 個
+百分點、是五桶最強的；Q5 最樂觀只剩 +0.6 pp；中性的 Q3 反而是
+negative。對應行為金融的 Kahneman 過度反應假說 (Q1 反彈) 跟
+Tetlock 過度樂觀假說 (Q5 弱勢)。Q1 + Q5 共佔 sentiment LOPO 的
+94%——文本情緒可作為主模型之上的 alpha filter。
+
+
+================================================================================
+Phase 6 · 深度驗證 (Deep Validation)
+================================================================================
+
+【做了什麼】
+1. LOPO 分析 (Leave-One-Pillar-Out)：一次拿掉一個支柱、看 AUC
+   掉多少。9 支柱輪流測試。
+
+2. 出手率分析 (threshold sweep)：跑 40 個閾值、從 0.30 到 0.69、
+   每個閾值看 call rate、hit rate、edge vs base、相對提升。
+
+3. 單股深度分析：以 2454 聯發科為案例、跑 SHAP per-instance
+   解釋、看模型在這檔股票上的逐日預測機制。
+
+4. 重建模型 (model rebuild)：對齊 91 features 新 schema、解決
+   Phase 5B 欄位漂移造成的 prediction_pipeline 失敗、重訓並驗證
+   6 個 horizon × engine 組合。
+
+5. 補算特徵穩定性 (feature stability backfill)：用 fold AUC CV
+   + engine top-20 Jaccard 反算 (overall_stability_score 0.7991)、
+   通過 0.7 閾值。
+
+6. 生成最終研究報告 (docx) + 課堂簡報 (pptx)、做交付總結。
+
+【產出了什麼】
+・lopo_pillar_contribution_D20.json — 9 支柱 LOPO 完整結果
+・threshold_sweep_xgb_D20.json — 40 閾值掃描結果
+・single_stock_2454_mediatek.json + .png — 聯發科個股深度
+・joblib 模型 6 份 (新 schema 對齊版)
+・docx 研究報告 + pptx 課堂簡報
+
+【結果是什麼】
+LOPO 結果非常明確：
+- Risk 是地基、拿掉掉 138.6 bps (約 1.4 個百分點)
+- Trend 拿掉掉 64.9 bps、Valuation 9.5、Text 8.5——這四支柱是
+  正貢獻
+- Chip (籌碼面)、Event、Industry 三支柱反而是負貢獻、合計負
+  49 bps——這三支引入的雜訊多於訊息、是下一輪精簡的對象
+
+Threshold sweep 結果：門檻越嚴、edge 越陡。
+- Top 10% 命中 28.88% / +2.6 pp
+- Top 5% 31.44% / +5.16 pp
+- Top 1% 36.81% / +10.53 pp
+- 最嚴閾值 0.50 那一軌、2,836 檔、命中 37.98% / 邊際 +11.70 pp、
+  相對提升 44.5%
+
+雙軌部位設計：
+- A 軌 (高信心)：threshold 0.50、call rate 0.70%、命中 37.98%、
+  edge +11.7 pp、給主動基金實盤、每日 2-3 檔
+- B 軌 (廣覆蓋)：threshold 0.40、call rate 8.83%、命中 29.41%、
+  edge +3.14 pp、給研究 watchlist、每日 30-40 檔
+
+
+================================================================================
+回測驗證 (Strategy Backtest)
+================================================================================
+
+【做了什麼】
+用 Top 1% 高信心訊號當實單部位、月初再平衡、含手續費 0.3% 與
+滑價 0.1%、回測 24 個月 (2024-Q2 到 2026-Q1)。同時跑 5/15/30 bps
+三情境成本壓力測試。
+
+【結果是什麼】
+・100 元起始資金、24 個月後達到 188 元——累積 +88%、CAGR +36.8%
+・同期 TAIEX 累計 +25% / 年化 +12.4%、策略相對基準 alpha 約 24
+  個百分點
+・最大回撤 -14.2%、TAIEX 同期 -22.4%——回撤淺很多
+・Sharpe 0.81 對 0.42 (大盤兩倍)、Calmar 比 2.59 對 0.55 (大盤
+  4.7 倍)
+・即使在極端 30 bps 成本壓力下、策略仍維持正報酬
+
+
+================================================================================
+互動儀表板 (Streamlit Dashboard)
+================================================================================
+
+13 頁互動儀表板、把所有研究結果暴露給研究員、PM、合規角色：
+
+01 投資解讀面板 — 推薦組合、成本計算、損益平衡
+02 Model Metrics — AUC / ICIR / fold 切換、超參數
+03 ICIR Analysis — pillar × month 熱圖
+04 Backtest — 累積報酬 + Drawdown + 0050 對照
+05 Feature Analysis — SHAP Top-20、個股逐股
+06 Data Explorer — Feature Store 概覽、9 道品質閘
+07 Model Governance — DSR、Drift、Model Cards、治理快照
+08 Signal Monitor — PSI / KS 漂移、半衰期、基線監控
+09 Extended Analytics — Phase 3 延伸分析
+10 Text Analysis — wordcloud、keyword、sent overview
+A  Phase6 深度驗證 — LOPO、SHAP、threshold、單股
+B  使用手冊 — 各頁說明、術語對照、操作指南
+
+技術上：Streamlit 1.39 + Plotly 5.24，部署在 Streamlit Cloud、
+所有圖表皆可導出 PNG / 對應 JSON artifact、跨角色共用同一 truth
+source。
+
+
+================================================================================
+總結
+================================================================================
+
+整套系統的閉環：
+資料 (10 張表 1.13M 筆) → 特徵 (1,623 → 91) → 模型 (XGBoost ×
+WFPK) → 驗證 (4 重檢定) → 治理 (9 道關卡) → 部署 (雙軌部位 +
+回測) → 監控 (PSI / drift / 重訓節奏)
+
+核心結論：D+20 中長線預測在四項獨立檢定下成立、邊界明確、重新
+訓練節奏可追蹤。可下一步是 POC 試運行加 PSI 自動回報的工程落地。
+
+本研究為 NTU 大數據與商業分析專案課堂成果、不構成任何投資建議。
