@@ -56,3 +56,6 @@ Thumbs.db
 
 # Claude workspace
 .claude/
+
+# Office temp lockfiles
+~$*
