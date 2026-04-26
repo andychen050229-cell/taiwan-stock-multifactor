@@ -182,10 +182,10 @@ try:
 
     with col_b:
         finmind_data = pd.DataFrame([
-            {"檔案": "stock_prices_ohlcv", "資料集名稱": "TaiwanStockPrice", "補充內容": "完整 OHLCV（核心表僅含收盤價）"},
-            {"檔案": "balance_sheet", "資料集名稱": "TaiwanStockBalanceSheet", "補充內容": "資產負債表（核心庫無此項）"},
-            {"檔案": "cashflow", "資料集名稱": "TaiwanStockCashFlowsStatement", "補充內容": "現金流量表（核心庫無此項）"},
-            {"檔案": "industry", "資料集名稱": "TaiwanStockInfo", "補充內容": "產業分類欄位（核心 companies 表未含）"},
+            {"檔案": "stock_prices_ohlcv", "資料集名稱": "TaiwanStockPrice", "補充內容": "完整 OHLCV（資料庫僅含收盤價）"},
+            {"檔案": "balance_sheet", "資料集名稱": "TaiwanStockBalanceSheet", "補充內容": "資產負債表（資料庫無此項）"},
+            {"檔案": "cashflow", "資料集名稱": "TaiwanStockCashFlowsStatement", "補充內容": "現金流量表（資料庫無此項）"},
+            {"檔案": "industry", "資料集名稱": "TaiwanStockInfo", "補充內容": "產業分類欄位（資料庫無此項）"},
             {"檔案": "institutional_investors", "資料集名稱": "TaiwanStockInstitutionalInvestorsBuySell", "補充內容": "外資 / 投信 / 自營商三大法人買賣超"},
             {"檔案": "margin_trading", "資料集名稱": "TaiwanStockMarginPurchaseShortSale", "補充內容": "融資融券交易資料 — ⚠️ 已於 2026-04-19 因覆蓋率不足下架，檔案保留供查驗"},
         ])
