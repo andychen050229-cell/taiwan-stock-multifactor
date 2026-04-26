@@ -560,8 +560,8 @@ def slide_problem(prs):
         {'br': True},
         {'text': '回測亮眼亦多為過擬合假象。', 'size': 15, 'color': INK_2},
         {'br': True}, {'br': True},
-        {'text': '→ ', 'size': 13, 'color': ROSE, 'mono': True},
-        {'text': '不應在日頻層做下注決策。', 'size': 13, 'color': ROSE},
+        {'text': '→ ', 'size': 13, 'color': INK, 'bold': True, 'mono': True},
+        {'text': '不應在日頻層做下注決策。', 'size': 13, 'bold': True, 'color': INK},
     ], line_h=1.65)
 
     # 卡 2：訊號層——基本面 / 文本 / 籌碼能對齊
@@ -587,8 +587,8 @@ def slide_problem(prs):
         {'br': True},
         {'text': 'forward-looking bias 從源頭阻斷。', 'size': 15, 'color': INK_2},
         {'br': True}, {'br': True},
-        {'text': '→ ', 'size': 13, 'color': TEAL, 'mono': True},
-        {'text': '同一決策日只看當下可見的訊息。', 'size': 13, 'color': TEAL},
+        {'text': '→ ', 'size': 13, 'color': INK, 'bold': True, 'mono': True},
+        {'text': '同一決策日只看當下可見的訊息。', 'size': 13, 'bold': True, 'color': INK},
     ], line_h=1.65)
 
     # 卡 3：時序選擇——D+20 是 sweet spot
@@ -630,11 +630,11 @@ def slide_problem(prs):
         {'text': '半衰期 > 1 個月，', 'size': 15, 'bold': True, 'color': INK},
         {'text': '對應中長線部位。', 'size': 15, 'color': INK_2},
         {'br': True},
-        {'text': '→ ', 'size': 13, 'color': NAVY, 'mono': True},
-        {'text': 'D+20 是訊號最強、雜訊已收斂的甜蜜點。', 'size': 13, 'color': NAVY},
+        {'text': '→ ', 'size': 13, 'color': INK, 'bold': True, 'mono': True},
+        {'text': 'D+20 是訊號最強、雜訊已收斂的甜蜜點。', 'size': 13, 'bold': True, 'color': INK},
     ], line_h=1.55)
 
-    takeaway_bar(slide, 96, 776, 1728, 152, 'SO WHAT', [
+    takeaway_bar(slide, 96, 808, 1728, 144, 'SO WHAT', [
         {'text': '台股 alpha 並非不存在、', 'size': 16, 'color': INK},
         {'text': '而是被錯誤時序與單一因子框架所遮蔽；', 'size': 16, 'color': INK},
         {'br': True},
@@ -781,9 +781,10 @@ def slide_approach(prs):
         lx += 130
 
     # 6-phase pipeline strip · 補充說明，置於下方一橫條
-    strip_y = 720
-    rect(slide, 96, strip_y, 1728, 76, fill=TINT, line=RULE, line_w=0.5)
-    text(slide, 116, strip_y+14, 400, 18, '6-PHASE PIPELINE',
+    # v11.5.21 §1 — 增加 strip 高度容納 13pt 子文字、POINT-IN-TIME bar 同步下移。
+    strip_y = 712
+    rect(slide, 96, strip_y, 1728, 96, fill=TINT, line=RULE, line_w=0.5)
+    text(slide, 116, strip_y+16, 400, 18, '6-PHASE PIPELINE',
          size=11, bold=True, color=INK_3, mono=True, ls=2.4)
     phases = [
         ('Ingest',     '7 表 3.48M 列'),
@@ -796,15 +797,15 @@ def slide_approach(prs):
     pw = (1728 - 40 - 30) / 6
     for i, (en, sub) in enumerate(phases):
         px_ = int(96 + 20 + i*pw)
-        text(slide, px_, strip_y+38, int(pw)-10, 18, f'{i+1:02d} · {en}',
-             size=11, bold=True, color=NAVY, mono=True, ls=1.4)
-        text(slide, px_, strip_y+58, int(pw)-10, 14, sub,
-             size=10, color=INK_3, mono=True, ls=0.4)
+        text(slide, px_, strip_y+44, int(pw)-10, 20, f'{i+1:02d} · {en}',
+             size=12, bold=True, color=NAVY, mono=True, ls=1.4)
+        text(slide, px_, strip_y+68, int(pw)-10, 18, sub,
+             size=13, color=INK_2, mono=True, ls=0.4)
         if i < 5:
             ax = int(96 + 20 + (i+1)*pw - 8)
-            text(slide, ax, strip_y+38, 12, 18, '›', size=14, color=INK_4)
+            text(slide, ax, strip_y+44, 12, 20, '›', size=15, color=INK_4)
 
-    takeaway_bar(slide, 96, 820, 1728, 132, 'POINT-IN-TIME DISCIPLINE', [
+    takeaway_bar(slide, 96, 832, 1728, 132, 'POINT-IN-TIME DISCIPLINE', [
         {'text': '財報 lag 45 天、文本 T 日 15:00 截止、', 'size': 15, 'color': INK},
         {'text': '(stock_id, date) ', 'size': 15, 'bold': True, 'color': NAVY, 'mono': True},
         {'text': '主鍵對齊；', 'size': 15, 'color': INK},
@@ -875,7 +876,7 @@ def slide_pillars_lopo(prs):
          size=11, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, panel_x+24, panel_y+42, 700, 18,
          'baseline 0.6486 · 1 bps = ΔAUC × 10,000 · 正向 = 該支柱貢獻訊號',
-         size=11, color=INK_3, italic=True)
+         size=11, color=INK_3)
     lopo_items = [
         ('Risk',        138.6),
         ('Trend',        64.9),
@@ -965,42 +966,41 @@ def slide_model_performance(prs):
         text(slide, cx+24, box_y+186, cell_w-48, 60, sub,
              size=12, color=INK_2, mono=True, ls=0.2, line_h=1.5)
 
-    # Bottom: 4-fold consistency strip — 證明跨 fold 一致
-    bot_y = 580
-    bot_h = 168
+    # Bottom: 4-fold consistency strip — v11.5.21 §2 字體放大 + bar 下移
+    bot_y = 576
+    bot_h = 196
     rect(slide, 96, bot_y, 1728, bot_h, fill=TINT, line=RULE, line_w=0.5)
-    text(slide, 116, bot_y+18, 600, 18, 'CONSISTENCY · 4 折 OOS AUC',
+    text(slide, 116, bot_y+18, 600, 20, 'CONSISTENCY · 4 折 OOS AUC',
          size=11, bold=True, color=INK_3, mono=True, ls=2.4)
-    text(slide, 116, bot_y+42, 800, 18,
+    text(slide, 116, bot_y+44, 900, 22,
          '四折落於 0.633 – 0.656、跨 fold 標準差僅 0.0089 · 證據非過擬合',
-         size=11, color=INK_3, italic=True)
+         size=13, color=INK_2)
     fold_data = [
         ('FOLD 0', '2023 Q4',            0.6481, NAVY),
         ('FOLD 1', '2024 Q1–Q2',         0.6463, NAVY),
         ('FOLD 2', '2024 Q2–Q3',         0.6332, ROSE),
         ('FOLD 3', '2024 Q4–25 Q1',      0.6543, TEAL),
     ]
-    fold_y = bot_y + 80
+    fold_y = bot_y + 96
     fw = (1728 - 64) / 4
     for i, (lbl, period, auc, color) in enumerate(fold_data):
         fx = int(116 + i*fw)
-        # label + period
-        text(slide, fx, fold_y, 90, 18, lbl,
-             size=11, bold=True, color=INK_3, mono=True, ls=1.4)
-        text(slide, fx, fold_y+22, 200, 18, period,
-             size=11, color=INK_3, mono=True, ls=0.4)
+        text(slide, fx, fold_y, 100, 22, lbl,
+             size=12, bold=True, color=INK_3, mono=True, ls=1.4)
+        text(slide, fx, fold_y+28, 220, 22, period,
+             size=12, color=INK_2, mono=True, ls=0.4)
         # bar
-        track_x = fx + 220
-        track_w = int(fw - 380)
-        rect(slide, track_x, fold_y+8, track_w, 8, fill=SUBTLE)
+        track_x = fx + 230
+        track_w = int(fw - 390)
+        rect(slide, track_x, fold_y+12, track_w, 10, fill=SUBTLE)
         scaled = (auc - 0.60) / (0.66 - 0.60)
         bar_w_ = max(2, int(scaled * track_w))
-        rect(slide, track_x, fold_y+8, bar_w_, 8, fill=color)
+        rect(slide, track_x, fold_y+12, bar_w_, 10, fill=color)
         # value
-        text(slide, fx + int(fw) - 130, fold_y, 110, 22, f'{auc:.4f}',
-             size=15, bold=True, color=color, mono=True, ls=-0.2)
+        text(slide, fx + int(fw) - 132, fold_y, 120, 24, f'{auc:.4f}',
+             size=17, bold=True, color=color, mono=True, ls=-0.2)
 
-    takeaway_bar(slide, 96, 768, 1728, 132, 'BOTTOM LINE', [
+    takeaway_bar(slide, 96, 800, 1728, 132, 'BOTTOM LINE', [
         {'text': '同一結論在四項獨立檢定下成立、跨四個 fold 重複出現、', 'size': 16, 'color': INK},
         {'text': '排除 p-hacking 與單期僥倖；', 'size': 16, 'bold': True, 'color': NAVY},
         {'br': True},
@@ -1040,7 +1040,7 @@ def slide_topn_dual(prs):
     text(slide, 116, 326, 700, 18, 'TOP-% HIT RATE · 邊際遞增',
          size=11, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, 116, 348, 700, 18, '樣本愈集中、edge 愈陡 · base 26.28%',
-         size=11, color=INK_3, italic=True)
+         size=11, color=INK_3)
     th_y = 380
     cols = [(116, 180, '分位'), (296, 130, 'N (檔)'), (426, 150, '命中率'),
             (576, 160, 'Edge vs base'), (736, 220, '相對提升')]
@@ -1081,7 +1081,7 @@ def slide_topn_dual(prs):
          size=11, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, 1010, 334, 800, 18,
          '依資金屬性與決策節奏分流、共用同一機率分數',
-         size=11, color=INK_3, italic=True)
+         size=11, color=INK_3)
     tracks = [
         ('A', '保守 · Threshold 0.50',    NAVY,
          '0.70%', '37.98%', '+11.70 pp', 'HIGH CONVICTION',
@@ -1165,7 +1165,7 @@ def slide_sentiment_ushape(prs):
     text(slide, chart_x+24, chart_y+18, 700, 22, 'SENTIMENT QUINTILE EDGE · sent_polarity_5d',
          size=11, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, chart_x+24, chart_y+44, 800, 22, 'Edge = 該分位實際命中率 − baseline 26.28% · pp 為百分點',
-         size=12, color=INK_3, italic=True)
+         size=12, color=INK_3)
     quintiles = [
         ('Q1', '最悲觀\nsent < 20', +3.2, NAVY),
         ('Q2', '20–40',           +0.2, NAVY),
@@ -1286,7 +1286,7 @@ def slide_governance(prs):
     text(slide, dsr_x+22, dsr_y+22, 480, 22, 'DEFLATED SHARPE · 多重檢定後的真 Sharpe',
          size=11, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, dsr_x+22, dsr_y+58, 500, 36, 'Bailey & López de Prado (2014)',
-         size=12, color=INK_3, italic=True)
+         size=12, color=INK_3)
 
     # Big DSR number
     text(slide, dsr_x+22, dsr_y+102, 500, 110, '12.12',
@@ -1414,7 +1414,7 @@ def slide_equity_curve_main(prs):
     text(slide, chart_x+24, chart_y+20, 700, 22, 'CUMULATIVE NAV · 起始資金 100 元',
          size=11, bold=True, color=INK_3, mono=True, ls=2.4)
     text(slide, chart_x+24, chart_y+44, 800, 22, 'Strategy = XGBoost D+20 Top 1% · 月初再平衡',
-         size=11, color=INK_3, italic=True)
+         size=11, color=INK_3)
 
     # plot region
     px_, py_, pw_, ph_ = chart_x+90, chart_y+90, chart_w-130, chart_h-180
@@ -1470,6 +1470,8 @@ def slide_equity_curve_main(prs):
          size=12, color=INK_3, mono=True)
 
     # ===== Right: KPI stack =====
+    # v11.5.21 §3 — 修 value 與 sub 重疊：item_h 108→120、value h 50→44、
+    # sub y 從 +82 → +94 確保不疊
     kpi_x = 1296; kpi_w = 528
     items = [
         ('CAGR · 年化',     '+36.8%',  'vs TAIEX +12.4%',   EMERALD),
@@ -1477,16 +1479,16 @@ def slide_equity_curve_main(prs):
         ('MAX DRAWDOWN',    '-14.2%',  'vs TAIEX -22.4%',    GOLD),
         ('SHARPE · CALMAR', '0.81 · 2.59', 'vs TAIEX 0.42 · 0.55', NAVY),
     ]
-    item_h = 108; item_gap = 8
+    item_h = 120; item_gap = 8
     for i, (lbl, val, sub, c) in enumerate(items):
         iy = 318 + i*(item_h + item_gap)
         rect(slide, kpi_x, iy, kpi_w, item_h, fill=PAPER, line=RULE, line_w=0.75)
         stripe(slide, kpi_x, iy, kpi_w, 4, c)
         text(slide, kpi_x+22, iy+18, kpi_w-44, 18, lbl,
              size=11, bold=True, color=INK_3, mono=True, ls=2.2)
-        text(slide, kpi_x+22, iy+42, kpi_w-44, 50, val,
-             size=32, bold=True, color=c, mono=True, ls=-1.0)
-        text(slide, kpi_x+22, iy+82, kpi_w-44, 22, sub,
+        text(slide, kpi_x+22, iy+42, kpi_w-44, 48, val,
+             size=30, bold=True, color=c, mono=True, ls=-1.0)
+        text(slide, kpi_x+22, iy+94, kpi_w-44, 22, sub,
              size=11, color=INK_3, mono=True, ls=0.4)
 
     takeaway_bar(slide, 96, 808, 1728, 168, 'STRATEGY READOUT', [
@@ -1801,7 +1803,7 @@ def slide_apx_problem_deep(prs):
         text(slide, 200, ry+74, 1500, 26, '· ' + headline, size=15, bold=True, color=color, mono=True, ls=0.4)
         text(slide, 200, ry+108, 1500, 60, '對策 · ' + body, size=14, color=INK_2, line_h=1.6)
 
-    takeaway_bar(slide, 96, 920, 1728, 80, 'KEY POINT', [
+    takeaway_bar(slide, 96, 898, 1728, 112, 'KEY POINT', [
         {'text': '三難題對應三層治理 → ', 'size': 14, 'color': INK},
         {'text': '時序紀律 + 主鍵對齊 + 詞表自建', 'size': 14, 'bold': True, 'color': NAVY},
         {'br': True},
@@ -2028,7 +2030,7 @@ def slide_apx_tech_stack(prs):
         text(slide, bar_x+1380, by+18, 320, bar_h-36, 'L' + no.lstrip('0'),
              size=42, bold=True, color=color, mono=True, align='right', anchor='middle', ls=-1.4)
 
-    takeaway_bar(slide, 96, 904, 1728, 60, 'CONTAINERIZED · 完全可重現', [
+    takeaway_bar(slide, 96, 904, 1728, 84, 'CONTAINERIZED · 完全可重現', [
         {'text': '五層皆有 unit test + integration test · 任何一層可獨立替換 (e.g. DuckDB → BigQuery)；', 'size': 14, 'color': INK},
         {'text': 'Docker compose 兩節點即可重新訓練全棧。', 'size': 14, 'bold': True, 'color': NAVY},
     ], color=ROSE, bg=ROSE_LT)
@@ -2136,7 +2138,7 @@ def slide_apx_lopo_detail(prs):
         rect(slide, obs_x+88, oy+58, 60, 3, fill=c)
         text(slide, obs_x+88, oy+72, 500, 50, body, size=14, color=INK_2, line_h=1.5)
 
-    takeaway_bar(slide, 96, 868, 1728, 96, 'IMPLICATION · 投資組合啟示', [
+    takeaway_bar(slide, 96, 868, 1728, 112, 'IMPLICATION · 投資組合啟示', [
         {'text': '若被迫精簡，先砍 Chip / Event / Industry 三支 (合計 -49 bps，為負貢獻)；', 'size': 15, 'color': INK},
         {'br': True},
         {'text': '保留 Risk + Trend + Valuation + Sentiment 四支已可貢獻 220+ bps 的 ΔAUC。', 'size': 15, 'color': NAVY, 'bold': True},
@@ -2477,7 +2479,7 @@ def slide_apx_auc_dsr(prs):
     text(slide, rx+24, 798, 632, 80, 'DSR > 2 即顯著；本系統 12.12 為極強拒絕「運氣假說」的證據——150 次參數搜尋的選擇偏誤已被扣除。',
          size=13, color=INK_2, line_h=1.55)
 
-    takeaway_bar(slide, 96, 904, 1728, 60, 'STABILITY · 跨 fold 穩定', [
+    takeaway_bar(slide, 96, 904, 1728, 84, 'STABILITY · 跨 fold 穩定', [
         {'text': '4 fold AUC 標準差 0.005 · 最差 fold 0.6431 仍遠高於 0.5 baseline · ', 'size': 14, 'color': INK},
         {'text': '系統不靠單一年份。', 'size': 14, 'bold': True, 'color': NAVY},
     ], color=ROSE, bg=ROSE_LT)
@@ -2577,7 +2579,7 @@ def slide_apx_hit_decile(prs):
     text(slide, 1620, base_y - base_h - 22, 200, 18, '30% baseline',
          size=10, bold=True, color=ROSE, mono=True, align='right')
 
-    takeaway_bar(slide, 96, 868, 1728, 96, 'MONOTONICITY · 機率排序與真實命中一致', [
+    takeaway_bar(slide, 96, 868, 1728, 112, 'MONOTONICITY · 機率排序與真實命中一致', [
         {'text': '十個分位無一破口 · 排序能力扎實；', 'size': 15, 'color': INK},
         {'text': 'D10 vs D1 spread = 25.4 pp', 'size': 15, 'bold': True, 'color': NAVY, 'mono': True},
         {'text': ' · 是策略中最關鍵的 alpha 來源。', 'size': 15, 'color': INK},
@@ -2770,7 +2772,7 @@ def slide_apx_dashboard(prs):
         rect(slide, cx+72, cy+50, 40, 2, fill=c)
         text(slide, cx+72, cy+58, cw-92, 44, body, size=12, color=INK_2, line_h=1.45)
 
-    takeaway_bar(slide, 96, 884, 1728, 80, 'OPERATIONAL READY · 上線即用', [
+    takeaway_bar(slide, 96, 884, 1728, 84, 'OPERATIONAL READY · 上線即用', [
         {'text': 'Streamlit 部署，三秒切頁；', 'size': 15, 'color': INK},
         {'text': '所有圖表皆可導出 PNG / 對應 JSON artifact', 'size': 15, 'bold': True, 'color': NAVY},
         {'text': '；研究員、PM、合規可同時使用同一頁面。', 'size': 15, 'color': INK},
@@ -2845,7 +2847,7 @@ def slide_apx_sentiment_overview(prs):
         rect(slide, 1340, sy+12, bw, 8, fill=c)
         text(slide, 1720, sy, 80, 32, pct, size=14, bold=True, color=c, mono=True, align='right', anchor='middle')
 
-    takeaway_bar(slide, 96, 974, 1728, 32, '', [
+    takeaway_bar(slide, 96, 956, 1728, 54, '', [
         {'text': '15 來源 · 前 6 大占 80% · ', 'size': 13, 'color': INK},
         {'text': '經濟日報 / 工商時報 / Anue 為新聞主幹；PTT 為散戶情緒主軸。',
          'size': 13, 'bold': True, 'color': NAVY},
@@ -2922,7 +2924,7 @@ def slide_apx_keyword_spectrum(prs):
     bar_panel(slide, 96, 308, 854, 610, 'BULL · 多方關鍵詞 (Lift > 1)', EMERALD, bull, 3.0)
     bar_panel(slide, 970, 308, 854, 610, 'BEAR · 空方關鍵詞 (Lift > 1)', ROSE, bear, 3.0)
 
-    takeaway_bar(slide, 96, 936, 1728, 32, '', [
+    takeaway_bar(slide, 96, 936, 1728, 54, '', [
         {'text': '空方 Lift 上限 (砍單 2.86×) > 多方 (創高 2.42×) · ',
          'size': 13, 'color': INK},
         {'text': '空方詞訊號更強烈 · 解釋 Q1 contrarian 效應的源頭。',
@@ -2993,7 +2995,7 @@ def slide_apx_sentiment_quintile(prs):
         text(slide, rx+24, cy+58, 200, 36, val, size=26, bold=True, color=c, mono=True, ls=-0.6)
         text(slide, rx+260, cy+62, 360, 60, body, size=13, color=INK_2, line_h=1.5, anchor='middle')
 
-    takeaway_bar(slide, 96, 904, 1728, 60, 'BEHAVIORAL FINANCE · 行為財務學印證', [
+    takeaway_bar(slide, 96, 904, 1728, 84, 'BEHAVIORAL FINANCE · 行為財務學印證', [
         {'text': 'Q1 反向效應 = ', 'size': 14, 'color': INK},
         {'text': '過度反應假說 (DeBondt & Thaler 1985)', 'size': 14, 'bold': True, 'color': NAVY},
         {'text': ' 在台股的數據驗證 · 詳見 A.21。', 'size': 14, 'color': INK},
@@ -3043,7 +3045,7 @@ def slide_apx_q1_contrarian(prs):
         rect(slide, sx+24, sy+162, 60, 3, fill=c)
         text(slide, sx+24, sy+178, 504, 160, body, size=15, color=INK_2, line_h=1.65)
 
-    takeaway_bar(slide, 96, 868, 1728, 96, 'EXECUTION CAVEAT · 執行注意', [
+    takeaway_bar(slide, 96, 868, 1728, 112, 'EXECUTION CAVEAT · 執行注意', [
         {'text': '此效應僅限 ', 'size': 14, 'color': INK},
         {'text': '基本面未受結構性傷害的標的', 'size': 14, 'bold': True, 'color': NAVY},
         {'text': '；模型加入 ROE / debt 作 sanity guardrail，避免抄到「真的不行」的個股。', 'size': 14, 'color': INK},
@@ -3110,7 +3112,7 @@ def slide_apx_ushape_multi(prs):
         text(slide, px+24, py+panel_h-46, panel_w-48, 22, '單位 · % excess return',
              size=11, color=INK_3, mono=True, ls=0.4)
 
-    takeaway_bar(slide, 96, 856, 1728, 108, 'TIME EVOLUTION · 時間演化', [
+    takeaway_bar(slide, 96, 856, 1728, 112, 'TIME EVOLUTION · 時間演化', [
         {'text': '反向效應在 T+1 尚未顯現 (慣性主導) · 在 T+5 開始浮現 · 在 T+20 完整成型；', 'size': 15, 'color': INK},
         {'br': True},
         {'text': '建議交易視窗為 ', 'size': 15, 'color': INK},
@@ -3186,7 +3188,7 @@ def slide_apx_news_forum(prs):
         text(slide, rx+18, ry+66, 240, 44, body,
              size=11, color=INK_2, line_h=1.45)
 
-    takeaway_bar(slide, 96, 904, 1728, 60, 'CROSS-CHANNEL VALIDATION', [
+    takeaway_bar(slide, 96, 904, 1728, 84, 'CROSS-CHANNEL VALIDATION', [
         {'text': '兩源共識 (BOTH BULL) +4.1% > 單源 ; ', 'size': 14, 'color': INK},
         {'text': '跨來源驗證', 'size': 14, 'bold': True, 'color': NAVY},
         {'text': ' 是訊號品質的關鍵濾網。', 'size': 14, 'color': INK},
@@ -3257,7 +3259,7 @@ def slide_apx_coverage(prs):
     text(slide, crash_x-80, py_+12, 160, 22, 'COVID-19 crash',
          size=11, bold=True, color=ROSE, mono=True, align='center')
 
-    takeaway_bar(slide, 96, 936, 1728, 32, '', [
+    takeaway_bar(slide, 96, 936, 1728, 54, '', [
         {'text': '極端事件 (COVID-19 / 2022 升息) 情感指數皆出現 -0.6 級重挫，', 'size': 14, 'color': INK},
         {'text': '系統能即時捕捉市場情緒拐點。', 'size': 14, 'bold': True, 'color': NAVY},
     ], color=ROSE, bg=ROSE_LT)
@@ -3320,7 +3322,7 @@ def slide_apx_signal_decay(prs):
         text(slide, bx+bar_w//2-32, base_y+38, 64, 22, status,
              size=10, bold=True, color=PAPER, mono=True, align='center', anchor='middle')
 
-    takeaway_bar(slide, 96, 904, 1728, 60, 'EARLY WARNING · 早期警示', [
+    takeaway_bar(slide, 96, 904, 1728, 84, 'EARLY WARNING · 早期警示', [
         {'text': 'Sentiment 0.13 已過 0.10 警告線 · 仍低於 0.25 alert · ', 'size': 14, 'color': INK},
         {'text': '建議季度更新詞表 · 避免衰減', 'size': 14, 'bold': True, 'color': NAVY},
         {'text': '。其餘 8 支柱皆穩定。', 'size': 14, 'color': INK},
@@ -3376,7 +3378,7 @@ def slide_apx_limitations(prs):
         text(slide, 1056, ry+18, 660, 28, h, size=18, bold=True, color=NAVY)
         text(slide, 1056, ry+52, 660, 36, body, size=13, color=INK_2, line_h=1.45)
 
-    takeaway_bar(slide, 96, 920, 1728, 44, '', [
+    takeaway_bar(slide, 96, 920, 1728, 54, '', [
         {'text': '系統設計時即承認自身邊界 · ', 'size': 14, 'color': INK},
         {'text': '誠實 > 過譽 · 這是 v11.5.17 與一般學術原型最根本的差別。', 'size': 14, 'bold': True, 'color': NAVY},
     ], color=ROSE, bg=ROSE_LT)
@@ -3438,7 +3440,7 @@ def slide_apx_bibliography(prs):
             text(slide, cx+44, ry, cw-72, 50, r,
                  size=12, color=INK_2, line_h=1.4)
 
-    takeaway_bar(slide, 96, 952, 1728, 32, '', [
+    takeaway_bar(slide, 96, 952, 1728, 54, '', [
         {'text': '所有方法論皆有同行審核之文獻支撐；', 'size': 14, 'color': INK},
         {'text': '本系統為 50 年量化文獻在台股的工程實作', 'size': 14, 'bold': True, 'color': NAVY},
         {'text': '。', 'size': 14, 'color': INK},
@@ -3573,7 +3575,7 @@ def slide_apx_methodology(prs):
              size=14, bold=True, color=color, mono=True, ls=2.0)
         text(slide, bar_x+88, by+48, 240, 28, zh, size=20, bold=True, color=NAVY)
         text(slide, bar_x+88, by+82, 360, 22, '↪ ' + ref,
-             size=10, color=INK_3, mono=True, italic=True, ls=0.4)
+             size=10, color=INK_3, mono=True, ls=0.4)
         # formula box (left mid)
         text(slide, bar_x+460, by+16, 100, 18, 'FORMULA',
              size=9, bold=True, color=INK_3, mono=True, ls=2.0)
@@ -3586,7 +3588,7 @@ def slide_apx_methodology(prs):
         text(slide, bar_x+1024, by+38, 680, 60, application,
              size=13, color=INK_2, line_h=1.5)
 
-    takeaway_bar(slide, 96, 880, 1728, 100, 'METHOD-TO-EVIDENCE', [
+    takeaway_bar(slide, 96, 880, 1728, 112, 'METHOD-TO-EVIDENCE', [
         {'text': '每個結論都可逆向追溯到一個方法、每個方法都有一篇引用文獻；', 'size': 15, 'color': INK},
         {'br': True},
         {'text': '這 5 大方法疊加 = ', 'size': 15, 'color': INK_2},
@@ -3639,7 +3641,7 @@ def slide_apx_data_sources_refs(prs):
         text(slide, sx0+24, sy+96, sw-48, 36, body,
              size=13, color=INK_2, line_h=1.5)
         text(slide, sx0+24, sy+148, sw-48, 22, '↪ ' + art,
-             size=11, color=INK_3, mono=True, italic=True, ls=0.4)
+             size=11, color=INK_3, mono=True, ls=0.4)
 
     # RIGHT: Extended References (4 categories beyond A.27)
     text(slide, 980, 296, 600, 22, 'EXTENDED REFERENCES · 延伸文獻',
@@ -3678,9 +3680,9 @@ def slide_apx_data_sources_refs(prs):
                  size=10, color=INK_2)
         if len(refs) > 2:
             text(slide, rx0+rw-90, ry+rh-22, 80, 18, f'+ {len(refs)-2} more',
-                 size=9, color=INK_4, mono=True, italic=True, align='right', ls=0.4)
+                 size=9, color=INK_4, mono=True, align='right', ls=0.4)
 
-    takeaway_bar(slide, 96, 932, 1728, 80, 'PROVENANCE', [
+    takeaway_bar(slide, 96, 926, 1728, 84, 'PROVENANCE', [
         {'text': '948,976 筆樣本 · 1,623 候選因子 · 91 篩選後特徵 · 全部', 'size': 14, 'color': INK},
         {'text': ' SQL 可回溯', 'size': 14, 'bold': True, 'color': NAVY, 'mono': True},
         {'text': '；本研究遵循 BDA-2026 課程資料規範、所有外部引用標明出處、所有方法論可獨立復現。',
