@@ -69,6 +69,7 @@ PURPLE    = RGBColor(0xa8, 0x55, 0xf7)
 INK       = RGBColor(0x0f, 0x17, 0x2a)
 INK_2     = RGBColor(0x33, 0x41, 0x55)
 INK_3     = RGBColor(0x64, 0x74, 0x8b)
+INK_3_DK  = RGBColor(0x47, 0x55, 0x69)   # slate-600 — 取代原 italic 的補強灰
 INK_4     = RGBColor(0x94, 0xa3, 0xb8)
 PAPER     = RGBColor(0xff, 0xff, 0xff)
 BG        = RGBColor(0xfa, 0xfb, 0xfc)
@@ -204,6 +205,8 @@ def rich(slide, x, y, w, h, runs, *, align='left', anchor='top', line_h=1.2):
 # CHROME & COMMON BLOCKS
 # ============================================================
 def slide_chrome_main(slide, page_title, page_no, *, total=10, act=None, source=None):
+    # v11.5.20 §1 — page number relocated from top-right to bottom-right
+    # (consistent with cover slide); top-right reserved for page_title.
     rect(slide, 96, 38, 30, 30, fill=NAVY)
     text(slide, 96, 38, 30, 30, 'TW', size=11, bold=True, color=PAPER,
          align='center', anchor='middle', mono=True)
@@ -211,44 +214,46 @@ def slide_chrome_main(slide, page_title, page_no, *, total=10, act=None, source=
          color=INK_2, anchor='middle', ls=1.4)
     text(slide, 522, 42, 200, 22, '· v11.5.18', size=10, color=INK_4,
          anchor='middle', mono=True, ls=0.8)
-    text(slide, 1180, 38, 620, 30, page_title, size=12, color=INK_3,
+    # Top-right: page title only
+    text(slide, 1180, 38, 700, 30, page_title, size=12, color=INK_3,
          align='right', anchor='middle', mono=True, ls=2.0)
-    rect(slide, 1810, 45, 1, 16, fill=RULE_2)
-    text(slide, 1820, 38, 60, 30, page_no, size=12, color=INK_2,
-         bold=True, align='right', anchor='middle', mono=True)
     if source:
         text(slide, 96, 1018, 1300, 30, 'Source · ' + source, size=11,
              color=INK_3, anchor='middle', mono=True, ls=0.5)
     if act is not None:
         labels = ['SETUP', 'FINDINGS', 'ACTION']
-        text(slide, 1560, 1024, 160, 18, labels[act], size=9, bold=True,
+        text(slide, 1500, 1024, 160, 18, labels[act], size=9, bold=True,
              color=TEAL, mono=True, ls=2.0, align='right')
         for i in range(3):
             on = (i == act)
-            cx = 1740 + i*22
+            cx = 1680 + i*22
             if on:
                 dot(slide, cx, 1033, 5, TEAL)
             else:
                 ring(slide, cx, 1033, 4, RULE_2, line_w=1)
+    # Bottom-right: consistent page-number stamp
+    text(slide, 1780, 1018, 60, 30, page_no, size=12, bold=True,
+         color=INK_2, align='right', anchor='middle', mono=True)
 
 
 def slide_chrome_appendix(slide, page_title, apx_no, *, source=None):
+    # v11.5.20 §1 — appendix page number also at bottom-right.
     rect(slide, 96, 38, 36, 30, fill=ROSE)
     text(slide, 96, 38, 36, 30, 'APX', size=9, bold=True, color=PAPER,
          align='center', anchor='middle', mono=True)
     text(slide, 140, 38, 380, 30, '多因子股票預測系統 · 附錄', size=12, bold=True,
          color=INK_2, anchor='middle', ls=1.4)
-    text(slide, 1180, 38, 620, 30, page_title, size=12, color=INK_3,
+    text(slide, 1180, 38, 700, 30, page_title, size=12, color=INK_3,
          align='right', anchor='middle', mono=True, ls=2.0)
-    rect(slide, 1810, 45, 1, 16, fill=RULE_2)
-    text(slide, 1820, 38, 60, 30, apx_no, size=12, color=ROSE,
-         bold=True, align='right', anchor='middle', mono=True)
     if source:
         text(slide, 96, 1018, 1300, 30, 'Source · ' + source, size=11,
              color=INK_3, anchor='middle', mono=True, ls=0.5)
-    text(slide, 1620, 1024, 220, 18, 'APPENDIX', size=9, bold=True,
+    text(slide, 1560, 1024, 200, 18, 'APPENDIX', size=9, bold=True,
          color=ROSE, mono=True, ls=2.4, align='right')
-    rect(slide, 1844, 1029, 12, 8, fill=ROSE)
+    rect(slide, 1768, 1029, 8, 8, fill=ROSE)
+    # Bottom-right: appendix page number (rose)
+    text(slide, 1780, 1018, 60, 30, apx_no, size=12, color=ROSE,
+         bold=True, align='right', anchor='middle', mono=True)
 
 
 def add_blank_slide(prs):
@@ -393,6 +398,7 @@ def slide_cover(prs):
     ], line_h=1.05)
 
     # Thesis line — 用戶聲音：metric-first、direct assertion
+    # CJK 換行紀律：逗號（、，）不強制換行、整段流動、自動 wrap；句號才換行。
     rect(slide, 96, 488, 1000, 1, fill=RULE_2)
     rich(slide, 96, 510, 1000, 130, [
         {'text': '台股短線是噪聲、', 'size': 22, 'bold': True, 'color': INK},
@@ -402,9 +408,7 @@ def slide_cover(prs):
         {'text': '948,976', 'size': 17, 'bold': True, 'color': NAVY, 'mono': True},
         {'text': ' 樣本、', 'size': 17, 'color': INK_2},
         {'text': '505', 'size': 17, 'bold': True, 'color': NAVY, 'mono': True},
-        {'text': ' 交易日，', 'size': 17, 'color': INK_2},
-        {'br': True},
-        {'text': '於 D+20 方向預測產出可部署的選股訊號。', 'size': 17, 'color': INK_2},
+        {'text': ' 交易日，於 D+20 方向預測產出可部署的選股訊號。', 'size': 17, 'color': INK_2},
     ], line_h=1.45)
 
     # 3-anchor strip — 報告開場直接亮關鍵數字
@@ -516,7 +520,7 @@ def slide_cover(prs):
 def slide_problem(prs):
     slide = add_blank_slide(prs)
     slide_chrome_main(slide, 'Problem Framing', '02', act=0,
-                      source='phase1_report_20260419_112854.json · López de Prado (2018) §7.4')
+                      source='自行整理 · López de Prado (2018) §7.4')
     eyebrow(slide, 96, 112, 700, 'PROBLEM · 為什麼鎖定 D+20')
 
     # H1 — 標題即結論
@@ -557,7 +561,7 @@ def slide_problem(prs):
         {'text': '回測亮眼亦多為過擬合假象。', 'size': 15, 'color': INK_2},
         {'br': True}, {'br': True},
         {'text': '→ ', 'size': 13, 'color': ROSE, 'mono': True},
-        {'text': '不應在日頻層做下注決策。', 'size': 13, 'color': ROSE, 'italic': True},
+        {'text': '不應在日頻層做下注決策。', 'size': 13, 'color': ROSE},
     ], line_h=1.65)
 
     # 卡 2：訊號層——基本面 / 文本 / 籌碼能對齊
@@ -584,7 +588,7 @@ def slide_problem(prs):
         {'text': 'forward-looking bias 從源頭阻斷。', 'size': 15, 'color': INK_2},
         {'br': True}, {'br': True},
         {'text': '→ ', 'size': 13, 'color': TEAL, 'mono': True},
-        {'text': '同一決策日只看當下可見的訊息。', 'size': 13, 'color': TEAL, 'italic': True},
+        {'text': '同一決策日只看當下可見的訊息。', 'size': 13, 'color': TEAL},
     ], line_h=1.65)
 
     # 卡 3：時序選擇——D+20 是 sweet spot
@@ -627,10 +631,10 @@ def slide_problem(prs):
         {'text': '對應中長線部位。', 'size': 15, 'color': INK_2},
         {'br': True},
         {'text': '→ ', 'size': 13, 'color': NAVY, 'mono': True},
-        {'text': 'D+20 是訊號最強、雜訊已收斂的甜蜜點。', 'size': 13, 'color': NAVY, 'italic': True},
+        {'text': 'D+20 是訊號最強、雜訊已收斂的甜蜜點。', 'size': 13, 'color': NAVY},
     ], line_h=1.55)
 
-    takeaway_bar(slide, 96, 752, 1728, 156, 'SO WHAT', [
+    takeaway_bar(slide, 96, 776, 1728, 152, 'SO WHAT', [
         {'text': '台股 alpha 並非不存在、', 'size': 16, 'color': INK},
         {'text': '而是被錯誤時序與單一因子框架所遮蔽；', 'size': 16, 'color': INK},
         {'br': True},
@@ -647,7 +651,7 @@ def slide_problem(prs):
 def slide_approach(prs):
     slide = add_blank_slide(prs)
     slide_chrome_main(slide, 'Methodology', '03', act=0,
-                      source='phase1_report_20260419_112854.json · phase2_report_20260419_152643.json · López de Prado (2018) §7.4')
+                      source='自行整理 · López de Prado (2018) §7.4')
     eyebrow(slide, 96, 112, 700, 'METHODOLOGY · 一頁交代')
 
     rich(slide, 96, 142, 1728, 130, [
@@ -807,7 +811,7 @@ def slide_approach(prs):
         {'br': True},
         {'text': '20 日 embargo 解決 D+20 標籤跨期重疊，', 'size': 15, 'color': INK},
         {'text': '是 DSR 12.12 通過多重檢定的關鍵前提。', 'size': 15, 'bold': True, 'color': TEAL},
-        {'text': '   → 詳 Appendix A.04 / A.05', 'size': 13, 'color': INK_3, 'italic': True},
+        {'text': '   → 詳 Appendix A.04 / A.05', 'size': 13, 'color': INK_3},
     ])
     return slide
 
@@ -818,7 +822,7 @@ def slide_approach(prs):
 def slide_pillars_lopo(prs):
     slide = add_blank_slide(prs)
     slide_chrome_main(slide, 'Factor Attribution', '06', act=1,
-                      source='lopo_pillar_contribution_D20.json · phase2_report_20260419_152643.json §feature_selection')
+                      source='自行整理')
     eyebrow(slide, 96, 112, 700, 'FACTOR ATTRIBUTION · 哪一支柱在發力')
 
     rich(slide, 96, 142, 1728, 130, [
@@ -899,7 +903,7 @@ def slide_pillars_lopo(prs):
         {'text': 'Chip / Event / Industry 共 −49 bps、', 'size': 15, 'color': INK_2},
         {'text': '為下一輪精簡的對象', 'size': 15, 'bold': True, 'color': ROSE},
         {'text': '。   → Appendix A.07 / A.08 / A.09',
-         'size': 13, 'color': INK_3, 'italic': True},
+         'size': 13, 'color': INK_3},
     ])
     return slide
 
@@ -910,7 +914,7 @@ def slide_pillars_lopo(prs):
 def slide_model_performance(prs):
     slide = add_blank_slide(prs)
     slide_chrome_main(slide, 'Headline Result', '04', act=1,
-                      source='phase2_report_20260419_152643.json §model_horizon_1.xgboost · DSR per Bailey & López de Prado (2014)')
+                      source='自行整理 · DSR per Bailey & López de Prado (2014)')
     eyebrow(slide, 96, 112, 700, 'HEADLINE · 四個獨立指標、同一結論')
 
     rich(slide, 96, 142, 1728, 130, [
@@ -1005,7 +1009,7 @@ def slide_model_performance(prs):
         {'text': '——可下單的選股訊號、非回測假象。', 'size': 16, 'color': INK},
         {'sp': True},
         {'text': '→ 下一頁交代統計穩健性 · 詳 Appendix A.11 / A.12',
-         'size': 13, 'color': INK_3, 'italic': True},
+         'size': 13, 'color': INK_3},
     ])
     return slide
 
@@ -1016,7 +1020,7 @@ def slide_model_performance(prs):
 def slide_topn_dual(prs):
     slide = add_blank_slide(prs)
     slide_chrome_main(slide, 'Deployment Edge', '08', act=2,
-                      source='threshold_sweep_xgb_D20.json · 40 檔門檻 × OOS 404,724 樣本')
+                      source='自行整理 · 40 檔門檻 × OOS 404,724 樣本')
     eyebrow(slide, 96, 112, 700, 'DEPLOYMENT · 從機率分數到可下單清單')
 
     rich(slide, 96, 142, 1728, 130, [
@@ -1128,10 +1132,10 @@ def slide_topn_dual(prs):
         {'text': '差異僅在閾值。', 'size': 16, 'bold': True, 'color': NAVY},
         {'br': True},
         {'text': '本研究為學術成果、不構成任何投資建議。',
-         'size': 13, 'color': INK_3, 'italic': True},
+         'size': 13, 'color': INK_3},
         {'sp': True},
         {'text': '→ 詳 Appendix A.13 / A.14',
-         'size': 13, 'color': INK_3, 'italic': True},
+         'size': 13, 'color': INK_3},
     ])
     return slide
 
@@ -1142,7 +1146,7 @@ def slide_topn_dual(prs):
 def slide_sentiment_ushape(prs):
     slide = add_blank_slide(prs)
     slide_chrome_main(slide, 'Sentiment U-Shape', '07', act=1,
-                      source='feature_store_final.parquet · sent_polarity_5d 五桶 · OOS 2024-Q4 – 2025-Q1')
+                      source='自行整理 · sent_polarity_5d 五桶 · OOS 2024-Q4 – 2025-Q1')
     eyebrow(slide, 96, 116, 900, 'WOW FINDING · 散戶情緒呈反向 U 型')
     rich(slide, 96, 144, 1750, 130, [
         {'text': 'Q1 最悲觀、', 'size': 42, 'bold': True, 'color': NAVY, 'ls': -1.0},
@@ -1249,7 +1253,7 @@ def slide_sentiment_ushape(prs):
         {'text': '共佔 sentiment LOPO ', 'size': 17, 'color': INK},
         {'text': '+8.5 bps 的 94%', 'size': 17, 'bold': True, 'color': NAVY, 'mono': True},
         {'text': '、可作為主模型之上的 alpha filter。  → A.18 – A.23',
-         'size': 14, 'color': INK_3, 'italic': True},
+         'size': 14, 'color': INK_3},
     ])
     return slide
 
@@ -1260,7 +1264,7 @@ def slide_sentiment_ushape(prs):
 def slide_governance(prs):
     slide = add_blank_slide(prs)
     slide_chrome_main(slide, 'Statistical Rigor', '05', act=1,
-                      source='phase3_report_20260426_RESOLVED.json · DSR per Bailey & López de Prado (2014) · PSI per Basel III FRTB')
+                      source='自行整理 · DSR per Bailey & López de Prado (2014) · PSI per Basel III FRTB')
     eyebrow(slide, 96, 116, 900, 'RIGOR · 統計穩健 ＋ 治理關卡')
     rich(slide, 96, 144, 1750, 130, [
         {'text': 'DSR 12.12 ', 'size': 44, 'bold': True, 'color': NAVY, 'ls': -1.0, 'mono': True},
@@ -1371,14 +1375,14 @@ def slide_governance(prs):
         {'text': 'DSR 通過多重檢定、9 / 9 治理關卡全數通過、', 'size': 17, 'color': INK},
         {'br': True},
         {'text': 'Text PSI 觸發 WARN 對應 ', 'size': 17, 'color': INK},
-        {'text': '每月詞向量重訓', 'size': 17, 'bold': True, 'color': GOLD},
+        {'text': '每月詞向量重新訓練', 'size': 17, 'bold': True, 'color': GOLD},
         {'text': '。', 'size': 17, 'color': INK},
         {'br': True},
         {'text': '結論已可進入下一頁：拆解哪些因子在驅動這個 AUC。',
-         'size': 14, 'color': INK_3, 'italic': True},
+         'size': 14, 'color': INK_3},
         {'sp': True},
         {'text': '→ A.05 / A.12',
-         'size': 14, 'color': INK_3, 'italic': True},
+         'size': 14, 'color': INK_3},
     ])
     return slide
 
@@ -1389,7 +1393,7 @@ def slide_governance(prs):
 def slide_equity_curve_main(prs):
     slide = add_blank_slide(prs)
     slide_chrome_main(slide, 'Strategy Backtest', '09', act=2,
-                      source='backtest_top1pct_24m.json · 月再平衡 · 手續費 0.3% 內含 · 滑價 0.1%')
+                      source='自行整理 · 月再平衡 · 手續費 0.3% 內含 · 滑價 0.1%')
     eyebrow(slide, 96, 112, 700, 'BACKTEST · 100 元起始、24 個月後達 188 元')
 
     rich(slide, 96, 142, 1728, 130, [
@@ -1496,10 +1500,10 @@ def slide_equity_curve_main(prs):
          'size': 15, 'bold': True, 'color': EMERALD},
         {'br': True},
         {'text': '本研究為學術回測、不構成投資建議。',
-         'size': 13, 'color': INK_3, 'italic': True},
+         'size': 13, 'color': INK_3},
         {'sp': True},
         {'text': '→ 詳 Appendix A.15 / A.16',
-         'size': 13, 'color': INK_3, 'italic': True},
+         'size': 13, 'color': INK_3},
     ])
     return slide
 
@@ -1510,11 +1514,11 @@ def slide_equity_curve_main(prs):
 def slide_recommendations(prs):
     slide = add_blank_slide(prs)
     slide_chrome_main(slide, 'Limits & Roadmap', '10', act=2,
-                      source='phase3_report_20260426_RESOLVED.json · 部署條件 phase7_validation.json · 路線圖 NTU-GSA 2026')
-    eyebrow(slide, 96, 116, 900, 'ACTION · 部署條件、限制邊界、再訓練節奏')
+                      source='自行整理')
+    eyebrow(slide, 96, 116, 900, 'ACTION · 部署條件、限制邊界、重新訓練節奏')
     rich(slide, 96, 144, 1750, 130, [
         {'text': '部署條件具備、', 'size': 42, 'bold': True, 'color': NAVY, 'ls': -1.0},
-        {'text': '1 – 2 個月再訓練、', 'size': 42, 'bold': True, 'color': TEAL, 'ls': -1.0},
+        {'text': '1 – 2 個月重新訓練、', 'size': 42, 'bold': True, 'color': TEAL, 'ls': -1.0},
         {'text': '三大限制邊界', 'size': 42, 'bold': True, 'color': NAVY, 'ls': -1.0},
         {'br': True},
         {'text': '能落地、', 'size': 24, 'bold': True, 'color': INK_2, 'ls': -0.4},
@@ -1567,7 +1571,7 @@ def slide_recommendations(prs):
     rect(slide, cx+24, col_y+108, 60, 3, fill=GOLD)
     limits = [
         ('SCOPE · D+20 中長線', '不適用 intraday、短於 5 日的訊號半衰期不足'),
-        ('TEXT · PSI 0.13 WARN', '語言演化（deepseek、矽光子）、需每月詞向量重訓'),
+        ('TEXT · PSI 0.13 WARN', '語言演化（deepseek、矽光子）、需每月詞向量重新訓練'),
         ('REGIME · 多頭主導窗口', '2024-Q4 至 2025-Q1、極端崩跌情境未涵蓋'),
     ]
     for i, (k, v) in enumerate(limits):
@@ -1593,7 +1597,7 @@ def slide_recommendations(prs):
     phases = [
         ('Q2 · POC',         '每日 Top 1% 服務化、API 試接 1 客戶'),
         ('Q2 – Q3 · OVERLAY','Risk 支柱獨立風控 overlay、可解釋'),
-        ('Q3 – Q4 · DRIFT',  '每月詞向量重訓、PSI 自動回報、防 drift > 0.20'),
+        ('Q3 – Q4 · DRIFT',  '每月詞向量重新訓練、PSI 自動回報、防 drift > 0.20'),
     ]
     for i, (k, v) in enumerate(phases):
         ry = col_y + 128 + i*100
@@ -1610,7 +1614,7 @@ def slide_recommendations(prs):
     takeaway_bar(slide, 96, 808, 1728, 144, 'SEQUENCING', [
         {'text': 'D+20 中長線預測在四項獨立檢定下成立、',
          'size': 17, 'color': INK},
-        {'text': '邊界明確、再訓練節奏可追蹤',
+        {'text': '邊界明確、重新訓練節奏可追蹤',
          'size': 17, 'bold': True, 'color': NAVY},
         {'text': '；下一步為 ',
          'size': 17, 'color': INK},
@@ -1620,7 +1624,7 @@ def slide_recommendations(prs):
          'size': 17, 'color': INK},
         {'br': True},
         {'text': '本研究為學術成果、不構成投資建議；後續延伸詳 A.26 limitations & future work。',
-         'size': 14, 'color': INK_3, 'italic': True},
+         'size': 14, 'color': INK_3},
     ])
     return slide
 
@@ -1721,8 +1725,8 @@ def slide_closing(prs):
 def slide_apx_three_commitments(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Three Commitments', 'A.01',
-                          source='Methodology reference: López de Prado (2018) · Bailey & López de Prado (2014) DSR')
-    eyebrow(slide, 96, 116, 700, 'A.01 · 三大承諾 · 研究立場', color=ROSE)
+                          source='López de Prado (2018) · Bailey & López de Prado (2014) DSR')
+    eyebrow(slide, 96, 116, 700, 'A.01 · 研究立場', color=ROSE)
     rich(slide, 96, 144, 1750, 130, [
         {'text': '不做 ', 'size': 46, 'bold': True, 'color': NAVY, 'ls': -1.0},
         {'text': '黑箱、overfitting、無法重現 ', 'size': 46, 'bold': True, 'color': TEAL, 'ls': -1.0},
@@ -1758,7 +1762,7 @@ def slide_apx_three_commitments(prs):
         {'br': True},
         {'text': '這是與一般「回測看起來很好」的量化原型', 'size': 17, 'color': INK},
         {'text': '最根本的區隔', 'size': 17, 'bold': True, 'color': NAVY},
-        {'text': '——所有產出可獨立稽核、可第三方重訓。', 'size': 17, 'color': INK},
+        {'text': '——所有產出可獨立稽核、可第三方重新訓練。', 'size': 17, 'color': INK},
     ], color=ROSE, bg=ROSE_LT)
     return slide
 
@@ -1767,8 +1771,8 @@ def slide_apx_three_commitments(prs):
 def slide_apx_problem_deep(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Problem · Deep Dive', 'A.02',
-                          source='Methodology: López de Prado (2018) · 台股文本驗證於 phase1_report_20260419_112854.json §data_integrity')
-    eyebrow(slide, 96, 116, 700, 'A.02 · 三重結構性難題 · 詳細', color=ROSE)
+                          source='自行整理 · López de Prado (2018)')
+    eyebrow(slide, 96, 116, 700, 'A.02 · 三重結構性難題', color=ROSE)
     rich(slide, 96, 144, 1750, 130, [
         {'text': '結構性陷阱 + 對應方法論', 'size': 42, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'br': True},
@@ -1797,10 +1801,11 @@ def slide_apx_problem_deep(prs):
         text(slide, 200, ry+74, 1500, 26, '· ' + headline, size=15, bold=True, color=color, mono=True, ls=0.4)
         text(slide, 200, ry+108, 1500, 60, '對策 · ' + body, size=14, color=INK_2, line_h=1.6)
 
-    takeaway_bar(slide, 96, 932, 1728, 60, 'KEY POINT', [
+    takeaway_bar(slide, 96, 920, 1728, 80, 'KEY POINT', [
         {'text': '三難題對應三層治理 → ', 'size': 14, 'color': INK},
         {'text': '時序紀律 + 主鍵對齊 + 詞表自建', 'size': 14, 'bold': True, 'color': NAVY},
-        {'text': ' · 對應到 P.04 Approach 的 6-phase pipeline。', 'size': 14, 'color': INK},
+        {'br': True},
+        {'text': '對應到 P.04 Approach 的 6-phase pipeline。', 'size': 14, 'color': INK},
     ], color=ROSE, bg=ROSE_LT)
     return slide
 
@@ -1809,8 +1814,8 @@ def slide_apx_problem_deep(prs):
 def slide_apx_approach_detail(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, '6-Phase Pipeline · Detail', 'A.03',
-                          source='Pipeline doc: 專案說明文件 §3 · artifacts in outputs/reports/')
-    eyebrow(slide, 96, 116, 700, 'A.03 · 6 階段流水線 · 詳細', color=ROSE)
+                          source='自行整理')
+    eyebrow(slide, 96, 116, 700, 'A.03 · 6 階段流水線', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': '6 階段流水線 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '從原始資料走到決策清單 · 每階段皆有可稽核產出',
@@ -1822,8 +1827,8 @@ def slide_apx_approach_detail(prs):
         ('01', 'Ingest',    '資料清洗與對齊',   '7 表 · 3,483,598 列 ETL · 除權息補償、RSI 異常',           'phase1_report.json',                          NAVY),
         ('02', 'Feature',   '特徵工程與選擇',   '1,623 → 91 · Purged K-Fold · 20 日 embargo · 948,976 樣本', 'phase2_report.json · feature_store.parquet',   NAVY),
         ('03', 'Model',     '模型訓練與調參',   'XGBoost / LightGBM / Logistic / RF · Optuna 150 trials',     'model_registry/*.pkl',                         NAVY),
-        ('04', 'Explain',   '歸因分析 · LOPO',  'Leave-One-Pillar-Out · SHAP summary · ΔAUC × 10,000 bps',  'lopo_pillar_contribution_D20.json',           ORANGE),
-        ('05', 'Backtest',  '門檻掃描 · 回測',  '門檻 0.40 / 0.50 / 0.60 · 三情境 · 40 檔門檻 sweep',         'threshold_sweep_xgb_D20.json',                 ORANGE),
+        ('04', 'Explain',   '歸因分析 · LOPO',  'Leave-One-Pillar-Out · SHAP summary · ΔAUC × 10,000 bps',  '自行整理',           ORANGE),
+        ('05', 'Backtest',  '門檻掃描 · 回測',  '門檻 0.40 / 0.50 / 0.60 · 三情境 · 40 檔門檻 sweep',         '自行整理',                 ORANGE),
         ('06', 'Govern',    '治理閘門 · 交付',  'DSR / PSI / KS / embargo / 最差 fold / lineage 9 項',        'phase6_gates.json · dashboard/',              ORANGE),
     ]
     grid_x, grid_y = 96, 308
@@ -1843,7 +1848,7 @@ def slide_apx_approach_detail(prs):
 
     takeaway_bar(slide, 96, 824, 1728, 124, 'DESIGN PRINCIPLE · 設計原則', [
         {'text': '每階段皆產出 JSON 報告 + 摘要 + artifact，dashboard 可逐頁追溯；', 'size': 17, 'color': INK},
-        {'text': '所有 random seed = 42、所有切分 lineage 可重訓，', 'size': 17, 'color': INK},
+        {'text': '所有 random seed = 42、所有切分 lineage 可重新訓練，', 'size': 17, 'color': INK},
         {'text': '從 raw → 決策清單', 'size': 17, 'bold': True, 'color': NAVY},
         {'text': ' 任一節點皆可被獨立復現。', 'size': 17, 'color': INK},
     ], color=ROSE, bg=ROSE_LT)
@@ -1856,8 +1861,8 @@ def slide_apx_approach_detail(prs):
 def slide_apx_data_sources(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Data Sources · 7 Tables', 'A.04',
-                          source='ETL output: phase1_report_20260419_112854.json · DuckDB local snapshot 2025-12-31')
-    eyebrow(slide, 96, 116, 700, 'A.04 · 七張原始表 · 結構與量級', color=ROSE)
+                          source='自行整理 · DuckDB local snapshot 2025-12-31')
+    eyebrow(slide, 96, 116, 700, 'A.04 · 七張原始表結構與量級', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': '3,483,598 列原始資料 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· 7 表 · 跨價量 / 財報 / 籌碼 / 文本', 'size': 28, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -1994,8 +1999,8 @@ def slide_apx_walk_forward(prs):
 def slide_apx_tech_stack(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Tech Stack · 5 Layers', 'A.06',
-                          source='Architecture spec: 專案說明文件 §2 · pyproject.toml')
-    eyebrow(slide, 96, 116, 700, 'A.06 · 技術堆疊 · 五層架構', color=ROSE)
+                          source='自行整理')
+    eyebrow(slide, 96, 116, 700, 'A.06 · 技術堆疊五層架構', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': '5-Layer Stack ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· Storage → ETL → Feature → Model → Serve', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -2025,7 +2030,7 @@ def slide_apx_tech_stack(prs):
 
     takeaway_bar(slide, 96, 904, 1728, 60, 'CONTAINERIZED · 完全可重現', [
         {'text': '五層皆有 unit test + integration test · 任何一層可獨立替換 (e.g. DuckDB → BigQuery)；', 'size': 14, 'color': INK},
-        {'text': 'Docker compose 兩節點即可重訓全棧。', 'size': 14, 'bold': True, 'color': NAVY},
+        {'text': 'Docker compose 兩節點即可重新訓練全棧。', 'size': 14, 'bold': True, 'color': NAVY},
     ], color=ROSE, bg=ROSE_LT)
     return slide
 
@@ -2036,8 +2041,8 @@ def slide_apx_tech_stack(prs):
 def slide_apx_pillars_grid(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, '9-Pillar Framework · Detail', 'A.07',
-                          source='Feature documentation: src/features/registry.py · 91 features grouped to 9 pillars')
-    eyebrow(slide, 96, 116, 700, 'A.07 · 九大支柱 · 範例特徵', color=ROSE)
+                          source='自行整理 · 91 features grouped to 9 pillars')
+    eyebrow(slide, 96, 116, 700, 'A.07 · 九大支柱範例特徵', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': '91 features → 9 pillars ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· 三大維度 (Price / Fundamentals / Alt-data)', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -2083,8 +2088,8 @@ def slide_apx_pillars_grid(prs):
 def slide_apx_lopo_detail(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'LOPO ΔAUC · Detail', 'A.08',
-                          source='Artifact: lopo_pillar_contribution_D20.json · 4-fold mean ΔAUC × 10,000 (bps)')
-    eyebrow(slide, 96, 116, 800, 'A.08 · Leave-One-Pillar-Out · 詳細解讀', color=ROSE)
+                          source='自行整理 · 4-fold mean ΔAUC × 10,000 (bps)')
+    eyebrow(slide, 96, 116, 800, 'A.08 · Leave-One-Pillar-Out 詳解', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'LOPO ΔAUC ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· Risk 一支獨大 138.6 bps · 文本仍貢獻 8.5 bps', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -2145,7 +2150,7 @@ def slide_apx_lopo_detail(prs):
 def slide_apx_shap_top20(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'SHAP Top-20 + Consistency', 'A.09',
-                          source='Artifact: shap_summary_xgb_D20.json · TreeExplainer · |SHAP| mean across OOS')
+                          source='自行整理 · TreeExplainer · |SHAP| mean across OOS')
     eyebrow(slide, 96, 116, 700, 'A.09 · SHAP Top-20 與支柱一致性', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'SHAP Top-20 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
@@ -2246,7 +2251,7 @@ def slide_apx_shap_top20(prs):
 def slide_apx_top10_factors(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Top-10 Single Factors · IC', 'A.10',
-                          source='Artifact: factor_ic_table_D20.json · Spearman IC over 4-fold OOS')
+                          source='自行整理 · Spearman IC over 4-fold OOS')
     eyebrow(slide, 96, 116, 700, 'A.10 · 單因子 IC 排行 Top-10', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'Top-10 Single Factors ', 'size': 38, 'bold': True, 'color': NAVY, 'ls': -0.8},
@@ -2315,8 +2320,8 @@ def slide_apx_top10_factors(prs):
 def slide_apx_model_compare(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Model Comparison · 4 Algorithms', 'A.11',
-                          source='Artifact: model_compare_D20.json · 4-fold mean ± std · Optuna 150 trials')
-    eyebrow(slide, 96, 116, 700, 'A.11 · 演算法選型 · 四模型對照', color=ROSE)
+                          source='自行整理 · 4-fold mean ± std · Optuna 150 trials')
+    eyebrow(slide, 96, 116, 700, 'A.11 · 演算法四模型對照', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'Algorithm Bake-off ', 'size': 38, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· XGBoost 勝出 · 但差距不大', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -2399,7 +2404,7 @@ def slide_apx_model_compare(prs):
 def slide_apx_auc_dsr(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'AUC by Fold + DSR', 'A.12',
-                          source='DSR formula: Bailey & López de Prado (2014) · 150 Optuna trials with skew/kurt correction')
+                          source='自行整理 · DSR per Bailey & López de Prado (2014)')
     eyebrow(slide, 96, 116, 700, 'A.12 · 4-Fold AUC + DSR 多重檢定', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'DSR 12.12 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
@@ -2485,7 +2490,7 @@ def slide_apx_auc_dsr(prs):
 def slide_apx_threshold(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Threshold Sweep · 0.40 / 0.50 / 0.60', 'A.13',
-                          source='Artifact: threshold_sweep_xgb_D20.json · 40 thresholds × 4-fold')
+                          source='自行整理 · 40 thresholds × 4-fold')
     eyebrow(slide, 96, 116, 700, 'A.13 · 三情境門檻設計', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': '三情境門檻 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
@@ -2534,7 +2539,7 @@ def slide_apx_threshold(prs):
 def slide_apx_hit_decile(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Hit Decile · Detail', 'A.14',
-                          source='Artifact: decile_hit_xgb_D20.json · OOS hit rate by predicted-prob decile')
+                          source='自行整理 · OOS hit rate by predicted-prob decile')
     eyebrow(slide, 96, 116, 700, 'A.14 · 預測機率分位 × 命中率', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': '十分位 hit rate ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
@@ -2588,7 +2593,7 @@ def slide_apx_hit_decile(prs):
 def slide_apx_equity_curve(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Equity Curve · Top 0.1% vs 0050', 'A.15',
-                          source='Artifact: backtest_top01pct_vs_0050.json · 5 bps round-trip cost · 20-day rebalance')
+                          source='自行整理 · 5 bps round-trip cost · 20-day rebalance')
     eyebrow(slide, 96, 116, 700, 'A.15 · 累積報酬曲線', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'Top 0.1% Strategy ', 'size': 38, 'bold': True, 'color': TEAL, 'ls': -0.8},
@@ -2674,7 +2679,7 @@ def slide_apx_equity_curve(prs):
 def slide_apx_drawdown_cost(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Drawdown & Cost Sensitivity', 'A.16',
-                          source='Artifact: cost_sensitivity_D20.json · round-trip cost from 0 to 30 bps')
+                          source='自行整理 · round-trip cost from 0 to 30 bps')
     eyebrow(slide, 96, 116, 700, 'A.16 · 回撤與交易成本敏感度', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'Cost Sensitivity ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
@@ -2729,8 +2734,8 @@ def slide_apx_drawdown_cost(prs):
 def slide_apx_dashboard(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Dashboard · 13 Pages', 'A.17',
-                          source='Artifact: dashboard/ · Streamlit 1.31 · launch via `make serve`')
-    eyebrow(slide, 96, 116, 700, 'A.17 · 互動儀表板 · 13 頁地圖', color=ROSE)
+                          source='dashboard/ · Streamlit 1.31 · launch via `make serve`')
+    eyebrow(slide, 96, 116, 700, 'A.17 · 互動儀表板 13 頁地圖', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': '13-Page Interactive Dashboard ', 'size': 36, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· 模型 / 解釋 / 文本 / 治理', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -2779,7 +2784,7 @@ def slide_apx_dashboard(prs):
 def slide_apx_sentiment_overview(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Sentiment Asset · Overview', 'A.18',
-                          source='Artifact: phase2_text_overview.json · sentiment lexicon under src/text/lexicon/')
+                          source='自行整理 · sentiment lexicon under src/text/lexicon/')
     eyebrow(slide, 96, 116, 700, 'A.18 · 文本資產總覽', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': '1.12M articles ', 'size': 38, 'bold': True, 'color': NAVY, 'ls': -0.8},
@@ -2815,7 +2820,7 @@ def slide_apx_sentiment_overview(prs):
         {'sp': True},
         {'text': '為何不直接用通用情感詞表？', 'size': 16, 'bold': True, 'color': NAVY},
         {'br': True},
-        {'text': 'LIWC / NTUSD 的「正面」≠ 股價的「正面」 (e.g. 「擴產」中性偏負，因稀釋EPS)', 'size': 13, 'color': INK_2, 'italic': True},
+        {'text': 'LIWC / NTUSD 的「正面」≠ 股價的「正面」 (e.g. 「擴產」中性偏負，因稀釋EPS)', 'size': 13, 'color': INK_2},
         {'sp': True},
         {'text': '完整詞表參考 src/text/lexicon/twstock500.csv', 'size': 12, 'color': INK_3, 'mono': True, 'ls': 0.4},
     ], line_h=1.55)
@@ -2854,8 +2859,8 @@ def slide_apx_sentiment_overview(prs):
 def slide_apx_keyword_spectrum(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Keyword Spectrum · Top 10', 'A.19',
-                          source='Artifact: keyword_lift_chi2_top.json · Lift = P(bull|word)/P(bull) · χ² independence test')
-    eyebrow(slide, 96, 116, 700, 'A.19 · 詞表光譜 · 多空 Top 10', color=ROSE)
+                          source='自行整理 · Lift = P(bull|word)/P(bull) · χ² independence test')
+    eyebrow(slide, 96, 116, 700, 'A.19 · 詞表光譜多空 Top 10', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': '500 keywords ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· Lift × χ² 雙指標 · 顯示前 10 多空關鍵詞', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -2932,8 +2937,8 @@ def slide_apx_keyword_spectrum(prs):
 def slide_apx_sentiment_quintile(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Sentiment Quintile · Detail', 'A.20',
-                          source='Artifact: sentiment_quintile_D20.json · forward 20-day excess return by quintile')
-    eyebrow(slide, 96, 116, 700, 'A.20 · 情感五分位 · 詳細展開', color=ROSE)
+                          source='自行整理 · forward 20-day excess return by quintile')
+    eyebrow(slide, 96, 116, 700, 'A.20 · 情感五分位詳解', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'U-shape Confirmed ', 'size': 38, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· Q1 +3.2% · Q5 +2.4% · 中段為負', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -3002,8 +3007,8 @@ def slide_apx_sentiment_quintile(prs):
 def slide_apx_q1_contrarian(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Q1 Contrarian · Elaboration', 'A.21',
-                          source='Theory: DeBondt & Thaler (1985) · empirical: artifact phase4_q1_contrarian.json')
-    eyebrow(slide, 96, 116, 700, 'A.21 · 極負面 Q1 反向效應 · 完整解讀', color=ROSE)
+                          source='DeBondt & Thaler (1985) · empirical: artifact 自行整理')
+    eyebrow(slide, 96, 116, 700, 'A.21 · Q1 反向效應完整解讀', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': '極負面 → 反彈 ', 'size': 40, 'bold': True, 'color': ROSE, 'ls': -0.8},
         {'text': '· 行為財務學的台股實證', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -3043,7 +3048,7 @@ def slide_apx_q1_contrarian(prs):
         {'text': '基本面未受結構性傷害的標的', 'size': 14, 'bold': True, 'color': NAVY},
         {'text': '；模型加入 ROE / debt 作 sanity guardrail，避免抄到「真的不行」的個股。', 'size': 14, 'color': INK},
         {'br': True},
-        {'text': '回測 OOS 8 年仍穩定，但個股級執行需研究員 final call。', 'size': 13, 'color': INK_3, 'italic': True},
+        {'text': '回測 OOS 8 年仍穩定，但個股級執行需研究員 final call。', 'size': 13, 'color': INK_3},
     ], color=ROSE, bg=ROSE_LT)
     return slide
 
@@ -3054,7 +3059,7 @@ def slide_apx_q1_contrarian(prs):
 def slide_apx_ushape_multi(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'U-shape Multi-Horizon', 'A.22',
-                          source='Artifact: sentiment_quintile_multi_horizon.json · forward 1d/5d/20d excess return')
+                          source='自行整理 · forward 1d/5d/20d excess return')
     eyebrow(slide, 96, 116, 700, 'A.22 · 多時間視窗 U-shape', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'U-shape 多視窗 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
@@ -3121,7 +3126,7 @@ def slide_apx_ushape_multi(prs):
 def slide_apx_news_forum(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'News × Forum Consensus', 'A.23',
-                          source='Artifact: phase4_consensus_quadrant.json · joint distribution news_sent × forum_sent')
+                          source='自行整理 · joint distribution news_sent × forum_sent')
     eyebrow(slide, 96, 116, 700, 'A.23 · 新聞 × 論壇 共識 2×2', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'Consensus / Divergence ', 'size': 36, 'bold': True, 'color': NAVY, 'ls': -0.8},
@@ -3195,7 +3200,7 @@ def slide_apx_news_forum(prs):
 def slide_apx_coverage(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Coverage & Daily Sentiment', 'A.24',
-                          source='Artifact: phase4_text_coverage.json · 1932 stocks × 4380 days panel')
+                          source='自行整理 · 1932 stocks × 4380 days panel')
     eyebrow(slide, 96, 116, 700, 'A.24 · 涵蓋率與每日情感序列', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'Coverage ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
@@ -3265,8 +3270,8 @@ def slide_apx_coverage(prs):
 def slide_apx_signal_decay(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Signal Decay · PSI by Pillar', 'A.25',
-                          source='Artifact: phase6_psi_30d.json · PSI computed on 30-day rolling window vs train baseline')
-    eyebrow(slide, 96, 116, 700, 'A.25 · 訊號衰減監控 · 9 支柱 PSI', color=ROSE)
+                          source='自行整理 · PSI computed on 30-day rolling window vs train baseline')
+    eyebrow(slide, 96, 116, 700, 'A.25 · 訊號衰減監控 9 支柱 PSI', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'PSI Drift Monitor ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· 9 pillars × 30 日 · 文本 0.13 警告', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -3384,8 +3389,8 @@ def slide_apx_limitations(prs):
 def slide_apx_bibliography(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Bibliography · 15 References', 'A.27',
-                          source='Full BibTeX in references.bib · all referenced in code comments')
-    eyebrow(slide, 96, 116, 700, 'A.27 · 參考文獻 · 四大領域 15 篇', color=ROSE)
+                          source='自行整理· all referenced in code comments')
+    eyebrow(slide, 96, 116, 700, 'A.27 · 參考文獻四大領域 15 篇', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'Standing on Shoulders ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· 方法論立基於 50 年量化研究', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -3448,7 +3453,7 @@ def slide_apx_tools_stack(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Tools · Python Ecosystem', 'A.28',
                           source='requirements.txt · pyproject.toml · 5 functional groups × 3 libs')
-    eyebrow(slide, 96, 116, 700, 'A.28 · 工具棧 · 15 個核心套件', color=ROSE)
+    eyebrow(slide, 96, 116, 700, 'A.28 · 工具棧 15 個核心套件', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'Python Stack ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· Data → ML → NLP → Viz → Governance', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -3527,7 +3532,7 @@ def slide_apx_methodology(prs):
     slide = add_blank_slide(prs)
     slide_chrome_appendix(slide, 'Methodology · 5 Core Methods', 'A.29',
                           source='López de Prado (2018) · Bailey & López de Prado (2014) · Lundberg & Lee (2017)')
-    eyebrow(slide, 96, 116, 700, 'A.29 · 方法論 · 公式 + 我們的應用', color=ROSE)
+    eyebrow(slide, 96, 116, 700, 'A.29 · 方法論詳述', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': 'Method × Application ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· 從學術到實證的 1:1 對應', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
@@ -3553,7 +3558,7 @@ def slide_apx_methodology(prs):
          'Lundberg & Lee (2017)'),
         ('05', 'PSI / KS',         '漂移監控',          ROSE,
          'PSI = Σ (p_i − q_i) ln(p_i / q_i)',
-         '91 features 月測 · Text PSI 0.13 觸發 WARN · 對策每月詞向量重訓',
+         '91 features 月測 · Text PSI 0.13 觸發 WARN · 對策每月詞向量重新訓練',
          'Basel III FRTB · industry standard'),
     ]
     bar_x, bar_y0 = 96, 308
