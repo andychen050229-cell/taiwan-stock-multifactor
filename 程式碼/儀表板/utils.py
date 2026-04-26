@@ -7231,7 +7231,10 @@ def load_report():
         return json.load(f), reports[0].name
 
 
-@st.cache_data(ttl=3600)
+# Cache TTL trimmed to 5 min (was 3600) so RESOLVED-report updates surface
+# within a single user session on Streamlit Cloud — gate state is a critical
+# trust-affecting datum, stale caches are worse than the small re-read cost.
+@st.cache_data(ttl=300)
 def load_quality_gates():
     """Single source of truth for quality-gate counts and their per-gate status.
 

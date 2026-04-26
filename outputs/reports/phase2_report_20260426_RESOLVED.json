@@ -1,6 +1,6 @@
 {
   "phase": "Phase 2 — 模型開發 + 策略回測",
-  "timestamp": "2026-04-19T14:45:20.335930",
+  "timestamp": "2026-04-26T11:55:00",
   "env": "dev",
   "results": {
     "feature_store": {
@@ -2173,5 +2173,6 @@
     "overall_stability_score": 0.7991,
     "source_artifact": "feature_stability_backfill.json",
     "note": "Phase 2 runner serialized importance_per_fold but pop()-ed it, so original gate had no data to evaluate. Backfilled with fold AUC consistency proxy."
-  }
+  },
+  "source_p2_report": "phase2_report_20260419_152643.json"
 }
