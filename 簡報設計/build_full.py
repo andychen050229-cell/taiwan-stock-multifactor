@@ -525,8 +525,8 @@ def slide_problem(prs):
 
     # H1 — 標題即結論
     rich(slide, 96, 142, 1728, 130, [
-        {'text': '台股短線是噪聲、', 'size': 38, 'bold': True, 'color': NAVY, 'ls': -0.8},
-        {'text': 'alpha 在中長線基本面結構', 'size': 38, 'bold': True, 'color': TEAL, 'ls': -0.8},
+        {'text': '台股短線是噪聲、', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': 'alpha 在中長線基本面結構', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -0.8},
         {'br': True},
         {'text': '我們的切點：以 D+20 為視窗、結構化基本面 × 文本 × 籌碼三軸',
          'size': 18, 'color': INK_2},
@@ -655,12 +655,12 @@ def slide_approach(prs):
     eyebrow(slide, 96, 112, 700, 'METHODOLOGY · 一頁交代')
 
     rich(slide, 96, 142, 1728, 130, [
-        {'text': '1,623 → 91 特徵 · XGBoost · ', 'size': 36, 'bold': True, 'color': NAVY, 'ls': -0.8},
-        {'text': 'Walk-Forward Purged K-Fold', 'size': 36, 'bold': True, 'color': TEAL, 'ls': -0.8, 'mono': True},
+        {'text': '1,623 → 91 特徵 · XGBoost · ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': 'Walk-Forward Purged K-Fold', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -0.8, 'mono': True},
         {'br': True},
-        {'text': '資料 → 特徵 → 模型 → 驗證、', 'size': 17, 'color': INK_2},
-        {'text': '948,976 樣本、', 'size': 17, 'bold': True, 'color': NAVY, 'mono': True},
-        {'text': '20 日 embargo 阻斷洩漏。', 'size': 17, 'color': INK_2},
+        {'text': '資料 → 特徵 → 模型 → 驗證、', 'size': 18, 'color': INK_2},
+        {'text': '948,976 樣本、', 'size': 18, 'bold': True, 'color': NAVY, 'mono': True},
+        {'text': '20 日 embargo 阻斷洩漏。', 'size': 18, 'color': INK_2},
     ], line_h=1.30)
     rule_divider(slide, 96, 280, color=TEAL)
 
@@ -827,14 +827,14 @@ def slide_pillars_lopo(prs):
     eyebrow(slide, 96, 112, 700, 'FACTOR ATTRIBUTION · 哪一支柱在發力')
 
     rich(slide, 96, 142, 1728, 130, [
-        {'text': 'Risk 為地基、', 'size': 36, 'bold': True, 'color': NAVY, 'ls': -0.6},
-        {'text': '移除 Risk 則 AUC 整體塌陷', 'size': 36, 'bold': True, 'color': TEAL, 'ls': -0.6},
+        {'text': 'Risk 為地基、', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.6},
+        {'text': '移除 Risk 則 AUC 整體塌陷', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -0.6},
         {'br': True},
         {'text': 'LOPO ΔAUC：Risk +138.6 bps、Trend +64.9、Val +9.5、Text +8.5；',
-         'size': 17, 'color': INK_2},
+         'size': 18, 'color': INK_2},
         {'br': True},
         {'text': 'Chip / Event / Industry 為負貢獻、引入雜訊多於訊息。',
-         'size': 17, 'color': INK_2},
+         'size': 18, 'color': INK_2},
     ], line_h=1.30)
     rule_divider(slide, 96, 280, color=TEAL)
 
@@ -919,10 +919,10 @@ def slide_model_performance(prs):
     eyebrow(slide, 96, 112, 700, 'HEADLINE · 四個獨立指標、同一結論')
 
     rich(slide, 96, 142, 1728, 130, [
-        {'text': '四項獨立統計檢定一致指向 ', 'size': 36, 'bold': True, 'color': NAVY, 'ls': -0.6},
-        {'text': 'D+20 alpha 確實存在', 'size': 36, 'bold': True, 'color': TEAL, 'ls': -0.6},
+        {'text': '四項獨立統計檢定一致指向 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.6},
+        {'text': 'D+20 alpha 確實存在', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -0.6},
         {'br': True},
-        {'text': '預測強度（AUC）、IC 穩定性（ICIR）、多重檢定（DSR）、選股效益（Top 1%）', 'size': 17, 'color': INK_2},
+        {'text': '預測強度（AUC）、IC 穩定性（ICIR）、多重檢定（DSR）、選股效益（Top 1%）', 'size': 18, 'color': INK_2},
     ], line_h=1.30)
     rule_divider(slide, 96, 280, color=TEAL)
 
@@ -1024,14 +1024,14 @@ def slide_topn_dual(prs):
     eyebrow(slide, 96, 112, 700, 'DEPLOYMENT · 從機率分數到可下單清單')
 
     rich(slide, 96, 142, 1728, 130, [
-        {'text': '高信心軌 ', 'size': 34, 'bold': True, 'color': NAVY, 'ls': -0.6},
+        {'text': '高信心軌 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.6},
         {'text': '（閾值 0.50）', 'size': 26, 'color': INK_2, 'ls': -0.4, 'mono': True},
-        {'text': ' 命中 37.98%、邊際 ', 'size': 34, 'bold': True, 'color': NAVY, 'ls': -0.6},
-        {'text': '+11.70 pp', 'size': 34, 'bold': True, 'color': TEAL, 'ls': -0.6, 'mono': True},
+        {'text': ' 命中 37.98%、邊際 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.6},
+        {'text': '+11.70 pp', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -0.6, 'mono': True},
         {'br': True},
-        {'text': '門檻越嚴、edge 越陡；', 'size': 17, 'color': INK_2},
+        {'text': '門檻越嚴、edge 越陡；', 'size': 18, 'color': INK_2},
         {'text': '雙軌部位對應「主動下注 vs 候選 cover」兩種資金屬性。',
-         'size': 17, 'color': INK_2},
+         'size': 18, 'color': INK_2},
     ], line_h=1.30)
     rule_divider(slide, 96, 280, color=TEAL)
 
@@ -1149,13 +1149,13 @@ def slide_sentiment_ushape(prs):
                       source='自行整理 · sent_polarity_5d 五桶 · OOS 2024-Q4 – 2025-Q1')
     eyebrow(slide, 96, 116, 900, 'WOW FINDING · 散戶情緒呈反向 U 型')
     rich(slide, 96, 144, 1750, 130, [
-        {'text': 'Q1 最悲觀、', 'size': 42, 'bold': True, 'color': NAVY, 'ls': -1.0},
-        {'text': '隔日 +3.2 pp ', 'size': 42, 'bold': True, 'color': TEAL, 'ls': -1.0, 'mono': True},
-        {'text': '逆向 edge', 'size': 42, 'bold': True, 'color': NAVY, 'ls': -1.0},
+        {'text': 'Q1 最悲觀、', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -1.0},
+        {'text': '隔日 +3.2 pp ', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -1.0, 'mono': True},
+        {'text': '逆向 edge', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -1.0},
         {'br': True},
-        {'text': 'Q5 樂觀僅 +0.6 pp、', 'size': 24, 'bold': True, 'color': INK_2, 'ls': -0.4},
-        {'text': '1d / 5d / 20d 三期同向、', 'size': 24, 'bold': True, 'color': INK_2, 'ls': -0.4},
-        {'text': '半衰期 > 一個月', 'size': 24, 'bold': True, 'color': INK_2, 'ls': -0.4},
+        {'text': 'Q5 樂觀僅 +0.6 pp、', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
+        {'text': '1d / 5d / 20d 三期同向、', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
+        {'text': '半衰期 > 一個月', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
     ], line_h=1.18)
     rule_divider(slide, 96, 286)
 
@@ -1267,16 +1267,16 @@ def slide_governance(prs):
                       source='自行整理 · DSR per Bailey & López de Prado (2014) · PSI per Basel III FRTB')
     eyebrow(slide, 96, 116, 900, 'RIGOR · 統計穩健 ＋ 治理關卡')
     rich(slide, 96, 144, 1750, 130, [
-        {'text': 'DSR 12.12 ', 'size': 44, 'bold': True, 'color': NAVY, 'ls': -1.0, 'mono': True},
-        {'text': '≫ ', 'size': 44, 'bold': True, 'color': INK_3, 'ls': -0.8},
-        {'text': '3.0 顯著', 'size': 44, 'bold': True, 'color': NAVY, 'ls': -1.0, 'mono': True},
-        {'text': '、', 'size': 44, 'bold': True, 'color': NAVY, 'ls': -0.8},
-        {'text': '9 / 9 治理關卡 ', 'size': 44, 'bold': True, 'color': EMERALD, 'ls': -1.0, 'mono': True},
-        {'text': 'PASS', 'size': 44, 'bold': True, 'color': EMERALD, 'ls': -0.8},
+        {'text': 'DSR 12.12 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -1.0, 'mono': True},
+        {'text': '≫ ', 'size': 40, 'bold': True, 'color': INK_3, 'ls': -0.8},
+        {'text': '3.0 顯著', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -1.0, 'mono': True},
+        {'text': '、', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': '9 / 9 治理關卡 ', 'size': 40, 'bold': True, 'color': EMERALD, 'ls': -1.0, 'mono': True},
+        {'text': 'PASS', 'size': 40, 'bold': True, 'color': EMERALD, 'ls': -0.8},
         {'br': True},
-        {'text': '結論並非運氣、', 'size': 24, 'bold': True, 'color': INK_2, 'ls': -0.4},
-        {'text': '並非過擬合、', 'size': 24, 'bold': True, 'color': INK_2, 'ls': -0.4},
-        {'text': '可獨立稽核', 'size': 24, 'bold': True, 'color': INK_2, 'ls': -0.4},
+        {'text': '結論並非運氣、', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
+        {'text': '並非過擬合、', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
+        {'text': '可獨立稽核', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
     ], line_h=1.18)
     rule_divider(slide, 96, 286)
 
@@ -1397,14 +1397,14 @@ def slide_equity_curve_main(prs):
     eyebrow(slide, 96, 112, 700, 'BACKTEST · 100 元起始、24 個月後達 188 元')
 
     rich(slide, 96, 142, 1728, 130, [
-        {'text': 'Top 1% 策略 ', 'size': 36, 'bold': True, 'color': NAVY, 'ls': -0.6},
-        {'text': '24 個月累積 +88%', 'size': 36, 'bold': True, 'color': EMERALD, 'ls': -0.6, 'mono': True},
-        {'text': '、CAGR ', 'size': 36, 'bold': True, 'color': NAVY, 'ls': -0.6},
-        {'text': '+36.8%', 'size': 36, 'bold': True, 'color': TEAL, 'ls': -0.6, 'mono': True},
-        {'text': ' vs TAIEX +12.4%', 'size': 28, 'color': INK_2, 'ls': -0.4, 'mono': True},
+        {'text': 'Top 1% 策略 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.6},
+        {'text': '24 個月累積 +88%', 'size': 40, 'bold': True, 'color': EMERALD, 'ls': -0.6, 'mono': True},
+        {'text': '、CAGR ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.6},
+        {'text': '+36.8%', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -0.6, 'mono': True},
+        {'text': ' vs TAIEX +12.4%', 'size': 26, 'color': INK_2, 'ls': -0.4, 'mono': True},
         {'br': True},
         {'text': '把模型機率分數化為實單部位、月再平衡、含手續費 0.3% 與滑價 0.1%。',
-         'size': 17, 'color': INK_2},
+         'size': 18, 'color': INK_2},
     ], line_h=1.30)
     rule_divider(slide, 96, 290, color=EMERALD)
 
@@ -1519,13 +1519,13 @@ def slide_recommendations(prs):
                       source='自行整理')
     eyebrow(slide, 96, 116, 900, 'ACTION · 部署條件、限制邊界、重新訓練節奏')
     rich(slide, 96, 144, 1750, 130, [
-        {'text': '部署條件具備、', 'size': 42, 'bold': True, 'color': NAVY, 'ls': -1.0},
-        {'text': '1 – 2 個月重新訓練、', 'size': 42, 'bold': True, 'color': TEAL, 'ls': -1.0},
-        {'text': '三大限制邊界', 'size': 42, 'bold': True, 'color': NAVY, 'ls': -1.0},
+        {'text': '部署條件具備、', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -1.0},
+        {'text': '1 – 2 個月重新訓練、', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -1.0},
+        {'text': '三大限制邊界', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -1.0},
         {'br': True},
-        {'text': '能落地、', 'size': 24, 'bold': True, 'color': INK_2, 'ls': -0.4},
-        {'text': '邊界清楚、', 'size': 24, 'bold': True, 'color': INK_2, 'ls': -0.4},
-        {'text': '節奏可預期', 'size': 24, 'bold': True, 'color': INK_2, 'ls': -0.4},
+        {'text': '能落地、', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
+        {'text': '邊界清楚、', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
+        {'text': '節奏可預期', 'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
     ], line_h=1.18)
     rule_divider(slide, 96, 286)
 
@@ -1730,11 +1730,11 @@ def slide_apx_three_commitments(prs):
                           source='López de Prado (2018) · Bailey & López de Prado (2014) DSR')
     eyebrow(slide, 96, 116, 700, 'A.01 · 研究立場', color=ROSE)
     rich(slide, 96, 144, 1750, 130, [
-        {'text': '不做 ', 'size': 46, 'bold': True, 'color': NAVY, 'ls': -1.0},
-        {'text': '黑箱、overfitting、無法重現 ', 'size': 46, 'bold': True, 'color': TEAL, 'ls': -1.0},
-        {'text': '的研究', 'size': 46, 'bold': True, 'color': NAVY, 'ls': -1.0},
+        {'text': '不做 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -1.0},
+        {'text': '黑箱、overfitting、無法重現 ', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -1.0},
+        {'text': '的研究', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -1.0},
         {'br': True},
-        {'text': '—— 三大學術承諾構成本專案的方法論底線', 'size': 22, 'color': INK_2},
+        {'text': '—— 三大學術承諾構成本專案的方法論底線', 'size': 26, 'color': INK_2},
     ], line_h=1.18)
     rule_divider(slide, 96, 290, color=ROSE)
 
@@ -1776,9 +1776,9 @@ def slide_apx_problem_deep(prs):
                           source='自行整理 · López de Prado (2018)')
     eyebrow(slide, 96, 116, 700, 'A.02 · 三重結構性難題', color=ROSE)
     rich(slide, 96, 144, 1750, 130, [
-        {'text': '結構性陷阱 + 對應方法論', 'size': 42, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': '結構性陷阱 + 對應方法論', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'br': True},
-        {'text': '為何傳統單一因子模型無法穿透', 'size': 28, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
+        {'text': '為何傳統單一因子模型無法穿透', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
     ], line_h=1.18)
     rule_divider(slide, 96, 282, color=ROSE)
 
@@ -1821,7 +1821,7 @@ def slide_apx_approach_detail(prs):
     rich(slide, 96, 144, 1750, 110, [
         {'text': '6 階段流水線 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '從原始資料走到決策清單 · 每階段皆有可稽核產出',
-         'size': 28, 'bold': True, 'color': INK_2, 'ls': -0.4},
+         'size': 26, 'bold': True, 'color': INK_2, 'ls': -0.4},
     ], line_h=1.18)
     rule_divider(slide, 96, 268, color=ROSE)
 
@@ -1867,7 +1867,7 @@ def slide_apx_data_sources(prs):
     eyebrow(slide, 96, 116, 700, 'A.04 · 七張原始表結構與量級', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
         {'text': '3,483,598 列原始資料 ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
-        {'text': '· 7 表 · 跨價量 / 財報 / 籌碼 / 文本', 'size': 28, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
+        {'text': '· 7 表 · 跨價量 / 財報 / 籌碼 / 文本', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
     ], line_h=1.18)
     rule_divider(slide, 96, 268, color=ROSE)
 
@@ -2256,7 +2256,7 @@ def slide_apx_top10_factors(prs):
                           source='自行整理 · Spearman IC over 4-fold OOS')
     eyebrow(slide, 96, 116, 700, 'A.10 · 單因子 IC 排行 Top-10', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
-        {'text': 'Top-10 Single Factors ', 'size': 38, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': 'Top-10 Single Factors ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· 排序前 10 大「能單獨打贏」的因子', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
     ], line_h=1.18)
     rule_divider(slide, 96, 268, color=ROSE)
@@ -2325,7 +2325,7 @@ def slide_apx_model_compare(prs):
                           source='自行整理 · 4-fold mean ± std · Optuna 150 trials')
     eyebrow(slide, 96, 116, 700, 'A.11 · 演算法四模型對照', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
-        {'text': 'Algorithm Bake-off ', 'size': 38, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': 'Algorithm Bake-off ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· XGBoost 勝出 · 但差距不大', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
     ], line_h=1.18)
     rule_divider(slide, 96, 268, color=ROSE)
@@ -2598,9 +2598,9 @@ def slide_apx_equity_curve(prs):
                           source='自行整理 · 5 bps round-trip cost · 20-day rebalance')
     eyebrow(slide, 96, 116, 700, 'A.15 · 累積報酬曲線', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
-        {'text': 'Top 0.1% Strategy ', 'size': 38, 'bold': True, 'color': TEAL, 'ls': -0.8},
-        {'text': 'vs ', 'size': 38, 'bold': True, 'color': INK_2, 'ls': -0.8},
-        {'text': '0050 ETF benchmark', 'size': 38, 'bold': True, 'color': INK_3, 'ls': -0.8},
+        {'text': 'Top 0.1% Strategy ', 'size': 40, 'bold': True, 'color': TEAL, 'ls': -0.8},
+        {'text': 'vs ', 'size': 40, 'bold': True, 'color': INK_2, 'ls': -0.8},
+        {'text': '0050 ETF benchmark', 'size': 40, 'bold': True, 'color': INK_3, 'ls': -0.8},
     ], line_h=1.18)
     rule_divider(slide, 96, 268, color=ROSE)
 
@@ -2739,7 +2739,7 @@ def slide_apx_dashboard(prs):
                           source='dashboard/ · Streamlit 1.31 · launch via `make serve`')
     eyebrow(slide, 96, 116, 700, 'A.17 · 互動儀表板 13 頁地圖', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
-        {'text': '13-Page Interactive Dashboard ', 'size': 36, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': '13-Page Interactive Dashboard ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· 模型 / 解釋 / 文本 / 治理', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
     ], line_h=1.18)
     rule_divider(slide, 96, 268, color=ROSE)
@@ -2789,7 +2789,7 @@ def slide_apx_sentiment_overview(prs):
                           source='自行整理 · sentiment lexicon under src/text/lexicon/')
     eyebrow(slide, 96, 116, 700, 'A.18 · 文本資產總覽', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
-        {'text': '1.12M articles ', 'size': 38, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': '1.12M articles ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· 500 keywords · 自建台股情感詞表', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
     ], line_h=1.18)
     rule_divider(slide, 96, 268, color=ROSE)
@@ -2942,7 +2942,7 @@ def slide_apx_sentiment_quintile(prs):
                           source='自行整理 · forward 20-day excess return by quintile')
     eyebrow(slide, 96, 116, 700, 'A.20 · 情感五分位詳解', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
-        {'text': 'U-shape Confirmed ', 'size': 38, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': 'U-shape Confirmed ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· Q1 +3.2% · Q5 +2.4% · 中段為負', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
     ], line_h=1.18)
     rule_divider(slide, 96, 268, color=ROSE)
@@ -3131,7 +3131,7 @@ def slide_apx_news_forum(prs):
                           source='自行整理 · joint distribution news_sent × forum_sent')
     eyebrow(slide, 96, 116, 700, 'A.23 · 新聞 × 論壇 共識 2×2', color=ROSE)
     rich(slide, 96, 144, 1750, 110, [
-        {'text': 'Consensus / Divergence ', 'size': 36, 'bold': True, 'color': NAVY, 'ls': -0.8},
+        {'text': 'Consensus / Divergence ', 'size': 40, 'bold': True, 'color': NAVY, 'ls': -0.8},
         {'text': '· 新聞與論壇一致時訊號最強', 'size': 26, 'bold': True, 'color': TEAL, 'ls': -0.4, 'mono': True},
     ], line_h=1.18)
     rule_divider(slide, 96, 268, color=ROSE)
