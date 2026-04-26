@@ -417,28 +417,63 @@ with tab1:
     df_fmt["ΔAUC_up (bps)"] = df_fmt["ΔAUC_up (bps)"].apply(lambda v: f"{v:+.2f}")
     df_fmt["ΔIC_up"] = df_fmt["ΔIC_up"].apply(lambda v: f"{v:+.4f}")
 
-    # Render as HTML to preserve pillar chips
+    # Render as HTML to preserve pillar chips. v11.5.19 §2 fix:
+    # f-string content MUST be left-justified — markdown treats 4+ leading
+    # spaces as a code block, which is why the raw <table ...> tag was being
+    # printed verbatim instead of rendered.
     html_table = df_fmt.to_html(escape=False, index=False, classes="gl-table")
+    # pandas adds border="1" by default → strip it so styling is fully ours
+    html_table = html_table.replace('border="1" ', '').replace('class="dataframe gl-table"', 'class="gl-table"')
     st.markdown(
-        f"""
-        <style>
-        .gl-table {{ width:100%; border-collapse: collapse; font-family: var(--gl-font-sans);
-                    background: rgba(8,16,32,0.55); border: 1px solid rgba(103,232,249,0.20);
-                    border-radius: 8px; overflow: hidden; }}
-        .gl-table th {{
-            background: rgba(103,232,249,0.08); color: #67e8f9; font-weight:700;
-            padding:10px 12px; text-align:left; border-bottom:1px solid rgba(103,232,249,0.32);
-            font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em;
-            font-family: var(--gl-font-mono);
-        }}
-        .gl-table td {{
-            padding:10px 12px; border-bottom:1px solid rgba(103,232,249,0.12);
-            font-family: var(--gl-font-mono); font-size: 0.86rem; color: #cfe2ee;
-        }}
-        .gl-table tbody tr:hover {{ background: rgba(103,232,249,0.06); }}
+f"""<style>
+.gl-table {{
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--gl-font-sans, system-ui);
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.95) 100%);
+    border: 1px solid rgba(103,232,249,0.22);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.10);
+}}
+.gl-table thead th {{
+    background: rgba(103,232,249,0.10);
+    color: #67e8f9;
+    font-weight: 700;
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid rgba(103,232,249,0.32);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace);
+    white-space: nowrap;
+}}
+.gl-table tbody td {{
+    padding: 11px 14px;
+    border-bottom: 1px solid rgba(103,232,249,0.10);
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.86rem;
+    color: #cfe2ee;
+    vertical-align: middle;
+}}
+.gl-table tbody tr:last-child td {{ border-bottom: none; }}
+.gl-table tbody tr:hover {{ background: rgba(103,232,249,0.06); transition: background 0.18s ease; }}
+.gl-pillar {{
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    background: rgba(103,232,249,0.08);
+    border: 1px solid rgba(103,232,249,0.30);
+    color: #67e8f9;
+}}
 </style>
-        {html_table}
-        """, unsafe_allow_html=True
+{html_table}""",
+        unsafe_allow_html=True
     )
 
     # Pillar feature-count breakdown

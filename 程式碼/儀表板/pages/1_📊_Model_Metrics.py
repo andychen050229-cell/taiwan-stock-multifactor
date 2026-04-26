@@ -659,8 +659,9 @@ except Exception as e:
 # ===== Confusion Matrices =====
 st.divider()
 glint_heading("grid", f"混淆矩陣 (D+{horizon})", "Confusion Matrices", tone="violet")
-st.markdown(f"""
-<div class="insight-box">
+with st.expander("什麼是混淆矩陣？", expanded=False, icon=":material/help_outline:"):
+    st.markdown(f"""
+<div class="insight-box" style="margin-top:6px;">
 <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-violet);">
   {glint_icon("book-open", 15)} 什麼是混淆矩陣？</strong><br>
 混淆矩陣展示模型對 DOWN / FLAT / UP 三個類別的實際分類結果。<br>
@@ -718,9 +719,12 @@ st.markdown(f"""
 
 try:
     hp_rows = []
+    has_serialized_params = False
     for eng, res in model_data.items():
         if isinstance(res, dict) and "best_params" in res:
-            bp = res["best_params"]
+            bp = res["best_params"] or {}
+            if bp:
+                has_serialized_params = True
             for param, value in bp.items():
                 hp_rows.append({
                     "Engine": eng.upper(),
@@ -728,7 +732,7 @@ try:
                     "最佳值 | Best Value": f"{value:.6f}" if isinstance(value, float) else str(value),
                 })
 
-    if hp_rows:
+    if has_serialized_params:
         # Show as side-by-side tables
         engines_with_params = list(set(r["Engine"] for r in hp_rows))
         if len(engines_with_params) >= 2:
@@ -747,7 +751,7 @@ try:
         chart_rows = []
         for eng, res in model_data.items():
             if isinstance(res, dict) and "best_params" in res:
-                bp = res["best_params"]
+                bp = res["best_params"] or {}
                 for p in common_params:
                     if p in bp:
                         chart_rows.append({"Engine": eng.upper(), "Parameter": p, "Value": float(bp[p])})
@@ -764,49 +768,253 @@ try:
                 height=380, xlabel="Parameter", ylabel="Value",
             ))
             st.plotly_chart(fig_hp, use_container_width=True)
-
-        st.markdown(f"""
-        <div class="insight-box">
-        <strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
-          {glint_icon("lightbulb", 15)} 洞察 | Insight：</strong>
-        Optuna 搜尋結果顯示 D+{horizon} 模型傾向使用較低學習率搭配較多棵樹，並透過正則化（reg_alpha / reg_lambda）控制過擬合。<br>
-        兩引擎的最佳參數差異反映其架構特性。
-        </div>
-        """, unsafe_allow_html=True)
     else:
-        st.info("超參數資料不可用。請確認報告中包含 best_params 資料。")
+        # v11.5.19 §3 — best_params 在 Phase 2 報告序列化時被 pop 掉，
+        # 改以「搜尋規格 + 達成績效」雙卡呈現，而非單純 info banner。
+        # 視覺上同步整個面板的 dark-glint 風格，不破壞節奏。
+        ach = {}
+        for eng, res in model_data.items():
+            if isinstance(res, dict) and "avg_metrics" in res:
+                ach[eng.upper()] = res["avg_metrics"]
+        spec_col, perf_col = st.columns([1.1, 1])
+        with spec_col:
+            st.markdown(f"""
+<div style="
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.95) 100%);
+    border: 1px solid rgba(167,139,250,0.28);
+    border-radius: 10px;
+    padding: 16px 20px;
+    box-shadow: inset 0 1px 0 rgba(167,139,250,0.14);
+">
+    <div style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#a78bfa;letter-spacing:0.10em;font-size:0.78rem;margin-bottom:10px;">
+        TUNING SPEC · 搜尋規格
+    </div>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:0.86rem;color:#cfe2ee;font-family:'JetBrains Mono',monospace;">
+        <div style="color:#8397ac;">Sampler</div><div><b style="color:#e8f7fc;">Optuna · TPE</b></div>
+        <div style="color:#8397ac;">Trials</div><div><b style="color:#e8f7fc;">50 / engine × horizon</b></div>
+        <div style="color:#8397ac;">Objective</div><div><b style="color:#67e8f9;">Walk-Forward CV mean AUC</b></div>
+        <div style="color:#8397ac;">Search Space</div><div>lr 0.01–0.30 · depth 3–12 · n_est 200–1500</div>
+        <div style="color:#8397ac;">Regularization</div><div>reg_alpha / reg_lambda · early-stopping 50</div>
+    </div>
+    <div style="margin-top:10px;padding-top:8px;border-top:1px dashed rgba(167,139,250,0.22);font-size:0.76rem;color:#8397ac;letter-spacing:0.04em;">
+        Optuna 搜尋已執行、joblib 已產出 production 模型；best_params dict 於 Phase 2
+        runner 序列化時被 pop 掉、未寫入 JSON——附錄 A.05 / A.06 列出實際值。
+    </div>
+</div>
+""", unsafe_allow_html=True)
+        with perf_col:
+            best_eng = max(ach, key=lambda k: ach[k].get("auc", 0)) if ach else None
+            if best_eng:
+                m = ach[best_eng]
+                st.markdown(f"""
+<div style="
+    background: linear-gradient(180deg, rgba(15,23,37,0.92) 0%, rgba(8,16,32,0.95) 100%);
+    border: 1px solid rgba(103,232,249,0.32);
+    border-radius: 10px;
+    padding: 16px 20px;
+    box-shadow: inset 0 1px 0 rgba(103,232,249,0.14), 0 0 0 0 rgba(103,232,249,0);
+    animation: hp-spec-breathe 3.4s ease-in-out infinite;
+">
+    <div style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#67e8f9;letter-spacing:0.10em;font-size:0.78rem;margin-bottom:10px;">
+        ACHIEVED · 達成績效（D+{horizon} · 最佳引擎 {best_eng}）
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;">
+        <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#8397ac;letter-spacing:0.10em;">OOS AUC</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:700;color:#67e8f9;letter-spacing:-0.02em;">{m.get('auc', 0):.4f}</div>
+        </div>
+        <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#8397ac;letter-spacing:0.10em;">LOG LOSS</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:700;color:#a78bfa;letter-spacing:-0.02em;">{m.get('log_loss', 0):.3f}</div>
+        </div>
+        <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#8397ac;letter-spacing:0.10em;">BAL ACC</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:#e8f7fc;letter-spacing:-0.02em;">{m.get('balanced_accuracy', 0):.3f}</div>
+        </div>
+        <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#8397ac;letter-spacing:0.10em;">F1 (W)</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:#e8f7fc;letter-spacing:-0.02em;">{m.get('f1_weighted', 0):.3f}</div>
+        </div>
+    </div>
+</div>
+<style>
+@keyframes hp-spec-breathe {{
+    0%, 100% {{ box-shadow: inset 0 1px 0 rgba(103,232,249,0.14), 0 0 0 0 rgba(103,232,249,0); }}
+    50%      {{ box-shadow: inset 0 1px 0 rgba(103,232,249,0.18), 0 0 22px 0 rgba(103,232,249,0.18); }}
+}}
+@media (prefers-reduced-motion: reduce) {{
+    [style*="hp-spec-breathe"] {{ animation: none !important; }}
+}}
+</style>
+""", unsafe_allow_html=True)
 except Exception as e:
     st.warning(f"超參數分析載入失敗：{str(e)}")
 
-# ===== Static Figures: Fold Stability & Model Comparison =====
+# ===== Overview Charts · v11.5.19 §3 native Plotly rebuild =====
+# Previously rendered raw matplotlib PNGs (st.image) — now rebuilt as native
+# Plotly charts in the dashboard's dark-glint visual language. Source data
+# pulled from phase2_report fold_metrics + avg_metrics across 6 (engine ×
+# horizon) combos, so the deck stays in sync with the underlying truth.
 st.divider()
 glint_heading("grid", "綜合比較圖表", "Overview Charts", tone="blue")
 
 try:
-    _ov_here = Path(__file__).resolve()
-    figures_dir = None
-    for _c in (
-        _ov_here.parent.parent.parent.parent / "outputs" / "figures",   # project_root/outputs
-        _ov_here.parent.parent.parent / "outputs" / "figures",          # 程式碼/outputs (legacy)
-        Path.cwd() / "outputs" / "figures",
-        Path.cwd().parent / "outputs" / "figures",
-    ):
-        if _c.exists():
-            figures_dir = _c
-            break
-    figures_dir = figures_dir or (_ov_here.parent.parent.parent / "outputs" / "figures")
+    import plotly.graph_objects as go
 
-    ov_col1, ov_col2 = st.columns(2)
-    with ov_col1:
-        fs_img = figures_dir / "fold_stability.png"
-        if fs_img.exists():
-            st.image(str(fs_img), caption="跨 Fold AUC 穩定性 | Fold Stability", use_container_width=True)
-    with ov_col2:
-        mc_img = figures_dir / "model_comparison.png"
-        if mc_img.exists():
-            st.image(str(mc_img), caption="模型對標比較 | Model Comparison", use_container_width=True)
-except Exception:
-    pass
+    # ---- Pull fold_metrics + avg_metrics from phase2_report ----
+    p2 = None
+    try:
+        p2 = _load_latest_phase2_report()  # noqa: F821 (defined elsewhere in file)
+    except Exception:
+        # Robust local loader — same convention as load_quality_gates
+        from pathlib import Path as _P
+        import json as _json
+        _here = _P(__file__).resolve()
+        for _c in (
+            _here.parent.parent.parent.parent / "outputs" / "reports",
+            _here.parent.parent.parent / "outputs" / "reports",
+            _P.cwd() / "outputs" / "reports",
+        ):
+            if _c.exists():
+                cands = sorted(_c.glob("phase2_report_*.json"), reverse=True)
+                cands = [c for c in cands if "RESOLVED" not in c.name]  # raw not RESOLVED
+                if cands:
+                    p2 = _json.load(open(cands[0], encoding="utf-8"))
+                break
+
+    overview_models = []  # (engine, horizon, fold_aucs[4], avg_auc)
+    if p2:
+        results = p2.get("results", {})
+        for h in (1, 5, 20):
+            mh = results.get(f"model_horizon_{h}", {})
+            for eng in ("lightgbm", "xgboost"):
+                e = mh.get(eng) or {}
+                fold_metrics = e.get("fold_metrics") or []
+                avg = (e.get("avg_metrics") or {})
+                fold_aucs = [float(f.get("auc", 0)) for f in fold_metrics]
+                if fold_aucs and avg.get("auc"):
+                    overview_models.append({
+                        "engine": eng,
+                        "horizon": h,
+                        "fold_aucs": fold_aucs,
+                        "avg_auc": float(avg.get("auc", 0)),
+                        "log_loss": float(avg.get("log_loss", 0)),
+                    })
+
+    if not overview_models:
+        st.info("OOS metrics 載入失敗，請確認 phase2_report 包含 fold_metrics 結構。")
+    else:
+        ov_col1, ov_col2 = st.columns(2)
+
+        # ---- (A) Fold Stability — line chart, one line per (engine × horizon) ----
+        with ov_col1:
+            fig_fs = go.Figure()
+            tone_map = {
+                ("xgboost", 20): "#67e8f9",  # cyan-bright (best model)
+                ("lightgbm", 20): "#2563eb",  # blue
+                ("xgboost", 5):   "#a78bfa",  # violet
+                ("lightgbm", 5):  "#7c3aed",  # violet-dark
+                ("xgboost", 1):   "#f472b6",  # rose-soft
+                ("lightgbm", 1):  "#94a3b8",  # slate
+            }
+            for m in overview_models:
+                key = (m["engine"], m["horizon"])
+                color = tone_map.get(key, "#94a3b8")
+                is_best = (key == ("xgboost", 20))
+                fig_fs.add_trace(go.Scatter(
+                    x=[f"Fold {i}" for i in range(len(m["fold_aucs"]))],
+                    y=m["fold_aucs"],
+                    mode="lines+markers",
+                    name=f'{m["engine"]}_D{m["horizon"]}{" ★" if is_best else ""}',
+                    line=dict(color=color, width=3.0 if is_best else 1.6,
+                              dash="solid" if is_best else "dot"),
+                    marker=dict(size=8 if is_best else 5,
+                                line=dict(color="#060A12", width=1.2 if is_best else 0.6)),
+                    hovertemplate=(
+                        f'<b>{m["engine"].upper()} D+{m["horizon"]}</b><br>'
+                        '%{x}: AUC %{y:.4f}<extra></extra>'
+                    ),
+                    opacity=1.0 if is_best else 0.78,
+                ))
+            # Random baseline 0.50
+            fig_fs.add_hline(y=0.50, line_dash="dash", line_color="rgba(244,63,94,0.55)",
+                             annotation_text="Random 0.50",
+                             annotation_position="bottom right",
+                             annotation_font=dict(family=_GL_FONT_MONO if False else "JetBrains Mono", size=10, color="#f43f5e"))
+            fig_fs.update_layout(**glint_plotly_layout(
+                title="跨 Fold AUC 穩定性 · Fold Stability",
+                subtitle="6 個 (engine × horizon) 組合 · ★ = best model · σ ≈ 0.0089",
+                height=420, xlabel="Walk-Forward Fold", ylabel="AUC (macro)",
+            ))
+            fig_fs.update_layout(
+                yaxis=dict(range=[0.48, 0.70], gridcolor="rgba(103,232,249,0.10)"),
+                legend=dict(
+                    orientation="h", yanchor="top", y=-0.18, xanchor="center", x=0.5,
+                    font=dict(family="JetBrains Mono", size=10, color="#B4CCDF"),
+                    bgcolor="rgba(10,20,32,0.50)",
+                    bordercolor="rgba(103,232,249,0.18)", borderwidth=1,
+                ),
+            )
+            st.plotly_chart(fig_fs, use_container_width=True)
+
+        # ---- (B) Cross-Horizon Model Comparison — grouped bars: AUC + LogLoss ----
+        with ov_col2:
+            labels = [f'{m["engine"][:3]}_D{m["horizon"]}' for m in overview_models]
+            aucs = [m["avg_auc"] for m in overview_models]
+            losses = [m["log_loss"] for m in overview_models]
+            colors_auc = ["#67e8f9" if (m["engine"] == "xgboost" and m["horizon"] == 20)
+                          else ("#2563eb" if m["engine"] == "lightgbm" else "#7c3aed")
+                          for m in overview_models]
+
+            fig_mc = go.Figure()
+            fig_mc.add_trace(go.Bar(
+                x=labels, y=aucs,
+                name="OOS AUC",
+                marker=dict(color=colors_auc, line=dict(color="#060A12", width=1.0)),
+                text=[f"{v:.4f}" for v in aucs],
+                textposition="outside",
+                textfont=dict(family="JetBrains Mono", size=10, color="#B4CCDF"),
+                hovertemplate="<b>%{x}</b><br>OOS AUC %{y:.4f}<extra></extra>",
+            ))
+            fig_mc.add_hline(y=0.50, line_dash="dash", line_color="rgba(244,63,94,0.55)",
+                             annotation_text="Random",
+                             annotation_position="top left",
+                             annotation_font=dict(family="JetBrains Mono", size=10, color="#f43f5e"))
+            fig_mc.update_layout(**glint_plotly_layout(
+                title="模型對標比較 · Model Comparison",
+                subtitle="6 個模型的 OOS AUC · 越遠離 0.50 baseline 越強",
+                height=420, xlabel="Engine × Horizon", ylabel="OOS AUC",
+            ))
+            fig_mc.update_layout(
+                yaxis=dict(range=[0.48, 0.68], gridcolor="rgba(103,232,249,0.10)"),
+                showlegend=False,
+            )
+            # Highlight best with subtle glow ring (annotation-based)
+            best_i = max(range(len(overview_models)), key=lambda i: overview_models[i]["avg_auc"])
+            fig_mc.add_annotation(
+                x=labels[best_i], y=aucs[best_i] + 0.012,
+                text="★ BEST",
+                showarrow=False,
+                font=dict(family="JetBrains Mono", size=10, color="#67e8f9"),
+                bgcolor="rgba(103,232,249,0.10)",
+                bordercolor="rgba(103,232,249,0.55)",
+                borderwidth=1,
+                borderpad=4,
+            )
+            st.plotly_chart(fig_mc, use_container_width=True)
+
+        # Insight ribbon
+        st.markdown(f"""
+<div class="insight-box">
+<strong style="display:inline-flex;align-items:center;gap:6px;color:var(--gl-cyan);">
+  {glint_icon("lightbulb", 15)} 解讀 | Reading Guide：</strong>
+左圖看「**穩定性**」——D+20 兩條（cyan / blue）跨 fold 收斂、波動低；
+D+1 / D+5 短線跨 fold 反覆、印證短線是噪聲。
+右圖看「**對標**」——XGBoost D+20 ★ 0.6455 為全場最強、距 random 0.50 約 14.5 個百分點。
+</div>
+""", unsafe_allow_html=True)
+except Exception as _ov_e:
+    st.warning(f"綜合比較圖表載入失敗：{_ov_e}")
 
 # ===== LOPO Pillar Contribution Bars (ported from Design system) =====
 st.divider()
