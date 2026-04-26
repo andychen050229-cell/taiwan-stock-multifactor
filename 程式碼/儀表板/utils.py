@@ -4410,28 +4410,41 @@ def render_market_composition_strip(segments: list, *,
                                     title: str | None = None,
                                     height: int = 46,
                                     show_percent: bool = True,
-                                    key: str | None = None) -> None:
+                                    key: str | None = None,
+                                    inline_min_pct: float = 14.0,
+                                    breathe_dominant: bool = True) -> None:
     """Render a v9 §8.3 "Signal Composition Strip" — a single horizontal bar
     split into semantic segments (強烈看多 → 看多 → 中性 → 看空 → 強烈看空).
+
+    v11.5.19 §1 visual upgrade:
+      - 小段落（<inline_min_pct%）只在 hover 顯示文字、不擠進 bar 內
+      - 所有段落以 chip legend 形式排在 strip 下方、保證每段 label/count/pct 都可讀
+      - 主導段（佔比最大且 ≥40%）加入 breathing light 動畫、突出視覺重心
 
     Args:
         segments: list of ``(label, value, tone)`` tuples where ``tone`` keys any
             ``_GL_DARK_BAR_ACCENTS`` entry.  Order matters — the strip renders
             left-to-right in the order given.
-        title: small mono label rendered above the strip (e.g. ``"D+20 · 市場訊號比例"``).
-        height: strip height in px (default 46 — reads as a clean signal bar).
-        show_percent: if True, overlays ``n · p%`` inside each segment.
+        title: small mono label rendered above the strip.
+        height: strip height in px (default 46).
+        show_percent: chip legend 是否顯示百分比（預設 True）。
         key: Streamlit chart key.
+        inline_min_pct: 段落寬度低於此百分比時、bar 內不放文字、改由 chip legend 代勞。
+        breathe_dominant: 主導段（≥40%）加入呼吸燈動畫。
     """
     import plotly.graph_objects as go  # noqa: WPS433
 
-    # Normalise input — filter zeros that would render as hairlines.
     segs = [(lbl, float(v), t) for (lbl, v, t) in segments if float(v) > 0]
     if not segs:
         st.info("無訊號分佈資料。")
         return
 
     total = sum(v for _, v, _ in segs)
+
+    # Identify dominant segment for the breathing-light animation
+    dominant_idx = max(range(len(segs)), key=lambda i: segs[i][1]) if breathe_dominant else -1
+    dominant_pct = (segs[dominant_idx][1] / total * 100.0) if dominant_idx >= 0 and total else 0.0
+    apply_breathe = breathe_dominant and dominant_pct >= 40.0
 
     if title:
         st.markdown(
@@ -4441,20 +4454,28 @@ def render_market_composition_strip(segments: list, *,
         )
 
     fig = go.Figure()
-    for lbl, val, tone in segs:
+    for i, (lbl, val, tone) in enumerate(segs):
         accent = _GL_DARK_BAR_ACCENTS.get(tone, _GL_DARK_BAR_ACCENTS["cyan"])
         pct = val / total * 100.0 if total else 0.0
-        text = f"{safe_html(str(lbl))} · {int(val):,} · {pct:.1f}%" if show_percent else safe_html(str(lbl))
+        # 寬段落才把文字放進 bar 內、避免擠壓
+        if pct >= inline_min_pct:
+            inside = f"{safe_html(str(lbl))} · {int(val):,} · {pct:.1f}%" if show_percent \
+                else safe_html(str(lbl))
+        else:
+            inside = ""
         fig.add_trace(go.Bar(
             y=["mkt"], x=[val], name=lbl, orientation="h",
             marker=dict(color=accent, opacity=0.92,
                         line=dict(color="#060A12", width=0.8)),
-            text=[text],
+            text=[inside],
             textposition="inside",
             textangle=0,
             insidetextanchor="middle",
-            textfont=dict(family=_GL_FONT_MONO, size=10.5, color="#06111C"),
-            hovertemplate=f"<b>{safe_html(str(lbl))}</b><br>%{{x:,.0f}} · {pct:.1f}%<extra></extra>",
+            textfont=dict(family=_GL_FONT_MONO, size=11, color="#06111C"),
+            hovertemplate=(
+                f"<b>{safe_html(str(lbl))}</b><br>"
+                f"%{{x:,.0f}} · {pct:.1f}%<extra></extra>"
+            ),
         ))
 
     fig.update_layout(
@@ -4472,7 +4493,32 @@ def render_market_composition_strip(segments: list, *,
             font=dict(family=_GL_FONT_MONO, color="#E8F7FC", size=11),
         ),
     )
+
+    # Wrap in a div that we can target for the breathing-light animation.
+    wrap_class = "gl-composition-wrap"
+    if apply_breathe:
+        wrap_class += f" gl-composition-breathe-{dominant_idx}"
+    st.markdown(f'<div class="{wrap_class}">', unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True, key=key)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Chip legend below the strip — every segment readable regardless of size
+    chip_html = ['<div class="gl-composition-chips">']
+    for i, (lbl, val, tone) in enumerate(segs):
+        accent = _GL_DARK_BAR_ACCENTS.get(tone, _GL_DARK_BAR_ACCENTS["cyan"])
+        pct = val / total * 100.0 if total else 0.0
+        is_dominant = (i == dominant_idx) and apply_breathe
+        chip_cls = "gl-composition-chip" + (" gl-composition-chip-dominant" if is_dominant else "")
+        chip_html.append(
+            f'<span class="{chip_cls}" style="--chip-accent:{accent}">'
+            f'<span class="gl-composition-chip-dot"></span>'
+            f'<span class="gl-composition-chip-label">{safe_html(str(lbl))}</span>'
+            f'<span class="gl-composition-chip-val">{int(val):,}</span>'
+            f'<span class="gl-composition-chip-pct">{pct:.1f}%</span>'
+            f'</span>'
+        )
+    chip_html.append('</div>')
+    st.markdown("".join(chip_html), unsafe_allow_html=True)
 
 
 # --- v9 §9 · CSS for donut chip legend + composition strip --------------
@@ -4519,6 +4565,87 @@ _GLINT_V9_CHART_CSS = """
     margin: 0 2px 4px 2px;
 }
 .gl-composition-total { color: #67e8f9; font-weight: 700; letter-spacing: 0.12em; }
+
+/* v11.5.19 §1 — Composition strip chip legend (under the bar)
+   Every segment gets a readable chip regardless of bar-segment width,
+   solving the cramped-text problem when 利多 / 中性 are <10% of total. */
+.gl-composition-chips {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: flex-start;
+    margin: 6px 2px 0 2px;
+    font-family: var(--gl-font-mono, 'JetBrains Mono', monospace);
+}
+.gl-composition-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 11px;
+    background: rgba(10,20,32,0.78);
+    border: 1px solid rgba(103,232,249,0.18);
+    border-radius: 999px;
+    font-size: 0.74rem;
+    color: #B4CCDF;
+    white-space: nowrap;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+.gl-composition-chip-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--chip-accent, #67e8f9);
+    flex: 0 0 auto;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.18);
+}
+.gl-composition-chip-label { color: #E8F7FC; font-weight: 600; letter-spacing: 0.04em; }
+.gl-composition-chip-val   { color: var(--chip-accent, #67e8f9); font-weight: 700; }
+.gl-composition-chip-pct   { color: #8397ac; font-size: 0.68rem; letter-spacing: 0.04em; }
+
+/* v11.5.19 §1 — Breathing-light effect on the dominant chip + bar segment.
+   Dominant ≥ 40% of total; signals visual hierarchy without overwhelming. */
+.gl-composition-chip-dominant {
+    border-color: var(--chip-accent, #67e8f9);
+    background: linear-gradient(120deg,
+        rgba(10,20,32,0.78) 0%,
+        rgba(103,232,249,0.06) 50%,
+        rgba(10,20,32,0.78) 100%);
+    animation: gl-composition-chip-pulse 3.2s ease-in-out infinite;
+}
+.gl-composition-chip-dominant .gl-composition-chip-dot {
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.18),
+                0 0 12px var(--chip-accent, #67e8f9);
+    animation: gl-composition-dot-pulse 3.2s ease-in-out infinite;
+}
+@keyframes gl-composition-chip-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(103,232,249,0.0),
+                    0 0 16px 0 rgba(103,232,249,0.0);
+    }
+    50% {
+        box-shadow: 0 0 0 1px var(--chip-accent, #67e8f9),
+                    0 0 18px 0 var(--chip-accent, #67e8f9);
+    }
+}
+@keyframes gl-composition-dot-pulse {
+    0%, 100% { transform: scale(1.0); opacity: 0.92; }
+    50%      { transform: scale(1.18); opacity: 1.0; }
+}
+
+/* Plotly bar segment soft glow on the dominant index (subtle layered ring on the
+   wrap container — Plotly itself can't animate per-trace, so we glow the wrap). */
+.gl-composition-wrap[class*="gl-composition-breathe-"] {
+    border-radius: 8px;
+    animation: gl-composition-wrap-breathe 3.2s ease-in-out infinite;
+}
+@keyframes gl-composition-wrap-breathe {
+    0%, 100% { box-shadow: inset 0 0 0 1px rgba(103,232,249,0.0); }
+    50%      { box-shadow: inset 0 0 24px 0 rgba(103,232,249,0.10),
+                          inset 0 0 0 1px rgba(103,232,249,0.18); }
+}
+
+/* Honor reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .gl-composition-chip-dominant,
+    .gl-composition-chip-dominant .gl-composition-chip-dot,
+    .gl-composition-wrap[class*="gl-composition-breathe-"] {
+        animation: none;
+    }
+}
 </style>
 """
 

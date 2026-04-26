@@ -1608,28 +1608,28 @@ try:
         st.markdown(f"""
 <div class="cost-result">
     <div style="font-size:0.8rem; color:#67e8f9;">買進金額</div>
-    <div class="cost-total">${buy_amount:,.0f}</div>
+    <div class="cost-total">${buy_amount:,.2f}</div>
 </div>
         """, unsafe_allow_html=True)
     with r2:
         st.markdown(f"""
 <div class="cost-result">
     <div style="font-size:0.8rem; color:#67e8f9;">手續費（買+賣）</div>
-    <div class="cost-total" style="font-size:1.3rem;">${buy_fee + sell_fee:,.0f}</div>
+    <div class="cost-total" style="font-size:1.3rem;">${buy_fee + sell_fee:,.2f}</div>
 </div>
         """, unsafe_allow_html=True)
     with r3:
         st.markdown(f"""
 <div class="cost-result">
     <div style="font-size:0.8rem; color:#67e8f9;">證交稅（賣出）</div>
-    <div class="cost-total" style="font-size:1.3rem;">${sell_tax:,.0f}</div>
+    <div class="cost-total" style="font-size:1.3rem;">${sell_tax:,.2f}</div>
 </div>
         """, unsafe_allow_html=True)
     with r4:
         st.markdown(f"""
 <div class="cost-result">
     <div style="font-size:0.8rem; color:#67e8f9;">總成本</div>
-    <div class="cost-total">${total_cost:,.0f}</div>
+    <div class="cost-total">${total_cost:,.2f}</div>
     <div style="font-size:0.75rem; color:#9ca3af;">{cost_ratio:.2f}%</div>
 </div>
         """, unsafe_allow_html=True)
@@ -1645,7 +1645,7 @@ try:
             values=[float(buy_fee), float(sell_fee), float(sell_tax)],
             title="成本分解",
             subtitle="Cost Breakdown",
-            center_metric=f"${(buy_fee+sell_fee+sell_tax):,.0f}",
+            center_metric=f"${(buy_fee+sell_fee+sell_tax):,.2f}",
             center_metric_label="Total",
             tones=["cyan", "blue", "violet"],
             height=260,
